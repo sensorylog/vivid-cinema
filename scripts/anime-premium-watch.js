@@ -328,7 +328,7 @@ async function requestPlayback(episode) {
   setStatus("Checking your Premium access…");
   try {
     if (mediaType === "tv") await animeIdPromise;
-    const token = await currentUser.getIdToken();
+    const token = await currentUser.getIdToken(true);
     if (requestId !== playbackRequestId) return;
     const response = await fetch("/api/anime-premium/playback", {
       method: "POST", headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token },
@@ -570,7 +570,10 @@ function bindAuth() {
         const response = await fetch("/api/anime-premium/membership", { headers: { Authorization: "Bearer " + token }, cache: "no-store" });
         const payload = response.ok ? await response.json() : null;
         if (currentUser !== nextUser) return;
-        if (payload?.membership?.active === true) {
+        if (response.status === 403 && currentUser.emailVerified !== true) {
+          const returnTo = "anime-premium-watch.html" + window.location.search;
+          showGate("Verify your Vivid email", "Verify your account email before opening Premium playback.", "Verify email", "verify-email.html?returnTo=" + encodeURIComponent(returnTo));
+        } else if (payload?.membership?.active === true) {
           showGate("Premium access confirmed", "Your Vivid Anime Premium membership is active. Select an episode to start watching.", "Open Vivid account", "account.html");
         } else {
           showGate("Premium membership required", "You are signed in to Vivid. Subscribe to Anime Premium to unlock this title and its episodes.", "Subscribe to Vivid Anime Premium", "anime-premium-membership.html");
