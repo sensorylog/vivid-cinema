@@ -96,9 +96,9 @@ The Premium entry route now acts as a dedicated discovery homepage rather than a
 
 - Adds a dedicated anime-premium-watch.html route with a responsive iframe player shell, season selector, episode browser, previous/next navigation and sub/dub controls.
 - Uses VIVID's existing third-party embed model rather than a custom raw-stream resolver.
-- Registers 13 provider endpoints: VidPlus, VidLink, VidSrc, AniXo, AniLink, MegaPlay, MegaPlay Legacy, Megavid, MegaFlix, VidAPI, EmbedWave, VidFast and VidRift.
+- Registers 14 provider endpoints: VidPlus, VidLink, VidSrc, AniXo, AniLink, MegaPlay, MegaPlay Legacy, Megavid, MegaFlix, VidAPI, EmbedWave, VidFast, Embed API Stream and VidRift.
 - Reuses the existing AniList/MAL ID resolver and TMDB season/episode metadata to build provider-specific URLs. Each provider is enabled only when its required catalogue ID is available.
-- VidAPI and EmbedWave are retained as requested; VidSrc and VidFast are also drawn from VIVID's existing provider set. VidRift is an additional researched provider with its own multi-source player.
+- VidAPI and EmbedWave are retained as requested; VidSrc, VidFast and Embed API Stream are also drawn from VIVID's existing provider set. Embed API Stream advertises 11 internal providers. VidRift is an additional researched provider with its own multi-source player.
 - Providers with validated readiness/error events can trigger automatic failover. Other providers offer a manual next-server action rather than treating iframe load as proof of playback.
 - Progress is saved only when a provider reports a valid time/duration pair. Incoming messages must match the active iframe's exact origin and source window.
 - The playback endpoint verifies the existing Firebase user and active Premium membership, then issues a short-lived, user-owned playback session. It never returns a raw HLS/MP4 stream URL.
