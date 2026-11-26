@@ -99,7 +99,7 @@ async function updatePrice() {
   const cardRadio = document.querySelector('input[name="vap-payment-method"][value="card"]');
   const mobileRadio = document.querySelector('input[name="vap-payment-method"][value="mobile_money"]');
   cardRadio.checked = true;
-  cardRadio.disabled = true;
+  cardRadio.disabled = false;
   mobileRadio.disabled = true;
   $("vap-card-method").setAttribute("aria-disabled", "false");
   $("vap-mobile-method").setAttribute("aria-disabled", "true");
