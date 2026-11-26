@@ -68,3 +68,13 @@
 .vap-current-membership button{border:1px solid rgba(255,255,255,.16);border-radius:999px;padding:9px 13px;background:transparent;color:#d7cde2;font:inherit;font-size:.58rem;font-weight:850;cursor:pointer}
 .vap-current-membership button[hidden]{display:none}
 .vap-current-membership button:hover{border-color:rgba(215,197,255,.55);color:#fff}
+
+.vap-region-heading{margin:22px 0 12px}
+.vap-billing-periods{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:0 0 18px}
+.vap-billing-option{display:flex;min-width:0;min-height:66px;flex-direction:column;align-items:flex-start;justify-content:center;gap:5px;padding:11px;border:1px solid var(--vap-line);border-radius:11px;background:rgba(255,255,255,.025);color:#f4efff;text-align:left;cursor:pointer;transition:border-color .2s,background .2s}
+.vap-billing-option strong{font-size:.72rem;letter-spacing:-.02em}
+.vap-billing-option small{color:#9b92a6;font-size:.55rem;line-height:1.35}
+.vap-billing-option.is-active{border-color:rgba(190,159,255,.75);background:rgba(160,126,219,.14);box-shadow:inset 0 0 0 1px rgba(190,159,255,.12)}
+.vap-billing-option:disabled{opacity:.38;cursor:not-allowed}
+.vap-billing-option:focus-visible{outline:2px solid #cbb3ff;outline-offset:3px}
+@media(max-width:520px){.vap-billing-periods{gap:6px}.vap-billing-option{padding:9px 8px}.vap-billing-option strong{font-size:.65rem}.vap-billing-option small{font-size:.5rem}}
