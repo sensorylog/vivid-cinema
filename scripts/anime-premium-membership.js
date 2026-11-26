@@ -101,7 +101,7 @@ async function updatePrice() {
   const cardRadio = document.querySelector('input[name="vap-payment-method"][value="card"]');
   const mobileRadio = document.querySelector('input[name="vap-payment-method"][value="mobile_money"]');
   const cardAvailable = Boolean(plan.cardAutoRenewAvailable);
-  const mobileAvailable = MOBILE_MONEY_COUNTRIES.has(selectedCountry);
+  const mobileAvailable = MOBILE_MONEY_COUNTRIES.has(selectedCountry) && ((selectedCountry === "GH" && checkoutCurrency === "GHS") || (selectedCountry === "KE" && checkoutCurrency === "KES"));
   cardRadio.disabled = !cardAvailable;
   mobileRadio.disabled = !mobileAvailable;
   $("vap-card-method").setAttribute("aria-disabled", String(!cardAvailable));
