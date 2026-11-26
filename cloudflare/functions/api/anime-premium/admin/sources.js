@@ -47,12 +47,28 @@ export async function onRequest({ request, env }) {
     await enforceRateLimit(db, user.uid, "admin-sources", 20, 60 * 1000);
     const key = mediaType + "_" + titleId + (mediaType === "tv" ? "_s" + season + "_e" + episode : "");
     const now = Date.now();
-    await db.collection("animePremiumSources").doc(key).set({
-      mediaType, titleId, season, episode, sourceId, provider,
+    const sourceRef = db.collection("animePremiumSources").doc(key);
+    const existingSnapshot = await sourceRef.get();
+    const existing = existingSnapshot.exists ? existingSnapshot.data() || {} : {};
+    const candidates = Array.isArray(existing.candidates) ? [...existing.candidates] :
+      (existing.sourceId && existing.provider ? [{ ...existing, candidateId: String(existing.provider) }] : []);
+    const candidateId = String(body.candidateId || provider).trim().slice(0, 80);
+    const nextCandidate = {
+      candidateId, mediaType, titleId, season, episode, sourceId, provider,
       rightsVerified: true, rightsReference, allowedTerritories,
       licenseStartsAt: timestampFromMillis(licenseStartsAt),
       licenseEndsAt: timestampFromMillis(licenseEndsAt),
       active: body.active !== false,
+      priority: Math.max(1, Math.min(100, Number(body.priority) || 50))
+    };
+    const existingIndex = candidates.findIndex(item => item.candidateId === candidateId);
+    if (existingIndex >= 0) candidates[existingIndex] = nextCandidate;
+    else candidates.push(nextCandidate);
+    if (candidates.length > 8) throw new AnimePremiumError(400, "source-limit-reached", "An episode can have up to eight authorised streaming server candidates.");
+    candidates.sort((left, right) => Number(left.priority || 50) - Number(right.priority || 50));
+    await sourceRef.set({
+      mediaType, titleId, season, episode, candidates,
+      active: candidates.some(item => item.active === true),
       updatedBy: user.uid, updatedAt: timestampFromMillis(now)
     }, { merge: true });
     await db.collection("animePremiumAdminAudit").add({
