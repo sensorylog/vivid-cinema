@@ -137,7 +137,7 @@ async function updatePrice() {
     $("vap-price-note").textContent = "Paystack checkout charge: " + formatMoney(plan.amountMajor, "GHS") + ".";
   } else {
     try {
-      const quote = await getExchangeRates("GHS");
+      const quote = await getExchangeRate(localCurrency);
       if (requestId !== priceRequestId) return;
       const rate = quote.rate;
       if (Number.isFinite(rate) && rate > 0) {
