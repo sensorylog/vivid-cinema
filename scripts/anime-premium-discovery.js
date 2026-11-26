@@ -216,6 +216,7 @@ function init() {
   $("vap-hero-open").addEventListener("click", () => {
     const [type, id] = $("vap-hero-open").dataset.vapTitle.split(":");
     if (id) window.location.href = "anime-premium-title.html?id=" + encodeURIComponent(id) + "&type=" + encodeURIComponent(type);
+    else $("vap-catalogue").scrollIntoView({ behavior: "smooth", block: "start" });
   });
   loadShelves().then(() => loadCatalogue(true)).catch(error => {
     console.warn("Vivid Anime Premium discovery initialization failed:", error);
