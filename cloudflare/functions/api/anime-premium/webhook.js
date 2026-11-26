@@ -65,6 +65,22 @@ async function handleChargeSuccess(db, env, data, eventRef) {
     checkout = checkoutSnapshot.data() || {};
     hostedPageCheckout = true;
   }
+  if (hostedPageCheckout) {
+    // A matching email/amount is not enough: donations and unrelated Paystack
+    // charges can share those values. Only a real Paystack subscription charge
+    // may activate a hosted-page Premium checkout.
+    const subscriptionCode = String(data.subscription?.subscription_code || data.subscription_code || "");
+    if (!safeReference(subscriptionCode)) {
+      console.warn("Hosted Paystack charge has no subscription evidence; Premium was not activated.", {
+        reference, email: data.customer?.email || "", amount: data.amount, currency: data.currency
+      });
+      return;
+    }
+    if (data.subscription?.amount != null && Number(data.subscription.amount) !== amount) {
+      console.warn("Hosted Paystack subscription amount did not match its charge.", { reference, amount, subscriptionAmount: data.subscription.amount });
+      return;
+    }
+  }
   if (checkout.status === "paid") return;
   const verified = hostedPageCheckout
     ? data
