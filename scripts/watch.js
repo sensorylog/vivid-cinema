@@ -942,7 +942,7 @@ function renderShell(params) {
     }
   }
 
-  mountSecondaryPlayer(params, episodeTitle || title);
+  if (isAnimePlayback()) $("vivid-tflix-player")?.remove();\n  else mountSecondaryPlayer(params, episodeTitle || title);
   window.dispatchEvent(new CustomEvent("vivid:player-adapter-ready", { detail: { playerId: "player1" } }));
 
   const player = $("vidapi-player");
