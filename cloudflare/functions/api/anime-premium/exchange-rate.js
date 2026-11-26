@@ -34,9 +34,16 @@ export async function onRequestGet({ request, env }) {
   if (!/^[A-Z]{3}$/.test(currency)) {
     return jsonResponse({ ok: false, code: "invalid-currency", message: "Choose a valid three-letter currency code." }, 400, origin, env);
   }
+  if (currency === "GHS") {
+    return jsonResponse({
+      ok: true, base: "GHS", currency: "GHS", rate: 1,
+      date: new Date().toISOString().slice(0, 10),
+      source: "Exact base-currency identity"
+    }, 200, origin, env);
+  }
   try {
     const quote = await fetchDailyRates();
-    const rate = currency === "GHS" ? 1 : Number(quote.rates[currency]);
+    const rate = Number(quote.rates[currency]);
     if (!Number.isFinite(rate) || rate <= 0) {
       return jsonResponse({ ok: false, code: "currency-rate-unavailable", message: "A published reference rate is not available for " + currency + "." }, 404, origin, env);
     }
