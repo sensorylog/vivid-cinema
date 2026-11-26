@@ -2,7 +2,7 @@ import { auth } from "./firebase.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
 import { getImageUrl } from "./media.js";
 import { escapeHtml } from "./utils.js";
-import { getAnimeLibrarySnapshot, removeAnimeFromWatchlist, unmarkAnimeCompleted, removeAnimeFavorite, saveAnimeLibraryPreferences } from "./anime-library.js";
+import { getAnimeLibrarySnapshot, removeAnimeFromWatchlist, unmarkAnimeCompleted, removeAnimeFavorite, saveAnimeLibraryPreferences, syncAnimePreferencesForUser } from "./anime-library.js";
 import { syncLibraryForUser } from "./library.js";
 import { syncPlaybackProgressForUser } from "./recommendations.js";
 
@@ -35,7 +35,7 @@ function card(item, section) {
   const year = escapeHtml(item.year || "");
   const image = escapeHtml(getImageUrl(item.poster_path, "w342"));
   const progress = Math.max(0, Math.min(100, Number(item.percentage) || 0));
-  const href = section === "continue" ? watchHref(item) : titleHref(item);
+  const href = ["continue", "episodes"].includes(section) ? watchHref(item) : titleHref(item);
   const episodeLabel = item.media_type === "tv" && item.episode
     ? "S" + String(item.season ?? 1) + " · E" + String(item.episode)
     : (year || (item.media_type === "movie" ? "Anime film" : "Anime series"));
@@ -96,7 +96,7 @@ async function openLibrary(user) {
     }
     $("vap-library-gate").hidden = true;
     $("vap-library-content").hidden = false;
-    await Promise.allSettled([syncLibraryForUser(user), syncPlaybackProgressForUser(user)]);
+    await Promise.allSettled([syncLibraryForUser(user), syncPlaybackProgressForUser(user), syncAnimePreferencesForUser(user)]);
     if (currentUser?.uid !== user.uid) return;
     render();
   } catch (error) {
