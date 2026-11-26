@@ -20,6 +20,7 @@ let pricing = null;
 let countries = FALLBACK_COUNTRIES;
 let currentUser = null;
 let membershipActive = false;
+let membershipAutoRenew = false;
 let selectedCountry = "GH";
 let selectedPaymentMethod = "card";
 const rateCache = new Map();
@@ -149,7 +150,7 @@ async function loadMembership() {
     if (membershipActive) {
       $("vap-current-membership").hidden = false;
       $("vap-membership-state").textContent = membership.autoRenew ? "Your Premium membership is active and set to renew automatically." : "Your Premium membership is active.";
-      $("vap-membership-period").textContent = "Access through " + (membership.currentPeriodEnd ? new Date(membership.currentPeriodEnd).toLocaleDateString() : "the current billing period") + " · " + (membership.renewalMode === "automatic" ? "Card renewal" : "Manual renewal");
+      $("vap-membership-period").textContent = "Access through " + (membership.currentPeriodEnd ? new Date(membership.currentPeriodEnd).toLocaleDateString() : "the current billing period") + " · " + (membership.autoRenew ? "Card auto-renewal is on" : "Manual renewal");
       $("vap-account-status").textContent = "You are signed in with your Vivid account.";
     }
   } catch (error) {
@@ -190,6 +191,34 @@ async function startCheckout() {
     if (!membershipActive) button.textContent = currentUser ? "Continue to secure checkout →" : "Sign in to subscribe →";
   }
 }
+
+async function cancelAutomaticRenewal() {
+  if (!currentUser || !membershipAutoRenew) return;
+  const button = $("vap-cancel-renewal");
+  button.disabled = true;
+  button.textContent = "Cancelling…";
+  try {
+    const token = await currentUser.getIdToken();
+    const response = await fetch("/api/anime-premium/cancel", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: "Bearer " + token },
+      cache: "no-store",
+      body: JSON.stringify({})
+    });
+    const payload = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(payload.message || "Automatic renewal could not be cancelled.");
+    membershipAutoRenew = false;
+    button.hidden = true;
+    $("vap-membership-state").textContent = "Automatic renewal is cancelled. Your Premium access remains active until the current period ends.";
+    $("vap-checkout-status").textContent = "Automatic renewal cancelled. You can renew manually before your access expires.";
+    await updatePrice();
+  } catch (error) {
+    $("vap-checkout-status").textContent = error.message || "Could not cancel automatic renewal.";
+    button.disabled = false;
+    button.textContent = "Cancel automatic renewal";
+  }
+}
+
 function bind() {
   $("vap-country").addEventListener("change", async event => {
     selectedCountry = event.target.value;
@@ -204,6 +233,7 @@ function bind() {
     }
   }));
   $("vap-checkout-button").addEventListener("click", startCheckout);
+  $("vap-cancel-renewal").addEventListener("click", cancelAutomaticRenewal);
 }
 onAuthStateChanged(auth, async user => {
   currentUser = user && !user.isAnonymous ? user : null;
