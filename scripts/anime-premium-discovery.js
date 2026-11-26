@@ -16,7 +16,7 @@ let heroTimer = null;
 
 function titleOf(item) { return item.title || item.name || "Untitled anime"; }
 function dateOf(item) { return item.release_date || item.first_air_date || ""; }
-function yearOf(item) { return dateOf(item).slice(0, 4); }
+function yearOf(item) { return dateOf(item).slice(0, 4) || String(item.year || ""); }
 function imageOf(item, size = "w342") { return getImageUrl(item.poster_path || item.backdrop_path, size); }
 function unique(items) {
   const seen = new Set();
