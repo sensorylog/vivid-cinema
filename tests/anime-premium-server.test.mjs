@@ -5,7 +5,7 @@ import { webcrypto } from "node:crypto";
 import { isAnimeMetadata } from "../scripts/anime-eligibility.js";
 import {
   allowedOrigin, jsonResponse, parsePlanConfig, publicPricing,
-  resolveCheckoutPlan, safeReference, verifyPaystackSignature, isValidEmailAddress
+  resolveCheckoutPlan, safeReference, verifyPaystackSignature, isValidEmailAddress, getPremiumTestAccess, hasPremiumMembership
 } from "../cloudflare/functions/lib/anime-premium-service.js";
 
 globalThis.crypto ||= webcrypto;
@@ -168,4 +168,23 @@ test("Premium progress requires a live session owned by the signed-in user", asy
   assert.match(progress, /session\.uid !== user\.uid/);
   assert.match(progress, /sessionExpiry <= Date\.now\(\)/);
   assert.match(progress, /animePremiumProfiles/);
+});
+
+test("time-limited Premium test access is restricted to verified allowlisted email and expiry", () => {
+  const email = "thearchive73@gmail.com";
+  const expiresAt = "2026-12-26T00:00:00.000Z";
+  const env = { ANIME_PREMIUM_TEST_ACCESS_JSON: JSON.stringify({ [email]: expiresAt }) };
+  const verified = { uid: "test-user", email, email_verified: true };
+  const access = getPremiumTestAccess(verified, env, Date.parse("2026-11-26T00:00:00.000Z"));
+  assert.equal(access.active, true);
+  assert.equal(access.source, "test-access");
+  assert.equal(access.renewalMode, "test");
+  assert.equal(access.autoRenew, false);
+  assert.equal(access.currentPeriodEnd, expiresAt);
+  assert.equal(hasPremiumMembership(verified, null, env, Date.parse("2026-11-26T00:00:00.000Z")), true);
+  assert.equal(getPremiumTestAccess({ ...verified, email_verified: false }, env), null);
+  assert.equal(getPremiumTestAccess({ ...verified, email: "attacker@example.com" }, env), null);
+  assert.equal(getPremiumTestAccess(verified, { ANIME_PREMIUM_TEST_ACCESS_JSON: "not-json" }), null);
+  assert.equal(getPremiumTestAccess(verified, env, Date.parse("2026-12-27T00:00:00.000Z")), null);
+  assert.equal(hasPremiumMembership(verified, null, env, Date.parse("2026-12-27T00:00:00.000Z")), false);
 });
