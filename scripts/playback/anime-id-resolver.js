@@ -5,12 +5,12 @@ const REQUEST_TIMEOUT_MS = 6500;
 export function normalizeAnimeTitle(value) {
   return String(value || "")
     .normalize("NFKD")
-    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[\\u0300-\\u036f]/g, "")
     .toLowerCase()
     .replace(/&/g, " and ")
     .replace(/[^a-z0-9]+/g, " ")
-    .replace(/\b(season|part|cour|tv)\s+[0-9ivx]+\b/g, " ")
-    .replace(/\s+/g, " ")
+    .replace(/\\b(season|part|cour|tv)\\s+[0-9ivx]+\\b/g, " ")
+    .replace(/\\s+/g, " ")
     .trim();
 }
 
@@ -58,46 +58,111 @@ function jikanTitles(item) {
   return [item?.title, item?.title_english, item?.title_japanese, ...titles].filter(Boolean);
 }
 
-async function findAniListMatch(title) {
-  const body = {
-    query: "query($search:String!){Media(search:$search,type:ANIME){id idMal synonyms title{romaji english native}}}",
-    variables: { search: title }
+function buildSearchTerms(title, options = {}) {
+  const terms = [];
+  const seasonTitle = String(options.seasonTitle || "").trim();
+  const normalizedSeason = normalizeAnimeTitle(seasonTitle);
+  const genericSeason = /^season \\d+$/.test(normalizedSeason);
+  if (seasonTitle && !genericSeason && normalizedSeason && normalizedSeason !== normalizeAnimeTitle(title)) {
+    terms.push(String(title).trim() + " " + seasonTitle);
+  }
+  terms.push(String(title).trim());
+  return [...new Set(terms.filter(Boolean))];
+}
+
+function rankCandidate(candidate, terms, titles, yearValue, options = {}) {
+  const scores = terms.map(term => titleScore(term, titles));
+  const bestScore = Math.max(0, ...scores);
+  const seasonTermScore = terms.length > 1 ? scores[0] : 0;
+  const candidateYear = Number(yearValue) || 0;
+  const targetYear = Number(options.seasonYear) || 0;
+  const yearDifference = candidateYear && targetYear ? Math.abs(candidateYear - targetYear) : null;
+  const adjustedScore = bestScore - (yearDifference == null ? 0 : Math.min(0.28, yearDifference * 0.055));
+  return { candidate, bestScore, seasonTermScore, yearDifference, adjustedScore };
+}
+
+function resolveCandidateEpisodeOffset(ranked, options = {}) {
+  const fallbackOffset = Math.max(0, Number(options.episodeOffset) || 0);
+  const globalEpisode = Math.max(1, Number(options.globalEpisode) || 1);
+  const localEpisode = Math.max(1, Number(options.localEpisode) || 1);
+  const episodeCount = Math.max(0, Number(ranked.candidate?.episodes) || 0);
+  if (ranked.seasonTermScore >= 0.98) return 0;
+  if (episodeCount && episodeCount < globalEpisode) {
+    // If the catalogue entry cannot contain the global episode, only use it
+    // when its season year clearly identifies the requested TMDB season.
+    if (ranked.yearDifference === 0) return 0;
+    return null;
+  }
+  return fallbackOffset;
+}
+
+async function findAniListMatch(title, options = {}) {
+  const terms = buildSearchTerms(title, options);
+  const query = "query($search:String!){Page(perPage:20){media(search:$search,type:ANIME,sort:SEARCH_MATCH){id idMal episodes seasonYear synonyms title{romaji english native}}}}";
+  const results = await Promise.all(terms.map(async search => {
+    const data = await fetchJson(ANILIST_URL, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ query, variables: { search } })
+    });
+    const media = data?.data?.Page?.media || (data?.data?.Media ? [data.data.Media] : []);
+    return media.map(item => rankCandidate(item, terms, anilistTitles(item), item?.seasonYear, options));
+  }));
+  const ranked = results.flat().sort((a, b) =>
+    b.adjustedScore - a.adjustedScore ||
+    b.seasonTermScore - a.seasonTermScore ||
+    (a.yearDifference ?? 999) - (b.yearDifference ?? 999)
+  )[0];
+  if (!ranked?.candidate?.id || ranked.bestScore < 0.72) return null;
+  const episodeOffset = resolveCandidateEpisodeOffset(ranked, options);
+  if (episodeOffset == null) return null;
+  return {
+    aniListId: String(ranked.candidate.id),
+    malId: String(ranked.candidate.idMal || ""),
+    episodeOffset
   };
-  const data = await fetchJson(ANILIST_URL, {
-    method: "POST",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify(body)
-  });
-  const media = data?.data?.Media;
-  if (!media?.id || titleScore(title, anilistTitles(media)) < 0.72) return null;
-  return { aniListId: String(media.id), malId: String(media.idMal || "") };
 }
 
-async function findJikanMatch(title) {
-  const url = new URL(JIKAN_URL);
-  url.searchParams.set("q", title);
-  url.searchParams.set("limit", "10");
-  url.searchParams.set("sfw", "true");
-  const data = await fetchJson(url.href);
-  const candidates = Array.isArray(data?.data) ? data.data : [];
-  candidates.sort((a, b) => titleScore(title, jikanTitles(b)) - titleScore(title, jikanTitles(a)));
-  const best = candidates[0];
-  if (!best?.mal_id || titleScore(title, jikanTitles(best)) < 0.72) return null;
-  return { aniListId: "", malId: String(best.mal_id) };
+async function findJikanMatch(title, options = {}) {
+  const terms = buildSearchTerms(title, options);
+  const results = await Promise.all(terms.map(async search => {
+    const url = new URL(JIKAN_URL);
+    url.searchParams.set("q", search);
+    url.searchParams.set("limit", "10");
+    url.searchParams.set("sfw", "true");
+    const data = await fetchJson(url.href);
+    return (Array.isArray(data?.data) ? data.data : []).map(item =>
+      rankCandidate(item, terms, jikanTitles(item), item?.year || item?.aired?.prop?.from?.year, options)
+    );
+  }));
+  const ranked = results.flat().sort((a, b) =>
+    b.adjustedScore - a.adjustedScore ||
+    b.seasonTermScore - a.seasonTermScore ||
+    (a.yearDifference ?? 999) - (b.yearDifference ?? 999)
+  )[0];
+  if (!ranked?.candidate?.mal_id || ranked.bestScore < 0.72) return null;
+  const episodeOffset = resolveCandidateEpisodeOffset(ranked, options);
+  if (episodeOffset == null) return null;
+  return { malId: String(ranked.candidate.mal_id), episodeOffset };
 }
 
-export async function resolveAnimeIds(title) {
+export async function resolveAnimeIds(title, options = {}) {
   const cleanTitle = String(title || "").trim();
   if (!cleanTitle) return { aniListId: "", malId: "" };
 
-  // Resolve both catalogs independently: AniList provides the VidPlus ID, while
-  // Jikan provides a useful MAL fallback even when AniList is throttled.
+  // Prefer a season-specific catalogue entry when TMDB provides a distinct
+  // season title/year. Otherwise retain a continuous episode offset for
+  // single-entry anime catalogues that span multiple TMDB seasons.
   const [aniList, jikan] = await Promise.all([
-    findAniListMatch(cleanTitle),
-    findJikanMatch(cleanTitle)
+    findAniListMatch(cleanTitle, options),
+    findJikanMatch(cleanTitle, options)
   ]);
-  return {
+  const result = {
     aniListId: aniList?.aniListId || "",
     malId: aniList?.malId || jikan?.malId || ""
   };
+  if (Object.keys(options).length) {
+    result.episodeOffset = aniList?.episodeOffset ?? jikan?.episodeOffset ?? Math.max(0, Number(options.episodeOffset) || 0);
+  }
+  return result;
 }
