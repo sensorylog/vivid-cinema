@@ -11,7 +11,7 @@ function render(media){
  const recommendations=(media.recommendations?.nodes||[]).map(x=>x.mediaRecommendation).filter(Boolean).slice(0,6);
  const meta=[media.format,media.season&&media.seasonYear?media.season+" "+media.seasonYear:media.seasonYear,media.episodes?media.episodes+" episodes":"",media.status?.replaceAll("_"," ")].filter(Boolean);
  const next=media.nextAiringEpisode;
- const studioHtml=studios.map(s=>'<a href="'+link(s.id)+'" target="_blank" rel="noopener noreferrer">'+escapeHtml(s.name)+'</a>').join("");
+ const studioHtml=studios.map(s=>'<a href="'+escapeHtml(s.siteUrl||("https://anilist.co/studio/"+encodeURIComponent(String(s.id))))+'" target="_blank" rel="noopener noreferrer">'+escapeHtml(s.name)+'</a>').join("");
  const genreHtml=(media.genres||[]).slice(0,8).map(g=>'<span>'+escapeHtml(g)+'</span>').join("");
  const characterHtml=characters.map(edge=>{const c=edge.node||{},voice=edge.voiceActors?.[0],image=safeImage(c.image?.large);return '<article class="vivid-anime-character">'+(image?'<img loading="lazy" src="'+escapeHtml(image)+'" alt="">':'')+'<div><strong>'+escapeHtml(c.name?.full||"Character")+'</strong><small>'+escapeHtml(edge.role||"")+(voice?" · JP voice: "+escapeHtml(voice.name?.full||""):"")+'</small></div></article>';}).join("");
  const relationHtml=relations.map(edge=>'<a href="'+link(edge.node.id)+'" target="_blank" rel="noopener noreferrer"><small>'+escapeHtml(edge.relationType||"RELATED")+'</small><strong>'+escapeHtml(titleOf(edge.node))+'</strong></a>').join("");
