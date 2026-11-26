@@ -1,3 +1,4 @@
+// Vivid Cinema Firestore rules: deploy this file to the live Firebase project when changed.
 rules_version = '2';
 
 service cloud.firestore {
