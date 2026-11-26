@@ -19,6 +19,8 @@ test("service worker has a versioned cache and required offline shell", () => {
   assert.ok(source.includes('"./styles/vivid-rounded-cards.css?v=round-1"'));
   assert.ok(source.includes('"./scripts/anime-discovery.js"'));
   assert.ok(source.includes('"./scripts/anime-enrichment.js"'));
+  assert.ok(source.includes('"./scripts/anime-library.js"'));
+  assert.ok(source.includes('"./scripts/library.js"'));
   assert.ok(source.includes('"./scripts/anime.js?v=discovery-3"'));
   assert.ok(source.includes('"./styles/vivid-anime.css?v=discovery-3"'));
   assert.ok(source.includes('"./scripts/watch.js?v=anime-phase5-player-10"'));
