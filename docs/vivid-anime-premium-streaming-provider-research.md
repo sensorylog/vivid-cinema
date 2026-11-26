@@ -1,147 +1,109 @@
-# VIVID ANIME PREMIUM — Streaming Provider Research & Integration Plan
+# VIVID ANIME PREMIUM — Third-Party Streaming Provider Research
 
-**Status:** Phase 4 research / integration design  
-**Scope:** Lawful provider discovery, rights acquisition, playback integration and operational controls  
-**Last reviewed:** 26 November 2026
+**Status:** Phase 4 provider integration  
+**Last reviewed:** 26 November 2026  
+**Integration model:** Cross-origin iframe players, matching the existing VIVID Cinema streaming architecture
 
-## Executive decision
+## What this work is for
 
-VIVID should operate a **rights-cleared, multi-provider playback layer**, not a list of public video-hosting sites. A provider is eligible only when VIVID has a contract, licence, written integration permission, or an official API/SDK whose terms expressly permit the intended use.
+This is the server model the VIVID team requested: the external player/embed providers already used by VIVID Cinema, plus additional anime-capable embed providers. This is **not** a commercial Crunchyroll/HIDIVE partner API project and it is not a raw HLS scraper.
 
-There is no safe basis for treating a consumer subscription, public website, iframe, exposed manifest, or an unofficial third-party endpoint as permission for VIVID to retransmit that provider's catalogue. Provider discovery and licensing are therefore part of Phase 4, while payment, entitlement and admin commercial workflows remain Phase 5.
+Premium playback now:
+1. Verifies the signed-in Firebase user and active VIVID Anime Premium membership through `/api/anime-premium/playback`.
+2. Creates a short-lived, user-owned playback session.
+3. Resolves public catalogue identifiers (TMDB, AniList and MAL) for the selected title/season.
+4. Builds the selected provider's documented iframe URL.
+5. Embeds that provider inside the Premium player.
+6. Switches to another provider when a provider reports a playback error, fails to become ready where it supports events, or the viewer chooses another server.
 
-The current architecture already has the right starting boundary:
-- VIVID's server-side source registry maps a title/episode to an authorised provider source ID.
-- The Cloudflare playback endpoint verifies the signed-in user and active membership.
-- A server-only resolver credential resolves the source ID into a short-lived HTTPS playback URL.
-- The server checks the final hostname against `ANIME_PREMIUM_STREAM_HOSTS`.
-- The browser receives only a short-lived session and supports HLS or MP4; it never chooses an unverified source.
+The iframe remains cross-origin. VIVID does not scrape the provider's page, extract its raw stream URL, or attempt to bypass its player.
 
-The next provider integrations should plug into this resolver contract. Do not put provider secrets, partner credentials, or durable origin URLs in browser code or Firestore client-readable documents.
+## Provider roster
 
-## Provider landscape — candidates, not claimed integrations
+The registry contains **12 selectable provider endpoints**. Some are separate endpoint generations for the same provider; the user sees each as a distinct fallback choice.
 
-| Candidate | Why it is relevant | Integration position |
-|---|---|---|
-| **Crunchyroll** | Major global anime distributor with a substantial licensed catalogue and distribution partnerships. | High-priority partnership/licensing approach. Its published terms expressly prohibit incorporating, streaming or retransmitting its content through another application, or indexing significant portions of its catalogue, without express written authorisation. A normal Crunchyroll user subscription is not an integration licence. |
-| **HIDIVE / Sentai Filmworks** | Anime-focused subscription service and content distributor; has publicised multi-year content and distribution partnerships. | Approach Sentai/HIDIVE for territory-specific distribution or an authorised partner arrangement. No public playback API or VIVID integration permission is assumed by this plan. |
-| **Netflix** | Significant anime commissioner and distributor in many markets. | Treat as a licensing/distribution relationship, not a consumer playback endpoint. Require written rights and an approved technical delivery method. |
-| **Prime Video Channels / Amazon** | Distribution channel for third-party services, including anime services in selected markets. | Potential commercial distribution route only where Amazon and the underlying rights holder approve VIVID's role. A Prime Video subscription or channel listing does not authorise re-streaming. |
-| **Official rights-holder / distributor delivery** | Studios, production committees and regional distributors may license individual titles or packages directly. | Strongest route for a VIVID-owned catalogue. Negotiate title, territory, language, window, monetisation and technical-delivery rights per contract. |
-| **Bilibili** | Regional anime streaming and distribution business, with selected licensed catalogues in parts of Asia. | Investigate only for territories and content packages that explicitly include VIVID's launch markets; do not assume a Southeast Asia licence covers Ghana or global distribution. |
-| **Disney+ / Hulu / Tubi** | General streaming services that carry selected anime titles in certain markets. | Secondary title-by-title licensing/distribution candidates; regional availability and app integrations are separate questions. |
-| **Official YouTube channels** | Some rights holders publish selected episodes, trailers or promotional content. | Use official embed/API mechanisms only where the channel owner permits embedding and the content is available in the user's territory. Do not treat this as a substitute for a licensed Premium catalogue. |
-| **AniBiz** | B2B anime IP marketplace connecting rights holders with potential licensees. In October 2026 it announced 30+ licensors and investment from TBS Group, Toei Animation and TV TOKYO Holdings. | Useful discovery and introduction channel for rights-holder conversations. It is a licensing marketplace, not a video-streaming API or a source of playable manifests. |
+| Provider | Catalogue key | Implemented route | Notes |
+|---|---|---|---|
+| **VidPlus** | AniList | `/embed/anime/{anilistId}/{episode}` | Existing VIVID anime source; sub/dub selection |
+| **VidLink** | MAL | `/anime/{malId}/{episode}/{subOrDub}` | Existing VIVID anime source; documented fallback between audio variants |
+| **AniXo** | AniList or MAL | `/embed/ani/{id}/{episode}` or `/embed/mal/{id}/{episode}` | Claims multi-engine failover; emits player events |
+| **AniLink** | AniList | `/watch/{anilistId}/{episode}?variant=sub|dub` | Public player event contract includes progress and error events |
+| **MegaPlay** | AniList or MAL | `/stream/ani/{id}/{episode}/{subOrDub}` or `/stream/mal/...` | Current documented domain; progress/error events |
+| **MegaPlay Legacy** | AniList or MAL | Existing VIVID `ani.megaplay.su` route | Retained as a separate fallback for compatibility with the current VIVID Anime player |
+| **Megavid** | AniList or MAL | `/ani/{id}/{episode}/{subOrDub}` or `/mal/...` | Progress, complete and error messages |
+| **MegaFlix** | AniList or MAL | `/stream/ani/{id}/{episode}/{subOrDub}` or `/stream/mal/...` | Progress, complete and error messages |
+| **VidAPI** | TMDB | `/embed/movie/{tmdbId}` or `/embed/tv/{tmdbId}/{season}/{episode}` | Existing VIVID provider; generic movie/TV route, not a dedicated anime API |
+| **EmbedWave** | TMDB | `/embed/movie/{tmdbId}` or `/embed/tv/{tmdbId}/{season}/{episode}` | Existing VIVID provider; built-in multi-server selector |
+| **VidFast** | TMDB | `/embed/movie/{tmdbId}` or `/embed/tv/{tmdbId}/{season}/{episode}` | Existing VIVID movie/TV provider; usable for anime titles indexed in its TMDB catalogue |
+| **VidRift** | AniList or TMDB | `/embed/anilist/{anilistId}/{episode}`, `/embed/tv/{tmdbId}/{season}/{episode}`, or movie route | New research addition; claims multiple sources, automatic failover and progress events |
 
-### Primary research references
+### Why these were selected
 
-- Crunchyroll Terms of Service: https://www.crunchyroll.com/en/terms/privacy — current terms restrict incorporating, streaming/retransmitting, automated extraction and indexing without express written authorisation.
-- Crunchyroll Partner Portal: https://partner.crunchyroll.com/ — an official partner entry point exists, but the publicly discoverable documentation route leads into a Game Vault partner journey; it is **not evidence of a public video playback API** or a granted VIVID streaming licence.
-- HIDIVE official service: https://welcome.hidive.com/
-- AMC Global Media / Sentai Filmworks and MBS distribution announcement (2 March 2023): https://www.amcglobalmedia.com/2023/03/02/amc-networks-sentai-filmworks-and-mainichi-broadcasting-system-seal-major-deal-for-anime-content-on-hidive-streaming-service/ — illustrates title/package and territory-specific exclusive rights.
-- AMC Global Media / HIDIVE and MBS distribution partnership announcement (10 August 2026): https://www.amcglobalmedia.com/2026/08/10/amc-global-medias-hidive-and-mainichi-broadcasting-system-extend-partnership-into-next-phase-with-exclusive-output-deal-covering-anime-streamer/
-- Netflix Help Center, content licensing: https://help.netflix.com/en/node/4976 — Netflix describes licensing rights by title, country and time window.
-- AniBiz official marketplace: https://anibiz.com/about
-- AniBiz licensee information: https://anibiz.com/lp/licensee
-- AniBiz October 2026 licensor expansion announcement: https://www.prnewswire.com/news-releases/tbs-group-toei-animation-and-tv-tokyo-holdings-make-strategic-investment-in-anibizcom-the-official-anime-licensing-platform-302921185.html
-- Netflix Ghana official anime category: https://www3.stage.netflix.com/gh/browse/genre/6721 — useful to confirm consumer-facing regional availability only, not redistribution rights.
-- Sony's overview of Crunchyroll's distribution and localisation business: https://www.sony.com/en/SonyInfo/blog/2026/10/06/
+- **VidAPI** documents TMDB/IMDb movie and TV embed endpoints, including a season/episode route. It does not document a separate MAL/AniList anime endpoint, so VIVID uses the TMDB route only when the anime title is represented in its catalogue.
+- **EmbedWave** documents the same TMDB movie/series route shapes and a built-in multi-server dropdown. It is included because it is already part of VIVID Cinema's provider set.
+- **VidLink** explicitly documents its anime route using a MAL ID, episode number and sub/dub path.
+- **AniLink** documents an AniList episode route, requires an explicit audio variant and publishes a validated `postMessage` event contract.
+- **AniXo** documents both AniList and MAL embed routes, as well as its claimed multi-engine failover.
+- **MegaPlay, Megavid and MegaFlix** document MAL/AniList anime routes and iframe player events. MegaPlay's current public API documentation uses `megaplay.buzz/stream/...`; VIVID also retains its older `ani.megaplay.su` endpoint as a compatibility fallback.
+- **VidRift** documents TMDB and AniList routes, a multi-source player with automatic failover, and progress/error messages.
+- **VidFast** documents TMDB/IMDb movie and TV routes. It is a generic catalogue fallback, not an anime-specific ID provider.
 
-These references establish that providers and licensing pathways exist; they do **not** establish that any provider has granted VIVID rights, supplied credentials, or approved a technical integration.
+## Source documentation
 
-## Ghana and global availability
+- VidAPI embed API: https://vidapi.ru/api
+- EmbedWave player and route reference: https://embedwave.cc/
+- VidLink player documentation: https://vidlink.pro/
+- AniLink introduction: https://anilink.cc/docs
+- AniLink embed parameters: https://anilink.cc/docs/embed-parameters
+- AniLink player events: https://anilink.cc/docs/player-events
+- AniXo embed/API reference: https://anixo.buzz/
+- MegaPlay embed API: https://megaplay.buzz/api
+- MegaPlay legacy player: https://ani.megaplay.su/
+- Megavid embed API: https://megavid.buzz/
+- MegaFlix embed API: https://megaflix.buzz/
+- VidFast embed API: https://vidfast.to/
+- VidRift routes and player messages: https://vidrift.net/docs/
 
-Provider availability is territory-specific and may vary by title, season, language, subscription tier and release window. Do not infer Ghana availability from a provider's global marketing page or from a title appearing in a catalogue search. Current third-party availability trackers returned conflicting Crunchyroll availability signals for Ghana during research, so those aggregators are not authoritative enough to unlock a VIVID title. Netflix does expose a Ghana-specific official anime category page, which is useful evidence of a local consumer catalogue, but it does not grant VIVID retransmission rights or an API integration.
+## Catalogue ID and episode mapping
 
-For every licensed title, the rights record must explicitly capture:
-- permitted territories (ISO 3166-1 alpha-2 codes);
-- start and end of the streaming window;
-- permitted business model (SVOD, AVOD, TVOD, promotional/free);
-- language and subtitle/dub rights;
-- permitted devices, applications and playback domains;
-- whether offline playback, downloads, casting or trailers are permitted;
-- reporting, attribution and takedown obligations.
+The Premium catalogue is TMDB-backed. The watch page resolves AniList and MAL IDs through VIVID's existing `scripts/playback/anime-id-resolver.js` module.
 
-If Ghana is not included in the contract, the title must not be playable in Ghana. The catalogue may show a clear regional-unavailability state if the underlying metadata/display rights allow it.
+- TMDB-based providers receive the selected TMDB title ID and the exact TMDB season/episode numbers.
+- AniList-based providers receive the AniList ID and episode number.
+- MAL-based providers receive the MAL ID and episode number.
+- For later seasons, VIVID attempts a season-specific ID lookup. If the same series ID is reused, it calculates the cumulative episode offset from preceding TMDB seasons. This is a best-effort mapping: anime catalogues can split cours/sequels differently, and a provider may not have indexed every title or season.
+- Sub/dub is explicit wherever the provider exposes a documented audio variant. A provider that does not support the requested variant may fail and be skipped.
 
-## Provider adapter architecture
+A provider is shown as available only when the required catalogue identifier is present. Anime films use the TMDB movie endpoints for VidAPI, EmbedWave, VidFast and VidRift; episode-only providers are not shown as usable movie sources.
 
-Keep a stable VIVID playback contract and implement one server-side adapter per approved partner:
+## Failover and progress behavior
 
-1. **Catalogue adapter** — maps provider title/season/episode IDs to VIVID's canonical TMDB-linked title identity; carries rights metadata and provider availability.
-2. **Entitlement adapter** — confirms the user is entitled to the VIVID product and, where required by the partner contract, the partner's own entitlement.
-3. **Playback resolver adapter** — exchanges a server-held partner credential and source ID for a short-lived signed HLS/MP4 playback URL, DRM configuration and permitted playback headers.
-4. **Playback capability adapter** — reports supported codecs, HLS/DASH, DRM (for example Widevine/FairPlay where contractually supplied), subtitle tracks, audio tracks and quality ladders.
-5. **Progress adapter** — accepts playback events only where partner terms permit reporting; VIVID's own progress remains stored server-side.
-6. **Rights enforcement** — checks territory, start/end window, language, monetisation and device/application restrictions before issuing a playback session.
+- The player keeps a priority-ordered provider list and allows manual source switching.
+- Providers with documented readiness/error events can trigger automatic failover when they report an error or do not report readiness within 18 seconds.
+- Providers without a public event contract are not assumed to be playing merely because the iframe's document loaded. VIVID exposes a manual **Try next server** action after the initial load window instead of falsely claiming that cross-origin playback was verified.
+- The message handler validates both `event.origin` and `event.source` against the currently active iframe before accepting progress or failure events.
+- Progress is saved through the existing Premium progress endpoint only when the provider supplies a valid current-time and duration pair. VIVID does not invent watch progress for providers that expose no events.
+- A provider outage does not break the rest of the player. The viewer can move through the remaining available options.
 
-Suggested provider interface (server-side only):
+## Important limits
 
-```js
-{
-  id: "partner-id",
-  async resolvePlayback({ sourceId, media, user, territory, device }) {
-    // Return only contract-approved playback data:
-    // { url, expiresAt, mimeType, drm?, subtitles?, audioTracks?, qualities? }
-  }
-}
-```
+The provider's public documentation establishes route formats and claimed player features, not a guaranteed uptime SLA or successful playback for every title. A route may return a player shell while the selected anime episode is missing, region-blocked, or unavailable upstream. Actual success must be measured per title and territory during QA.
 
-Never expose partner secrets to the browser. Never store a permanent stream URL as the VIVID source record. The source record should identify the partner's licensed asset; the resolver should mint the short-lived session on demand.
+The Premium membership gate protects the VIVID Premium watch route and creates a VIVID playback session. It cannot make a third-party provider enforce VIVID membership inside that provider's own iframe. The upstream player remains operated by that third party.
 
-## Current codebase fit
+Only use these embeds for content VIVID has the right to make available in its target markets. This integration does not validate the upstream content rights, and no provider is represented as a commercial partner of VIVID. Do not add raw-stream extraction, mirror scraping, DRM circumvention or hidden-source bypasses.
 
-The current Phase 4 API already has:
-- `animePremiumSources/{mediaType_titleId_sN_eN}` as a server-managed episode source registry, plus `animePremiumSources/tv_titleId` title-wide mappings; title-wide mappings let an approved provider adapter resolve any season/episode for a series without manually entering every episode. Each mapping supports up to eight independently rights-cleared `candidates`, each with a unique candidate ID, provider, source ID, priority, territory list, licence window and active flag;
-- `ANIME_PREMIUM_PROVIDER_RESOLVERS_JSON` as the preferred server-only map of provider ID to resolver URL, resolver token and provider-specific allowed hostnames;
-- legacy `ANIME_PREMIUM_STREAM_RESOLVER_URL`, `ANIME_PREMIUM_STREAM_RESOLVER_TOKEN` and `ANIME_PREMIUM_STREAM_HOSTS` as a backwards-compatible single-resolver fallback;
-- provider-specific final host allowlists, so one partner's resolver cannot return another provider's domain;
-- priority-ordered server fallback: the resolver tries each eligible candidate in order, rejects redirects, applies a 12-second timeout and continues to the next licensed candidate when a resolver is unavailable or returns an invalid session;
-- playback-session responses include the selected candidate ID; if the browser reports a fatal native/HLS playback failure or cannot load Hls.js, the client requests another candidate while asking the server to exclude already-failed candidate IDs (maximum eight);
-- membership and playback-session checks before progress writes.
+## Phase 4 QA checklist
 
-The playback endpoint now supports isolated provider resolver configurations. Configure a secret environment variable using this shape (example values are deliberately non-functional placeholders):
+- [ ] Test a representative current-season anime episode on every enabled provider.
+- [ ] Test a long-running series, a sequel/cour split and a special episode to validate ID and episode-number mapping.
+- [ ] Test sub and dub separately; do not infer dub availability from a successful sub stream.
+- [ ] Test at least one anime film through each TMDB movie provider.
+- [ ] Test provider-reported error and timeout failover on mobile and desktop.
+- [ ] Test manual source switching when an iframe loads but its video does not start.
+- [ ] Confirm AniLink, AniXo, MegaPlay, Megavid, MegaFlix and VidRift progress messages are origin-checked and saved correctly.
+- [ ] Confirm providers without progress events do not create fake Continue Watching progress.
+- [ ] Test the Premium gate for signed-out, expired and active members.
+- [ ] Verify that account changes and expired playback sessions remove the active iframe.
 
-```json
-{
-  "licensed-provider-one": {
-    "resolverUrl": "https://resolver.partner-one.example/v1/playback",
-    "resolverToken": "STORE_THIS_AS_A_SECRET",
-    "allowedHosts": ["video.partner-one.example", "cdn.partner-one.example"]
-  },
-  "licensed-provider-two": {
-    "resolverUrl": "https://resolver.partner-two.example/v1/playback",
-    "resolverToken": "STORE_THIS_AS_A_SECRET",
-    "allowedHosts": ["stream.partner-two.example"]
-  }
-}
-```
-
-The source registry's server-managed candidate `provider` value selects the matching configuration. Each provider has a separate token, resolver URL and final hostname allowlist. The existing single-resolver environment variables remain as a backwards-compatible fallback while the multi-provider configuration is introduced. It must not accept arbitrary URLs, arbitrary resolver destinations, browser-supplied provider names, or user-supplied stream hosts. The browser may only submit candidate IDs to skip after a playback failure; it cannot select a provider, set a stream URL, or bypass territory and licence checks. Episode-specific mappings are tried before title-wide mappings, so a title can use a default provider while exceptional episodes can be mapped to a different approved source.
-
-## Phase 4 implementation gates
-
-A provider is **not integrated** until all of the following are true:
-
-- [ ] Written licence / integration authorisation is on file and covers VIVID's intended Premium distribution model.
-- [x] Territory and title/episode rights are recorded in the admin source registry and machine-enforced at playback.
-- [ ] Provider has supplied an approved API, SDK, feed or delivery mechanism and credentials.
-- [ ] Provider adapter resolves a short-lived stream or DRM session without exposing secrets.
-- [ ] Host, expiry, MIME type, redirects and manifest/segment delivery are validated.
-- [ ] Subtitle, audio, quality and DRM behaviour is tested on supported Android, iOS/Safari and desktop browsers.
-- [ ] Playback failures, token expiry, provider outage and revoked rights fail closed.
-- [ ] Provider attribution, reporting, privacy and takedown processes are documented.
-- [ ] Automated tests cover title/territory/window entitlement and resolver failure.
-
-Until those gates are met, keep the provider visible only as a researched candidate, not as a playable server. Do not populate the production source registry with unofficial mirrors, scraped embed pages, public file hosts or domains whose distribution rights cannot be established.
-
-## Immediate Phase 4 priorities
-
-1. Finish player lifecycle, session expiry, episode navigation and reliable final progress persistence.
-2. Complete the eight-candidate registry and automatic failover QA, including actual media errors after a resolver successfully returns a URL.
-3. Formalise the provider adapter/resolver contract and rights metadata.
-4. Build a provider due-diligence shortlist and outreach package for Crunchyroll, Sentai/HIDIVE and direct rights holders via AniBiz.
-5. Integrate the first partner only after VIVID has written permission, credentials and a test asset.
-6. Add real-device playback QA for HLS/DRM, subtitles, audio tracks, network changes and low-bandwidth conditions.
-
-**No third-party provider is represented as partnered with VIVID by this document.**
+**No uptime claim is made until live title-by-title playback QA has been completed.**
