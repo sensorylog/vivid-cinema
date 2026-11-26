@@ -26,9 +26,9 @@ test("admin page provides audited membership and authorised source operations", 
   assert.match(client, /licenseStartsAt:/);
   assert.match(client, /licenseEndsAt:/);
   assert.match(client, /rightsVerified:/);
-  assert.match(serverSources, /rightsVerified !== true/);
-  assert.match(serverSources, /allowedTerritories/);
-  assert.match(serverSources, /licenseEndsAt/);
+  assert.match(sources, /rightsVerified !== true/);
+  assert.match(sources, /allowedTerritories/);
+  assert.match(sources, /licenseEndsAt/);
   assert.match(html, /server-verified operations/i);
   assert.match(client, /getIdToken\(\)/);
   assert.match(client, /api\/anime-premium\/admin\/memberships/);
