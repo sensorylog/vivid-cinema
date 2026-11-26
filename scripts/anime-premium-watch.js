@@ -5,6 +5,9 @@ import { getImageUrl } from "./media.js";
 import { escapeHtml } from "./utils.js";
 import { resolveAnimeIds } from "./playback/anime-id-resolver.js";
 import { resolveAnimePremiumProviderOptions } from "./playback/anime-premium-providers.js";
+import { getLocalLibrary, upsertLibraryItem } from "./library.js";
+import { savePlaybackProgress, completePlaybackProgress, flushPlaybackProgress } from "./recommendations.js";
+import { getAnimeLibraryPreferences, saveAnimeLibraryPreferences } from "./anime-library.js";
 
 const $ = id => document.getElementById(id);
 const params = new URLSearchParams(window.location.search);
@@ -28,7 +31,9 @@ let failedProviderIds = new Set();
 let baseAnimeIds = { aniListId: "", malId: "" };
 let seasonAnimeIds = { aniListId: "", malId: "" };
 let animeIdPromise = Promise.resolve(baseAnimeIds);
-let animeTrack = "sub";
+let animeTrack = getAnimeLibraryPreferences().track;
+let lastHistorySyncAt = 0;
+let lastCompletedEpisodeKey = "";
 let activeProviderEpisodeNumber = 1;
 let latestProviderProgress = null;
 let lastProgressSync = 0;
@@ -179,6 +184,21 @@ function updateProviderProgress(position, duration, force = false) {
   const currentTime = Number(position), total = Number(duration);
   if (!Number.isFinite(currentTime) || !Number.isFinite(total) || total <= 0 || currentTime < 0 || currentTime > total + 5) return;
   latestProviderProgress = { currentTime: Math.min(currentTime, total), duration: total };
+  const season = mediaType === "tv" ? Math.max(0, Number(params.get("season") || 1)) : null;
+  const episode = mediaType === "tv" ? Math.max(1, Number(activeEpisodes[activeEpisodeIndex]?.episode_number || params.get("episode") || 1)) : null;
+  const contentId = mediaType === "tv" ? `tv:${titleId}:${season}:${episode}` : `movie:${titleId}`;
+  const progressData = { id: titleId, media_type: mediaType, season, episode, title: titleName(titleDetails), progress: Math.min(currentTime, total), duration: total, isAnime: true };
+  savePlaybackProgress(contentId, progressData);
+  recordAnimeHistory(currentTime, total);
+  if (force && currentTime >= total - 5 && lastCompletedEpisodeKey !== contentId) {
+    lastCompletedEpisodeKey = contentId;
+    completePlaybackProgress(contentId, progressData);
+    if (mediaType === "movie") markAnimeCompleted({ id: titleId, media_type: mediaType, title: titleName(titleDetails), poster_path: titleDetails?.poster_path || "", backdrop_path: titleDetails?.backdrop_path || "" });
+    else if (getAnimeLibraryPreferences().autoplayNextEpisode && activeEpisodeIndex + 1 < activeEpisodes.length) {
+      const nextIndex = activeEpisodeIndex + 1;
+      window.setTimeout(() => { if (currentPlaybackSessionId) void selectEpisode(nextIndex, true); }, 1100);
+    }
+  }
   void syncPlaybackProgress(force);
 }
 function handleProviderMessage(event) {
@@ -346,7 +366,9 @@ async function requestPlayback(episode) {
       season: seasonNumber, episode: activeProviderEpisodeNumber, track: animeTrack
     });
     renderServerOptions();
-    const first = providerOptions.find(item => item.available);
+    const preferredPlayer = getAnimeLibraryPreferences().preferredPlayer;
+    const first = providerOptions.find(item => item.available && preferredPlayer !== "auto" && item.id === preferredPlayer)
+      || providerOptions.find(item => item.available);
     if (!first) {
       showGate("No compatible server found", "Vivid could not match this anime to any available provider catalogue. Try again later or choose another title.", "Back to title", titleRoute(), true);
       return;
@@ -361,6 +383,25 @@ async function requestPlayback(episode) {
     if (requestId !== playbackRequestId) return;
     showGate("Playback could not start", error?.message || "Vivid could not verify Premium playback. Please try again.", "Try again", titleRoute(), true);
     setStatus("Premium playback could not be opened.");
+  }
+}
+function recordAnimeHistory(progress, duration) {
+  if (!titleDetails || !Number.isFinite(Number(progress)) || Number(progress) <= 0) return;
+  const library = getLocalLibrary();
+  const existing = (library.history || []).find(item => item.isAnime === true && item.media_type === mediaType && String(item.id) === titleId);
+  const now = Date.now();
+  const completion = duration > 0 ? Math.min(100, Number(progress) / Number(duration) * 100) : Number(existing?.completion) || 0;
+  const item = {
+    id: titleId, media_type: mediaType, title: titleName(titleDetails),
+    year: String(titleDetails.release_date || titleDetails.first_air_date || "").slice(0, 4),
+    poster_path: titleDetails.poster_path || "", backdrop_path: titleDetails.backdrop_path || "",
+    isAnime: true, startedAt: Number(existing?.startedAt) || now, lastWatchedAt: now,
+    watchedSeconds: Math.max(Number(existing?.watchedSeconds) || 0, Number(progress)),
+    completion: Math.max(Number(existing?.completion) || 0, completion), updatedAt: now
+  };
+  if (!existing || now - lastHistorySyncAt >= 30000) {
+    lastHistorySyncAt = now;
+    upsertLibraryItem("history", item);
   }
 }
 async function syncPlaybackProgress(force = false) {
@@ -494,7 +535,7 @@ function bindControls() {
     if (!button) return;
     const nextTrack = button.dataset.vapTrack === "dub" ? "dub" : "sub";
     if (nextTrack === animeTrack) return;
-    animeTrack = nextTrack;
+    animeTrack = saveAnimeLibraryPreferences({ track: nextTrack }).track;
     $("vap-audio-track").querySelectorAll("[data-vap-track]").forEach(item => item.setAttribute("aria-pressed", String(item.dataset.vapTrack === animeTrack)));
     const episode = activeEpisodes[activeEpisodeIndex];
     if (currentPlaybackSessionId && episode) {
