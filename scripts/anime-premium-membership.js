@@ -167,12 +167,15 @@ async function loadMembership() {
     $("vap-account-status").innerHTML = 'Already subscribed? <a href="auth.html?returnTo=anime-premium-membership.html">Sign in with your Vivid account</a>.';
     return;
   }
+  const accountLabel = currentUser.displayName || currentUser.email || "your Vivid account";
+  $("vap-account-status").textContent = "Signed in as " + accountLabel + ". Your existing Vivid account will own your Anime Premium membership.";
   const token = await currentUser.getIdToken();
   const response = await withTimeout(fetch("/api/anime-premium/membership", {
     headers: { Authorization: "Bearer " + token }, cache: "no-store"
   }), 6500, "Membership status request timed out.");
   if (response.status === 403) {
     $("vap-checkout-status").textContent = "Verify your Vivid email address before subscribing.";
+    $("vap-account-status").textContent = "Signed in as " + accountLabel + ". Verify your email to continue to Anime Premium.";
     return;
   }
   if (!response.ok) throw new Error("Membership status could not be checked.");
