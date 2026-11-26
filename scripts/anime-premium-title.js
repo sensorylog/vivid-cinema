@@ -3,6 +3,7 @@ import { auth } from "./firebase.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
 import { getImageUrl, normalizeResults } from "./media.js";
 import { escapeHtml } from "./utils.js";
+import { isAnimeMetadata } from "./anime-eligibility.js";
 import { hasLibraryItem, toggleLibraryItem } from "./library.js";
 import { markAnimeCompleted, unmarkAnimeCompleted, addAnimeFavorite, removeAnimeFavorite } from "./anime-library.js";
 
@@ -19,27 +20,46 @@ let backdropAdvancing = false;
 let activeTitleDetails = null;
 let activeVividUser = null;
 let premiumMembershipActive = false;
+let titleAccessRequest = 0;
+
+function setMemberActionsVisible(visible) {
+  document.querySelectorAll("[data-vap-member-action]").forEach(button => { button.hidden = !visible; });
+}
 
 
 async function syncTitleAccess(user) {
+  const requestId = ++titleAccessRequest;
   activeVividUser = user && !user.isAnonymous ? user : null;
   premiumMembershipActive = false;
+  let emailVerificationRequired = false;
   if (activeVividUser) {
     try {
-      const token = await activeVividUser.getIdToken();
+      const token = await activeVividUser.getIdToken(true);
       const response = await fetch("/api/anime-premium/membership", { headers: { Authorization: "Bearer " + token }, cache: "no-store" });
+      if (requestId !== titleAccessRequest || activeVividUser?.uid !== user.uid) return;
+      if (response.status === 403 && activeVividUser.emailVerified !== true) emailVerificationRequired = true;
       if (response.ok) {
         const payload = await response.json();
         premiumMembershipActive = payload?.membership?.active === true;
       }
     } catch (error) {
+      if (requestId !== titleAccessRequest) return;
       console.warn("Vivid Anime Premium membership status could not be checked:", error);
     }
   }
+  if (requestId !== titleAccessRequest) return;
+  setMemberActionsVisible(premiumMembershipActive);
   const primary = $("vap-title-account");
   const watch = $("vap-title-watch");
   const membership = $("vap-title-membership");
   if (!primary) return;
+  if (activeVividUser && emailVerificationRequired) {
+    primary.textContent = "Verify your email →";
+    primary.href = "verify-email.html?returnTo=" + encodeURIComponent("anime-premium-title.html" + window.location.search);
+    if (watch) watch.hidden = true;
+    if (membership) membership.hidden = true;
+    return;
+  }
   if (!activeVividUser) {
     primary.textContent = "Sign in & subscribe →";
     primary.href = "auth.html?returnTo=" + encodeURIComponent("anime-premium-title.html" + window.location.search);
@@ -111,7 +131,7 @@ function renderCast(details) {
 }
 function renderRelated(details) {
   const related = details.recommendations?.results?.length ? details.recommendations.results : details.similar?.results || [];
-  const items = normalizeResults(related.filter(item => item.poster_path).slice(0, 12), mediaType);
+  const items = normalizeResults(related.filter(item => item.poster_path && isAnimeMetadata(item)).slice(0, 12), mediaType);
   if (!items.length) return;
   $("vap-title-related").innerHTML = items.map(item => {
     const title = item.title || item.name || "Anime title";
@@ -282,6 +302,20 @@ function renderTitle(details) {
   activeTitleDetails = details;
   const name = titleName(details);
   document.title = name + " · VIVID ANIME PREMIUM";
+  const canonicalUrl = new URL("anime-premium-title.html", window.location.origin);
+  canonicalUrl.searchParams.set("id", String(details.id));
+  canonicalUrl.searchParams.set("type", mediaType);
+  const canonical = document.querySelector('link[rel="canonical"]');
+  if (canonical) canonical.href = canonicalUrl.toString();
+  const description = String(details.overview || "Explore the story, characters and world behind " + name + " on Vivid Anime Premium.").replace(/\s+/g, " ").trim().slice(0, 160);
+  const descriptionMeta = document.querySelector('meta[name="description"]');
+  if (descriptionMeta) descriptionMeta.content = description;
+  const socialTitle = document.querySelector('meta[property="og:title"]');
+  if (socialTitle) socialTitle.content = document.title;
+  const socialDescription = document.querySelector('meta[property="og:description"]');
+  if (socialDescription) socialDescription.content = description;
+  const socialUrl = document.querySelector('meta[property="og:url"]');
+  if (socialUrl) socialUrl.content = canonicalUrl.toString();
   $("vap-title-name").textContent = name;
   const watchParams = new URLSearchParams({ id: String(details.id), type: mediaType });
   if (mediaType === "tv") { watchParams.set("season", "1"); watchParams.set("episode", "1"); }
@@ -310,6 +344,7 @@ async function loadTitle() {
   if (detailsResult.status !== "fulfilled") throw detailsResult.reason || new Error("The anime title is unavailable.");
   const details = detailsResult.value;
   if (!details?.id) throw new Error("The anime title could not be found.");
+  if (!isAnimeMetadata(details)) throw new Error("This title is not listed as Japanese animation in the Vivid Anime Premium catalogue.");
   const images = imagesResult.status === "fulfilled" ? imagesResult.value || {} : {};
   renderTitle(details);
   startBackdrop(imageSlides(details, images));

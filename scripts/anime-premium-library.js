@@ -77,7 +77,7 @@ function render() {
 
 async function verifyMembership(user) {
   const response = await fetch("/api/anime-premium/membership", {
-    headers: { Authorization: "Bearer " + await user.getIdToken() },
+    headers: { Authorization: "Bearer " + await user.getIdToken(true) },
     cache: "no-store"
   });
   if (response.status === 401) return { active: false, reason: "signin" };

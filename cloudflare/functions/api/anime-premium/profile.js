@@ -1,6 +1,6 @@
 import {
   allowedOrigin, AnimePremiumError, enforceRateLimit, getPremiumServices,
-  jsonResponse, optionsResponse, requirePremiumUser, timestampFromMillis
+  jsonResponse, optionsResponse, requirePremiumUser, timestampFromMillis, hasPremiumMembership
 } from "../../lib/anime-premium-service.js";
 
 function iso(value) {
@@ -40,6 +40,11 @@ export async function onRequest({ request, env }) {
     const user = await requirePremiumUser(request, env);
     const { db } = getPremiumServices(env);
     await enforceRateLimit(db, user.uid, "profile", 60, 60000);
+    const membershipSnapshot = await db.collection("animePremiumMemberships").doc(user.uid).get();
+    const membership = membershipSnapshot.exists ? membershipSnapshot.data() || {} : {};
+    if (!hasPremiumMembership(user, membership, env)) {
+      throw new AnimePremiumError(403, "premium-membership-required", "An active Vivid Anime Premium membership is required to access your anime library.");
+    }
     const ref = db.collection("animePremiumProfiles").doc(user.uid);
     if (request.method === "GET") {
       const snapshot = await ref.get();

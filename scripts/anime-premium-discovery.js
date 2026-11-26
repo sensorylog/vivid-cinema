@@ -2,6 +2,7 @@ import { getAnimePage } from "./content.js";
 import { tmdbApi } from "./tmdb.js";
 import { getImageUrl, normalizeResults } from "./media.js";
 import { escapeHtml } from "./utils.js";
+import { isAnimeMetadata } from "./anime-eligibility.js";
 
 const $ = id => document.getElementById(id);
 const state = { type: "all", sort: "popularity.desc", year: "", query: "", page: 1, totalPages: 1, request: 0 };
@@ -50,7 +51,7 @@ function card(item) {
   const type = item.media_type === "movie" ? "FILM" : "SERIES";
   return '<a class="vap-title-card" href="' + escapeHtml(titleUrl(item)) + '" aria-label="Explore ' + escapeHtml(title) + '">' +
     '<span class="vap-poster-wrap">' + (poster ? '<img loading="lazy" decoding="async" src="' + escapeHtml(poster) + '" alt="' + escapeHtml(title) + ' poster">' : '<span class="vap-poster-fallback">VIVID</span>') +
-    '<span class="vap-card-tag">PREMIUM</span><span class="vap-card-type">' + type + '</span><span class="vap-card-play" aria-hidden="true">↗</span></span>' +
+    '<span class="vap-card-type">' + type + '</span><span class="vap-card-play" aria-hidden="true">↗</span></span>' +
     '<span class="vap-card-copy"><strong>' + escapeHtml(title) + '</strong><small>' + escapeHtml(yearOf(item) || "Anime") + ' · ★ ' + (Number(item.vote_average) ? Number(item.vote_average).toFixed(1) : "—") + '</small></span></a>';
 }
 function identityCard(item) {
@@ -113,7 +114,7 @@ async function searchAnime(query, page = 1) {
   const response = await tmdbApi.searchMulti(query, page);
   const raw = (response.results || []).filter(item =>
     ["movie", "tv"].includes(item.media_type) &&
-    (item.original_language === "ja" || (item.genre_ids || []).includes(16)) &&
+    isAnimeMetadata(item) &&
     (state.type === "all" || item.media_type === state.type) &&
     (!state.year || yearOf(item) === state.year)
   );

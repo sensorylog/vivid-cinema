@@ -1,6 +1,8 @@
+import { VIVID_CONFIG } from "../../../../scripts/config.js";
+import { isAnimeMetadata } from "../../../../scripts/anime-eligibility.js";
 import {
   allowedOrigin, AnimePremiumError, enforceRateLimit, getPremiumServices,
-  jsonResponse, optionsResponse, requirePremiumUser, timestampFromMillis
+  jsonResponse, optionsResponse, requirePremiumUser, timestampFromMillis, hasPremiumMembership
 } from "../../lib/anime-premium-service.js";
 
 export function onRequestOptions({ request, env }) {
@@ -29,11 +31,25 @@ export async function onRequestPost({ request, env }) {
     await enforceRateLimit(db, user.uid, "playback", 40, 60 * 1000);
     const membershipSnapshot = await db.collection("animePremiumMemberships").doc(user.uid).get();
     const membership = membershipSnapshot.exists ? membershipSnapshot.data() : null;
-    const periodEnd = typeof membership?.currentPeriodEnd?.toMillis === "function"
-      ? membership.currentPeriodEnd.toMillis()
-      : Number(membership?.currentPeriodEnd || 0);
-    if (!membership || !["active", "past_due"].includes(membership.status) || periodEnd <= Date.now()) {
+    if (!hasPremiumMembership(user, membership, env)) {
       throw new AnimePremiumError(403, "premium-membership-required", "An active Vivid Anime Premium membership is required.");
+    }
+
+    // A Premium playback session is only for titles in the anime catalogue.
+    // Do not rely on client-side catalogue filters for this security boundary.
+    const tmdbUrl = new URL("https://api.themoviedb.org/3/" + mediaType + "/" + titleId);
+    tmdbUrl.searchParams.set("api_key", VIVID_CONFIG.api.tmdbApiKey);
+    let metadataResponse;
+    try {
+      metadataResponse = await fetch(tmdbUrl.toString(), { signal: AbortSignal.timeout(7000) });
+    } catch {
+      throw new AnimePremiumError(503, "anime-catalogue-unavailable", "Vivid could not verify this anime title right now. Please try again.");
+    }
+    if (metadataResponse.status === 404) throw new AnimePremiumError(404, "anime-title-not-found", "This anime title could not be found.");
+    if (!metadataResponse.ok) throw new AnimePremiumError(503, "anime-catalogue-unavailable", "Vivid could not verify this anime title right now. Please try again.");
+    const metadata = await metadataResponse.json().catch(() => null);
+    if (!metadata || !isAnimeMetadata(metadata)) {
+      throw new AnimePremiumError(403, "anime-title-not-eligible", "This title is not part of the Vivid Anime Premium catalogue.");
     }
 
     // Premium access is checked here. The browser then embeds the same third-party

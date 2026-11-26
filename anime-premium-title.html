@@ -5,7 +5,11 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#08070d">
 <meta name="description" content="Discover the story, characters and world behind this Vivid Anime Premium title.">
-<link rel="canonical" href="https://vivid-cinema.pages.dev/anime-premium.html">
+<meta property="og:title" content="Anime title · VIVID ANIME PREMIUM">
+<meta property="og:description" content="Discover this anime on Vivid Anime Premium.">
+<meta property="og:type" content="video.tv_show">
+<meta property="og:url" content="https://vivid-cinema.pages.dev/anime-premium-title.html">
+<link rel="canonical" href="https://vivid-cinema.pages.dev/anime-premium-title.html">
 <title>Anime title · VIVID ANIME PREMIUM</title>
 <link rel="icon" href="icons/vivid-icon.svg" type="image/svg+xml">
 <link rel="manifest" href="manifest.json">
@@ -22,7 +26,7 @@
 <div class="vap-shell">
 <header class="vap-header">
   <a class="vap-brand" href="anime-premium.html" aria-label="Vivid Anime Premium home"><span>VIVID</span><b>ANIME</b><small>PREMIUM</small></a>
-  <nav aria-label="Premium navigation"><a href="anime-premium.html">Discover</a><a href="anime-premium-library.html">My Anime</a><a href="anime.html">Free anime</a><a class="vap-account-link" href="auth.html?returnTo=anime-premium.html" data-vap-account>Sign in</a></nav>
+  <nav aria-label="Premium navigation"><a href="anime-premium.html">Discover</a><a href="anime-premium-library.html">My Anime</a><a href="home.html">Cinema</a><a class="vap-account-link" href="auth.html?returnTo=anime-premium.html" data-vap-account>Sign in</a></nav>
 </header>
 <main id="vap-title-content" aria-live="polite">
   <section class="vap-title-hero" id="vap-title-hero">
@@ -38,9 +42,9 @@
       <p class="vap-title-overview" id="vap-title-overview">Loading title details…</p>
       <div class="vap-title-actions">
         <a class="vap-primary" id="vap-title-account" data-vap-primary href="auth.html?returnTo=anime-premium.html">Continue with Vivid <span aria-hidden="true">→</span></a>
-        <button class="vap-secondary vap-favorite-button" id="vap-title-favorite" type="button" aria-pressed="false"><i class="bi bi-bookmark-plus" aria-hidden="true"></i> Add to My List</button>
-        <button class="vap-secondary vap-favorite-button" id="vap-title-star" type="button" aria-pressed="false"><i class="bi bi-star" aria-hidden="true"></i> Add to favourites</button>
-        <button class="vap-secondary vap-favorite-button" id="vap-title-completed" type="button" aria-pressed="false"><i class="bi bi-check-circle" aria-hidden="true"></i> Mark as completed</button>
+        <button class="vap-secondary vap-favorite-button" id="vap-title-favorite" data-vap-member-action type="button" hidden aria-pressed="false"><i class="bi bi-bookmark-plus" aria-hidden="true"></i> Add to My List</button>
+        <button class="vap-secondary vap-favorite-button" id="vap-title-star" data-vap-member-action type="button" hidden aria-pressed="false"><i class="bi bi-star" aria-hidden="true"></i> Add to favourites</button>
+        <button class="vap-secondary vap-favorite-button" id="vap-title-completed" data-vap-member-action type="button" hidden aria-pressed="false"><i class="bi bi-check-circle" aria-hidden="true"></i> Mark as completed</button>
         <a class="vap-secondary" id="vap-title-membership" href="anime-premium-membership.html"><i class="bi bi-crown" aria-hidden="true"></i> Get Premium</a>
         <a class="vap-secondary" id="vap-title-watch" href="anime-premium-watch.html" hidden><i class="bi bi-play-circle" aria-hidden="true"></i> Watch with Premium</a>
         <a class="vap-secondary" id="vap-title-trailer" href="anime-premium.html" hidden target="_blank" rel="noopener noreferrer"><i class="bi bi-play-circle" aria-hidden="true"></i> Official trailer</a>

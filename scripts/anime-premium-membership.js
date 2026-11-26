@@ -108,14 +108,14 @@ async function updatePrice() {
         $("vap-local-price").textContent = "≈ " + formatMoney(plan.amountMajor * rate, localCurrency);
         $("vap-price-note").textContent = "Reference rate: 1 GHS = " + rate.toFixed(6) + " " + localCurrency + (quote.date ? " · Rate date: " + quote.date : "") + ". Source: " + quote.source + ", daily indicative reference rates. Paystack charges " + formatMoney(plan.amountMajor, "GHS") + "; your bank/card provider sets the final converted charge and may add fees.";
       } else {
-        $("vap-local-price").textContent = "Rate unavailable";
-        $("vap-price-note").textContent = "No published GHS/" + localCurrency + " reference rate is currently available. We will not display an invented conversion. Paystack charges " + formatMoney(plan.amountMajor, "GHS") + "; your bank/card provider determines the converted amount.";
+        $("vap-local-price").textContent = formatMoney(plan.amountMajor, "GHS");
+        $("vap-price-note").textContent = "Local estimate temporarily unavailable. Paystack charges " + formatMoney(plan.amountMajor, "GHS") + " in Ghanaian Cedis (GHS); your bank/card provider determines any conversion and fees.";
       }
     } catch (error) {
       console.warn("Vivid FX reference-rate lookup failed:", error);
       if (requestId !== priceRequestId) return;
-      $("vap-local-price").textContent = "Rate unavailable";
-      $("vap-price-note").textContent = "We could not retrieve a current published GHS/" + localCurrency + " reference rate. Paystack charges " + formatMoney(plan.amountMajor, "GHS") + "; your bank/card provider determines the converted amount.";
+      $("vap-local-price").textContent = formatMoney(plan.amountMajor, "GHS");
+      $("vap-price-note").textContent = "Local estimate temporarily unavailable. Paystack charges " + formatMoney(plan.amountMajor, "GHS") + " in Ghanaian Cedis (GHS); your bank/card provider determines any conversion and fees.";
     }
   }
   if (requestId !== priceRequestId) return;
@@ -138,7 +138,7 @@ async function loadMembership() {
   }
   const accountLabel = currentUser.displayName || currentUser.email || "your Vivid account";
   $("vap-account-status").textContent = "Signed in as " + accountLabel + ". Your existing Vivid account will own your Anime Premium membership.";
-  const token = await currentUser.getIdToken();
+  const token = await currentUser.getIdToken(true);
   const response = await withTimeout(fetch("/api/anime-premium/membership", {
     headers: { Authorization: "Bearer " + token }, cache: "no-store"
   }), 6500, "Membership status request timed out.");

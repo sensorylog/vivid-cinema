@@ -221,7 +221,7 @@ function buildPrimaryLinks(page) {
     navLink("home.html", "bi-house-fill", "Home", page === "home"),
     navLink("collection.html?collection=movies", "bi-film", "Movies", isCollectionType("movies")),
     navLink("collection.html?collection=tv", "bi-tv", "Series", isCollectionType("tv")),
-    navLink("anime-premium.html", "bi-stars", "Premium Anime", page.startsWith("anime-premium")),
+    navLink("anime-premium.html", "bi-stars", "Premium", page.startsWith("anime-premium")),
     navLink("anime.html", "bi-stars", "Free Anime", page === "anime"),
     navLink("live.html", "bi-broadcast-pin", "Live", page === "live"),
     africanStoriesNavLink(page === "african-stories"),
@@ -385,7 +385,7 @@ function syncMobileNavigation() {
     navLink("home.html", "bi-house-fill", "Home", page === "home"),
     navLink("collection.html?collection=movies", "bi-film", "Movies", isCollectionType("movies")),
     navLink("collection.html?collection=tv", "bi-tv", "Series", isCollectionType("tv")),
-    navLink("anime-premium.html", "bi-stars", "Premium Anime", page.startsWith("anime-premium")),
+    navLink("anime-premium.html", "bi-stars", "Premium", page.startsWith("anime-premium")),
     '<button type="button" data-vivid-more-navigation aria-label="More destinations"><i class="bi bi-three-dots" aria-hidden="true"></i><span>More</span></button>'
   ].join("");
   syncMoreNavigation(nav, page);

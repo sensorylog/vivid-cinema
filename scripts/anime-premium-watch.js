@@ -3,6 +3,7 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.19.0/f
 import { tmdbApi } from "./tmdb.js";
 import { getImageUrl } from "./media.js";
 import { escapeHtml } from "./utils.js";
+import { isAnimeMetadata } from "./anime-eligibility.js";
 import { resolveAnimeIds } from "./playback/anime-id-resolver.js";
 import { resolveAnimePremiumProviderOptions } from "./playback/anime-premium-providers.js";
 import { getLocalLibrary, upsertLibraryItem } from "./library.js";
@@ -117,16 +118,14 @@ function renderServerOptions() {
   const list = $("vap-server-list");
   list.innerHTML = providerOptions.map(provider =>
     '<button class="vap-server-option" type="button" data-vap-server="' + provider.id + '"' +
-    (provider.available ? "" : " disabled") +
     ' aria-pressed="' + String(provider.id === activeProviderId) + '">' +
-    '<span class="vap-server-option-copy"><strong>' + escapeHtml(provider.label) + '</strong><small>' +
-    escapeHtml(provider.available ? provider.note : (mediaType === "movie" ? "Episode-only provider" : "No matching catalogue ID")) +
-    '</small></span><span class="vap-server-option-state">' +
-    (provider.available ? (provider.id === activeProviderId ? "Selected" : failedProviderIds.has(provider.id) ? "Failed · retry" : "Compatible") : "Unavailable") +
+    '<span class="vap-server-option-copy"><strong>' + escapeHtml(provider.label) + '</strong><small>Anime stream · ' + escapeHtml(animeTrack.toUpperCase()) + '</small></span>' +
+    '<span class="vap-server-option-state">' +
+    (provider.id === activeProviderId ? "Selected" : failedProviderIds.has(provider.id) ? "Failed · retry" : "Ready to try") +
     '</span></button>'
   ).join("");
   list.querySelectorAll("[data-vap-server]").forEach(button => button.addEventListener("click", () => activateProvider(button.dataset.vapServer)));
-  $("vap-server-count").textContent = providerOptions.filter(item => item.available).length + " compatible";
+  $("vap-server-count").textContent = providerOptions.length + (providerOptions.length === 1 ? " server option" : " server options");
 }
 function activateProvider(providerId) {
   const provider = providerOptions.find(item => item.id === providerId && item.available);
@@ -146,7 +145,7 @@ function activateProvider(providerId) {
   frame.title = titleName(titleDetails) + " · " + provider.label;
   frame.onload = () => {
     if (generation === providerRequestId && activeProviderId === provider.id) {
-      setStatus(provider.label + " player loaded. If the episode does not start, switch to another server.");
+      setStatus(provider.label + " page opened. Playback is not confirmed yet; switch servers if the episode does not start.");
     }
   };
   frame.onerror = () => {
@@ -157,11 +156,7 @@ function activateProvider(providerId) {
   setStatus("Opening " + provider.label + " · " + animeTrack.toUpperCase() + "…");
   providerLoadTimer = window.setTimeout(() => {
     if (generation !== providerRequestId || activeProviderId !== provider.id) return;
-    if (provider.events) {
-      fallbackToNextPlaybackServer(provider.label + " did not report playback readiness.");
-      return;
-    }
-    setStatus(provider.label + " has not confirmed playback yet. If the video is stuck, try the next server.");
+    setStatus(provider.label + " has not confirmed playback. The player may still be loading; use the next server if it remains stuck.");
     $("vap-server-next").hidden = providerOptions.filter(item => item.available && item.id !== provider.id).length === 0;
   }, 18000);
   return true;
@@ -241,7 +236,9 @@ function handleProviderMessage(event) {
     if (["aniembed:ready", "aniembed:play", "aniembed:progress", "aniembed:timeupdate"].includes(data.type)) {
       if (providerLoadTimer) window.clearTimeout(providerLoadTimer);
       providerLoadTimer = null;
-      setStatus("Playing with AniXo · " + animeTrack.toUpperCase());
+      setStatus(data.type === "aniembed:ready"
+        ? provider.label + " is ready. Press play in the player."
+        : "Playing · " + animeTrack.toUpperCase());
       if (Number.isFinite(Number(data.duration))) updateProviderProgress(data.currentTime ?? data.time, data.duration);
     } else if (data.type === "aniembed:ended") {
       if (Number.isFinite(Number(data.duration))) updateProviderProgress(data.duration, data.duration, true);
@@ -311,7 +308,10 @@ function handleProviderMessage(event) {
     if (!healthy) return;
     if (providerLoadTimer) window.clearTimeout(providerLoadTimer);
     providerLoadTimer = null;
-    setStatus("Playing with " + provider.label + " · " + animeTrack.toUpperCase());
+    const confirmedPlaying = /^(play|playing|timeupdate|progress|seeked|started)$/.test(eventName) || progress > 0;
+    setStatus(confirmedPlaying
+      ? "Playing · " + animeTrack.toUpperCase()
+      : provider.label + " is ready. Press play in the player.");
     if (progress > 0 && duration > 0) updateProviderProgress(progress, duration);
     if (/^(ended|completed)$/.test(eventName) && duration > 0) updateProviderProgress(duration, duration, true);
   }
@@ -327,7 +327,7 @@ async function requestPlayback(episode) {
   setStatus("Checking your Premium access…");
   try {
     if (mediaType === "tv") await animeIdPromise;
-    const token = await currentUser.getIdToken();
+    const token = await currentUser.getIdToken(true);
     if (requestId !== playbackRequestId) return;
     const response = await fetch("/api/anime-premium/playback", {
       method: "POST", headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token },
@@ -364,7 +364,7 @@ async function requestPlayback(episode) {
     providerOptions = resolveAnimePremiumProviderOptions({
       mediaType, tmdbId: titleId, aniListId: seasonAnimeIds.aniListId, malId: seasonAnimeIds.malId,
       season: seasonNumber, episode: activeProviderEpisodeNumber, track: animeTrack
-    });
+    }).filter(item => item.available).map((item, index) => ({ ...item, label: "Server " + (index + 1) }));
     renderServerOptions();
     const preferredPlayer = getAnimeLibraryPreferences().preferredPlayer;
     const first = providerOptions.find(item => item.available && preferredPlayer !== "auto" && item.id === preferredPlayer)
@@ -495,6 +495,7 @@ async function loadWatchPage() {
   const getDetails = mediaType === "movie" ? tmdbApi.movieDetails : tmdbApi.tvDetails;
   titleDetails = await getDetails(titleId);
   if (!titleDetails?.id) throw new Error("This anime title could not be found.");
+  if (!isAnimeMetadata(titleDetails)) throw new Error("This title is not listed as Japanese animation in the Vivid Anime Premium catalogue.");
   animeIdPromise = resolveAnimeIds(titleName(titleDetails)).then(ids => {
     baseAnimeIds = ids || { aniListId: "", malId: "" };
     if (mediaType === "tv" && Number(params.get("season") || 1) === 1) seasonAnimeIds = { ...baseAnimeIds };
@@ -568,7 +569,10 @@ function bindAuth() {
         const response = await fetch("/api/anime-premium/membership", { headers: { Authorization: "Bearer " + token }, cache: "no-store" });
         const payload = response.ok ? await response.json() : null;
         if (currentUser !== nextUser) return;
-        if (payload?.membership?.active === true) {
+        if (response.status === 403 && currentUser.emailVerified !== true) {
+          const returnTo = "anime-premium-watch.html" + window.location.search;
+          showGate("Verify your Vivid email", "Verify your account email before opening Premium playback.", "Verify email", "verify-email.html?returnTo=" + encodeURIComponent(returnTo));
+        } else if (payload?.membership?.active === true) {
           showGate("Premium access confirmed", "Your Vivid Anime Premium membership is active. Select an episode to start watching.", "Open Vivid account", "account.html");
         } else {
           showGate("Premium membership required", "You are signed in to Vivid. Subscribe to Anime Premium to unlock this title and its episodes.", "Subscribe to Vivid Anime Premium", "anime-premium-membership.html");

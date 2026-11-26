@@ -24,6 +24,8 @@ const [html, client, returnHtml, returnScript, pricing, checkout, pageCheckout, 
 ]);
 
 test("membership page offers country selection and only supported Paystack card checkout", () => {
+  assert.match(html, /rel="canonical" href="https:\/\/vivid-cinema\.pages\.dev\/anime-premium-membership\.html"/);
+  assert.match(html, /og:title/);
   assert.match(html, /id="vap-country"/);
   assert.match(html, /id="vap-card-method"/);
   assert.doesNotMatch(html, /value="mobile_money"|Automatic monthly renewal|Manual renewal each month/);
@@ -45,8 +47,11 @@ test("membership UI initialises pricing before Firebase auth and always exits lo
   assert.doesNotMatch(client, /getExchangeRates\(/);
   assert.match(client, /auth\.authStateReady\(\)/);
   assert.match(client, /Signed in as .*Your existing Vivid account will own your Anime Premium membership/);
+  assert.match(client, /getIdToken\(true\)/);
+  assert.match(returnScript, /getIdToken\(true\)/);
   assert.match(client, /Reference rate: 1 GHS =/);
-  assert.match(client, /Rate unavailable/);
+  assert.doesNotMatch(client, /textContent = "Rate unavailable"/);
+  assert.match(client, /Local estimate temporarily unavailable/);
   assert.match(client, /bank\/card provider sets the final converted charge/);
   assert.match(client, /ANIME_PREMIUM_COUNTRIES/);
   assert.match(client, /window\.vividAuthResolved/);
@@ -107,13 +112,21 @@ test("webhook verification is the source of truth for membership activation and 
   assert.match(webhook, /transaction\/verify/);
   assert.match(webhook, /Payment Page transactions have Paystack-generated references/);
   assert.match(webhook, /matches\.length !== 1/);
+  assert.match(webhook, /Hosted Paystack charge has no subscription evidence/);
+  assert.match(webhook, /\^SUB_\[A-Za-z0-9\]\{6,80\}\$\/i\.test\(subscriptionCode\)/);
+  assert.match(webhook, /data\.subscription\?\.amount/);
   assert.match(webhook, /checkoutSource === "hosted_payment_page"/);
   assert.match(webhook, /eventName === "charge\.success"/);
   assert.match(webhook, /invoice\.payment_success/);
+  assert.match(webhook, /eventName === "invoice\.update"/);
+  assert.match(webhook, /invoice-payment-mismatch/);
+  assert.match(webhook, /Number\(value\.amount\)/);
   assert.match(webhook, /invoice\.payment_failed/);
   assert.match(webhook, /animePremiumMemberships/);
+  assert.match(membership, /canCancelAutoRenew: Boolean\(env\.PAYSTACK_SECRET_KEY && data\.autoRenew/);
   assert.match(membership, /animePremiumMemberships/);
   assert.match(membership, /currentPeriodEnd/);
+  assert.match(membership, /env\.PAYSTACK_SECRET_KEY && data\.autoRenew/);
 });
 
 test("payment return checks server membership and never grants access from the callback", () => {
@@ -125,7 +138,7 @@ test("payment return checks server membership and never grants access from the c
 test("membership return survives Vivid email verification and is cached offline", () => {
   assert.match(sendVerification, /anime-premium-membership\.html/);
   assert.match(verifyEmail, /anime-premium-membership\.html/);
-  assert.match(sw, /vivid-cinema-shell-v356/);
+  assert.match(sw, /vivid-cinema-shell-v358/);
   assert.match(sw, /anime-premium-membership\.html/);
   assert.match(sw, /anime-premium-return\.html/);
   assert.match(sw, /anime-premium-membership\.js/);

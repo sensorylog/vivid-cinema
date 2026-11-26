@@ -2,19 +2,30 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { webcrypto } from "node:crypto";
+import { isAnimeMetadata } from "../scripts/anime-eligibility.js";
 import {
   allowedOrigin, jsonResponse, parsePlanConfig, publicPricing,
-  resolveCheckoutPlan, safeReference, verifyPaystackSignature, isValidEmailAddress
+  resolveCheckoutPlan, safeReference, verifyPaystackSignature, isValidEmailAddress, getPremiumTestAccess, hasPremiumMembership
 } from "../cloudflare/functions/lib/anime-premium-service.js";
 
 globalThis.crypto ||= webcrypto;
 const playback = await readFile(new URL("../cloudflare/functions/api/anime-premium/playback.js", import.meta.url), "utf8");
+assert.match(playback, /isAnimeMetadata\(metadata\)/);
+assert.match(playback, /api\.themoviedb\.org\/3/);
+assert.match(playback, /anime-title-not-eligible/);
 
 async function sign(secret, value) {
   const key = await crypto.subtle.importKey("raw", new TextEncoder().encode(secret), { name: "HMAC", hash: "SHA-512" }, false, ["sign"]);
   const result = await crypto.subtle.sign("HMAC", key, value instanceof Uint8Array ? value : new TextEncoder().encode(value));
   return [...new Uint8Array(result)].map(byte => byte.toString(16).padStart(2, "0")).join("");
 }
+
+test("server-side anime eligibility rejects generic animation and non-anime titles", () => {
+  assert.equal(isAnimeMetadata({ original_language: "ja", genre_ids: [16] }), true);
+  assert.equal(isAnimeMetadata({ original_language: "en", genre_ids: [16], origin_country: ["JP"] }), true);
+  assert.equal(isAnimeMetadata({ original_language: "en", genre_ids: [16], origin_country: ["US"] }), false);
+  assert.equal(isAnimeMetadata({ original_language: "ja", genre_ids: [18] }), false);
+});
 
 test("verified account email validation accepts Google and email/password addresses", () => {
   assert.equal(isValidEmailAddress("dave@gmail.com"), true);
@@ -134,8 +145,7 @@ test("Premium API responses are no-store and CORS is limited to Vivid origins", 
 
 test("Premium playback endpoint checks membership and issues an expiring third-party embed session", () => {
   assert.match(playback, /requirePremiumUser/);
-  assert.match(playback, /animePremiumMemberships/);
-  assert.match(playback, /\["active", "past_due"\]/);
+  assert.match(playback, /hasPremiumMembership\(user, membership, env\)/);
   assert.match(playback, /animePremiumPlaybackSessions/);
   assert.match(playback, /providerMode: "vivid-third-party-embeds"/);
   assert.match(playback, /expiresAt: timestampFromMillis\(expiresAt\)/);
@@ -157,4 +167,24 @@ test("Premium progress requires a live session owned by the signed-in user", asy
   assert.match(progress, /session\.uid !== user\.uid/);
   assert.match(progress, /sessionExpiry <= Date\.now\(\)/);
   assert.match(progress, /animePremiumProfiles/);
+  assert.match(progress, /hasPremiumMembership\(user, membership, env\)/);
+});
+
+test("time-limited Premium test access is restricted to verified allowlisted email and expiry", () => {
+  const email = "thearchive73@gmail.com";
+  const expiresAt = "2026-12-26T00:00:00.000Z";
+  const env = { ANIME_PREMIUM_TEST_ACCESS_JSON: JSON.stringify({ [email]: expiresAt }) };
+  const verified = { uid: "test-user", email, email_verified: true };
+  const access = getPremiumTestAccess(verified, env, Date.parse("2026-11-26T00:00:00.000Z"));
+  assert.equal(access.active, true);
+  assert.equal(access.source, "test-access");
+  assert.equal(access.renewalMode, "test");
+  assert.equal(access.autoRenew, false);
+  assert.equal(access.currentPeriodEnd, expiresAt);
+  assert.equal(hasPremiumMembership(verified, null, env, Date.parse("2026-11-26T00:00:00.000Z")), true);
+  assert.equal(getPremiumTestAccess({ ...verified, email_verified: false }, env), null);
+  assert.equal(getPremiumTestAccess({ ...verified, email: "attacker@example.com" }, env), null);
+  assert.equal(getPremiumTestAccess(verified, { ANIME_PREMIUM_TEST_ACCESS_JSON: "not-json" }), null);
+  assert.equal(getPremiumTestAccess(verified, env, Date.parse("2026-12-27T00:00:00.000Z")), null);
+  assert.equal(hasPremiumMembership(verified, null, env, Date.parse("2026-12-27T00:00:00.000Z")), false);
 });

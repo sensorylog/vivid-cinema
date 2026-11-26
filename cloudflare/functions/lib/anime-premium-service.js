@@ -32,6 +32,43 @@ export function isValidEmailAddress(value) {
   return /^[A-Z0-9.!#$%&'*+/=?^_\x60{|}~-]+@[A-Z0-9](?:[A-Z0-9-]*[A-Z0-9])?(?:\.[A-Z0-9](?:[A-Z0-9-]*[A-Z0-9])?)+$/i.test(email);
 }
 
+
+/**
+ * Optional, time-limited staff/test entitlements. Configure only as a Cloudflare
+ * Pages secret/variable; never put tester addresses in source control.
+ * Format: {"verified@example.com":"2026-12-26T00:00:00.000Z"}
+ */
+export function getPremiumTestAccess(user, env = {}, now = Date.now()) {
+  if (!user || user.email_verified !== true || !isValidEmailAddress(user.email)) return null;
+  let entries;
+  try { entries = JSON.parse(String(env.ANIME_PREMIUM_TEST_ACCESS_JSON || "{}")); }
+  catch { return null; }
+  if (!entries || typeof entries !== "object" || Array.isArray(entries)) return null;
+  const expiryValue = entries[String(user.email).trim().toLowerCase()];
+  if (typeof expiryValue !== "string") return null;
+  const expiresAt = Date.parse(expiryValue);
+  if (!Number.isFinite(expiresAt) || expiresAt <= now) return null;
+  return {
+    active: true,
+    status: "active",
+    source: "test-access",
+    planId: "tester",
+    currency: null,
+    renewalMode: "test",
+    autoRenew: false,
+    canCancelAutoRenew: false,
+    currentPeriodEnd: new Date(expiresAt).toISOString(),
+    cancelAtPeriodEnd: false
+  };
+}
+export function hasPremiumMembership(user, membership, env = {}, now = Date.now()) {
+  const periodEnd = typeof membership?.currentPeriodEnd?.toMillis === "function"
+    ? membership.currentPeriodEnd.toMillis()
+    : Number(membership?.currentPeriodEnd || 0);
+  if (membership && ["active", "past_due"].includes(membership.status) && periodEnd > now) return true;
+  return Boolean(getPremiumTestAccess(user, env, now));
+}
+
 export class AnimePremiumError extends Error {
   constructor(status, code, message) {
     super(message);

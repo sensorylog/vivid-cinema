@@ -22,12 +22,16 @@ test("Premium has its own route, namespaced assets and discoverable metadata", (
   assert.match(html, /scripts\/anime-premium\.js/);
   assert.match(html, /VIVID ANIME PREMIUM/);
   assert.match(html, /rel="canonical" href="https:\/\/vivid-cinema\.pages\.dev\/anime-premium\.html"/);
+  assert.match(html, /Your anime, all in one place/);
+  assert.doesNotMatch(html, /future Premium membership/);
   assert.match(styles, /\.vap-hero/);
+  assert.match(styles, /padding-bottom:calc\(160px \+ env\(safe-area-inset-bottom/);
+  assert.match(shell, /navLink\("anime-premium\.html", "bi-stars", "Premium"/);
   assert.match(sitemap, /https:\/\/vivid-cinema\.pages\.dev\/anime-premium\.html/);
 });
 
 test("Premium is explicitly labelled in navigation and Free Anime remains distinct", () => {
-  assert.match(shell, /navLink\("anime-premium\.html", "bi-stars", "Premium Anime"/);
+  assert.match(shell, /navLink\("anime-premium\.html", "bi-stars", "Premium"/);
   assert.match(shell, /navLink\("anime\.html", "bi-stars", "Free Anime"/);
   assert.match(shell, /page\.startsWith\("anime-premium"\)/);
 });
@@ -56,7 +60,7 @@ test("Phase 1 does not grant membership or expose a Premium playback catalogue",
 });
 
 test("Premium route and assets are included in the offline app shell", () => {
-  assert.match(serviceWorker, /vivid-cinema-shell-v356/);
+  assert.match(serviceWorker, /vivid-cinema-shell-v358/);
   assert.match(serviceWorker, /"\.\/anime-premium\.html"/);
   assert.match(serviceWorker, /"\.\/styles\/vivid-anime-premium\.css"/);
   assert.match(serviceWorker, /"\.\/scripts\/anime-premium\.js"/);
