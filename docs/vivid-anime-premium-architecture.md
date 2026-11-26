@@ -31,8 +31,8 @@ Premium membership is backend-owned. The browser may display membership state, b
 1. Require a Firebase ID token on protected Premium API requests.
 2. Verify the token and resolve its UID on the server.
 3. Read membership state from a server-controlled entitlement record.
-4. Initialize and verify Paystack transactions on the server.
-5. Verify webhook signatures against the unmodified request body.
+4. Verify signed Paystack webhook events against the unmodified request body and match the exact pending checkout.
+5. Process webhook events idempotently before activating the UID-owned entitlement.
 6. Process webhook events idempotently.
 7. Keep Paystack secret credentials out of client code.
 8. Deny protected catalogue/playback access when entitlement is absent, expired, cancelled or unverified.
