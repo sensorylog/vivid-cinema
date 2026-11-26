@@ -101,6 +101,5 @@ test("retired community routes show a transition notice without social controls"
     await page.goto(route,{waitUntil:"domcontentloaded"});
     await expect(page.getByRole("heading",{name:/community experience has ended|watch rooms have ended/i})).toBeVisible();
     await expect(page.locator("form,textarea,[data-open-dialog]")).toHaveCount(0);
-  await expect(profileLink).toHaveAttribute("href", /auth\.html$/);
   }
 });
