@@ -140,3 +140,9 @@ body.vivid-anime-premium-page{margin:0;min-height:100vh;background:var(--vap-bg)
   }
   body.vivid-anime-premium-page .vap-header nav .vap-account-link{margin-left:auto}
 }
+
+.vap-shelf-error{display:flex;align-items:center;justify-content:space-between;gap:14px;min-height:58px;padding:13px 15px;border:1px dashed rgba(190,166,235,.28);border-radius:12px;background:rgba(255,255,255,.025);color:#aaa2b6;font-size:.7rem;line-height:1.5}
+.vap-shelf-error button{flex:0 0 auto;border:1px solid rgba(206,186,255,.35);border-radius:999px;padding:8px 14px;background:rgba(167,139,250,.12);color:#e7ddff;font:inherit;font-size:.64rem;font-weight:850;cursor:pointer}
+.vap-shelf-error button:hover,.vap-shelf-error button:focus-visible{background:#e9e1ff;color:#191321;outline-offset:3px}
+.vap-library-loading{padding:14px 0;color:#bca8f5;font-size:.72rem}
+@media(max-width:520px){.vap-shelf-error{align-items:flex-start;flex-direction:column}.vap-shelf-error button{width:100%}}
