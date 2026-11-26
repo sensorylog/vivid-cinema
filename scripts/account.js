@@ -398,9 +398,21 @@ syncButton?.addEventListener("click", async () => {
     setSyncStatus("Synced just now", "Your likes, Watch Later and history are up to date.", "success");
     setStatus("Library sync completed.", "success");
   } catch (error) {
-    console.error("Vivid library sync failed:", error);
-    setSyncStatus("Sync paused", "Your local library is still available. Check your connection and retry.", "error");
-    setStatus("Cloud sync could not be completed.", "error");
+    console.error("Vivid library sync failed:", {
+      code: error?.code || "unknown",
+      message: error?.message || String(error),
+      error
+    });
+    const code = String(error?.code || "");
+    const detail = code.includes("permission-denied")
+      ? "Firestore blocked a library operation. Your saved titles are safe on this device; retry after the cloud permissions are corrected."
+      : code.includes("unauthenticated") || code.includes("auth/")
+        ? "Your sign-in session expired. Sign out and sign in again, then retry."
+        : String(error?.message || "").includes("timed out")
+          ? "The cloud library took too long to respond. Your saved titles remain on this device; check your connection and retry."
+          : "Your saved titles remain on this device. " + (error?.message || "Check your connection and retry.");
+    setSyncStatus("Sync paused", detail, "error");
+    setStatus("Cloud sync could not be completed (" + (code || "unknown error") + ").", "error");
   } finally {
     syncButton.disabled = false;
   }
