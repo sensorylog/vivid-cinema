@@ -65,6 +65,8 @@ test("Premium supports monthly, biannual and annual Paystack plans with server-o
   assert.equal(resolveCheckoutPlan("GH", env, "biannually").amount, 28000);
   assert.equal(resolveCheckoutPlan("GH", env, "biannually").planCode, "PLN_SIX_MONTHS");
   assert.equal(resolveCheckoutPlan("GH", env, "annually").amount, 50000);
+  const usdOnlyAnnual = resolveCheckoutPlan("GH", { ANIME_PREMIUM_PLANS_JSON: JSON.stringify({ annually: { USD: { amountMinor: 4999 } } }) }, "annually");
+  assert.equal(usdOnlyAnnual.currency, "USD");
   assert.throws(() => resolveCheckoutPlan("GH", env, "weekly"), /billing period/i);
   const published = publicPricing(env);
   assert.equal(published.plans.biannually.GHS.amountMinor, 28000);
