@@ -1,6 +1,7 @@
 import { tmdbApi } from "./tmdb.js";
 import { resolveAndroidPlayerBackAction } from "./android-navigation.js";
 import { resolveAnimeIds } from "./playback/anime-id-resolver.js";
+import { isFreeAnimePreviewRoute } from "./anime-free-policy.js";
 import { getImageUrl, getMediaUrl, normalizeMedia, normalizeResults } from "./media.js";
 import { buildTitleUrl, buildWatchUrl, getRoute } from "./routes.js";
 import { escapeHtml } from "./utils.js";
@@ -237,7 +238,7 @@ function showFallbackPrompt(source) {
 
 function updateSourceLabel() {
   const count = document.querySelector(".vivid-server-count");
-  if (count) count.textContent = isAnimePlayback() ? "4 sources" : "7 sources";
+  if (count) count.textContent = isAnimePlayback() ? "1 preview source" : "7 sources";
   const label = document.getElementById("player-source-label");
   if (label) label.textContent = getSourceLabel(activeSource);
   document.querySelectorAll("[data-server-state]").forEach(node => {
@@ -247,7 +248,7 @@ function updateSourceLabel() {
   document.querySelectorAll("[data-player-source]").forEach(button => {
     const source = button.getAttribute("data-player-source");
     button.classList.toggle("is-active", source === activeSource);
-    button.hidden = isAnimePlayback() ? !["vidapi", "vidsrc", "vidplus", "vidlink"].includes(source) : !["vidapi", "vidsrc", "embedwave", "vidfast", "ezvidapi", "embedapistream", "moviesapi"].includes(source);
+    button.hidden = isAnimePlayback() ? source !== "vidapi" : !["vidapi", "vidsrc", "embedwave", "vidfast", "ezvidapi", "embedapistream", "moviesapi"].includes(source);
     button.disabled = !sourceAvailable(source);
     button.setAttribute("aria-pressed", source === activeSource ? "true" : "false");
   });
@@ -1590,7 +1591,7 @@ async function load() {
     }
     // Re-mount Player 2 after TMDB metadata arrives so its season and episode
     // selectors use the actual series seasons, not the early loading shell.
-    mountSecondaryPlayer(currentParams, details.episode?.name || media.title || media.name, details);
+    if (!isAnimePlayback()) mountSecondaryPlayer(currentParams, details.episode?.name || media.title || media.name, details);
     void loadWatchRecommendations(currentParams);
     // Metadata arrived after shell — re-arm
     // the primary timer if the player is still waiting.
