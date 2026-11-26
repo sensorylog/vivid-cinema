@@ -27,11 +27,11 @@ test("Premium pricing has a configurable GHS default and does not expose Paystac
   assert.equal(publicData.plans.GHS.mobileMoneyAvailable, true);
   assert.deepEqual(publicData.mobileMoneyCountries, ["GH", "KE"]);
   assert.equal(publicData.checkoutEnabled, false);
-  const hostedReady = publicPricing({ PAYSTACK_SECRET_KEY: "sk_test_example", FIREBASE_SERVICE_ACCOUNT_JSON: "{}" });
+  const hostedReady = publicPricing({ PAYSTACK_WEBHOOK_SECRET: "whsec_example", FIREBASE_SERVICE_ACCOUNT_JSON: "{}" });
   assert.equal(hostedReady.checkoutEnabled, true);
   const missingWebhookSecret = publicPricing({ FIREBASE_SERVICE_ACCOUNT_JSON: "{}" });
   assert.equal(missingWebhookSecret.checkoutEnabled, false);
-  assert.match(missingWebhookSecret.checkoutMessage, /Paystack webhook verification is not configured/);
+  assert.match(missingWebhookSecret.checkoutMessage, /PAYSTACK_WEBHOOK_SECRET/);
   const webhookReady = publicPricing({ PAYSTACK_WEBHOOK_SECRET: "whsec_example", FIREBASE_SERVICE_ACCOUNT_JSON: "{}" });
   assert.equal(webhookReady.checkoutEnabled, true);
   assert.equal(webhookReady.checkoutMessage, "");
