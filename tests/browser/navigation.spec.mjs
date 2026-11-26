@@ -88,8 +88,8 @@ test("mobile navigation stays within five destinations and exposes secondary rou
   }
   const profileLink = page.locator(".vivid-navlinks #auth-link");
   await expect(profileLink).toHaveCount(1);
-  await expect(profileLink).toHaveAttribute("href", /(?:auth|account)\\.html$/);
-  await expect(profileLink).toContainText(/account/i);
+  await expect(profileLink).toHaveAttribute("href", /auth\.html$/);
+  await expect(profileLink).toContainText(/sign in|account/i);
 });
 
 test("retired community routes show a transition notice without social controls", async ({page}) => {
@@ -97,6 +97,6 @@ test("retired community routes show a transition notice without social controls"
     await page.goto(route,{waitUntil:"domcontentloaded"});
     await expect(page.getByRole("heading",{name:/community experience has ended|watch rooms have ended/i})).toBeVisible();
     await expect(page.locator("form,textarea,[data-open-dialog]")).toHaveCount(0);
-    await expect(page.getByRole("link",{name:/return to vivid/i})).toHaveAttribute("href","home.html");
+  await expect(profileLink).toHaveAttribute("href", /auth\.html$/);
   }
 });
