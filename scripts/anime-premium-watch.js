@@ -23,6 +23,7 @@ let activeHls = null;
 let playbackRequestId = 0;
 let playbackExpiryTimer = null;
 let hlsLibraryPromise = null;
+let hlsRecoveryAttempts = 0;
 const HLS_LIBRARY_URL = "https://cdn.jsdelivr.net/npm/hls.js@1.7.3/dist/hls.min.js";
 
 function loadHlsLibrary() {
@@ -167,6 +168,8 @@ async function requestPlayback(episode) {
     const mimeType = String(playback.mimeType || "");
     if (!["video/mp4", "application/vnd.apple.mpegurl", "application/x-mpegURL"].includes(mimeType)) throw new Error("The playback service returned an unsupported media format.");
     const video = $("vap-player");
+    let deferredHlsPlayback = false;
+    hlsRecoveryAttempts = 0;
     currentPlaybackSessionId = String(playback.sessionId);
     lastProgressSync = 0;
     video.hidden = false;
@@ -183,10 +186,18 @@ async function requestPlayback(episode) {
       if (!Hls.isSupported()) throw new Error("This browser cannot play the authorised HLS stream.");
       const hls = new Hls({ enableWorker: true, lowLatencyMode: false, backBufferLength: 90, maxBufferLength: 30 });
       activeHls = hls;
+      deferredHlsPlayback = true;
+      hls.on(Hls.Events.MANIFEST_PARSED, () => {
+        if (activeHls !== hls || requestId !== playbackRequestId) return;
+        video.play().catch(() => setStatus("Your episode is ready. Press play to begin."));
+      });
       hls.on(Hls.Events.ERROR, (_event, data) => {
         if (!data?.fatal || activeHls !== hls) return;
-        setStatus("The authorised stream encountered a playback error. Try again or choose another episode.");
-        if (data.type === Hls.ErrorTypes.NETWORK_ERROR) hls.startLoad();
+        hlsRecoveryAttempts += 1;
+        setStatus("The authorised stream encountered a playback error. Recovering…");
+        if (hlsRecoveryAttempts > 2) {
+          showGate("Playback interrupted", "The authorised stream could not recover. Request a fresh playback session.", "Back to title", titleRoute(), true);
+        } else if (data.type === Hls.ErrorTypes.NETWORK_ERROR) hls.startLoad();
         else if (data.type === Hls.ErrorTypes.MEDIA_ERROR) hls.recoverMediaError();
         else showGate("Playback interrupted", "The authorised stream could not continue. Request a fresh playback session.", "Back to title", titleRoute(), true);
       });
@@ -198,7 +209,9 @@ async function requestPlayback(episode) {
       showGate("Playback session expired", "For your security, this playback session has expired. Request a fresh authorised session to continue.", "Back to title", titleRoute(), true);
       setStatus("Playback session expired.");
     }, Math.max(0, expiresIn));
-    try { await video.play(); } catch { setStatus("Your episode is ready. Press play to begin."); }
+    if (!deferredHlsPlayback) {
+      try { await video.play(); } catch { setStatus("Your episode is ready. Press play to begin."); }
+    }
     if (requestId === playbackRequestId) setStatus("Authorised playback session opened.");
   } catch (error) {
     if (requestId !== playbackRequestId) return;
