@@ -141,3 +141,9 @@ test("playback progress checks HTTP responses and retries a failed snapshot at m
   assert.match(script, /retries: Number\(snapshot\.retries \|\| 0\) \+ 1/);
   assert.match(script, /!pendingProgressSnapshot/);
 });
+
+
+test("watcher surfaces server-provided territory and provider fallback explanations", () => {
+  assert.match(script, /const failure = await response\.json\(\)\.catch\(\(\) => \(\{\}\)\)/);
+  assert.match(script, /failure\.message \|\| "The protected playback request could not be completed\."/);
+});
