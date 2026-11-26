@@ -54,6 +54,8 @@ test("Provider fallback switches embeds without requesting arbitrary stream URLs
   assert.match(script, /failedProviderIds\.delete\(provider\.id\)/);
   assert.match(script, /providerOptions\.find\(item => item\.available && !failedProviderIds\.has\(item\.id\)\)/);
   assert.match(script, /frame\.src = provider\.url/);
+  assert.match(script, /page opened\. Playback is not confirmed yet/);
+  assert.doesNotMatch(script, /player loaded\. If the episode does not start/);
   assert.match(script, /event\.origin !== expectedOrigin/);
   assert.match(script, /event\.source !== frame\.contentWindow/);
   assert.doesNotMatch(script, /ANIME_PREMIUM_STREAM_RESOLVER|excludeCandidateIds|HLS_LIBRARY_URL/);
