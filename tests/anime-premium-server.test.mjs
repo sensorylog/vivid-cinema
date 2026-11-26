@@ -19,12 +19,12 @@ async function sign(secret, value) {
 test("Premium pricing has a configurable GHS default and does not expose Paystack plan codes", () => {
   const config = parsePlanConfig({ PAYSTACK_PLAN_GHS_MONTHLY: "PLN_PRIVATE_CODE" });
   assert.equal(config.defaultCurrency, "GHS");
-  assert.equal(config.plans.GHS.amount, 5330);
-  assert.equal(config.plans.GHS.planCode, "PLN_PRIVATE_CODE");
+  assert.equal(config.plans.monthly.GHS.amount, 5330);
+  assert.equal(config.plans.monthly.GHS.planCode, "PLN_PRIVATE_CODE");
   const publicData = publicPricing({ PAYSTACK_PLAN_GHS_MONTHLY: "PLN_PRIVATE_CODE" });
-  assert.equal(publicData.plans.GHS.amountMinor, 5330);
-  assert.equal(publicData.plans.GHS.cardAutoRenewAvailable, true);
-  assert.equal(publicData.plans.GHS.mobileMoneyAvailable, true);
+  assert.equal(publicData.plans.monthly.GHS.amountMinor, 5330);
+  assert.equal(publicData.plans.monthly.GHS.cardAutoRenewAvailable, true);
+  assert.equal(publicData.plans.monthly.GHS.mobileMoneyAvailable, true);
   assert.deepEqual(publicData.mobileMoneyCountries, ["GH", "KE"]);
   assert.equal(publicData.checkoutEnabled, false);
   assert.doesNotMatch(JSON.stringify(publicData), /PLN_PRIVATE_CODE/);
@@ -48,6 +48,31 @@ test("country checkout mapping selects configured Paystack currencies and safe f
   assert.equal(resolveCheckoutPlan("NG", env).mobileMoneyAvailable, false);
   assert.equal(resolveCheckoutPlan("KE", { ANIME_PREMIUM_GHS_MONTHLY_AMOUNT: "5330" }).mobileMoneyAvailable, false);
   assert.throws(() => resolveCheckoutPlan("GHA", env), /valid country/i);
+});
+
+test("Premium supports monthly, biannual and annual Paystack plans with server-owned totals", () => {
+  const env = {
+    ANIME_PREMIUM_PLANS_JSON: JSON.stringify({
+      monthly: { GHS: { amountMinor: 5330, planCode: "PLN_MONTHLY" } },
+      biannually: { GHS: { amountMinor: 28000, planCode: "PLN_SIX_MONTHS" } },
+      annually: { GHS: { amountMinor: 50000, planCode: "PLN_ANNUAL" } }
+    })
+  };
+  const config = parsePlanConfig(env);
+  assert.equal(config.plans.monthly.GHS.interval, "monthly");
+  assert.equal(config.plans.biannually.GHS.interval, "biannually");
+  assert.equal(config.plans.annually.GHS.interval, "annually");
+  assert.equal(resolveCheckoutPlan("GH", env, "biannually").amount, 28000);
+  assert.equal(resolveCheckoutPlan("GH", env, "biannually").planCode, "PLN_SIX_MONTHS");
+  assert.equal(resolveCheckoutPlan("GH", env, "annually").amount, 50000);
+  assert.throws(() => resolveCheckoutPlan("GH", env, "weekly"), /billing period/i);
+  const published = publicPricing(env);
+  assert.equal(published.plans.biannually.GHS.amountMinor, 28000);
+  assert.equal(published.plans.annually.GHS.cardAutoRenewAvailable, true);
+  assert.doesNotMatch(JSON.stringify(published), /PLN_SIX_MONTHS|PLN_ANNUAL/);
+  const now = Date.UTC(2026, 0, 31);
+  assert.equal(new Date(addPlanIntervalMillis("biannually", now)).toISOString(), "2026-07-31T00:00:00.000Z");
+  assert.equal(new Date(addPlanIntervalMillis("annually", now)).toISOString(), "2027-01-31T00:00:00.000Z");
 });
 
 test("unconfigured country currencies fall back to the configured default checkout currency", () => {
