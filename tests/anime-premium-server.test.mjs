@@ -29,9 +29,14 @@ test("Premium pricing has a configurable GHS default and does not expose Paystac
   assert.equal(publicData.checkoutEnabled, false);
   const hostedReady = publicPricing({ PAYSTACK_WEBHOOK_SECRET: "whsec_example", FIREBASE_SERVICE_ACCOUNT_JSON: "{}" });
   assert.equal(hostedReady.checkoutEnabled, true);
+  const legacyHostedReady = publicPricing({ PAYSTACK_SECRET_KEY: "sk_live_legacy", FIREBASE_SERVICE_ACCOUNT_JSON: "{}" });
+  assert.equal(legacyHostedReady.checkoutEnabled, true);
   const missingWebhookSecret = publicPricing({ FIREBASE_SERVICE_ACCOUNT_JSON: "{}" });
   assert.equal(missingWebhookSecret.checkoutEnabled, false);
-  assert.match(missingWebhookSecret.checkoutMessage, /PAYSTACK_WEBHOOK_SECRET/);
+  assert.match(missingWebhookSecret.checkoutMessage, /webhook verification/);
+  const webhookReady = publicPricing({ PAYSTACK_WEBHOOK_SECRET: "whsec_example", FIREBASE_SERVICE_ACCOUNT_JSON: "{}" });
+  assert.equal(webhookReady.checkoutEnabled, true);
+  assert.equal(webhookReady.checkoutMessage, "");
   assert.doesNotMatch(JSON.stringify(publicData), /PLN_PRIVATE_CODE/);
 });
 
@@ -76,6 +81,11 @@ test("legacy x-paystack-signature validates the raw request body", async () => {
     method: "POST", headers: { "x-paystack-signature": signature }
   });
   assert.equal(await verifyPaystackSignature(request, body, { PAYSTACK_SECRET_KEY: secret }), true);
+  const modernAndLegacyRequest = new Request("https://vivid-cinema.pages.dev/api/anime-premium/webhook", {
+    method: "POST",
+    headers: { "Paystack-Signature": "t=ignored,v1=key-id:invalid", "x-paystack-signature": signature }
+  });
+  assert.equal(await verifyPaystackSignature(modernAndLegacyRequest, body, { PAYSTACK_SECRET_KEY: secret }), true);
   const tampered = new TextEncoder().encode('{"event":"charge.success","data":{"reference":"VAP654321"}}');
   assert.equal(await verifyPaystackSignature(request, tampered, { PAYSTACK_SECRET_KEY: secret }), false);
 });
