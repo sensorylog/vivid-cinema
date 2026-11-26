@@ -33,6 +33,9 @@ test("Cloudflare Content Security Policy keeps existing Firebase and provider en
     "vivid-cinema.firebaseapp.com",
     "api.github.com",
     "api.themoviedb.org",
+    "restcountries.com",
+    "cdn.jsdelivr.net",
+    "api.frankfurter.dev",
     "checkout.paystack.com",
     "www.youtube.com",
     "vidlink.pro"
