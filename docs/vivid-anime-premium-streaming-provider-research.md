@@ -20,7 +20,7 @@ The iframe remains cross-origin. VIVID does not scrape the provider's page, extr
 
 ## Provider roster
 
-The registry contains **13 selectable provider endpoints**. Some are separate endpoint generations for the same provider; the user sees each as a distinct fallback choice.
+The registry contains **14 selectable provider endpoints**. Some are separate endpoint generations for the same provider; the user sees each as a distinct fallback choice.
 
 | Provider | Catalogue key | Implemented route | Notes |
 |---|---|---|---|
@@ -36,6 +36,7 @@ The registry contains **13 selectable provider endpoints**. Some are separate en
 | **VidAPI** | TMDB | `/embed/movie/{tmdbId}` or `/embed/tv/{tmdbId}/{season}/{episode}` | Existing VIVID provider; generic movie/TV route, not a dedicated anime API |
 | **EmbedWave** | TMDB | `/embed/movie/{tmdbId}` or `/embed/tv/{tmdbId}/{season}/{episode}` | Existing VIVID provider; built-in multi-server selector |
 | **VidFast** | TMDB | `/embed/movie/{tmdbId}` or `/embed/tv/{tmdbId}/{season}/{episode}` | Existing VIVID movie/TV provider; usable for anime titles indexed in its TMDB catalogue |
+| **Embed API Stream** | TMDB | `/embed/movie/{tmdbId}` or `/embed/tv/{tmdbId}/{season}/{episode}` | Existing VIVID provider; one iframe player advertises multiple internal providers, subtitles, quality and episode navigation |
 | **VidRift** | AniList or TMDB | `/embed/anilist/{anilistId}/{episode}`, `/embed/tv/{tmdbId}/{season}/{episode}`, or movie route | New research addition; claims multiple sources, automatic failover and progress events |
 
 ### Why these were selected
@@ -49,6 +50,7 @@ The registry contains **13 selectable provider endpoints**. Some are separate en
 - **MegaPlay, Megavid and MegaFlix** document MAL/AniList anime routes and iframe player events. MegaPlay's current public API documentation uses `megaplay.buzz/stream/...`; VIVID also retains its older `ani.megaplay.su` endpoint as a compatibility fallback. MegaPlay's docs warn that not every title is mapped to MAL/AniList. They document a separate Anikoto catalogue API (`recent-anime` then `series/{id}`) that returns episode embed IDs, but explicitly recommend server-side use and document rate limits. Premium currently uses the documented MAL/AniList iframe routes; a future Anikoto catalog adapter should be added only after its response schema and title-matching behavior are validated server-side.
 - **VidRift** documents TMDB and AniList routes, a multi-source player with automatic failover, and progress/error messages.
 - **VidFast** documents TMDB/IMDb movie and TV routes. It is a generic catalogue fallback, not an anime-specific ID provider.
+- **Embed API Stream** documents TMDB/IMDb movie and TV routes and advertises an 11-provider player with subtitles, quality selection and episode navigation. It is a generic catalogue fallback, not an AniList/MAL-specific anime API.
 
 ## Source documentation
 
@@ -67,6 +69,7 @@ The registry contains **13 selectable provider endpoints**. Some are separate en
 - Megavid embed API: https://megavid.buzz/
 - MegaFlix embed API: https://megaflix.buzz/
 - VidFast embed API: https://vidfast.to/
+- Embed API Stream documentation and live builder: https://watch.embed-api.stream/
 - VidRift routes and player messages: https://vidrift.net/docs/
 
 ## Catalogue ID and episode mapping
