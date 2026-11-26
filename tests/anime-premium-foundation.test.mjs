@@ -55,14 +55,16 @@ test("Anime Premium is a first-class desktop destination while free anime stays 
 });
 
 test("Premium route and assets are included in the offline app shell", () => {
-  assert.match(serviceWorker, /vivid-cinema-shell-v366/);
+  assert.match(serviceWorker, /vivid-cinema-shell-v367/);
   assert.match(serviceWorker, /"\.\/anime-premium\.html"/);
   assert.match(serviceWorker, /"\.\/styles\/vivid-anime-premium\.css"/);
   assert.match(serviceWorker, /"\.\/scripts\/anime-premium\.js"/);
 });
 
-test("the existing Anime page remains a separate, unmodified free destination", () => {
-  assert.match(legacyAnime, /data-vivid-page="anime"/);
+test("the free Anime destination is explicitly limited and points users to Premium", () => {
+  assert.match(legacyAnime, /VIVID ANIME · FREE/);
+  assert.match(legacyAnime, /six selected series and the first episode of each/);
+  assert.match(legacyAnime, /anime-premium\.html/);
+  assert.match(legacyAnime, /FREE SAMPLE COLLECTION/);
   assert.match(legacyAnime, /scripts\/anime\.js/);
-  assert.doesNotMatch(legacyAnime, /anime-premium\.html/);
 });
