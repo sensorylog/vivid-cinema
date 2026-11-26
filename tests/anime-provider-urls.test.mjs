@@ -8,11 +8,11 @@ test("AnimeEmbed uses its documented AniList iframe route and track parameter",(
 });
 test("Vidy uses AniList anime route with documented episode controls",()=>{
  assert.equal(buildVidyAnimeUrl(ids),"https://vidy.st/anime/21/4?color=E50914&autoplay=true&episodeSelector=true&nextEpisode=true");
- assert.equal(buildVidyAnimeUrl({...ids,startAt:60}),"https://vidy.st/anime/21/4?color=E50914&episodeSelector=true&nextEpisode=true&progress=60");
+ assert.equal(buildVidyAnimeUrl({...ids,startAt:60}),"https://vidy.st/anime/21/4?color=E50914&autoplay=true&episodeSelector=true&nextEpisode=true&progress=60");
 });
 test("anime provider builders reject invalid IDs and clamp zero episodes",()=>{
  assert.equal(buildAnimeEmbedUrl({aniListId:"not-a-number",episode:1}),"");
- assert.equal(buildVidyAnimeUrl({aniListId:"21",episode:0}),"https://vidy.st/anime/21/1?color=E50914&episodeSelector=true&nextEpisode=true");
+ assert.equal(buildVidyAnimeUrl({aniListId:"21",episode:0}),"https://vidy.st/anime/21/1?color=E50914&autoplay=true&episodeSelector=true&nextEpisode=true");
 });
 
 test("anime track selection maps to provider-specific sub and dub routes",()=>{
