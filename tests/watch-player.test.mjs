@@ -200,7 +200,7 @@ test("VidSrc forwards progress, seek, readiness and explicit play/pause transiti
 });
 
 test("anime native player receives sub/dub preference and global episode mapping", () => {
-  assert.match(source, /getAnimeGlobalEpisode\(params, details\?\.seasons\)/);
+  assert.match(source, /getAnimeGlobalEpisode\(currentParams, details\?\.seasons\)/);
   assert.match(source, /track: animeTrack/);
   assert.match(source, /data-anime-track="sub"/);
   assert.match(source, /data-anime-track="dub"/);
@@ -218,8 +218,8 @@ test("anime provider timeouts fail over instead of silently waiting for manual i
 
 test("anime movie routes do not select episode-only AniList or MAL players", () => {
   assert.match(source, /const animeSeries = currentParams\?\.type === "tv"/);
-  assert.match(source, /return animeSeries && Boolean\(aniListId\)/);
-  assert.match(source, /return animeSeries && Boolean\(malId\)/);
+  assert.match(source, /return nativeAnimeEpisode && Boolean\(aniListId\)/);
+  assert.match(source, /return nativeAnimeEpisode && Boolean\(malId\)/);
 });
 
 test("anime audio preference changes synchronize between Player 1 and Player 2", () => {
