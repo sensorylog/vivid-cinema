@@ -13,6 +13,7 @@ let activeBackdropLayer = 0;
 let backdropIndex = 0;
 let backdropTimer = null;
 let backdropAdvancing = false;
+let activeTitleDetails = null;
 
 function titleName(details) { return details.title || details.name || "Anime title"; }
 function releaseYear(details) {
@@ -187,12 +188,12 @@ function updateFavoriteButton(details) {
 
 window.addEventListener("vivid:library-changed", () => {
   const name = $("vap-title-name")?.textContent;
-  if (!name || !window.currentAnimePremiumDetails) return;
-  updateFavoriteButton(window.currentAnimePremiumDetails);
+  if (!name || !activeTitleDetails) return;
+  updateFavoriteButton(activeTitleDetails);
 });
 
 function renderTitle(details) {
-  window.currentAnimePremiumDetails = details;
+  activeTitleDetails = details;
   const name = titleName(details);
   document.title = name + " · VIVID ANIME PREMIUM";
   $("vap-title-name").textContent = name;
