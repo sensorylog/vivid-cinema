@@ -4,7 +4,7 @@ import { buildAnimePremiumProviderUrl, resolveAnimePremiumProviderOptions, listA
 
 const episode = { mediaType: "tv", tmdbId: "12345", aniListId: "21", malId: "21", season: 2, episode: 3, track: "sub" };
 
-test("Premium provider registry includes the two existing Vivid servers and anime-specific alternatives", () => {
+test("Premium provider registry includes existing Vivid sources and anime-specific alternatives", () => {
   assert.deepEqual(listAnimePremiumProviders().map(item => item.id), [
     "vidplus", "vidlink", "vidsrc", "anixo", "anilink", "megaplay", "megaplay-legacy", "megavid", "megaflix", "vidapi", "embedwave", "vidfast", "vidrift"
   ]);
@@ -19,6 +19,7 @@ test("VidAPI and EmbedWave use the documented TMDB episode routes", () => {
 test("VidLink and VidPlus use their documented MAL and AniList anime routes", () => {
   assert.match(buildAnimePremiumProviderUrl("vidlink", episode), /^https:\/\/vidlink\.pro\/anime\/21\/3\/sub\?/);
   assert.match(buildAnimePremiumProviderUrl("vidlink", episode), /fallback=true/);
+  assert.match(buildAnimePremiumProviderUrl("vidlink", { ...episode, track: "dub" }), /\/anime\/21\/3\/dub\?/);
   assert.match(buildAnimePremiumProviderUrl("vidplus", episode), /^https:\/\/player\.vidplus\.to\/embed\/anime\/21\/3\?/);
   assert.match(buildAnimePremiumProviderUrl("vidplus", { ...episode, track: "dub" }), /dub=true/);
 });
