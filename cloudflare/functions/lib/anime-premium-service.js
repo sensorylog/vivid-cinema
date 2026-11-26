@@ -160,7 +160,12 @@ export function publicPricing(env = {}) {
   const { defaultCurrency, plans } = parsePlanConfig(env);
   return {
     defaultCurrency,
-    checkoutEnabled: env.PAYSTACK_LIVE_ENABLED === "true" && Boolean(env.PAYSTACK_SECRET_KEY),
+    checkoutEnabled: Boolean(env.PAYSTACK_SECRET_KEY && env.FIREBASE_SERVICE_ACCOUNT_JSON),
+    checkoutMessage: !env.FIREBASE_SERVICE_ACCOUNT_JSON
+      ? "Vivid membership authentication is not configured on this deployment."
+      : !env.PAYSTACK_SECRET_KEY
+        ? "Paystack payment verification is not configured on this deployment."
+        : "",
     supportedCurrencies: SUPPORTED_PAYSTACK_CURRENCIES.filter(currency => Boolean(plans[currency])),
     mobileMoneyCountries: [...MOBILE_MONEY_COUNTRIES],
     plans: Object.fromEntries(Object.entries(plans).map(([currency, plan]) => [currency, {

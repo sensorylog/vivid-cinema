@@ -45,6 +45,7 @@ function setCheckoutState() {
   const button = $("vap-checkout-button");
   if (!button) return;
   button.disabled = !pricing.checkoutEnabled || (membershipActive && membershipAutoRenew) || !authReady;
+  if (!pricing.checkoutEnabled && pricing.checkoutMessage) $("vap-checkout-status").textContent = pricing.checkoutMessage;
   button.textContent = !pricing.checkoutEnabled ? "Checkout temporarily unavailable"
     : membershipActive && membershipAutoRenew ? "Membership active — auto-renew on"
     : !authReady ? "Checking your Vivid account…"
@@ -80,72 +81,45 @@ async function loadCountries() {
   countries = FALLBACK_COUNTRIES;
   const countryStatus = $("vap-country-status");
   if (countryStatus) countryStatus.textContent = "Loading the full international country list…";
-  let loadedFullCatalogue = false;
-  selectedCountry = countries.some(country => country.code === saved) ? saved : "GH";
+  selectedCountry = saved;
   render();
 
-  const normaliseRestCountries = data => data.map(country => ({
-    code: String(country.cca2 || "").toUpperCase(),
-    name: country.name?.common || country.cca2,
-    currency: Object.keys(country.currencies || {}).sort()[0] || ""
-  })).filter(country => /^[A-Z]{2}$/.test(country.code) && country.name && country.currency);
-
-  const normaliseAnnexare = data => Object.entries(data || {}).map(([code, country]) => ({
-    code: code.toUpperCase(),
-    name: country.name || code,
-    currency: Array.isArray(country.currency) ? country.currency[0] : (country.currency || "")
-  })).filter(country => /^[A-Z]{2}$/.test(country.code) && country.name && /^[A-Z]{3}$/.test(country.currency));
-
-  // Try the full REST Countries catalogue first, then a separate maintained ISO country
-  // dataset so a temporary outage cannot strand users with the tiny emergency list.
-  const sources = [
-    async () => {
-      const response = await withTimeout(fetch("https://restcountries.com/v3.1/all?fields=cca2,name,currencies", { cache: "force-cache" }), 5000, "REST Countries request timed out.");
-      if (!response.ok) throw new Error("REST Countries unavailable");
-      return normaliseRestCountries(await response.json());
-    },
-    async () => {
-      const response = await withTimeout(fetch("https://cdn.jsdelivr.net/gh/annexare/Countries@master/dist/countries.json", { cache: "force-cache" }), 6000, "Backup country catalogue request timed out.");
-      if (!response.ok) throw new Error("Backup country catalogue unavailable");
-      return normaliseAnnexare(await response.json());
-    }
-  ];
-
-  for (const source of sources) {
-    try {
-      const parsed = await source();
-      if (parsed.length < 180) throw new Error("Country catalogue was incomplete (" + parsed.length + " entries).");
-      const unique = [...new Map(parsed.map(country => [country.code, country])).values()];
-      countries = unique.sort((left, right) => left.name.localeCompare(right.name));
-      loadedFullCatalogue = true;
-      if (countryStatus) countryStatus.textContent = "International country list loaded · " + countries.length + " countries available.";
-      if (!countries.some(country => country.code === selectedCountry)) selectedCountry = "GH";
-      render();
-      break;
-    } catch (error) {
-      console.warn("Country catalogue source failed; trying the next source:", error);
-    }
-  }
-  if (!loadedFullCatalogue && countryStatus) countryStatus.textContent = "The full country directory could not be reached. Showing the limited offline list of " + countries.length + " countries; please refresh to retry.";
+  // Use Vivid's same-origin Pages Function instead of depending on browser
+  // access to third-party country APIs (which can be blocked by mobile WebViews,
+  // content blockers, DNS filtering, or a deployment CSP).
+  const response = await withTimeout(
+    fetch("/api/anime-premium/countries", { cache: "no-store", credentials: "same-origin" }),
+    10000,
+    "The international country directory request timed out."
+  );
+  if (!response.ok) throw new Error("The international country directory is unavailable (" + response.status + ").");
+  const payload = await response.json();
+  const parsed = Array.isArray(payload.countries) ? payload.countries : [];
+  const unique = [...new Map(parsed.map(country => [String(country.code || "").toUpperCase(), {
+    code: String(country.code || "").toUpperCase(),
+    name: String(country.name || ""),
+    currency: String(country.currency || "").toUpperCase()
+  }])).values()].filter(country => /^[A-Z]{2}$/.test(country.code) && country.name);
+  if (!payload.ok || unique.length < 180) throw new Error("The international country directory returned an incomplete list.");
+  countries = unique.sort((left, right) => left.name.localeCompare(right.name));
+  if (!countries.some(country => country.code === selectedCountry)) selectedCountry = "GH";
+  render();
+  if (countryStatus) countryStatus.textContent = "International country list loaded · " + countries.length + " countries available.";
   select.value = selectedCountry;
 }
-async function getExchangeRates(baseCurrency) {
-  // Frankfurter v2 blended middle/reference rates; not a card issuer settlement quote.
+async function getExchangeRate(currency) {
   const now = Date.now();
-  if (rateCache && now - rateCacheAt < 15 * 60 * 1000) return rateCache;
-  const response = await withTimeout(fetch("https://api.frankfurter.dev/v2/rates?base=" + encodeURIComponent(baseCurrency), { cache: "no-store" }), 7000, "Reference-rate request timed out.");
-  if (!response.ok) throw new Error("Reference exchange rates are unavailable (" + response.status + ").");
-  const rows = await response.json();
-  if (!Array.isArray(rows) || !rows.length) throw new Error("The exchange-rate provider returned no rates.");
-  const rates = {};
-  let date = "";
-  for (const row of rows) {
-    const rate = Number(row.rate);
-    if (row.base === baseCurrency && row.quote && Number.isFinite(rate) && rate > 0) rates[row.quote] = rate;
-    if (row.date && (!date || row.date > date)) date = row.date;
+  if (rateCache && rateCache.currency === currency && now - rateCacheAt < 6 * 60 * 60 * 1000) return rateCache;
+  const response = await withTimeout(
+    fetch("/api/anime-premium/exchange-rate?currency=" + encodeURIComponent(currency), { cache: "no-store" }),
+    9000,
+    "Daily exchange-rate request timed out."
+  );
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok || payload.ok !== true || !Number.isFinite(Number(payload.rate)) || Number(payload.rate) <= 0) {
+    throw new Error(payload.message || "A published GHS/" + currency + " reference rate is unavailable.");
   }
-  if (!Object.keys(rates).length) throw new Error("No supported reference rates were returned.");
-  rateCache = { rates, date };
+  rateCache = { currency, rate: Number(payload.rate), date: String(payload.date || "") };
   rateCacheAt = now;
   return rateCache;
 }
@@ -165,10 +139,10 @@ async function updatePrice() {
     try {
       const quote = await getExchangeRates("GHS");
       if (requestId !== priceRequestId) return;
-      const rate = quote.rates?.[localCurrency];
+      const rate = quote.rate;
       if (Number.isFinite(rate) && rate > 0) {
         $("vap-local-price").textContent = "≈ " + formatMoney(plan.amountMajor * rate, localCurrency);
-        $("vap-price-note").textContent = "Reference rate: 1 GHS = " + rate.toFixed(6) + " " + localCurrency + (quote.date ? " · Rate date: " + quote.date : "") + ". Source: Frankfurter blended central-bank reference rates. Paystack charges " + formatMoney(plan.amountMajor, "GHS") + "; your bank/card provider sets the final converted charge and may add fees.";
+        $("vap-price-note").textContent = "Reference rate: 1 GHS = " + rate.toFixed(6) + " " + localCurrency + (quote.date ? " · Rate date: " + quote.date : "") + ". Source: CurrencyFreaks Open Rates, blended daily reference rates from central banks and official sources. Paystack charges " + formatMoney(plan.amountMajor, "GHS") + "; your bank/card provider sets the final converted charge and may add fees.";
       } else {
         $("vap-local-price").textContent = "Rate unavailable";
         $("vap-price-note").textContent = "No published GHS/" + localCurrency + " reference rate is currently available. We will not display an invented conversion. Paystack charges " + formatMoney(plan.amountMajor, "GHS") + "; your bank/card provider determines the converted amount.";
@@ -352,7 +326,21 @@ async function init() {
   $("vap-checkout-button").textContent = "Checking checkout availability…";
   const countriesTask = loadCountries().then(() => updatePrice()).catch(error => {
     console.error("Country selector initialisation failed:", error);
+    const status = $("vap-country-status");
+    if (status) status.textContent = "The full country directory is temporarily unavailable. Showing the offline country list; retry by refreshing the page.";
     $("vap-price-note").textContent = "Country information could not be loaded. The Paystack charge remains in Ghanaian Cedis (GHS).";
+    if (!$("vap-country").options.length) {
+      countries = FALLBACK_COUNTRIES;
+      selectedCountry = countries.some(country => country.code === selectedCountry) ? selectedCountry : "GH";
+      const select = $("vap-country");
+      select.replaceChildren(...countries.map(country => {
+        const option = document.createElement("option");
+        option.value = country.code;
+        option.textContent = country.name + (country.currency ? " (" + country.currency + ")" : "");
+        return option;
+      }));
+      select.value = selectedCountry;
+    }
   });
   const pricingTask = loadPricing().then(() => updatePrice()).catch(error => {
     console.error("Premium pricing initialisation failed:", error);
