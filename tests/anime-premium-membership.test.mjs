@@ -85,6 +85,7 @@ test("client selects one of the three server-owned hosted Paystack plan pages", 
 test("hosted page checkout requires verified identity and maps the three plans server-side", () => {
   assert.match(pageCheckout, /requirePremiumUser/);
   assert.doesNotMatch(pageCheckout, /PAYSTACK_SECRET_KEY|paystackRequest/);
+  assert.match(pageCheckout, /PAYSTACK_WEBHOOK_SECRET/);
   assert.match(pageCheckout, /paymentPageUrl\.searchParams\.set\("email", email\)/);
   assert.match(pageCheckout, /paymentPageUrl\.searchParams\.set\("read-only", "email"\)/);
   assert.match(pageCheckout, /checkoutSource: "hosted_payment_page"/);
@@ -123,6 +124,6 @@ test("membership return survives Vivid email verification and is cached offline"
   assert.match(sw, /anime-premium-membership\.js/);
   assert.match(sw, /anime-premium-return\.js/);
   assert.match(pricing, /publicPricing/);
-  assert.match(service, /PAYSTACK_WEBHOOK_SECRET \|\| env\.PAYSTACK_SECRET_KEY/);
-  assert.match(service, /checkoutEnabled: Boolean\(env\.FIREBASE_SERVICE_ACCOUNT_JSON && \(env\.PAYSTACK_WEBHOOK_SECRET \|\| env\.PAYSTACK_SECRET_KEY\)\)/);
+  assert.match(service, /PAYSTACK_WEBHOOK_SECRET/);
+  assert.match(service, /checkoutEnabled: Boolean\(env\.FIREBASE_SERVICE_ACCOUNT_JSON && env\.PAYSTACK_WEBHOOK_SECRET\)/);
 });
