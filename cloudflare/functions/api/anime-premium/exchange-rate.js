@@ -57,6 +57,7 @@ async function fetchProviderTable(provider) {
 async function getUsdBaseTable(currency) {
   const failures = [];
   let validTableFound = false;
+  let providerFailure = false;
   for (const provider of PROVIDERS) {
     try {
       const table = await fetchProviderTable(provider);
@@ -65,11 +66,12 @@ async function getUsdBaseTable(currency) {
       if (Number.isFinite(targetRate) && targetRate > 0) return table;
       failures.push(provider.name + " does not publish " + currency + ".");
     } catch (error) {
+      providerFailure = true;
       failures.push(provider.name + ": " + (error?.message || String(error)));
       console.warn("Vivid FX provider unavailable:", failures[failures.length - 1]);
     }
   }
-  if (validTableFound) {
+  if (validTableFound && !providerFailure) {
     const error = new Error("Neither reference-rate source currently publishes a rate for " + currency + ".");
     error.code = "currency-rate-unavailable";
     throw error;
