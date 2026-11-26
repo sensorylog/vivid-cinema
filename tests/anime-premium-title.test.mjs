@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
 const read = path => readFile(new URL(path, import.meta.url), "utf8");
-const [html, titleScript, discovery, tmdb, sw, syntax, css, library] = await Promise.all([
+const [html, titleScript, discovery, tmdb, sw, syntax, css, discoveryCss, library] = await Promise.all([
   read("../anime-premium-title.html"),
   read("../scripts/anime-premium-title.js"),
   read("../scripts/anime-premium-discovery.js"),
@@ -11,6 +11,7 @@ const [html, titleScript, discovery, tmdb, sw, syntax, css, library] = await Pro
   read("../service-worker.js"),
   read("../automation/check-syntax.mjs"),
   read("../styles/vivid-anime-premium-title.css"),
+  read("../styles/vivid-anime-premium.css"),
   read("../scripts/library.js")
 ]);
 
@@ -45,16 +46,19 @@ test("title experience stays metadata-only and uses official trailer links only"
   assert.doesNotMatch(titleScript, /<video|playbackUrl|streamUrl|\.m3u8|\.mp4/i);
 });
 
-test("anime identity cards use per-title SVG silhouette masks and mobile poster fallback", () => {
+test("anime identity cards keep per-title SVG silhouette masks across desktop and mobile", () => {
   assert.match(discovery, /IDENTITY_MASKS/);
   assert.match(discovery, /clipPath/);
+  assert.match(discovery, /items\.map\(identityCard\)/);
   assert.match(discovery, /vap-identity-mobile-poster/);
+  assert.match(discoveryCss, /\.vap-identity-svg\{display:block;width:100%;height:100%\}/);
+  assert.match(discoveryCss, /\.vap-identity-shade\{display:none!important\}/);
   assert.match(discovery, /anime-premium-title\.html/);
   assert.match(css, /vap-title-hero\.is-scrolled/);
 });
 
 test("title route and runtime are available offline and included in syntax checks", () => {
-  assert.match(sw, /vivid-cinema-shell-v358/);
+  assert.match(sw, /vivid-cinema-shell-v359/);
   assert.match(sw, /scripts\/anime-eligibility\.js/);
   assert.match(sw, /anime-premium-title\.html/);
   assert.match(sw, /vivid-anime-premium-title\.css/);
@@ -74,6 +78,12 @@ test("Anime Premium My List uses the shared Vivid Library Watch Later collection
   assert.match(titleScript, /vap:my-list-changed/);
   assert.match(titleScript, /Subscribe to Vivid Anime Premium/);
   assert.match(titleScript, /isAnimeMetadata\(details\)/);
+  assert.match(titleScript, /movieDetailsBasic : tmdbApi\.tvDetailsBasic/);
+  assert.match(titleScript, /Promise\.allSettled\(\[\s*getImages\(titleId\), getCredits\(titleId\), getVideos\(titleId\), getRecommendations\(titleId\)/);
+  assert.match(titleScript, /renderTitle\(details\);[\s\S]*?startBackdrop\(imageSlides\(details, \{\}\)\)/);
+  assert.match(titleScript, /Optional metadata enriches the already-visible page/);
+  assert.match(tmdb, /movieCredits: \(id\)/);
+  assert.match(tmdb, /tvCredits: \(id\)/);
   assert.match(titleScript, /related\.filter\(item => item\.poster_path && isAnimeMetadata\(item\)\)/);
   assert.match(titleScript, /canonicalUrl\.searchParams\.set\("id"/);
   assert.match(titleScript, /meta\[property="og:title"\]/);

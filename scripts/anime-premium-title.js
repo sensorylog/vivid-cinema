@@ -202,6 +202,10 @@ async function advanceBackdrop() {
   }
 }
 function startBackdrop(slides) {
+  if (backdropTimer) {
+    window.clearInterval(backdropTimer);
+    backdropTimer = null;
+  }
   backdropSlides = slides;
   if (!slides.length) return;
   applyInitialBackdrop(slides[0]);
@@ -338,15 +342,36 @@ function renderTitle(details) {
 }
 async function loadTitle() {
   if (!titleId) throw new Error("This title link is invalid. Return to the Premium catalogue and choose an anime.");
-  const getDetails = mediaType === "movie" ? tmdbApi.movieDetails : tmdbApi.tvDetails;
-  const getImages = mediaType === "movie" ? tmdbApi.movieImages : tmdbApi.tvImages;
-  const [detailsResult, imagesResult] = await Promise.allSettled([getDetails(titleId), getImages(titleId)]);
-  if (detailsResult.status !== "fulfilled") throw detailsResult.reason || new Error("The anime title is unavailable.");
-  const details = detailsResult.value;
+
+  // Fetch the small, authoritative record first. The old append_to_response
+  // request bundled credits, videos, recommendations and provider data into
+  // one response; a slow optional section could prevent the whole page rendering.
+  const getDetails = mediaType === "movie" ? tmdbApi.movieDetailsBasic : tmdbApi.tvDetailsBasic;
+  const details = await getDetails(titleId);
   if (!details?.id) throw new Error("The anime title could not be found.");
   if (!isAnimeMetadata(details)) throw new Error("This title is not listed as Japanese animation in the Vivid Anime Premium catalogue.");
-  const images = imagesResult.status === "fulfilled" ? imagesResult.value || {} : {};
+
+  // Render the title as soon as its core metadata is available.
   renderTitle(details);
+  // Show the title's own artwork immediately; gallery images are progressive enhancement.
+  startBackdrop(imageSlides(details, {}));
+  const getImages = mediaType === "movie" ? tmdbApi.movieImages : tmdbApi.tvImages;
+  const getCredits = mediaType === "movie" ? tmdbApi.movieCredits : tmdbApi.tvCredits;
+  const getVideos = mediaType === "movie" ? tmdbApi.movieVideos : tmdbApi.tvVideos;
+  const getRecommendations = mediaType === "movie" ? tmdbApi.movieRecommendations : tmdbApi.tvRecommendations;
+  const [imagesResult, creditsResult, videosResult, recommendationsResult] = await Promise.allSettled([
+    getImages(titleId), getCredits(titleId), getVideos(titleId), getRecommendations(titleId)
+  ]);
+
+  const images = imagesResult.status === "fulfilled" ? imagesResult.value || {} : {};
+  if (creditsResult.status === "fulfilled") details.credits = creditsResult.value || {};
+  if (videosResult.status === "fulfilled") details.videos = videosResult.value || {};
+  if (recommendationsResult.status === "fulfilled") details.recommendations = recommendationsResult.value || {};
+
+  // Optional metadata enriches the already-visible page; it never gates it.
+  renderCast(details);
+  renderRelated(details);
+  renderTrailer(details);
   startBackdrop(imageSlides(details, images));
 }
 function renderError(error) {
