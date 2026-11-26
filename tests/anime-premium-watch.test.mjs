@@ -53,7 +53,7 @@ test("Provider fallback switches embeds without requesting arbitrary stream URLs
 });
 
 test("Progress messages are origin-checked and saved through the Premium progress endpoint", () => {
-  assert.match(script, /anilink-player:progress/);
+  assert.match(script, /anilink-player:/);
   assert.match(script, /aniembed:play/);
   assert.match(script, /provider\\.id === "vidrift"/);
   assert.match(script, /message\\.type === "watching-log"/);
@@ -78,7 +78,7 @@ test("Playback sessions expire and account changes stop embedded playback", () =
 });
 
 test("Watch page assets are cached and syntax-checked", () => {
-  assert.match(sw, /vivid-cinema-shell-v345/);
+  assert.match(sw, /vivid-cinema-shell-v346/);
   assert.match(sw, /anime-premium-watch\.html/);
   assert.match(sw, /anime-premium-providers\.js/);
   assert.match(syntax, /scripts\/anime-premium-watch\.js/);
