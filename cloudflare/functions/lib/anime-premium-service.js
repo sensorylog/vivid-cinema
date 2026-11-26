@@ -116,7 +116,11 @@ const PLAN_INTERVALS = Object.freeze({
 export function addPlanIntervalMillis(planId, from = Date.now()) {
   const plan = PLAN_INTERVALS[String(planId || "monthly")] || PLAN_INTERVALS.monthly;
   const date = new Date(from);
+  const day = date.getUTCDate();
+  date.setUTCDate(1);
   date.setUTCMonth(date.getUTCMonth() + plan.months);
+  const lastDay = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + 1, 0)).getUTCDate();
+  date.setUTCDate(Math.min(day, lastDay));
   return date.getTime();
 }
 export function parsePlanConfig(env = {}) {
