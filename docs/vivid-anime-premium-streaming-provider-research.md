@@ -20,12 +20,13 @@ The iframe remains cross-origin. VIVID does not scrape the provider's page, extr
 
 ## Provider roster
 
-The registry contains **12 selectable provider endpoints**. Some are separate endpoint generations for the same provider; the user sees each as a distinct fallback choice.
+The registry contains **13 selectable provider endpoints**. Some are separate endpoint generations for the same provider; the user sees each as a distinct fallback choice.
 
 | Provider | Catalogue key | Implemented route | Notes |
 |---|---|---|---|
 | **VidPlus** | AniList | `/embed/anime/{anilistId}/{episode}` | Existing VIVID anime source; sub/dub selection |
 | **VidLink** | MAL | `/anime/{malId}/{episode}/{subOrDub}` | Existing VIVID anime source; documented fallback between audio variants |
+| **VidSrc** | TMDB | `/embed/movie/{tmdbId}` or `/embed/tv/{tmdbId}/{season}/{episode}` | Existing VIVID Anime fallback; generic TMDB route rather than a dedicated MAL/AniList endpoint |
 | **AniXo** | AniList or MAL | `/embed/ani/{id}/{episode}` or `/embed/mal/{id}/{episode}` | Claims multi-engine failover; emits player events |
 | **AniLink** | AniList | `/watch/{anilistId}/{episode}?variant=sub|dub` | Public player event contract includes progress and error events |
 | **MegaPlay** | AniList or MAL | `/stream/ani/{id}/{episode}/{subOrDub}` or `/stream/mal/...` | Current documented domain; progress/error events |
@@ -42,6 +43,7 @@ The registry contains **12 selectable provider endpoints**. Some are separate en
 - **VidAPI** documents TMDB/IMDb movie and TV embed endpoints, including a season/episode route. It does not document a separate MAL/AniList anime endpoint, so VIVID uses the TMDB route only when the anime title is represented in its catalogue.
 - **EmbedWave** documents the same TMDB movie/series route shapes and a built-in multi-server dropdown. It is included because it is already part of VIVID Cinema's provider set.
 - **VidLink** explicitly documents its anime route using a MAL ID, episode number and sub/dub path.
+- **VidSrc** is retained because the existing VIVID Anime watch flow already uses its TMDB movie/TV embed route for anime titles represented in TMDB. It is not treated as a dedicated MAL/AniList anime endpoint.
 - **AniLink** documents an AniList episode route, requires an explicit audio variant and publishes a validated `postMessage` event contract.
 - **AniXo** documents both AniList and MAL embed routes, as well as its claimed multi-engine failover.
 - **MegaPlay, Megavid and MegaFlix** document MAL/AniList anime routes and iframe player events. MegaPlay's current public API documentation uses `megaplay.buzz/stream/...`; VIVID also retains its older `ani.megaplay.su` endpoint as a compatibility fallback.
