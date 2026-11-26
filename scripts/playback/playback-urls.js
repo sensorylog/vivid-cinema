@@ -42,7 +42,7 @@ export function buildVidsrcEmbedUrl(params, { tmdbId = "", imdbId = "", startAt 
   return base + path + "?" + query;
 }
 
-export function buildVidlinkEmbedUrl(params, { tmdbId = "", malId = "", anime = false, startAt = 0 } = {}) {
+export function buildVidlinkEmbedUrl(params, { tmdbId = "", malId = "", anime = false, startAt = 0, track = "sub" } = {}) {
   const base = cleanBase(VIVID_CONFIG.api.vidlinkEmbedBaseUrl, "https://vidlink.pro");
   // Vivid's server-picker tap is the user's play intent; ask the provider to begin playback.
   const query = new URLSearchParams({ primaryColor: "e50914", secondaryColor: "1b1b1b", iconColor: "ffffff", title: "false", poster: "false", autoplay: "true" });
@@ -50,7 +50,8 @@ export function buildVidlinkEmbedUrl(params, { tmdbId = "", malId = "", anime = 
   if (anime) {
     if (!/^\d+$/.test(String(malId || ""))) return "";
     query.set("fallback", "true");
-    return base + "/anime/" + encodeURIComponent(String(malId)) + "/" + Math.max(1, Number(params.episode) || 1) + "/sub?" + query;
+    const audio = track === "dub" ? "dub" : "sub";
+    return base + "/anime/" + encodeURIComponent(String(malId)) + "/" + Math.max(1, Number(params.episode) || 1) + "/" + audio + "?" + query;
   }
   const id = tmdbOnlyId(params, tmdbId);
   if (!id) return "";
@@ -60,12 +61,12 @@ export function buildVidlinkEmbedUrl(params, { tmdbId = "", malId = "", anime = 
   return base + path + "?" + query;
 }
 
-export function buildVidplusEmbedUrl(params, { tmdbId = "", aniListId = "", anime = false, startAt = 0 } = {}) {
+export function buildVidplusEmbedUrl(params, { tmdbId = "", aniListId = "", anime = false, startAt = 0, track = "sub" } = {}) {
   const base = cleanBase(VIVID_CONFIG.api.vidplusEmbedBaseUrl, "https://player.vidplus.to");
   const query = new URLSearchParams({ autoplay: "true", primarycolor: "e50914", secondarycolor: "171717", iconcolor: "ffffff" });
   if (anime) {
     if (!/^\d+$/.test(String(aniListId || ""))) return "";
-    query.set("dub", "false");
+    query.set("dub", String(track === "dub"));
     return base + "/embed/anime/" + encodeURIComponent(String(aniListId)) + "/" + Math.max(1, Number(params.episode) || 1) + "?" + query;
   }
   const id = tmdbOnlyId(params, tmdbId);
