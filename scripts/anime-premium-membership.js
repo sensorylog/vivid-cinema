@@ -25,7 +25,8 @@ let membershipAutoRenew = false;
 let selectedCountry = "GH";
 let selectedPlanId = "monthly";
 let priceRequestId = 0;
-const rateCache = new Map();
+let rateCache = null;
+let rateCacheAt = 0;
 const withTimeout = async (promise, ms, message) => {
   let timer;
   try {
@@ -98,16 +99,24 @@ async function loadCountries() {
   select.value = selectedCountry;
 }
 async function getExchangeRates(baseCurrency) {
-  if (rateCache.has(baseCurrency)) return rateCache.get(baseCurrency);
-  const request = withTimeout(
-    fetch("https://open.er-api.com/v6/latest/" + encodeURIComponent(baseCurrency), { cache: "no-store" }),
-    4500,
-    "Exchange-rate request timed out."
-  ).then(response => response.ok ? response.json() : Promise.reject(new Error("Exchange rates unavailable")))
-    .then(data => data.result === "success" && data.rates ? data.rates : null)
-    .catch(error => { console.warn("Vivid local-currency estimate unavailable:", error); return null; });
-  rateCache.set(baseCurrency, request);
-  return request;
+  // Frankfurter v2 blended middle/reference rates; not a card issuer settlement quote.
+  const now = Date.now();
+  if (rateCache && now - rateCacheAt < 15 * 60 * 1000) return rateCache;
+  const response = await withTimeout(fetch("https://api.frankfurter.dev/v2/rates?base=" + encodeURIComponent(baseCurrency), { cache: "no-store" }), 7000, "Reference-rate request timed out.");
+  if (!response.ok) throw new Error("Reference exchange rates are unavailable (" + response.status + ").");
+  const rows = await response.json();
+  if (!Array.isArray(rows) || !rows.length) throw new Error("The exchange-rate provider returned no rates.");
+  const rates = {};
+  let date = "";
+  for (const row of rows) {
+    const rate = Number(row.rate);
+    if (row.base === baseCurrency && row.quote && Number.isFinite(rate) && rate > 0) rates[row.quote] = rate;
+    if (row.date && (!date || row.date > date)) date = row.date;
+  }
+  if (!Object.keys(rates).length) throw new Error("No supported reference rates were returned.");
+  rateCache = { rates, date };
+  rateCacheAt = now;
+  return rateCache;
 }
 async function updatePrice() {
   const requestId = ++priceRequestId;
@@ -117,20 +126,27 @@ async function updatePrice() {
   $("vap-local-currency").textContent = localCurrency;
   $("vap-checkout-currency").textContent = "GHS · Ghanaian Cedi";
   $("vap-local-price").textContent = localCurrency === "GHS" ? formatMoney(plan.amountMajor, "GHS") : "Calculating…";
-  $("vap-price-note").textContent = "Paystack always charges the fixed Ghana Cedi plan price. Local currency is an estimate.";
+  $("vap-price-note").textContent = "Retrieving the latest published reference rate…";
   renderPlan();
   if (localCurrency === "GHS") {
-    $("vap-price-note").textContent = "Your selected country uses Ghanaian Cedis. Paystack will charge " + formatMoney(plan.amountMajor, "GHS") + ".";
+    $("vap-price-note").textContent = "Paystack checkout charge: " + formatMoney(plan.amountMajor, "GHS") + ".";
   } else {
-    const rates = await getExchangeRates("GHS");
-    if (requestId !== priceRequestId) return;
-    const rate = rates?.[localCurrency];
-    if (Number.isFinite(rate) && rate > 0) {
-      $("vap-local-price").textContent = "≈ " + formatMoney(plan.amountMajor * rate, localCurrency);
-      $("vap-price-note").textContent = "Estimated in " + localCurrency + ". Paystack checkout remains " + formatMoney(plan.amountMajor, "GHS") + ". Your bank/card provider converts the GHS charge at its exchange rate; the final amount and any foreign transaction fee may vary.";
-    } else {
-      $("vap-local-price").textContent = formatMoney(plan.amountMajor, "GHS");
-      $("vap-price-note").textContent = "We could not retrieve a reliable " + localCurrency + " estimate right now. The fixed Paystack charge is " + formatMoney(plan.amountMajor, "GHS") + "; your bank/card provider will convert it.";
+    try {
+      const quote = await getExchangeRates("GHS");
+      if (requestId !== priceRequestId) return;
+      const rate = quote.rates?.[localCurrency];
+      if (Number.isFinite(rate) && rate > 0) {
+        $("vap-local-price").textContent = "≈ " + formatMoney(plan.amountMajor * rate, localCurrency);
+        $("vap-price-note").textContent = "Reference rate: 1 GHS = " + rate.toFixed(6) + " " + localCurrency + (quote.date ? " · Rate date: " + quote.date : "") + ". Source: Frankfurter blended central-bank reference rates. Paystack charges " + formatMoney(plan.amountMajor, "GHS") + "; your bank/card provider sets the final converted charge and may add fees.";
+      } else {
+        $("vap-local-price").textContent = "Rate unavailable";
+        $("vap-price-note").textContent = "No published GHS/" + localCurrency + " reference rate is currently available. We will not display an invented conversion. Paystack charges " + formatMoney(plan.amountMajor, "GHS") + "; your bank/card provider determines the converted amount.";
+      }
+    } catch (error) {
+      console.warn("Vivid FX reference-rate lookup failed:", error);
+      if (requestId !== priceRequestId) return;
+      $("vap-local-price").textContent = "Rate unavailable";
+      $("vap-price-note").textContent = "We could not retrieve a current published GHS/" + localCurrency + " reference rate. Paystack charges " + formatMoney(plan.amountMajor, "GHS") + "; your bank/card provider determines the converted amount.";
     }
   }
   if (requestId !== priceRequestId) return;
@@ -151,12 +167,15 @@ async function loadMembership() {
     $("vap-account-status").innerHTML = 'Already subscribed? <a href="auth.html?returnTo=anime-premium-membership.html">Sign in with your Vivid account</a>.';
     return;
   }
+  const accountLabel = currentUser.displayName || currentUser.email || "your Vivid account";
+  $("vap-account-status").textContent = "Signed in as " + accountLabel + ". Your existing Vivid account will own your Anime Premium membership.";
   const token = await currentUser.getIdToken();
   const response = await withTimeout(fetch("/api/anime-premium/membership", {
     headers: { Authorization: "Bearer " + token }, cache: "no-store"
   }), 6500, "Membership status request timed out.");
   if (response.status === 403) {
     $("vap-checkout-status").textContent = "Verify your Vivid email address before subscribing.";
+    $("vap-account-status").textContent = "Signed in as " + accountLabel + ". Verify your email to continue to Anime Premium.";
     return;
   }
   if (!response.ok) throw new Error("Membership status could not be checked.");
@@ -240,6 +259,8 @@ async function initialiseAuth() {
       import("./firebase.js"),
       import("https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js")
     ]), 9000, "Vivid sign-in initialisation timed out.");
+    if (typeof auth.authStateReady === "function") await withTimeout(auth.authStateReady(), 9000, "Restoring your saved Vivid sign-in timed out.");
+    currentUser = auth.currentUser && !auth.currentUser.isAnonymous ? auth.currentUser : null;
     onAuthStateChanged(auth, async user => {
       currentUser = user && !user.isAnonymous ? user : null;
       authReady = true;
