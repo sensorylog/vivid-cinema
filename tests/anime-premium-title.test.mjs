@@ -80,7 +80,8 @@ test("Anime Premium My List uses the shared Vivid Library Watch Later collection
   assert.match(titleScript, /isAnimeMetadata\(details\)/);
   assert.match(titleScript, /movieDetailsBasic : tmdbApi\.tvDetailsBasic/);
   assert.match(titleScript, /Promise\.allSettled\(\[\s*getImages\(titleId\), getCredits\(titleId\), getVideos\(titleId\), getRecommendations\(titleId\)/);
-  assert.match(titleScript, /renderTitle\(details\);[\s\S]*?startBackdrop\(imageSlides\(details, \{\}\)\)/);\n  assert.match(titleScript, /Optional metadata enriches the already-visible page/);
+  assert.match(titleScript, /renderTitle\(details\);[\s\S]*?startBackdrop\(imageSlides\(details, \{\}\)\)/);
+  assert.match(titleScript, /Optional metadata enriches the already-visible page/);
   assert.match(tmdb, /movieCredits: \(id\)/);
   assert.match(tmdb, /tvCredits: \(id\)/);
   assert.match(titleScript, /related\.filter\(item => item\.poster_path && isAnimeMetadata\(item\)\)/);
