@@ -3,14 +3,16 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
 const read = path => readFile(new URL(path, import.meta.url), "utf8");
-const [html, client, styles, legacyAnime, authRuntime, serviceWorker, sitemap] = await Promise.all([
+const [html, client, styles, legacyAnime, authRuntime, serviceWorker, sitemap, freePolicy, watchRuntime] = await Promise.all([
   read("../anime-premium.html"),
   read("../scripts/anime-premium.js"),
   read("../styles/vivid-anime-premium.css"),
   read("../anime.html"),
   read("../scripts/auth.js"),
   read("../service-worker.js"),
-  read("../sitemap.xml")
+  read("../sitemap.xml"),
+  read("../scripts/anime-free-policy.js"),
+  read("../scripts/watch.js")
 ]);
 
 test("Premium has its own route, namespaced assets and discoverable metadata", () => {
@@ -47,14 +49,19 @@ test("Phase 1 does not grant membership or expose a Premium playback catalogue",
 });
 
 test("Premium route and assets are included in the offline app shell", () => {
-  assert.match(serviceWorker, /vivid-cinema-shell-v349/);
+  assert.match(serviceWorker, /vivid-cinema-shell-v350/);
   assert.match(serviceWorker, /"\.\/anime-premium\.html"/);
   assert.match(serviceWorker, /"\.\/styles\/vivid-anime-premium\.css"/);
   assert.match(serviceWorker, /"\.\/scripts\/anime-premium\.js"/);
 });
 
-test("the existing Anime page remains a separate, unmodified free destination", () => {
-  assert.match(legacyAnime, /data-vivid-page="anime"/);
-  assert.match(legacyAnime, /scripts\/anime\.js/);
-  assert.doesNotMatch(legacyAnime, /anime-premium\.html/);
+test("Free Anime is limited to six curated series and season one episode one", () => {
+  assert.equal((freePolicy.match(/id: \"/g) || []).length, 6);
+  assert.match(freePolicy, /Number\(season\) === 1/);
+  assert.match(freePolicy, /Number\(episode\) === 1/);
+  assert.match(legacyAnime, /FREE PREVIEW/);
+  assert.match(legacyAnime, /anime-premium\.html/);
+  assert.match(watchRuntime, /isFreeAnimePreviewRoute/);
+  assert.match(watchRuntime, /source === \"vidapi\"/);
+  assert.match(watchRuntime, /if \(!isAnimePlayback\(\)\) mountSecondaryPlayer/);
 });
