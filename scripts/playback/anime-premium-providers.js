@@ -1,6 +1,7 @@
 const PROVIDERS = Object.freeze([
   { id: "vidplus", label: "VidPlus", origin: "https://player.vidplus.to", kind: "anilist", events: false, note: "AniList anime player · sub/dub" },
   { id: "vidlink", label: "VidLink", origin: "https://vidlink.pro", kind: "mal", events: false, note: "MAL anime player · automatic audio fallback" },
+  { id: "vidsrc", label: "VidSrc", origin: "https://vidsrc.sh", kind: "tmdb", events: false, note: "Existing VIVID anime fallback · TMDB episode route" },
   { id: "anixo", label: "AniXo", origin: "https://anixo.buzz", kind: "either", events: true, note: "AniList/MAL · multi-engine failover" },
   { id: "anilink", label: "AniLink", origin: "https://anilink.cc", kind: "anilist", events: true, note: "AniList anime player · progress events" },
   { id: "megaplay", label: "MegaPlay", origin: "https://megaplay.buzz", kind: "either", events: true, note: "AniList/MAL · progress and error events" },
@@ -45,6 +46,10 @@ export function buildAnimePremiumProviderUrl(providerId, {
       if (isMovie) return provider.origin + "/embed/movie/" + tmdb;
       if (ani) return provider.origin + "/embed/anilist/" + ani + "/" + ep + (audio === "dub" ? "?dub=1" : "");
       return provider.origin + "/embed/tv/" + tmdb + "/" + s + "/" + ep;
+    }
+    if (providerId === "vidsrc") {
+      const path = isMovie ? "/embed/movie/" + tmdb : "/embed/tv/" + tmdb + "/" + s + "/" + ep;
+      return provider.origin + path + "?ds_lang=en";
     }
     if (providerId === "vidfast") {
       const path = isMovie ? "/embed/movie/" + tmdb : "/embed/tv/" + tmdb + "/" + s + "/" + ep;
