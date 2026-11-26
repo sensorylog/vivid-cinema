@@ -39,6 +39,8 @@ test("client sends only country and payment method; server owns the amount and P
   assert.match(client, /JSON\.stringify\(\{ country: selectedCountry, paymentMethod: selectedPaymentMethod \}\)/);
   assert.doesNotMatch(client, /PAYSTACK_SECRET_KEY|pk_live_|PaystackPop/);
   assert.match(checkout, /PAYSTACK_SECRET_KEY/);
+  assert.match(checkout, /PAYSTACK_LIVE_ENABLED !== "true"/);
+  assert.match(client, /pricing\.checkoutEnabled/);
   assert.match(checkout, /plan: plan\.planCode/);
   assert.match(checkout, /channels: paymentMethod === "card" \? \["card"\] : \["mobile_money"\]/);
   assert.match(checkout, /renewalMode = paymentMethod === "card" \? "automatic" : "manual"/);
