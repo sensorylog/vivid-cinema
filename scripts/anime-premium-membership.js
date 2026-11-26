@@ -118,7 +118,7 @@ async function updatePrice() {
   $("vap-checkout-button").textContent = !pricing.checkoutEnabled ? "Checkout temporarily unavailable" : membershipActive ? (membershipAutoRenew ? "Membership active — auto-renew on" : "Renew manually →") : currentUser ? "Continue to secure checkout →" : "Sign in to subscribe →";
 }
 async function loadPricing() {
-  const response = await fetch("/api/anime-premium/pricing", { cache: "no-store" });
+  const response = await fetch("/api/anime-premium/pricing", { cache: "no-store", signal: AbortSignal.timeout(8000) });
   const payload = await response.json().catch(() => ({}));
   if (!response.ok || !payload.ok) {
     throw new Error(payload.message || (response.status === 404
@@ -271,8 +271,9 @@ async function initAuth() {
 }
 async function init() {
   bind();
-  // Country and FX services are optional presentation enhancements. They must
-  // never hold the server-owned price or checkout controls behind a slow request.
+  // Account and country services are optional enhancements. Neither should
+  // prevent the server-owned price from rendering.
+  void initAuth();
   void loadCountries().then(() => {
     if (pricing) return updatePrice();
   }).catch(error => console.warn("Premium country list unavailable; using the fallback list:", error));
@@ -283,7 +284,6 @@ async function init() {
     $("vap-checkout-button").disabled = true;
     $("vap-checkout-status").textContent = error.message;
   }
-  void initAuth();
 }
 if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init, { once: true });
 else init();
