@@ -117,8 +117,8 @@ async function updatePrice() {
     : selectedPaymentMethod === "mobile_money"
       ? "Mobile money is a one-time payment. Renew manually each month; no automatic debit is created."
       : "No payment method is configured for this region yet.";
-  $("vap-checkout-button").disabled = membershipActive || !selectedPaymentMethod;
-  $("vap-checkout-button").textContent = membershipActive ? "Premium membership active" : currentUser ? "Continue to secure checkout →" : "Sign in to subscribe →";
+  $("vap-checkout-button").disabled = (membershipActive && membershipAutoRenew) || !selectedPaymentMethod;
+  $("vap-checkout-button").textContent = membershipActive ? (membershipAutoRenew ? "Membership active — auto-renew on" : "Renew manually →") : currentUser ? "Continue to secure checkout →" : "Sign in to subscribe →";
 }
 async function loadPricing() {
   const response = await fetch("/api/anime-premium/pricing", { cache: "no-store" });
@@ -130,6 +130,7 @@ async function loadPricing() {
 async function loadMembership() {
   if (!currentUser) {
     membershipActive = false;
+    membershipAutoRenew = false;
     $("vap-account-status").innerHTML = 'Already subscribed? <a href="auth.html?returnTo=anime-premium-membership.html">Sign in with your Vivid account</a>.';
     return;
   }
@@ -147,6 +148,8 @@ async function loadMembership() {
     const payload = await response.json();
     const membership = payload.membership || {};
     membershipActive = membership.active === true;
+    membershipAutoRenew = membership.autoRenew === true;
+    $("vap-cancel-renewal").hidden = !membershipActive || !membershipAutoRenew;
     if (membershipActive) {
       $("vap-current-membership").hidden = false;
       $("vap-membership-state").textContent = membership.autoRenew ? "Your Premium membership is active and set to renew automatically." : "Your Premium membership is active.";
@@ -158,7 +161,7 @@ async function loadMembership() {
   }
 }
 async function startCheckout() {
-  if (membershipActive) return;
+  if (membershipActive && membershipAutoRenew) return;
   if (!currentUser) {
     window.location.href = "auth.html?returnTo=anime-premium-membership.html";
     return;
@@ -187,8 +190,8 @@ async function startCheckout() {
     $("vap-checkout-status").textContent = error.message || "Checkout could not be started.";
     await updatePrice();
   } finally {
-    button.disabled = membershipActive || !selectedPaymentMethod;
-    if (!membershipActive) button.textContent = currentUser ? "Continue to secure checkout →" : "Sign in to subscribe →";
+    button.disabled = (membershipActive && membershipAutoRenew) || !selectedPaymentMethod;
+    button.textContent = membershipActive ? (membershipAutoRenew ? "Membership active — auto-renew on" : "Renew manually →") : currentUser ? "Continue to secure checkout →" : "Sign in to subscribe →";
   }
 }
 
@@ -240,6 +243,7 @@ onAuthStateChanged(auth, async user => {
   if (currentUser) await loadMembership();
   else {
     membershipActive = false;
+    membershipAutoRenew = false;
     $("vap-account-status").innerHTML = 'Already subscribed? <a href="auth.html?returnTo=anime-premium-membership.html">Sign in with your Vivid account</a>.';
   }
   if (pricing) await updatePrice();
