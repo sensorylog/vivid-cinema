@@ -146,6 +146,43 @@ function observeHeroScroll() {
   }, { threshold: [0, 0.25, 0.5, 1] });
   observer.observe(hero);
 }
+const FAVORITES_KEY = "vivid:anime-premium:my-list";
+
+function readFavorites() {
+  try {
+    const value = JSON.parse(localStorage.getItem(FAVORITES_KEY) || "[]");
+    return Array.isArray(value) ? value.filter(item => item && /^\\d{1,12}$/.test(String(item.id)) && ["tv", "movie"].includes(item.type)) : [];
+  } catch {
+    return [];
+  }
+}
+function updateFavoriteButton(details) {
+  const button = $("vap-title-favorite");
+  if (!button) return;
+  const key = mediaType + ":" + details.id;
+  const saved = readFavorites().some(item => item.type + ":" + item.id === key);
+  button.setAttribute("aria-pressed", String(saved));
+  button.classList.toggle("is-saved", saved);
+  button.innerHTML = saved
+    ? '<i class="bi bi-bookmark-check" aria-hidden="true"></i> Added to My List'
+    : '<i class="bi bi-bookmark-plus" aria-hidden="true"></i> Add to My List';
+  button.onclick = () => {
+    const favorites = readFavorites();
+    const exists = favorites.some(item => item.type + ":" + item.id === key);
+    const next = exists
+      ? favorites.filter(item => item.type + ":" + item.id !== key)
+      : [...favorites, { id: String(details.id), type: mediaType, title: titleName(details), savedAt: new Date().toISOString() }];
+    try {
+      localStorage.setItem(FAVORITES_KEY, JSON.stringify(next));
+      updateFavoriteButton(details);
+      button.dispatchEvent(new CustomEvent("vap:favorites-changed", { bubbles: true, detail: { id: String(details.id), type: mediaType, saved: !exists } }));
+    } catch {
+      button.setAttribute("aria-pressed", String(exists));
+      button.textContent = exists ? "Added to My List" : "Could not save — try again";
+    }
+  };
+}
+
 function renderTitle(details) {
   const name = titleName(details);
   document.title = name + " · VIVID ANIME PREMIUM";
@@ -158,6 +195,7 @@ function renderTitle(details) {
   $("vap-title-tagline").textContent = details.tagline || "";
   $("vap-title-overview").textContent = details.overview || "Explore the characters, setting and story behind this anime.";
   $("vap-title-description").textContent = details.overview || "A story from the Vivid Anime Premium collection.";
+  updateFavoriteButton(details);
   renderFacts(details);
   renderGenres(details);
   renderCast(details);
