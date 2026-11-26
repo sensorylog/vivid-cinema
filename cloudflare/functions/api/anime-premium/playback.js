@@ -6,6 +6,39 @@ import {
 function allowedStreamHosts(env) {
   return new Set(String(env.ANIME_PREMIUM_STREAM_HOSTS || "").split(",").map(value => value.trim().toLowerCase()).filter(Boolean));
 }
+function providerResolver(env, providerId) {
+  if (!/^[a-z0-9][a-z0-9._-]{1,63}$/i.test(providerId)) {
+    throw new AnimePremiumError(404, "authorised-source-not-found", "No authorised playback source is available for this episode.");
+  }
+  const configured = String(env.ANIME_PREMIUM_PROVIDER_RESOLVERS_JSON || "").trim();
+  let settings;
+  if (configured) {
+    let providers;
+    try { providers = JSON.parse(configured); }
+    catch { throw new AnimePremiumError(503, "playback-provider-not-configured", "The authorised playback providers are not configured correctly."); }
+    settings = providers?.[providerId];
+  } else {
+    settings = {
+      resolverUrl: env.ANIME_PREMIUM_STREAM_RESOLVER_URL,
+      resolverToken: env.ANIME_PREMIUM_STREAM_RESOLVER_TOKEN,
+      allowedHosts: [...allowedStreamHosts(env)]
+    };
+  }
+  const resolverUrl = String(settings?.resolverUrl || "").trim();
+  const resolverToken = String(settings?.resolverToken || "").trim();
+  const hosts = new Set((Array.isArray(settings?.allowedHosts) ? settings.allowedHosts : [])
+    .map(value => String(value).trim().toLowerCase()).filter(Boolean));
+  if (!resolverUrl || !resolverToken || !hosts.size) {
+    throw new AnimePremiumError(503, "playback-provider-not-configured", "This authorised playback provider is not configured yet.");
+  }
+  let url;
+  try { url = new URL(resolverUrl); }
+  catch { throw new AnimePremiumError(503, "playback-provider-not-configured", "The authorised playback resolver URL is invalid."); }
+  if (url.protocol !== "https:" || url.username || url.password) {
+    throw new AnimePremiumError(503, "playback-provider-not-configured", "The authorised playback resolver URL is invalid.");
+  }
+  return { url, token: resolverToken, hosts };
+}
 export function onRequestOptions({ request, env }) {
   return optionsResponse(request.headers.get("Origin") || "", env);
 }
@@ -39,21 +72,12 @@ export async function onRequestPost({ request, env }) {
     if (!sourceSnapshot.exists || sourceSnapshot.data()?.active !== true) {
       throw new AnimePremiumError(404, "authorised-source-not-found", "No authorised playback source is available for this episode.");
     }
-    const resolverUrl = String(env.ANIME_PREMIUM_STREAM_RESOLVER_URL || "").trim();
-    const resolverToken = String(env.ANIME_PREMIUM_STREAM_RESOLVER_TOKEN || "").trim();
-    const hosts = allowedStreamHosts(env);
-    if (!resolverUrl || !resolverToken || !hosts.size) {
-      throw new AnimePremiumError(503, "playback-provider-not-configured", "The authorised playback provider is not configured yet.");
-    }
-    const resolver = new URL(resolverUrl);
-    if (resolver.protocol !== "https:" || resolver.username || resolver.password) {
-      throw new AnimePremiumError(503, "playback-provider-not-configured", "The authorised playback resolver URL is invalid.");
-    }
     const source = sourceSnapshot.data();
-    if (!source.sourceId || !source.provider) throw new AnimePremiumError(404, "authorised-source-not-found", "No authorised playback source is available for this episode.");
-    const resolverResponse = await fetch(resolver.toString(), {
+    if (!source.sourceId || typeof source.provider !== "string") throw new AnimePremiumError(404, "authorised-source-not-found", "No authorised playback source is available for this episode.");
+    const provider = providerResolver(env, source.provider);
+    const resolverResponse = await fetch(provider.url.toString(), {
       method: "POST",
-      headers: { Authorization: "Bearer " + resolverToken, "Content-Type": "application/json" },
+      headers: { Authorization: "Bearer " + provider.token, "Content-Type": "application/json" },
       body: JSON.stringify({
         sourceId: source.sourceId,
         provider: source.provider,
@@ -71,7 +95,7 @@ export async function onRequestPost({ request, env }) {
     const url = new URL(resolved.url);
     const expiresAt = Date.parse(resolved.expiresAt);
     const mimeType = String(resolved.mimeType || "");
-    if (url.protocol !== "https:" || !hosts.has(url.hostname.toLowerCase()) || url.username || url.password ||
+    if (url.protocol !== "https:" || !provider.hosts.has(url.hostname.toLowerCase()) || url.username || url.password ||
         !Number.isFinite(expiresAt) || expiresAt <= Date.now() || expiresAt > Date.now() + 60 * 60 * 1000 ||
         !["video/mp4", "application/vnd.apple.mpegurl", "application/x-mpegURL"].includes(mimeType)) {
       throw new AnimePremiumError(502, "invalid-playback-session", "The authorised provider returned an invalid playback session.");
