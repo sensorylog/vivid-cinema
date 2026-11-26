@@ -202,6 +202,10 @@ async function advanceBackdrop() {
   }
 }
 function startBackdrop(slides) {
+  if (backdropTimer) {
+    window.clearInterval(backdropTimer);
+    backdropTimer = null;
+  }
   backdropSlides = slides;
   if (!slides.length) return;
   applyInitialBackdrop(slides[0]);
@@ -349,6 +353,8 @@ async function loadTitle() {
 
   // Render the title as soon as its core metadata is available.
   renderTitle(details);
+  // Show the title's own artwork immediately; gallery images are progressive enhancement.
+  startBackdrop(imageSlides(details, {}));
   const getImages = mediaType === "movie" ? tmdbApi.movieImages : tmdbApi.tvImages;
   const getCredits = mediaType === "movie" ? tmdbApi.movieCredits : tmdbApi.tvCredits;
   const getVideos = mediaType === "movie" ? tmdbApi.movieVideos : tmdbApi.tvVideos;
