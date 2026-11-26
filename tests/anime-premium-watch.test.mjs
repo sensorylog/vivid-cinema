@@ -19,6 +19,8 @@ test("Premium watch page has a responsive embedded player and multi-server selec
   assert.match(html, /id="vap-server-list"/);
   assert.match(html, /id="vap-server-count"/);
   assert.match(html, /id="vap-server-next"/);
+  assert.match(html, /VIVID PREMIUM PLAYER/);
+  assert.match(html, /MEMBERSHIP VERIFIED BEFORE PLAYBACK/);
   assert.match(html, /data-vap-track="sub"/);
   assert.match(html, /data-vap-track="dub"/);
   assert.doesNotMatch(html, /<video[^>]+src=/i);
@@ -37,6 +39,10 @@ test("Premium access is verified through the existing Firebase account before a 
   assert.match(script, /fetch\("\/api\/anime-premium\/playback"/);
   assert.match(script, /response\.status === 403/);
   assert.match(script, /activateProvider\(first\.id\)/);
+  assert.match(script, /label: "Server " \+ \(index \+ 1\)/);
+  assert.match(script, /server option/);
+  assert.doesNotMatch(script, /provider\.note/);
+  assert.doesNotMatch(script, /ID matched/);
   assert.doesNotMatch(script, /initializeApp\s*\(|getAuth\s*\(/);
 });
 
