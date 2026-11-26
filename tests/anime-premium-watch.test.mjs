@@ -13,7 +13,9 @@ const [html, script, sw, syntax, css, playbackApi] = await Promise.all([
 ]);
 
 test("Premium watch page has a responsive embedded player and multi-server selector", () => {
-  assert.match(html, /name="robots" content="noindex,nofollow"/);\n  assert.match(html, /Premium access required/);\n  assert.match(html, /id="vap-player-frame"/);
+  assert.match(html, /name="robots" content="noindex,nofollow"/);
+  assert.match(html, /Premium access required/);
+  assert.match(html, /id="vap-player-frame"/);
   assert.match(html, /id="vap-server-list"/);
   assert.match(html, /id="vap-server-count"/);
   assert.match(html, /id="vap-server-next"/);
