@@ -38,6 +38,7 @@ test("watch page waits for optional auth restoration without blocking episode me
   assert.match(script, /async function bindAuth\(\)/);
   assert.match(script, /authReady = bindAuth\(\)/);
   assert.match(script, /await authReady/);
+  assert.match(script, /returnTo=anime-premium-watch\.html/);
 });
 
 test("Premium watch resolves AniList and MAL identifiers independently and supports season-specific lookups", () => {
