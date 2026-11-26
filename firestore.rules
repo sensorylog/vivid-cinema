@@ -32,7 +32,14 @@ service cloud.firestore {
     }
 
     function validContentId(contentId) {
-      return contentId.matches('^(movie|tv):[0-9]+
+      return contentId.matches('^(movie|tv):[0-9]+$');
+    }
+
+    function validProgressId(contentId) {
+      return contentId.matches('^movie:[0-9]+$')
+        || contentId.matches('^tv:[0-9]+$')
+        || contentId.matches('^tv:[0-9]+:[0-9]+:[0-9]+$');
+    }
 
     function validLibraryData() {
       return request.resource.data.keys().hasOnly([
