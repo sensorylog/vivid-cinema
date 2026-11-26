@@ -54,15 +54,25 @@ async function fetchProviderTable(provider) {
   }
 }
 
-async function getUsdBaseTable() {
+async function getUsdBaseTable(currency) {
   const failures = [];
+  let validTableFound = false;
   for (const provider of PROVIDERS) {
     try {
-      return await fetchProviderTable(provider);
+      const table = await fetchProviderTable(provider);
+      validTableFound = true;
+      const targetRate = Number(table.rates?.[currency]);
+      if (Number.isFinite(targetRate) && targetRate > 0) return table;
+      failures.push(provider.name + " does not publish " + currency + ".");
     } catch (error) {
       failures.push(provider.name + ": " + (error?.message || String(error)));
       console.warn("Vivid FX provider unavailable:", failures[failures.length - 1]);
     }
+  }
+  if (validTableFound) {
+    const error = new Error("Neither reference-rate source currently publishes a rate for " + currency + ".");
+    error.code = "currency-rate-unavailable";
+    throw error;
   }
   throw new Error("All reference-rate providers are unavailable. " + failures.join("; "));
 }
@@ -91,7 +101,7 @@ export async function onRequestGet({ request, env }) {
   }
 
   try {
-    const table = await getUsdBaseTable();
+    const table = await getUsdBaseTable(currency);
     const usdPerGhs = 1 / Number(table.rates.GHS);
     const targetPerUsd = Number(table.rates[currency]);
     const rate = targetPerUsd * usdPerGhs;
@@ -112,6 +122,9 @@ export async function onRequestGet({ request, env }) {
       calculation: "GHS cross-rate calculated from a USD-base reference table"
     }, 200, origin, env);
   } catch (error) {
+    if (error?.code === "currency-rate-unavailable") {
+      return jsonResponse({ ok: false, code: error.code, message: error.message }, 404, origin, env);
+    }
     console.error("Vivid Anime Premium exchange-rate lookup failed:", error?.message || String(error));
     return jsonResponse({
       ok: false,
