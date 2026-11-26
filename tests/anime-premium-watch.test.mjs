@@ -3,12 +3,13 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
 const read = path => readFile(new URL(path, import.meta.url), "utf8");
-const [html, script, sw, syntax, css] = await Promise.all([
+const [html, script, sw, syntax, css, playbackApi] = await Promise.all([
   read("../anime-premium-watch.html"),
   read("../scripts/anime-premium-watch.js"),
   read("../service-worker.js"),
   read("../automation/check-syntax.mjs"),
-  read("../styles/vivid-anime-premium-watch.css")
+  read("../styles/vivid-anime-premium-watch.css"),
+  read("../cloudflare/functions/api/anime-premium/playback.js")
 ]);
 
 test("Premium watch page has a responsive embedded player and multi-server selector", () => {
@@ -26,6 +27,9 @@ test("Premium watch page has a responsive embedded player and multi-server selec
 test("Premium access is verified through the existing Firebase account before a provider iframe opens", () => {
   assert.match(script, /import \{ auth \} from "\.\/firebase\.js"/);
   assert.match(script, /onAuthStateChanged\(auth/);
+  assert.match(script, /isAnimeMetadata\(titleDetails\)/);
+  assert.match(playbackApi, /isAnimeMetadata\(metadata\)/);
+  assert.match(playbackApi, /anime-title-not-eligible/);
   assert.match(script, /currentUser\.getIdToken\(\)/);
   assert.match(script, /fetch\("\/api\/anime-premium\/playback"/);
   assert.match(script, /response\.status === 403/);
@@ -75,7 +79,7 @@ test("Playback sessions expire and account changes stop embedded playback", () =
 });
 
 test("Watch page assets are cached and syntax-checked", () => {
-  assert.match(sw, /vivid-cinema-shell-v356/);
+  assert.match(sw, /vivid-cinema-shell-v357/);
   assert.match(sw, /anime-premium-watch\.html/);
   assert.match(sw, /anime-premium-providers\.js/);
   assert.match(syntax, /scripts\/anime-premium-watch\.js/);
