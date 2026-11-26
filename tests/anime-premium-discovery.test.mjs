@@ -65,6 +65,11 @@ test("featured action safely falls back to catalogue before a title is available
   assert.match(script, /else \$\("vap-catalogue"\)\.scrollIntoView/);
 });
 
+test("discovery and library recovery states have premium styling", () => {
+  assert.match(css, /\.vap-shelf-error/);
+  assert.match(css, /\.vap-library-loading/);
+});
+
 test("failed Premium shelves leave loading state and expose a retry action", () => {
   assert.match(script, /Promise\.allSettled\(jobs\)/);
   assert.match(script, /renderShelfError\(/);
