@@ -116,6 +116,7 @@ function progressDocData(contentId, item) {
     season: item.season == null ? null : Math.max(0, Number(item.season) || 0),
     episode: item.episode == null ? null : Math.max(1, Number(item.episode) || 1),
     title: String(item.title || "").slice(0, 300),
+    ...(item.isAnime === true ? { isAnime: true } : {}),
     updatedAt: Number(item.updatedAt) || Date.now()
   };
 }
@@ -175,6 +176,10 @@ function queueRemoteProgress(contentId, item) {
 export function getPlaybackProgress(contentId) {
   const item = readProgress()[contentId];
   return item && !item.completed && Number(item.progress) > 0 ? item : null;
+}
+
+export function getAllPlaybackProgress() {
+  return Object.entries(readProgress()).map(([contentId, item]) => ({ ...item, contentId }));
 }
 
 export function savePlaybackProgress(contentId, data = {}) {
