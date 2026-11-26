@@ -226,3 +226,8 @@ test("anime audio preference changes synchronize between Player 1 and Player 2",
   assert.match(source, /window\.dispatchEvent\(new CustomEvent\("vivid:anime-track-changed"/);
   assert.match(source, /window\.addEventListener\("vivid:anime-track-changed"/);
 });
+
+test("watch route changes clear previous anime IDs and episode offsets", () => {
+  assert.match(source, /async function load\(\) \{\s*currentParams = getParams\(\);\s*aniListId = "";/);
+  assert.match(source, /malId = "";\s*animeEpisodeOffset = 0;/);
+});
