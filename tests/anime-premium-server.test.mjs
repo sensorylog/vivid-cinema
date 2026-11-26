@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { webcrypto } from "node:crypto";
+import { isAnimeMetadata } from "../scripts/anime-eligibility.js";
 import {
   allowedOrigin, jsonResponse, parsePlanConfig, publicPricing,
   resolveCheckoutPlan, safeReference, verifyPaystackSignature, isValidEmailAddress
@@ -9,12 +10,22 @@ import {
 
 globalThis.crypto ||= webcrypto;
 const playback = await readFile(new URL("../cloudflare/functions/api/anime-premium/playback.js", import.meta.url), "utf8");
+assert.match(playback, /isAnimeMetadata\(metadata\)/);
+assert.match(playback, /api\.themoviedb\.org\/3/);
+assert.match(playback, /anime-title-not-eligible/);
 
 async function sign(secret, value) {
   const key = await crypto.subtle.importKey("raw", new TextEncoder().encode(secret), { name: "HMAC", hash: "SHA-512" }, false, ["sign"]);
   const result = await crypto.subtle.sign("HMAC", key, value instanceof Uint8Array ? value : new TextEncoder().encode(value));
   return [...new Uint8Array(result)].map(byte => byte.toString(16).padStart(2, "0")).join("");
 }
+
+test("server-side anime eligibility rejects generic animation and non-anime titles", () => {
+  assert.equal(isAnimeMetadata({ original_language: "ja", genre_ids: [16] }), true);
+  assert.equal(isAnimeMetadata({ original_language: "en", genre_ids: [16], origin_country: ["JP"] }), true);
+  assert.equal(isAnimeMetadata({ original_language: "en", genre_ids: [16], origin_country: ["US"] }), false);
+  assert.equal(isAnimeMetadata({ original_language: "ja", genre_ids: [18] }), false);
+});
 
 test("verified account email validation accepts Google and email/password addresses", () => {
   assert.equal(isValidEmailAddress("dave@gmail.com"), true);
