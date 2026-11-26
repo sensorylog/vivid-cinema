@@ -243,20 +243,12 @@ export function mountAnimeSecondaryPlayer({ root, params, media, title, aniListI
     if (frame) frame.src = "about:blank";
     root.innerHTML = "";
     root.hidden = true;
+    if (root.__vividAnimePlayer2Cleanup === cleanup) delete root.__vividAnimePlayer2Cleanup;
   };
   root.__vividAnimePlayer2Cleanup = cleanup;
   return {
     loadServer,
     getSelectedServer: () => selectedServer,
     destroy: cleanup
-      generation += 1;
-      window.removeEventListener("vivid:anime-track-changed", trackChangeListener);
-      if (root.__vividAnimePlayer2Cleanup === cleanup) delete root.__vividAnimePlayer2Cleanup;
-      if (timer) window.clearTimeout(timer);
-      const frame = screen.querySelector("iframe");
-      if (frame) frame.src = "about:blank";
-      root.innerHTML = "";
-      root.hidden = true;
-    }
   };
 }
