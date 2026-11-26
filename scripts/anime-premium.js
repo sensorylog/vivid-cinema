@@ -1,13 +1,19 @@
-import { auth } from "./firebase.js";
-import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
-
 const accountLink = document.querySelector("[data-vap-account]");
 const primaryLink = document.querySelector("[data-vap-primary]");
-const accountStatus = document.getElementById("vap-account-status");
+const accountStatus = document.body?.dataset?.vividPage === "anime-premium"
+  ? document.getElementById("vap-account-status")
+  : null;
+const currentRoute = window.location.pathname.split("/").pop();
+const premiumRoutes = new Set([
+  "anime-premium.html", "anime-premium-title.html", "anime-premium-watch.html",
+  "anime-premium-library.html", "anime-premium-membership.html", "anime-premium-return.html"
+]);
+const returnDestination = premiumRoutes.has(currentRoute)
+  ? currentRoute + window.location.search
+  : "anime-premium.html";
 
 function setSignedOut() {
-  const destination = "anime-premium.html";
-  const login = "auth.html?returnTo=" + encodeURIComponent(destination);
+  const login = "auth.html?returnTo=" + encodeURIComponent(returnDestination);
   if (accountLink) {
     accountLink.href = login;
     accountLink.textContent = "Sign in";
@@ -42,6 +48,10 @@ if (accountStatus) accountStatus.textContent = "Checking your Vivid account…";
 if (accountLink) accountLink.setAttribute("aria-disabled", "true");
 
 try {
+  const [{ auth }, { onAuthStateChanged }] = await Promise.all([
+    import("./firebase.js"),
+    import("https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js")
+  ]);
   if (typeof auth.authStateReady === "function") await auth.authStateReady();
   onAuthStateChanged(auth, user => {
     if (user && !user.isAnonymous) setSignedIn(user);
