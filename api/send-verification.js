@@ -3,7 +3,7 @@ import { getAuth } from "firebase-admin/auth";
 import { getFirestore, Timestamp } from "firebase-admin/firestore";
 
 const VERIFY_CONTINUE_URL = "https://vivid-cinema.pages.dev/verify-email.html";
-const ALLOWED_RETURN_DESTINATIONS = new Set(["anime-premium.html"]);
+const ALLOWED_RETURN_DESTINATIONS = new Set(["anime-premium.html", "anime-premium-membership.html"]);
 
 function verificationContinueUrl(body) {
   const requested = body && typeof body === "object" && typeof body.returnTo === "string"
