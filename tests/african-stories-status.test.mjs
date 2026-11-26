@@ -30,7 +30,7 @@ test("African Stories public landing, player and submission routes are gated, no
 
 test("service worker no longer precaches gated African Stories feature runtimes", async () => {
   const worker = await readFile(path.join(root, "service-worker.js"), "utf8");
-  assert.match(worker, /vivid-cinema-shell-v\\d+/);
+  assert.match(worker, /vivid-cinema-shell-v\d+/);
   assert.doesNotMatch(worker, /\.\/scripts\/african-stories\/(?:discovery|player|acquisition)\.js/);
   assert.doesNotMatch(worker, /\.\/african-stories-watch\.html|\.\/african-stories-submit\.html/);
 });
