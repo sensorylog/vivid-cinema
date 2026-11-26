@@ -170,7 +170,7 @@ function getNextSource(source) {
 function getSourceLabel(source) {
   if (typeof source === "string" && source.startsWith("custom:")) return (getCustomPlaybackServer(source.slice(7))?.name || "Custom server") + " · external embed";
   if (source === "direct") return "Authorized direct stream · HLS/DASH";
-  if (source === "vidsrc") return "VidSrc alternate source";
+  if (source === "vidsrc") return isAnimePlayback() ? "VidSrc · TMDB anime fallback" : "VidSrc alternate source";
   if (source === "vidlink") return "VidLink alternate source";
   if (source === "vidplus") return "VidPlus anime source";
   if (source === "animeembed") return "AnimeEmbed · AniList anime player";
@@ -182,7 +182,7 @@ function getSourceLabel(source) {
   if (source === "ezvidapi") return "ezvidapi alternate source";
   if (source === "embedapistream") return "Embed API Stream alternate source";
   if (source === "moviesapi") return "MoviesAPI.to alternate source";
-  return "VidAPI primary source";
+  return isAnimePlayback() ? "VidAPI · TMDB / IMDb anime fallback" : "VidAPI primary source";
 }
 
 function triggerFallback(reason = "source_error") {
@@ -258,6 +258,10 @@ function updateSourceLabel() {
     button.disabled = !sourceAvailable(source);
     button.setAttribute("aria-pressed", source === activeSource ? "true" : "false");
   });
+  if (count) {
+    const available = [...document.querySelectorAll("[data-player-source]")].filter(button => !button.hidden && !button.disabled).length;
+    count.textContent = isAnimePlayback() ? available + " available anime servers" : "7 sources";
+  }
 }
 
 function setPlayerSource(source, params, startAt = 0) {
