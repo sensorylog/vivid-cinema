@@ -122,7 +122,7 @@ function renderCast(details) {
 }
 function renderRelated(details) {
   const related = details.recommendations?.results?.length ? details.recommendations.results : details.similar?.results || [];
-  const items = normalizeResults(related.filter(item => item.poster_path).slice(0, 12), mediaType);
+  const items = normalizeResults(related.filter(item => item.poster_path && isAnimeMetadata(item)).slice(0, 12), mediaType);
   if (!items.length) return;
   $("vap-title-related").innerHTML = items.map(item => {
     const title = item.title || item.name || "Anime title";
