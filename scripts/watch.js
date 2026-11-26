@@ -1,7 +1,7 @@
 import { tmdbApi } from "./tmdb.js";
 import { resolveAndroidPlayerBackAction } from "./android-navigation.js";
 import { resolveAnimeIds } from "./playback/anime-id-resolver.js";
-import { getAnimeGlobalEpisode, readAnimeTrackPreference, writeAnimeTrackPreference } from "./playback/anime-playback.js";
+import { getAnimeGlobalEpisode, readAnimeTrackPreference, writeAnimeTrackPreference, normalizeAnimeProviderMessage } from "./playback/anime-playback.js";
 import { getImageUrl, getMediaUrl, normalizeMedia, normalizeResults } from "./media.js";
 import { buildTitleUrl, buildWatchUrl, getRoute } from "./routes.js";
 import { escapeHtml } from "./utils.js";
@@ -1409,17 +1409,8 @@ function handlePlayerEvent(event) {
     payload = { type: "PLAYER_EVENT", data: { ...payload, player_status: payload.event, player_progress: payload.currentTime, player_duration: payload.duration } };
   }
   if (isAnimeEmbed || isVidy) {
-    const message = payload.data && typeof payload.data === "object" ? payload.data : payload;
-    const eventName = String(message.event || "").toLowerCase();
-    if (isAnimeEmbed && payload.channel !== "animeembed") return;
-    if (!/^(ready|play|playing|pause|paused|buffering|progress|timeupdate|seeked|ended|error)$/i.test(eventName)) return;
-    payload = { type: "PLAYER_EVENT", data: {
-      ...message,
-      event: eventName,
-      player_status: eventName === "progress" ? "timeupdate" : eventName,
-      player_progress: message.currentTime ?? message.progress ?? message.position ?? 0,
-      player_duration: message.duration ?? 0
-    }};
+    payload = normalizeAnimeProviderMessage(isAnimeEmbed ? "animeembed" : "vidy", payload);
+    if (!payload) return;
   }
 
   // Opt-in, sanitized telemetry for provider messages. Never log full payloads or URLs.
