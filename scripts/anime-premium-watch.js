@@ -67,6 +67,7 @@ function watchRoute(season, episode) {
 function showGate(title, message, actionLabel = "Sign in to Vivid", actionHref = "auth.html?returnTo=anime-premium.html", retry = false) {
   disposeHls();
   currentPlaybackSessionId = "";
+  activePlaybackCandidateId = "";
   $("vap-player").pause();
   $("vap-player").removeAttribute("src");
   $("vap-player").load();
@@ -240,6 +241,8 @@ async function selectEpisode(index, request = false) {
 }
 async function loadSeason(seasonNumber) {
   const request = ++seasonRequest;
+  failedPlaybackCandidates = [];
+  activePlaybackCandidateId = "";
   if (currentPlaybackSessionId) void syncPlaybackProgress(true);
   playbackRequestId += 1;
   showGate("Loading season", "Choose an episode after the season list has loaded.");
@@ -356,6 +359,7 @@ function fallbackToNextPlaybackServer(message) {
   failedPlaybackCandidates = [...new Set([...failedPlaybackCandidates, activePlaybackCandidateId])].slice(0, 8);
   const episode = activeEpisodes[activeEpisodeIndex];
   if (!episode) return;
+  void syncPlaybackProgress(true);
   currentPlaybackSessionId = "";
   activePlaybackCandidateId = "";
   setStatus(message + " Trying the next authorised server…");
