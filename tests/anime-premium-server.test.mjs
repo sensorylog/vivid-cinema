@@ -154,3 +154,12 @@ test("admin source registry stores and sorts up to eight independent authorised 
   assert.match(adminSources, /candidates\.length > 8/);
   assert.match(adminSources, /rightsVerified: true/);
 });
+
+
+test("playback endpoint validates skip lists and excludes failed candidates without weakening rights checks", () => {
+  assert.match(playback, /invalid-server-fallback/);
+  assert.match(playback, /excludedRaw\.length > 8/);
+  assert.match(playback, /excludedCandidates\.has/);
+  assert.match(playback, /candidate\.rightsVerified !== true/);
+  assert.match(playback, /candidateId: String\(selected\.candidate\.candidateId/);
+});
