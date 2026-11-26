@@ -61,14 +61,14 @@ test("title route and runtime are available offline and included in syntax check
 
 test("Anime Premium My List uses the shared Vivid Library Watch Later collection", () => {
   assert.match(titleScript, /from "\.\/library\.js"/);
-  assert.match(titleScript, /hasLibraryItem\("favorites", item\)/);
-  assert.match(titleScript, /toggleLibraryItem\("favorites", item\)/);
+  assert.match(titleScript, /hasLibraryItem\("watchLater", item\)/);
+  assert.match(titleScript, /toggleLibraryItem\("watchLater", item\)/);
   assert.match(titleScript, /media_type: mediaType/);
   assert.match(titleScript, /poster_path: details\.poster_path/);
   assert.match(titleScript, /vivid:library-changed/);
   assert.match(titleScript, /aria-pressed/);
   assert.match(titleScript, /Added to My List/);
-  assert.match(titleScript, /vap:favorites-changed/);
+  assert.match(titleScript, /vap:my-list-changed/);
   assert.doesNotMatch(titleScript, /vivid:anime-premium:my-list/);
   assert.match(library, /export function toggleLibraryItem\(collection,item\)/);
   assert.match(library, /export function syncLibraryForUser\(user=null\)/);
