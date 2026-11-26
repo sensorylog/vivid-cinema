@@ -33,9 +33,12 @@ The next provider integrations should plug into this resolver contract. Do not p
 
 ### Primary research references
 
-- Crunchyroll Terms of Service: https://www.crunchyroll.com/en/terms/privacy — the terms include restrictions on incorporating, streaming/retransmitting, and indexing its content without express written authorisation.
+- Crunchyroll Terms of Service: https://www.crunchyroll.com/en/terms/privacy — current terms restrict incorporating, streaming/retransmitting, automated extraction and indexing without express written authorisation.
+- Crunchyroll Partner Portal: https://partner.crunchyroll.com/ — an official partner entry point exists, but the publicly discoverable documentation route leads into a Game Vault partner journey; it is **not evidence of a public video playback API** or a granted VIVID streaming licence.
 - HIDIVE official service: https://welcome.hidive.com/
+- AMC Global Media / Sentai Filmworks and MBS distribution announcement (2 March 2023): https://www.amcglobalmedia.com/2023/03/02/amc-networks-sentai-filmworks-and-mainichi-broadcasting-system-seal-major-deal-for-anime-content-on-hidive-streaming-service/ — illustrates title/package and territory-specific exclusive rights.
 - AMC Global Media / HIDIVE and MBS distribution partnership announcement (10 August 2026): https://www.amcglobalmedia.com/2026/08/10/amc-global-medias-hidive-and-mainichi-broadcasting-system-extend-partnership-into-next-phase-with-exclusive-output-deal-covering-anime-streamer/
+- Netflix Help Center, content licensing: https://help.netflix.com/en/node/4976 — Netflix describes licensing rights by title, country and time window.
 - AniBiz official marketplace: https://anibiz.com/about
 - AniBiz licensee information: https://anibiz.com/lp/licensee
 - Sony's overview of Crunchyroll's distribution and localisation business: https://www.sony.com/en/SonyInfo/blog/2026/10/06/
