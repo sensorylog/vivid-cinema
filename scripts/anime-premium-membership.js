@@ -1,16 +1,6 @@
+import { ANIME_PREMIUM_COUNTRIES } from "./anime-premium-countries.js";
 const $ = id => document.getElementById(id);
-const FALLBACK_COUNTRIES = [
-  { code: "GH", name: "Ghana", currency: "GHS" }, { code: "NG", name: "Nigeria", currency: "NGN" },
-  { code: "KE", name: "Kenya", currency: "KES" }, { code: "ZA", name: "South Africa", currency: "ZAR" },
-  { code: "US", name: "United States", currency: "USD" }, { code: "GB", name: "United Kingdom", currency: "GBP" },
-  { code: "CA", name: "Canada", currency: "CAD" }, { code: "AU", name: "Australia", currency: "AUD" },
-  { code: "IN", name: "India", currency: "INR" }, { code: "DE", name: "Germany", currency: "EUR" },
-  { code: "FR", name: "France", currency: "EUR" }, { code: "AE", name: "United Arab Emirates", currency: "AED" },
-  { code: "JP", name: "Japan", currency: "JPY" }, { code: "SG", name: "Singapore", currency: "SGD" },
-  { code: "UG", name: "Uganda", currency: "UGX" }, { code: "TZ", name: "Tanzania", currency: "TZS" },
-  { code: "RW", name: "Rwanda", currency: "RWF" }, { code: "CI", name: "Côte d’Ivoire", currency: "XOF" },
-  { code: "SN", name: "Senegal", currency: "XOF" }, { code: "BR", name: "Brazil", currency: "BRL" }
-];
+const FALLBACK_COUNTRIES = ANIME_PREMIUM_COUNTRIES;
 const PAGE_CHECKOUT_PLANS = {
   monthly: { amountMajor: 53.30, label: "1 month", period: "month" },
   biannually: { amountMajor: 287.82, label: "6 months", period: "6 months" },
