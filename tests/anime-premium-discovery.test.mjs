@@ -51,9 +51,16 @@ test("search, type, year and sort controls share one catalogue state", () => {
   assert.match(script, /function yearOf\(item\).*item\.year/);
 });
 
+test("failed Premium shelves leave loading state and expose a retry action", () => {
+  assert.match(script, /Promise\.allSettled\(jobs\)/);
+  assert.match(script, /renderShelfError\(/);
+  assert.match(script, /data-vap-retry-shelves/);
+  assert.match(script, /shelfRequest/);
+});
+
 test("Premium discovery assets are cached and syntax-checked", () => {
   assert.match(sw, /scripts\/anime-premium-discovery\.js/);
-  assert.match(sw, /vivid-cinema-shell-v351/);
+  assert.match(sw, /vivid-cinema-shell-v352/);
   assert.match(sw, /anime-premium-title\.html/);
   assert.match(sw, /anime-premium-title\.js/);
   assert.match(sw, /vivid-anime-premium-title\.css/);
