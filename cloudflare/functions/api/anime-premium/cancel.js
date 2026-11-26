@@ -1,5 +1,5 @@
 import {
-  allowedOrigin, AnimePremiumError, getPremiumServices, jsonResponse, optionsResponse,
+  allowedOrigin, AnimePremiumError, enforceRateLimit, getPremiumServices, jsonResponse, optionsResponse,
   paystackRequest, requirePremiumUser, timestampFromMillis
 } from "../../lib/anime-premium-service.js";
 
@@ -12,6 +12,7 @@ export async function onRequestPost({ request, env }) {
   try {
     const user = await requirePremiumUser(request, env);
     const { db } = getPremiumServices(env);
+    await enforceRateLimit(db, user.uid, "cancel-renewal", 3, 60 * 60 * 1000);
     const membershipRef = db.collection("animePremiumMemberships").doc(user.uid);
     const snapshot = await membershipRef.get();
     const membership = snapshot.exists ? snapshot.data() || {} : {};
