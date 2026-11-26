@@ -11,15 +11,17 @@ const TRACKS = new Set(["sub", "dub"]);
 // Keep local anime preferences available even if Firebase's remote SDK is slow
 // or temporarily unavailable. Account sync attaches when the shared auth module
 // finishes restoring the Vivid session.
-void import("./firebase.js").then(({ auth: instance }) => {
+const authPromise = import("./firebase.js").then(({ auth: instance }) => {
   auth = instance;
   ensurePreferencesOwner(auth?.currentUser?.uid || "guest");
   if (auth?.currentUser) {
     void syncAnimePreferencesForUser(auth.currentUser)
       .catch(error => console.warn("Anime preferences cloud sync unavailable:", error));
   }
+  return auth;
 }).catch(error => {
   console.warn("Anime preferences are running locally until Vivid account services reconnect:", error);
+  return null;
 });
 
 function normalizeItem(item = {}) {
@@ -102,6 +104,7 @@ async function getPreferencesFirestore() {
 }
 
 export async function syncAnimePreferencesForUser(user = null) {
+  await authPromise;
   if (!user?.uid || String(auth?.currentUser?.uid || "") !== String(user.uid)) return getAnimeLibraryPreferences();
   ensurePreferencesOwner(user.uid);
   const { db, doc, getDocFromServer, setDoc } = await getPreferencesFirestore();
