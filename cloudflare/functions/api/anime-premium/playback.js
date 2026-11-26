@@ -58,6 +58,12 @@ export async function onRequestPost({ request, env }) {
     try { body = JSON.parse(raw); } catch { throw new AnimePremiumError(400, "invalid-request", "A valid playback request is required."); }
     const mediaType = body.mediaType === "movie" ? "movie" : body.mediaType === "tv" ? "tv" : "";
     const titleId = String(body.titleId || "");
+    const excludedRaw = body.excludeCandidateIds;
+    if (excludedRaw !== undefined && (!Array.isArray(excludedRaw) || excludedRaw.length > 8 ||
+        excludedRaw.some(value => typeof value !== "string" || !/^[A-Za-z0-9][A-Za-z0-9._-]{1,79}$/.test(value)))) {
+      throw new AnimePremiumError(400, "invalid-server-fallback", "The server fallback request is invalid.");
+    }
+    const excludedCandidates = new Set(excludedRaw || []);
     if (!mediaType || !/^\d{1,12}$/.test(titleId)) throw new AnimePremiumError(400, "invalid-title", "A valid anime title is required.");
     const season = mediaType === "tv" ? Number(body.season) : null;
     const episode = mediaType === "tv" ? Number(body.episode) : null;
@@ -80,8 +86,9 @@ export async function onRequestPost({ request, env }) {
     const source = sourceSnapshot.data() || {};
     // One episode can have several independently rights-cleared server candidates.
     // Legacy single-source documents remain readable during migration.
-    const candidates = Array.isArray(source.candidates) ? source.candidates.slice(0, 8) :
-      [{ ...source, candidateId: String(source.provider || "legacy") }];
+    const candidates = (Array.isArray(source.candidates) ? source.candidates.slice(0, 8) :
+      [{ ...source, candidateId: String(source.provider || "legacy") }])
+      .sort((left, right) => Number(left.priority || 50) - Number(right.priority || 50));
     const territory = String(request.cf?.country || "").toUpperCase();
     if (!/^[A-Z]{2}$/.test(territory)) {
       throw new AnimePremiumError(451, "territory-or-rights-unavailable", "Vivid could not verify the playback territory for this request.");
@@ -89,7 +96,8 @@ export async function onRequestPost({ request, env }) {
     let rightsEligible = false;
     let selected = null;
     for (const candidate of candidates) {
-      if (!candidate || candidate.active !== true || !candidate.sourceId || typeof candidate.provider !== "string") continue;
+      if (!candidate || excludedCandidates.has(String(candidate.candidateId || candidate.provider || "legacy")) ||
+          candidate.active !== true || !candidate.sourceId || typeof candidate.provider !== "string") continue;
       const licenseStartsAt = timestampMillis(candidate.licenseStartsAt);
       const licenseEndsAt = timestampMillis(candidate.licenseEndsAt);
       if (candidate.rightsVerified !== true || !Array.isArray(candidate.allowedTerritories) ||
@@ -150,7 +158,8 @@ export async function onRequestPost({ request, env }) {
         url: selected.url.toString(),
         expiresAt: new Date(selected.expiresAt).toISOString(),
         mimeType: selected.mimeType,
-        provider: String(selected.candidate.label || selected.candidate.provider || "Vivid authorised source")
+        provider: String(selected.candidate.label || selected.candidate.provider || "Vivid authorised source"),
+        candidateId: String(selected.candidate.candidateId || selected.candidate.provider || "legacy")
       }
     }, 200, origin, env);
   } catch (error) {
