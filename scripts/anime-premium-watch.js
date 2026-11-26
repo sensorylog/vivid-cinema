@@ -7,7 +7,7 @@ import { resolveAnimeIds } from "./playback/anime-id-resolver.js";
 import { resolveAnimePremiumProviderOptions } from "./playback/anime-premium-providers.js";
 import { getLocalLibrary, upsertLibraryItem } from "./library.js";
 import { savePlaybackProgress, completePlaybackProgress, flushPlaybackProgress } from "./recommendations.js";
-import { getAnimeLibraryPreferences, saveAnimeLibraryPreferences } from "./anime-library.js";
+import { getAnimeLibraryPreferences, saveAnimeLibraryPreferences, syncAnimePreferencesForUser, markAnimeCompleted } from "./anime-library.js";
 
 const $ = id => document.getElementById(id);
 const params = new URLSearchParams(window.location.search);
@@ -557,6 +557,13 @@ function bindAuth() {
       setStatus("Playback stopped after the Vivid account changed.");
     }
     currentUser = nextUser;
+    if (currentUser) {
+      void syncAnimePreferencesForUser(currentUser).then(preferences => {
+        if (currentUser?.uid !== user?.uid) return;
+        animeTrack = preferences.track;
+        $("vap-audio-track")?.querySelectorAll("[data-vap-track]").forEach(button => button.setAttribute("aria-pressed", String(button.dataset.vapTrack === animeTrack)));
+      }).catch(error => console.warn("Vivid Anime Premium preferences could not sync:", error));
+    }
     $("vap-player-signin").href = currentUser ? "account.html" : "auth.html?returnTo=anime-premium.html";
     $("vap-player-signin").textContent = currentUser ? "Open Vivid account →" : "Sign in to Vivid →";
   }, error => {
