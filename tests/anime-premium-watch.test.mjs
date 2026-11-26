@@ -67,12 +67,23 @@ test("Provider fallback switches embeds without requesting arbitrary stream URLs
   assert.doesNotMatch(script, /ANIME_PREMIUM_STREAM_RESOLVER|excludeCandidateIds|HLS_LIBRARY_URL/);
 });
 
+test("A slow provider is not automatically marked failed before a real playback error", () => {
+  const timer = script.slice(script.indexOf("providerLoadTimer = window.setTimeout"), script.indexOf("return true;", script.indexOf("providerLoadTimer = window.setTimeout")));
+  assert.match(timer, /has not confirmed playback/);
+  assert.doesNotMatch(timer, /fallbackToNextPlaybackServer/);
+  assert.match(script, /frame\.onerror = \(\) =>/);
+  assert.match(script, /reported a playback error/);
+});
+
 test("Progress messages are origin-checked and saved through the Premium progress endpoint", () => {
   assert.match(script, /anilink-player:/);
   assert.match(script, /aniembed:play/);
   assert.match(script, /provider\.id === "vidrift"/);
   assert.match(script, /message\.type === "watching-log"/);
-  assert.match(script, /if \(provider\.events\)/);
+  assert.doesNotMatch(script, /if \(provider\.events\)/);
+  assert.match(script, /has not confirmed playback\. The player may still be loading/);
+  assert.match(script, /is ready\. Press play in the player/);
+  assert.match(script, /const confirmedPlaying =/);
   assert.match(script, /\["vidapi", "vidsrc", "vidlink", "vidplus"\]\.includes\(provider\.id\)/);
   assert.match(script, /new URL\(provider\?\.url \|\| ""\)\.origin/);
   assert.match(script, /\["megaplay", "megaplay-legacy", "megavid", "megaflix"\]/);
