@@ -35,7 +35,7 @@ function formatMoney(amount, currency) {
 }
 async function loadCountries() {
   try {
-    const response = await fetch("https://restcountries.com/v3.1/all?fields=cca2,name,currencies", { cache: "force-cache" });
+    const controller = new AbortController();\n    const timeout = window.setTimeout(() => controller.abort(), 4500);\n    let response;\n    try { response = await fetch("https://restcountries.com/v3.1/all?fields=cca2,name,currencies", { cache: "force-cache", signal: controller.signal }); }\n    finally { window.clearTimeout(timeout); }
     if (!response.ok) throw new Error("Country list unavailable");
     const data = await response.json();
     const parsed = data.map(country => {
