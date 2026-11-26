@@ -857,6 +857,26 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
+
+    // Anime Premium billing, entitlements, authorised sources and audit trails
+    // are server-owned. Even signed-in users and custom-claim admins must use
+    // the authenticated Cloudflare API; browser clients cannot read or mutate them.
+    match /animePremiumMemberships/{uid} {
+      allow read, write: if false;
+    }
+    match /animePremiumCheckouts/{reference} {
+      allow read, write: if false;
+    }
+    match /animePremiumWebhookEvents/{eventId} {
+      allow read, write: if false;
+    }
+    match /animePremiumSources/{sourceId} {
+      allow read, write: if false;
+    }
+    match /animePremiumAdminAudit/{auditId} {
+      allow read, write: if false;
+    }
+
     match /{document=**} {
       allow read, write: if false;
     }
