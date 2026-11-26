@@ -88,6 +88,7 @@ export async function onRequestPost({ request, env }) {
     // Legacy single-source documents remain readable during migration.
     const candidates = (Array.isArray(source.candidates) ? source.candidates.slice(0, 8) :
       [{ ...source, candidateId: String(source.provider || "legacy") }])
+      .filter(candidate => candidate && typeof candidate === "object")
       .sort((left, right) => Number(left.priority || 50) - Number(right.priority || 50));
     const territory = String(request.cf?.country || "").toUpperCase();
     if (!/^[A-Z]{2}$/.test(territory)) {
