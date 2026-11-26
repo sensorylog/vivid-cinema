@@ -41,7 +41,10 @@ Use a real signed-in browser session. The library page is private and must remai
 - [ ] My Anime page, CSS and scripts are present in the service-worker shell.
 - [ ] Returning online refreshes cloud library/progress data without duplicating entries.
 - [ ] Existing non-anime favorites, Watch Later, history and progress continue to work.
-- [ ] Existing free anime page remains unchanged.
+- [ ] Free Anime is clearly labelled separately from Anime Premium on desktop navigation and the mobile More menu.
+- [ ] Free Anime displays only the six curated series and no catalogue pagination or full-catalogue filters.
+- [ ] Every free sample opens only Season 1, Episode 1; other anime titles/episodes show the Premium upgrade gate.
+- [ ] Anime Premium remains a separate primary navigation destination on desktop and mobile.
 - [ ] The provider QA matrix is completed separately; iframe load alone does not count as playback success.
 
 ## Release guard
