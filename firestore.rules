@@ -32,7 +32,14 @@ service cloud.firestore {
     }
 
     function validContentId(contentId) {
-      return contentId.matches('^(movie|tv):[0-9]+
+      return contentId.matches('^(movie|tv):[0-9]+$');
+    }
+
+    function validProgressId(contentId) {
+      return contentId.matches('^movie:[0-9]+$')
+        || contentId.matches('^tv:[0-9]+$')
+        || contentId.matches('^tv:[0-9]+:[0-9]+:[0-9]+$');
+    }
 
     function validLibraryData() {
       return request.resource.data.keys().hasOnly([
@@ -88,6 +95,18 @@ service cloud.firestore {
       && request.resource.data.title.size() <= 300
       && (!request.resource.data.keys().hasAny(['isAnime']) || request.resource.data.isAnime is bool)
       && request.resource.data.updatedAt is number;
+    }
+
+    function validAnimePreferences() {
+      return request.resource.data.keys().hasOnly(['track','autoplayNextEpisode','subtitleLanguage','preferredPlayer','updatedAt'])
+        && request.resource.data.track in ['sub','dub']
+        && request.resource.data.autoplayNextEpisode is bool
+        && request.resource.data.subtitleLanguage is string
+        && request.resource.data.subtitleLanguage.size() <= 12
+        && request.resource.data.preferredPlayer is string
+        && request.resource.data.preferredPlayer.size() <= 32
+        && request.resource.data.updatedAt is number
+        && request.resource.data.updatedAt >= 0;
     }
 
     function validTombstoneData() {
@@ -316,6 +335,12 @@ service cloud.firestore {
       match /progress/{contentId} {
         allow read: if isOwner(userId);
         allow create, update: if isOwner(userId) && validProgressId(contentId) && validProgressData();
+        allow delete: if isOwner(userId);
+      }
+
+      match /animePreferences/{preferenceId} {
+        allow read: if isOwner(userId);
+        allow create, update: if isOwner(userId) && preferenceId == "default" && validAnimePreferences();
         allow delete: if isOwner(userId);
       }
 
