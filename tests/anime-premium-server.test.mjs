@@ -190,3 +190,9 @@ test("admin source registry supports episode-level and whole-title mappings", as
   assert.match(adminScript, /scope: mediaType === "tv" \?/);
   assert.match(adminScript, /addEventListener\("change", updateSourceScope\)/);
 });
+
+
+test("admin form defaults an empty candidate ID to the approved provider ID", async () => {
+  const adminScript = await readFile(new URL("../scripts/anime-premium-admin.js", import.meta.url), "utf8");
+  assert.match(adminScript, /candidateId: \$\("vap-admin-candidate-id"\)\.value\.trim\(\) \|\| \$\("vap-admin-provider"\)\.value\.trim\(\)/);
+});
