@@ -163,9 +163,11 @@ async function loadMembership() {
     const token = await currentUser.getIdToken();
     const response = await fetch("/api/anime-premium/membership", {
       headers: { Authorization: "Bearer " + token },
-      cache: "no-store"
+      cache: "no-store",
+      signal: AbortSignal.timeout(10000)
     });
     if (response.status === 403) {
+      membershipStatusUnavailable = false;
       membershipVerificationRequired = true;
       if (pricing) await updatePrice();
       else $("vap-checkout-status").textContent = "Verify your Vivid email address before subscribing.";
