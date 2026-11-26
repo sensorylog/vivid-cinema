@@ -37,7 +37,14 @@ export class AnimePremiumError extends Error {
 export function allowedOrigin(origin, env = {}) {
   if (!origin) return false;
   const extra = String(env.VIVID_ALLOWED_ORIGINS || "").split(",").map(value => value.trim()).filter(Boolean);
-  return DEFAULT_ALLOWED_ORIGINS.includes(origin) || extra.includes(origin);
+  if (DEFAULT_ALLOWED_ORIGINS.includes(origin) || extra.includes(origin)) return true;
+  try {
+    const parsed = new URL(origin);
+    return parsed.protocol === "https:" &&
+      (parsed.hostname === "vivid-cinema.pages.dev" || parsed.hostname.endsWith(".vivid-cinema.pages.dev"));
+  } catch {
+    return false;
+  }
 }
 export function jsonResponse(data, status = 200, origin = "", env = {}) {
   const headers = new Headers({
