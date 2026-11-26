@@ -57,45 +57,19 @@ async function loadCountries() {
   const select = $("vap-country");
   if (!select) throw new Error("Country selector is missing from the membership page.");
   const saved = (() => { try { return localStorage.getItem("vivid:anime-premium-country") || "GH"; } catch { return "GH"; } })();
-  const render = () => {
-    const fragment = document.createDocumentFragment();
-    countries.forEach(country => {
-      const option = document.createElement("option");
-      option.value = country.code;
-      option.textContent = country.name + (country.currency ? " (" + country.currency + ")" : "");
-      fragment.appendChild(option);
-    });
-    select.replaceChildren(fragment);
-    select.value = countries.some(country => country.code === selectedCountry) ? selectedCountry : "GH";
-  };
-  countries = FALLBACK_COUNTRIES;
-  const countryStatus = $("vap-country-status");
-  if (countryStatus) countryStatus.textContent = "Loading the full international country list…";
-  selectedCountry = saved;
-  render();
-
-  // Use Vivid's same-origin Pages Function instead of depending on browser
-  // access to third-party country APIs (which can be blocked by mobile WebViews,
-  // content blockers, DNS filtering, or a deployment CSP).
-  const response = await withTimeout(
-    fetch("/api/anime-premium/countries", { cache: "no-store", credentials: "same-origin" }),
-    10000,
-    "The international country directory request timed out."
-  );
-  if (!response.ok) throw new Error("The international country directory is unavailable (" + response.status + ").");
-  const payload = await response.json();
-  const parsed = Array.isArray(payload.countries) ? payload.countries : [];
-  const unique = [...new Map(parsed.map(country => [String(country.code || "").toUpperCase(), {
-    code: String(country.code || "").toUpperCase(),
-    name: String(country.name || ""),
-    currency: String(country.currency || "").toUpperCase()
-  }])).values()].filter(country => /^[A-Z]{2}$/.test(country.code) && country.name);
-  if (!payload.ok || unique.length < 180) throw new Error("The international country directory returned an incomplete list.");
-  countries = unique.sort((left, right) => left.name.localeCompare(right.name));
-  if (!countries.some(country => country.code === selectedCountry)) selectedCountry = "GH";
-  render();
-  if (countryStatus) countryStatus.textContent = "International country list loaded · " + countries.length + " countries available.";
+  countries = ANIME_PREMIUM_COUNTRIES;
+  selectedCountry = countries.some(country => country.code === saved) ? saved : "GH";
+  const fragment = document.createDocumentFragment();
+  countries.forEach(country => {
+    const option = document.createElement("option");
+    option.value = country.code;
+    option.textContent = country.name + (country.currency ? " (" + country.currency + ")" : "");
+    fragment.appendChild(option);
+  });
+  select.replaceChildren(fragment);
   select.value = selectedCountry;
+  const countryStatus = $("vap-country-status");
+  if (countryStatus) countryStatus.textContent = "Complete country directory loaded · " + countries.length + " countries and territories available offline.";
 }
 async function getExchangeRate(currency) {
   const now = Date.now();
