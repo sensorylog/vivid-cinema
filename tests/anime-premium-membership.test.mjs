@@ -51,7 +51,7 @@ test("membership UI initialises pricing before Firebase auth and always exits lo
   assert.match(client, /ANIME_PREMIUM_COUNTRIES/);
   assert.match(client, /window\.vividAuthResolved/);
   assert.match(client, /window\.vividAuthUser/);
-  assert.match(client, /International country list loaded/);
+  assert.match(client, /Complete country directory loaded/);
   assert.match(client, /countries and territories available offline/);
   assert.match(html, /vap-country-status/);
   assert.match(shell, /window\.vividAuthUser = user \|\| null/);
@@ -99,7 +99,7 @@ test("hosted page checkout requires verified identity and maps the three plans s
 test("webhook verification is the source of truth for membership activation and renewals", () => {
   assert.match(webhook, /verifyPaystackSignature/);
   assert.match(webhook, /transaction\/verify/);
-  assert.match(webhook, /Hosted Paystack page transactions have Paystack-generated references/);
+  assert.match(webhook, /Payment Page transactions have Paystack-generated references/);
   assert.match(webhook, /matches\.length !== 1/);
   assert.match(webhook, /checkoutSource === "hosted_payment_page"/);
   assert.match(webhook, /eventName === "charge\.success"/);
