@@ -166,7 +166,8 @@ async function loadMembership() {
       cache: "no-store",
       signal: AbortSignal.timeout(10000)
     });
-    if (response.status === 403) {
+    const payload = await response.json().catch(() => ({}));
+    if (response.status === 403 && payload.code === "email-not-verified") {
       membershipStatusUnavailable = false;
       membershipVerificationRequired = true;
       if (pricing) await updatePrice();
@@ -179,7 +180,6 @@ async function loadMembership() {
       else $("vap-checkout-status").textContent = "Vivid could not verify your current membership. Reload and try again before paying.";
       return;
     }
-    const payload = await response.json();
     membershipStatusUnavailable = false;
     membershipVerificationRequired = false;
     const membership = payload.membership || {};
@@ -230,6 +230,10 @@ async function startCheckout() {
       body: JSON.stringify({ country: selectedCountry, paymentMethod: selectedPaymentMethod })
     });
     const payload = await response.json().catch(() => ({}));
+    if (response.status === 403 && payload.code === "email-not-verified") {
+      membershipVerificationRequired = true;
+      if (pricing) await updatePrice();
+    }
     if (!response.ok || !payload.authorizationUrl) throw new Error(payload.message || "Secure checkout could not be started.");
     $("vap-checkout-status").textContent = "Opening Paystack securely…";
     window.location.assign(payload.authorizationUrl);
