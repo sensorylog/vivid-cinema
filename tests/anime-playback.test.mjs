@@ -32,8 +32,9 @@ test("anime track preference safely normalizes and persists sub or dub", () => {
 });
 
 test("AnimeEmbed messages require their documented channel and normalize progress", () => {
-  assert.equal(normalizeAnimeProviderMessage("animeembed", { channel: "other", event: "play" }), null);
-  const message = normalizeAnimeProviderMessage("animeembed", { channel: "animeembed", event: "progress", currentTime: 42, duration: 120 });
+  assert.equal(normalizeAnimeProviderMessage("animeembed", { channel: "other", version: 1, event: "play" }), null);
+  assert.equal(normalizeAnimeProviderMessage("animeembed", { channel: "animeembed", event: "play" }), null);
+  const message = normalizeAnimeProviderMessage("animeembed", { channel: "animeembed", version: 1, event: "progress", data: { currentTime: 42, duration: 120 } });
   assert.equal(message.type, "PLAYER_EVENT");
   assert.equal(message.data.player_status, "timeupdate");
   assert.equal(message.data.player_progress, 42);
