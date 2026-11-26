@@ -38,7 +38,7 @@ test("card auto-renew cancellation uses stored Paystack subscription credentials
   assert.match(cancel, /subscriptionCode/);
   assert.match(cancel, /subscription\/disable/);
   assert.match(cancel, /cancelAtPeriodEnd: true/);
-  assert.match(cancel, /currentPeriodEnd/);
+  assert.doesNotMatch(cancel, /currentPeriodEnd\s*:/);
 });
 
 test("server-only Firestore collections remain private to all browser clients", () => {
