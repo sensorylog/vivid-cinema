@@ -1,5 +1,3 @@
-import { auth } from "./firebase.js";
-import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
 
 const $ = id => document.getElementById(id);
 const reference = new URLSearchParams(window.location.search).get("reference") || "";
@@ -24,7 +22,8 @@ async function checkMembership() {
     const token = await currentUser.getIdToken();
     const response = await fetch("/api/anime-premium/membership", {
       headers: { Authorization: "Bearer " + token },
-      cache: "no-store"
+      cache: "no-store",
+      signal: AbortSignal.timeout(10000)
     });
     if (response.status === 403) {
       setState("bi-envelope-exclamation", "Verify your Vivid email", "Your Vivid account email must be verified before membership can be activated.");
@@ -55,10 +54,25 @@ async function checkMembership() {
 }
 $("vap-return-reference").textContent = reference ? "Payment reference · …" + reference.slice(-8) : "No payment reference was returned.";
 $("vap-return-refresh").addEventListener("click", () => { void checkMembership(); });
-onAuthStateChanged(auth, user => {
-  currentUser = user && !user.isAnonymous ? user : null;
-  void checkMembership();
-}, () => {
-  currentUser = null;
-  void checkMembership();
-});
+async function initAuth() {
+  try {
+    const [{ auth }, { onAuthStateChanged }] = await Promise.all([
+      import("./firebase.js"),
+      import("https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js")
+    ]);
+    if (typeof auth.authStateReady === "function") await auth.authStateReady();
+    currentUser = auth.currentUser && !auth.currentUser.isAnonymous ? auth.currentUser : null;
+    onAuthStateChanged(auth, user => {
+      currentUser = user && !user.isAnonymous ? user : null;
+      void checkMembership();
+    }, () => {
+      currentUser = null;
+      void checkMembership();
+    });
+  } catch (error) {
+    console.warn("Vivid Anime Premium return could not restore the account session:", error);
+    currentUser = null;
+    void checkMembership();
+  }
+}
+void initAuth();
