@@ -1,11 +1,7 @@
 import { tmdbApi } from "./tmdb.js";
-import { auth } from "./firebase.js";
-import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
 import { getImageUrl, normalizeResults } from "./media.js";
 import { escapeHtml } from "./utils.js";
 import { isAnimeMetadata } from "./anime-eligibility.js";
-import { hasLibraryItem, toggleLibraryItem } from "./library.js";
-import { markAnimeCompleted, unmarkAnimeCompleted, addAnimeFavorite, removeAnimeFavorite } from "./anime-library.js";
 
 const $ = id => document.getElementById(id);
 const params = new URLSearchParams(window.location.search);
@@ -21,6 +17,8 @@ let activeTitleDetails = null;
 let activeVividUser = null;
 let premiumMembershipActive = false;
 let titleAccessRequest = 0;
+let libraryApi = { hasLibraryItem: () => false, toggleLibraryItem: () => ({}) };
+let animeLibraryApi = { markAnimeCompleted: () => {}, unmarkAnimeCompleted: () => {}, addAnimeFavorite: () => {}, removeAnimeFavorite: () => {} };
 
 function setMemberActionsVisible(visible) {
   document.querySelectorAll("[data-vap-member-action]").forEach(button => { button.hidden = !visible; });
@@ -79,10 +77,32 @@ async function syncTitleAccess(user) {
     if (membership) membership.hidden = true;
   }
 }
-onAuthStateChanged(auth, user => { void syncTitleAccess(user); }, error => {
-  console.warn("Vivid Anime Premium account status could not be resolved:", error);
-  void syncTitleAccess(null);
-});
+// Firebase and library startup must never block public title metadata.
+async function initializeOptionalAccountFeatures() {
+  try {
+    const [firebaseModule, authSdk, libraryModule, animeLibraryModule] = await Promise.all([
+      import("./firebase.js"),
+      import("https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js"),
+      import("./library.js"),
+      import("./anime-library.js")
+    ]);
+    libraryApi = libraryModule;
+    animeLibraryApi = animeLibraryModule;
+    if (activeTitleDetails) {
+      updateFavoriteButton(activeTitleDetails);
+      updateCompletedButton(activeTitleDetails);
+      updateStarButton(activeTitleDetails);
+    }
+    authSdk.onAuthStateChanged(firebaseModule.auth, user => { void syncTitleAccess(user); }, error => {
+      console.warn("Vivid Anime Premium account status could not be resolved:", error);
+      void syncTitleAccess(null);
+    });
+  } catch (error) {
+    console.warn("Vivid Anime Premium account/library features are temporarily unavailable:", error);
+    void syncTitleAccess(null);
+  }
+}
+void initializeOptionalAccountFeatures();
 
 function titleName(details) { return details.title || details.name || "Anime title"; }
 function releaseYear(details) {
@@ -237,15 +257,15 @@ function updateStarButton(details) {
   const button = $("vap-title-star");
   if (!button) return;
   const item = libraryTitleItem(details);
-  const saved = hasLibraryItem("favorites", item);
+  const saved = libraryApi.hasLibraryItem("favorites", item);
   button.setAttribute("aria-pressed", String(saved));
   button.classList.toggle("is-saved", saved);
   button.innerHTML = saved
     ? '<i class="bi bi-star-fill" aria-hidden="true"></i> Favourite'
     : '<i class="bi bi-star" aria-hidden="true"></i> Add to favourites';
   button.onclick = () => {
-    if (hasLibraryItem("favorites", item)) removeAnimeFavorite(item.id, mediaType);
-    else addAnimeFavorite(item);
+    if (libraryApi.hasLibraryItem("favorites", item)) animeLibraryApi.removeAnimeFavorite(item.id, mediaType);
+    else animeLibraryApi.addAnimeFavorite(item);
     updateStarButton(details);
   };
 }
@@ -254,15 +274,15 @@ function updateCompletedButton(details) {
   const button = $("vap-title-completed");
   if (!button) return;
   const item = libraryTitleItem(details);
-  const saved = hasLibraryItem("completed", item);
+  const saved = libraryApi.hasLibraryItem("completed", item);
   button.setAttribute("aria-pressed", String(saved));
   button.classList.toggle("is-saved", saved);
   button.innerHTML = saved
     ? '<i class="bi bi-check-circle-fill" aria-hidden="true"></i> Completed'
     : '<i class="bi bi-check-circle" aria-hidden="true"></i> Mark as completed';
   button.onclick = () => {
-    if (hasLibraryItem("completed", item)) unmarkAnimeCompleted(item.id, mediaType);
-    else markAnimeCompleted(item);
+    if (libraryApi.hasLibraryItem("completed", item)) animeLibraryApi.unmarkAnimeCompleted(item.id, mediaType);
+    else animeLibraryApi.markAnimeCompleted(item);
     updateCompletedButton(details);
   };
 }
@@ -271,14 +291,14 @@ function updateFavoriteButton(details) {
   const button = $("vap-title-favorite");
   if (!button) return;
   const item = libraryTitleItem(details);
-  const saved = hasLibraryItem("watchLater", item);
+  const saved = libraryApi.hasLibraryItem("watchLater", item);
   button.setAttribute("aria-pressed", String(saved));
   button.classList.toggle("is-saved", saved);
   button.innerHTML = saved
     ? '<i class="bi bi-bookmark-check" aria-hidden="true"></i> Added to My List'
     : '<i class="bi bi-bookmark-plus" aria-hidden="true"></i> Add to My List';
   button.onclick = () => {
-    const next = toggleLibraryItem("watchLater", item);
+    const next = libraryApi.toggleLibraryItem("watchLater", item);
     const isSaved = (next.watchLater || []).some(entry =>
       String(entry.id) === item.id && (entry.media_type || entry.mediaType || "movie") === mediaType
     );
