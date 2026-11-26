@@ -41,6 +41,7 @@ const files = [
   "cloudflare/functions/api/african-stories/submissions.js",
   "cloudflare/functions/api/african-stories/metrics.js",
   "scripts/anime-premium.js",
+  "scripts/anime-premium-discovery.js",
   "scripts/auth.js",
   "scripts/verify-email.js",
   "api/send-verification.js",
