@@ -10,6 +10,29 @@ const env = await initializeTestEnvironment({
   firestore: { rules }
 });
 
+test("anime episode progress accepts season and episode scoped document IDs", async () => {
+  const db = env.authenticatedContext("alice").firestore();
+  await assertSucceeds(setDoc(doc(db, "users/alice/progress/tv:123:0:2"), {
+    id: "123", media_type: "tv", progress: 420, duration: 1200,
+    percentage: 35, completed: false, season: 0, episode: 2,
+    title: "Anime special", updatedAt: Date.now(), isAnime: true
+  }));
+  await assertFails(setDoc(doc(db, "users/alice/progress/tv:123:0"), {
+    id: "123", media_type: "tv", progress: 420, duration: 1200,
+    percentage: 35, completed: false, season: 0, episode: 2,
+    title: "Invalid episode key", updatedAt: Date.now(), isAnime: true
+  }));
+});
+
+test("owner can save an anime title in the completed collection", async () => {
+  const db = env.authenticatedContext("alice").firestore();
+  await assertSucceeds(setDoc(doc(db, "users/alice/completed/tv:123"), {
+    id: "123", media_type: "tv", title: "Completed anime", year: "2024",
+    poster_path: "/anime.jpg", backdrop_path: "/anime-backdrop.jpg",
+    updatedAt: Date.now(), completion: 100, completedAt: Date.now(), isAnime: true
+  }));
+});
+
 test("owner can write a valid library item", async () => {
   const db = env.authenticatedContext("alice").firestore();
   await assertSucceeds(setDoc(doc(db, "users/alice/favorites/movie:550"), {
