@@ -90,3 +90,13 @@ The Premium entry route now acts as a dedicated discovery homepage rather than a
 - Backdrop motion respects reduced-motion preferences, overlapping transitions are prevented, and the hero artwork/content fades as the reader scrolls into the title details.
 - Title discovery remains metadata-only: the page does not create a playback session or expose stream URLs. Playback and membership remain reserved for their later phases.
 - The title route, stylesheet and runtime are added to the offline app shell and scoped syntax checks, with dedicated structural tests for the identity masks and backdrop lifecycle.
+
+
+## Phase 4 implementation — protected watch experience
+
+- Adds a dedicated anime-premium-watch.html route with a native video player shell, season selector, episode browser, previous/next navigation and responsive cinema layout.
+- Episode and season metadata comes from TMDB; it is not treated as a playback source or entitlement.
+- Playback requests are sent only to the Vivid-owned /api/anime-premium/playback endpoint with the existing Firebase user's ID token. The browser never constructs or falls back to third-party streaming embeds.
+- A playback response is accepted only when it includes an HTTPS URL, a future expiry time and a supported media MIME type. Missing, unauthenticated, unentitled or unavailable responses fail closed with an explicit gate state.
+- The protected playback endpoint and server-side membership/source resolution are intentionally reserved for Phase 5. Until then the player shell remains safely locked rather than inventing a stream.
+- The watch route, stylesheet and runtime are included in the offline app shell, syntax checks and dedicated tests.
