@@ -116,7 +116,7 @@ test("server playback requires an active membership and a resolver-approved host
 test("playback resolver supports isolated server-side adapters per approved provider", () => {
   assert.match(playback, /ANIME_PREMIUM_PROVIDER_RESOLVERS_JSON/);
   assert.match(playback, /providers\?\.\[providerId\]/);
-  assert.match(playback, /providerResolver\(env, source\.provider\)/);
+  assert.match(playback, /providerResolver\(env, candidate\.provider\)/);
   assert.match(playback, /provider\.url\.toString\(\)/);
   assert.match(playback, /provider\.token/);
   assert.match(playback, /provider\.hosts\.has\(url\.hostname\.toLowerCase\(\)\)/);
@@ -126,8 +126,8 @@ test("playback resolver supports isolated server-side adapters per approved prov
 
 test("playback enforces verified territory and licence-window rights before resolving a provider", () => {
   assert.match(playback, /request\.cf\?\.country/);
-  assert.match(playback, /source\.rightsVerified !== true/);
-  assert.match(playback, /source\.allowedTerritories\.includes\(territory\)/);
+  assert.match(playback, /candidate\.rightsVerified !== true/);
+  assert.match(playback, /candidate\.allowedTerritories\.includes\(territory\)/);
   assert.match(playback, /licenseStartsAt > Date\.now\(\)/);
   assert.match(playback, /licenseEndsAt <= Date\.now\(\)/);
   assert.match(playback, /territory-or-rights-unavailable/);
