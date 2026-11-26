@@ -40,6 +40,7 @@ const files = [
   "cloudflare/functions/api/african-stories/session.js",
   "cloudflare/functions/api/african-stories/submissions.js",
   "cloudflare/functions/api/african-stories/metrics.js",
+  "scripts/anime-premium.js",
   "scripts/config.js",
   "scripts/routes.js",
   "scripts/utils.js",
