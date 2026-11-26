@@ -25,7 +25,8 @@ let membershipAutoRenew = false;
 let selectedCountry = "GH";
 let selectedPlanId = "monthly";
 let priceRequestId = 0;
-const rateCache = new Map();
+let rateCache = null;
+let rateCacheAt = 0;
 const withTimeout = async (promise, ms, message) => {
   let timer;
   try {
