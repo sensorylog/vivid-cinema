@@ -133,3 +133,6 @@ body.vivid-anime-premium-page{margin:0;min-height:100vh;background:var(--vap-bg)
 .vap-card-row .vap-identity-art{aspect-ratio:3/4}
 .vap-identity-svg image{width:240px;height:320px}
 .vap-identity-card:focus-visible{outline:2px solid #d9caff;outline-offset:5px;border-radius:12px}
+
+/* Keep the SVG silhouette transparent outside its actual title-specific mask. */
+.vap-identity-shade{display:none!important}
