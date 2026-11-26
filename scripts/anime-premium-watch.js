@@ -109,14 +109,130 @@ function updateEpisodeControls() {
     button.setAttribute("aria-pressed", String(active));
   });
 }
-async function requestPlayback(episode, excludedCandidates = failedPlaybackCandidates) {
+function renderServerOptions() {
+  const list = $("vap-server-list");
+  if (!list) return;
+  list.innerHTML = providerOptions.map(provider =>
+    '<button class="vap-server-option" type="button" data-vap-server="' + provider.id + '"' +
+    (provider.available ? "" : " disabled") +
+    ' aria-pressed="' + String(provider.id === activeProviderId) + '">' +
+    '<span class="vap-server-option-copy"><strong>' + escapeHtml(provider.label) + '</strong><small>' +
+    escapeHtml(provider.available ? provider.note : (mediaType === "movie" ? "Anime episode player · not for films" : "Needs a matching AniList/MAL ID or TMDB ID")) +
+    '</small></span><span class="vap-server-option-state">' +
+    (provider.available ? (provider.id === activeProviderId ? "Playing" : "Ready") : "Unavailable") +
+    '</span></button>'
+  ).join("");
+  list.querySelectorAll("[data-vap-server]").forEach(button => {
+    button.addEventListener("click", () => activateProvider(button.dataset.vapServer));
+  });
+  $("vap-server-count").textContent = providerOptions.filter(item => item.available).length + " available";
+}
+function activateProvider(providerId) {
+  const provider = providerOptions.find(item => item.id === providerId && item.available);
+  if (!provider || !currentPlaybackSessionId) return false;
+  const frame = $("vap-player-frame");
+  const generation = ++providerRequestId;
+  if (providerLoadTimer) window.clearTimeout(providerLoadTimer);
+  providerLoadTimer = null;
+  activeProviderId = provider.id;
+  renderServerOptions();
+  $("vap-player-gate").hidden = true;
+  frame.hidden = false;
+  frame.src = "about:blank";
+  frame.referrerPolicy = provider.id === "embedwave" ? "no-referrer" : "origin";
+  frame.title = titleName(titleDetails) + " · " + provider.label;
+  frame.onload = () => {
+    if (generation !== providerRequestId || activeProviderId !== provider.id) return;
+    setStatus(provider.label + " player loaded. If the episode does not start, switch to another server.");
+  };
+  frame.onerror = () => {
+    if (generation !== providerRequestId || activeProviderId !== provider.id) return;
+    fallbackToNextPlaybackServer(provider.label + " could not load.");
+  };
+  frame.src = provider.url;
+  $("vap-server-next").hidden = providerOptions.filter(item => item.available && item.id !== provider.id).length === 0;
+  setStatus("Opening " + provider.label + " · " + animeTrack.toUpperCase() + "…");
+  providerLoadTimer = window.setTimeout(() => {
+    if (generation !== providerRequestId || activeProviderId !== provider.id) return;
+    setStatus(provider.label + " has not confirmed playback yet. If the video is stuck, try the next server.");
+    $("vap-server-next").hidden = providerOptions.filter(item => item.available && item.id !== provider.id).length === 0;
+  }, 18000);
+  return true;
+}
+function fallbackToNextPlaybackServer(message) {
+  if (!currentPlaybackSessionId) return;
+  if (activeProviderId) failedProviderIds.add(activeProviderId);
+  const next = providerOptions.find(item => item.available && !failedProviderIds.has(item.id));
+  if (!next) {
+    setStatus(message + " No other available server remains. Choose a server above to retry.");
+    $("vap-server-next").hidden = true;
+    renderServerOptions();
+    return;
+  }
+  setStatus(message + " Trying " + next.label + "…");
+  activateProvider(next.id);
+}
+function updateProviderProgress(position, duration, force = false) {
+  const currentTime = Number(position);
+  const total = Number(duration);
+  if (!Number.isFinite(currentTime) || !Number.isFinite(total) || total <= 0 || currentTime < 0 || currentTime > total + 5) return;
+  latestProviderProgress = { currentTime: Math.min(currentTime, total), duration: total };
+  void syncPlaybackProgress(force);
+}
+function handleProviderMessage(event) {
+  const provider = providerOptions.find(item => item.id === activeProviderId);
+  const frame = $("vap-player-frame");
+  if (!provider || !frame?.contentWindow || event.source !== frame.contentWindow || event.origin !== provider.origin) return;
+  const data = event.data;
+  if (!data || typeof data !== "object") return;
+  if (provider.id === "anilink" && typeof data.type === "string" && data.type.startsWith("anilink-player:")) {
+    const type = data.type.slice("anilink-player:".length);
+    const payload = data.payload && typeof data.payload === "object" ? data.payload : {};
+    if (["ready", "play", "progress"].includes(type)) {
+      if (providerLoadTimer) window.clearTimeout(providerLoadTimer);
+      providerLoadTimer = null;
+      setStatus("Playing with AniLink · " + animeTrack.toUpperCase());
+    }
+    if (type === "progress") updateProviderProgress(payload.position ?? payload.currentTime, payload.duration);
+    if (type === "ended") updateProviderProgress(payload.position ?? payload.duration, payload.duration, true);
+    if (type === "error") fallbackToNextPlaybackServer("AniLink reported a playback error.");
+    return;
+  }
+  if (provider.id === "anixo") {
+    if (data.type === "aniembed:play") {
+      if (providerLoadTimer) window.clearTimeout(providerLoadTimer);
+      providerLoadTimer = null;
+      setStatus("Playing with AniXo · " + animeTrack.toUpperCase());
+      if (Number.isFinite(Number(data.duration))) updateProviderProgress(data.currentTime, data.duration);
+    } else if (data.type === "aniembed:ended") {
+      if (Number.isFinite(Number(data.duration))) updateProviderProgress(data.duration, data.duration, true);
+    } else if (data.type === "aniembed:error") {
+      fallbackToNextPlaybackServer("AniXo reported a playback error.");
+    }
+    return;
+  }
+  if (provider.id === "megavid") {
+    const type = String(data.type || data.event || "").toLowerCase();
+    if (["time", "timeupdate", "progress", "playing"].includes(type)) {
+      if (providerLoadTimer) window.clearTimeout(providerLoadTimer);
+      providerLoadTimer = null;
+      updateProviderProgress(data.currentTime ?? data.time ?? data.position, data.duration ?? data.total);
+      setStatus("Playing with Megavid · " + animeTrack.toUpperCase());
+    } else if (["error", "failed"].includes(type)) {
+      fallbackToNextPlaybackServer("Megavid reported a playback error.");
+    } else if (["complete", "ended"].includes(type) && Number.isFinite(Number(data.duration ?? data.total))) {
+      updateProviderProgress(data.duration ?? data.total, data.duration ?? data.total, true);
+    }
+  }
+}
+async function requestPlayback(episode) {
   const requestId = ++playbackRequestId;
   if (!currentUser) {
     showGate("Sign in to continue", "A Vivid account is required before Premium playback can be checked. Sign in with the same account you use across Vivid Cinema.");
     setStatus("Sign in with your existing Vivid account to continue.");
     return;
   }
-  showGate("Checking Premium access", "Vivid is verifying your account and requesting an authorised playback session.", "Open Vivid account", "account.html", true);
+  showGate("Checking Premium access", "Vivid is verifying your account before opening the anime servers.", "Open Vivid account", "account.html", true);
   setStatus("Checking your Premium access…");
   try {
     const token = await currentUser.getIdToken();
@@ -129,8 +245,7 @@ async function requestPlayback(episode, excludedCandidates = failedPlaybackCandi
         mediaType,
         titleId,
         season: mediaType === "tv" ? Number(params.get("season") || 1) : null,
-        episode: mediaType === "tv" ? Number(episode.episode_number || 1) : null,
-        excludeCandidateIds: excludedCandidates.slice(0, 8)
+        episode: mediaType === "tv" ? Number(episode.episode_number || 1) : null
       })
     });
     if (requestId !== playbackRequestId) return;
@@ -140,190 +255,64 @@ async function requestPlayback(episode, excludedCandidates = failedPlaybackCandi
       return;
     }
     if (response.status === 403) {
-      showGate("Premium membership required", "This title is protected. An active Vivid Anime Premium membership is required to request playback.", "Get Premium membership", "anime-premium-membership.html");
+      showGate("Premium membership required", "An active Vivid Anime Premium membership is required to open these servers.", "Get Premium membership", "anime-premium-membership.html");
       setStatus("Your account does not currently have Premium playback access.");
-      return;
-    }
-    if (response.status === 404 || response.status === 503) {
-      showGate("Protected playback unavailable", "Vivid has not returned an authorised stream for this episode. No unverified third-party source will be substituted.", "Back to title", titleRoute(), true);
-      setStatus("The protected playback service has not issued a stream for this episode.");
       return;
     }
     if (!response.ok) {
       const failure = await response.json().catch(() => ({}));
-      throw new Error(failure.message || "The protected playback request could not be completed.");
+      throw new Error(failure.message || "The Premium playback check could not be completed.");
     }
     const payload = await response.json();
     if (requestId !== playbackRequestId) return;
     const playback = payload?.playback;
-    if (!playback?.url || !playback?.expiresAt || !playback?.sessionId) throw new Error("The playback service returned an incomplete session.");
+    if (!playback?.sessionId || !playback?.expiresAt || playback.providerMode !== "vivid-third-party-embeds") {
+      throw new Error("Vivid returned an incomplete Premium playback session.");
+    }
     const expiresAt = Date.parse(playback.expiresAt);
-    if (!Number.isFinite(expiresAt) || expiresAt <= Date.now()) throw new Error("The playback service returned an invalid or expired session.");
-    const streamUrl = new URL(playback.url, window.location.origin);
-    if (streamUrl.protocol !== "https:" || streamUrl.username || streamUrl.password) throw new Error("The playback service returned an unsafe stream URL.");
-    const mimeType = String(playback.mimeType || "");
-    if (!["video/mp4", "application/vnd.apple.mpegurl", "application/x-mpegURL"].includes(mimeType)) throw new Error("The playback service returned an unsupported media format.");
-    const video = $("vap-player");
-    let deferredHlsPlayback = false;
-    hlsRecoveryAttempts = 0;
+    if (!Number.isFinite(expiresAt) || expiresAt <= Date.now()) throw new Error("The Premium playback session is invalid or expired.");
     currentPlaybackSessionId = String(playback.sessionId);
-    activePlaybackCandidateId = String(playback.candidateId || playback.provider || "");
-    lastProgressSync = 0;
-    video.hidden = false;
-    $("vap-player-gate").hidden = true;
-    if (mimeType === "video/mp4") {
-      video.src = streamUrl.href;
-      video.load();
-    } else if (video.canPlayType(mimeType) || video.canPlayType("application/x-mpegURL")) {
-      video.src = streamUrl.href;
-      video.load();
-    } else {
-      let Hls;
-      try { Hls = await loadHlsLibrary(); }
-      catch {
-        if (requestId !== playbackRequestId) return;
-        fallbackToNextPlaybackServer("The HLS playback engine could not load. Trying another authorised server.");
-        return;
-      }
-      if (requestId !== playbackRequestId) return;
-      if (!Hls.isSupported()) {
-        fallbackToNextPlaybackServer("This browser cannot use the HLS engine. Trying another authorised server.");
-        return;
-      }
-      const hls = new Hls({ enableWorker: true, lowLatencyMode: false, backBufferLength: 90, maxBufferLength: 30 });
-      activeHls = hls;
-      deferredHlsPlayback = true;
-      hls.on(Hls.Events.MANIFEST_PARSED, () => {
-        if (activeHls !== hls || requestId !== playbackRequestId) return;
-        video.play().catch(() => setStatus("Your episode is ready. Press play to begin."));
-      });
-      hls.on(Hls.Events.ERROR, (_event, data) => {
-        if (!data?.fatal || activeHls !== hls) return;
-        hlsRecoveryAttempts += 1;
-        setStatus("The authorised stream encountered a playback error. Recovering…");
-        if (hlsRecoveryAttempts > 2) {
-          fallbackToNextPlaybackServer("The current authorised server could not recover.");
-        } else if (data.type === Hls.ErrorTypes.NETWORK_ERROR) hls.startLoad();
-        else if (data.type === Hls.ErrorTypes.MEDIA_ERROR) hls.recoverMediaError();
-        else fallbackToNextPlaybackServer("The authorised stream could not continue.");
-      });
-      hls.loadSource(streamUrl.href);
-      hls.attachMedia(video);
+    failedProviderIds = new Set();
+    latestProviderProgress = null;
+    const episodeNumber = Number(episode.episode_number || 1);
+    const seasonNumber = Number(params.get("season") || 1);
+    const offset = seasonNumber > 1 && seasonAnimeIds.aniListId === baseAnimeIds.aniListId && seasonAnimeIds.malId === baseAnimeIds.malId
+      ? (titleDetails.seasons || []).filter(item => Number(item.season_number) > 0 && Number(item.season_number) < seasonNumber)
+        .reduce((sum, item) => sum + Number(item.episode_count || 0), 0)
+      : 0;
+    providerOptions = resolveAnimePremiumProviderOptions({
+      mediaType, tmdbId: titleId,
+      aniListId: seasonAnimeIds.aniListId,
+      malId: seasonAnimeIds.malId,
+      season: seasonNumber,
+      episode: episodeNumber + offset,
+      track: animeTrack
+    });
+    renderServerOptions();
+    const first = providerOptions.find(item => item.available);
+    if (!first) {
+      showGate("No compatible server found", "Vivid could not match this anime to any of the available provider catalogues. Try again later or choose another title.", "Back to title", titleRoute(), true);
+      return;
     }
-    const expiresIn = expiresAt - Date.now();
     playbackExpiryTimer = window.setTimeout(() => {
-      showGate("Playback session expired", "For your security, this playback session has expired. Request a fresh authorised session to continue.", "Back to title", titleRoute(), true);
+      showGate("Playback session expired", "Your Premium playback session has expired. Request a fresh session to continue.", "Back to title", titleRoute(), true);
       setStatus("Playback session expired.");
-    }, Math.max(0, expiresIn));
-    if (!deferredHlsPlayback) {
-      try { await video.play(); } catch { setStatus("Your episode is ready. Press play to begin."); }
-    }
-    if (requestId === playbackRequestId) setStatus("Authorised playback session opened" + (playback.provider ? " · " + playback.provider : "") + ".");
+    }, Math.max(0, expiresAt - Date.now()));
+    activateProvider(first.id);
   } catch (error) {
     if (requestId !== playbackRequestId) return;
-    showGate("Playback could not start", error?.message || "Try again in a moment.", "Back to title", titleRoute(), true);
-    setStatus(error?.message || "Playback could not start.");
-    console.warn("Vivid Anime Premium playback request failed:", error);
+    showGate("Playback could not start", error?.message || "Vivid could not verify Premium playback. Please try again.", "Try again", titleRoute(), true);
+    setStatus("Premium playback could not be opened.");
   }
 }
-async function selectEpisode(index, request = false) {
-  if (!activeEpisodes[index]) return;
-  if (currentPlaybackSessionId) void syncPlaybackProgress(true);
-  activeEpisodeIndex = index;
-  failedPlaybackCandidates = [];
-  activePlaybackCandidateId = "";
-  const episode = activeEpisodes[index];
-  const season = Number(params.get("season") || 1);
-  history.replaceState({}, "", watchRoute(season, episode.episode_number || index + 1));
-  updateEpisodeControls();
-  showGate("Episode selected", "Choose play to request a protected playback session from Vivid. Stream URLs are never supplied by the browser.");
-  setStatus("Selected " + (episode.name || "episode " + (episode.episode_number || index + 1)) + ".");
-  if (request) await requestPlayback(episode);
-}
-async function loadSeason(seasonNumber) {
-  const request = ++seasonRequest;
-  failedPlaybackCandidates = [];
-  activePlaybackCandidateId = "";
-  if (currentPlaybackSessionId) void syncPlaybackProgress(true);
-  playbackRequestId += 1;
-  showGate("Loading season", "Choose an episode after the season list has loaded.");
-  const season = Number(seasonNumber || 1);
-  params.set("season", String(season));
-  const episodeParam = Number(params.get("episode") || 1);
-  const query = new URLSearchParams({ id: titleId, type: mediaType, season: String(season), episode: String(episodeParam) });
-  history.replaceState({}, "", "anime-premium-watch.html?" + query.toString());
-  $("vap-episode-grid").innerHTML = '<p class="vap-watch-loading">Loading episodes…</p>';
-  try {
-    const result = await tmdbApi.tvSeason(titleId, season);
-    if (request !== seasonRequest) return;
-    seasonDetails = result;
-    renderEpisodes(result.episodes || []);
-    const current = activeEpisodes[activeEpisodeIndex];
-    if (current) {
-      updateEpisodeControls();
-      setStatus("Choose an episode to request protected playback.");
-    }
-  } catch (error) {
-    if (request !== seasonRequest) return;
-    $("vap-episode-grid").innerHTML = '<p class="vap-watch-empty">Episode details could not be loaded. Please try another season.</p>';
-    setStatus("Could not load season " + season + ".");
-  }
-}
-function bindSeasonPicker(details) {
-  const seasons = (details.seasons || []).filter(season => Number(season.season_number) > 0);
-  if (!seasons.length) {
-    $("vap-season-picker-wrap").hidden = true;
-    return;
-  }
-  const select = $("vap-season-picker");
-  select.innerHTML = seasons.map(season =>
-    '<option value="' + Number(season.season_number) + '">' + escapeHtml(season.name || "Season " + season.season_number) + '</option>'
-  ).join("");
-  const requested = Number(params.get("season") || 1);
-  const selected = seasons.some(season => Number(season.season_number) === requested) ? requested : Number(seasons[0].season_number);
-  select.value = String(selected);
-  params.set("season", String(selected));
-  select.addEventListener("change", () => {
-    params.set("episode", "1");
-    void loadSeason(select.value);
-  });
-  return selected;
-}
-async function loadWatchPage() {
-  if (!titleId) throw new Error("This watch link is invalid. Return to the Premium catalogue and choose a title.");
-  const getDetails = mediaType === "movie" ? tmdbApi.movieDetails : tmdbApi.tvDetails;
-  titleDetails = await getDetails(titleId);
-  if (!titleDetails?.id) throw new Error("This anime title could not be found.");
-  const name = titleName(titleDetails);
-  document.title = "Watch " + name + " · VIVID ANIME PREMIUM";
-  $("vap-watch-title").textContent = name;
-  $("vap-watch-subtitle").textContent = mediaType === "movie" ? "Anime film · " + (titleDetails.release_date || "").slice(0, 4) : "Anime series · " + (titleDetails.first_air_date || "").slice(0, 4);
-  $("vap-watch-title-link").href = titleRoute();
-  if (titleDetails.backdrop_path) {
-    const image = getImageUrl(titleDetails.backdrop_path, "w1280");
-    $("vap-player-stage").style.backgroundImage = 'linear-gradient(0deg,rgba(8,7,13,.72),rgba(8,7,13,.72)),url("' + image.replace(/["\\]/g, "") + '")';
-    $("vap-player-stage").style.backgroundSize = "cover";
-    $("vap-player-stage").style.backgroundPosition = "center";
-  }
-  if (mediaType === "movie") {
-    $("vap-season-picker-wrap").hidden = true;
-    renderEpisodes([{ episode_number: 1, name: name, overview: titleDetails.overview, runtime: titleDetails.runtime }]);
-    return;
-  }
-  const season = bindSeasonPicker(titleDetails);
-  if (season) await loadSeason(season);
-  else $("vap-episode-grid").innerHTML = '<p class="vap-watch-empty">No seasons are listed for this anime.</p>';
-}
-
 async function syncPlaybackProgress(force = false) {
-  const video = $("vap-player");
-  if (!currentPlaybackSessionId || !currentUser || !Number.isFinite(video.duration) || video.duration <= 0 || video.currentTime <= 0) return;
+  if (!currentPlaybackSessionId || !currentUser || !latestProviderProgress) return;
   if (!force && Date.now() - lastProgressSync < 15000) return;
   pendingProgressSnapshot = {
     sessionId: currentPlaybackSessionId,
     user: currentUser,
-    currentTime: video.currentTime,
-    duration: video.duration,
+    currentTime: latestProviderProgress.currentTime,
+    duration: latestProviderProgress.duration,
     keepalive: force,
     retries: 0
   };
@@ -341,11 +330,7 @@ async function syncPlaybackProgress(force = false) {
           headers: { "Content-Type": "application/json", Authorization: "Bearer " + token },
           cache: "no-store",
           keepalive: snapshot.keepalive,
-          body: JSON.stringify({
-            sessionId: snapshot.sessionId,
-            currentTime: snapshot.currentTime,
-            duration: snapshot.duration
-          })
+          body: JSON.stringify({ sessionId: snapshot.sessionId, currentTime: snapshot.currentTime, duration: snapshot.duration })
         });
         if (!response.ok) throw new Error("Progress endpoint returned HTTP " + response.status);
       } catch (error) {
@@ -374,18 +359,26 @@ function fallbackToNextPlaybackServer(message) {
 function bindControls() {
   $("vap-previous-episode").addEventListener("click", () => { if (activeEpisodeIndex > 0) void selectEpisode(activeEpisodeIndex - 1, true); });
   $("vap-next-episode").addEventListener("click", () => { if (activeEpisodeIndex < activeEpisodes.length - 1) void selectEpisode(activeEpisodeIndex + 1, true); });
-  $("vap-player").addEventListener("timeupdate", () => { void syncPlaybackProgress(false); });
-  $("vap-player").addEventListener("pause", () => { void syncPlaybackProgress(true); });
-  $("vap-player").addEventListener("ended", () => { void syncPlaybackProgress(true); });
-  $("vap-player").addEventListener("error", () => {
-    if (currentPlaybackSessionId && activePlaybackCandidateId) fallbackToNextPlaybackServer("This authorised server failed during playback.");
-  });
   $("vap-player-retry").addEventListener("click", () => {
     const episode = activeEpisodes[activeEpisodeIndex];
-    failedPlaybackCandidates = [];
-    activePlaybackCandidateId = "";
-    if (episode) void requestPlayback(episode, []);
+    if (episode) void requestPlayback(episode);
   });
+  $("vap-server-next").addEventListener("click", () => fallbackToNextPlaybackServer("Switching from " + (activeProviderId || "the current server") + "."));
+  $("vap-audio-track").addEventListener("click", event => {
+    const button = event.target.closest("[data-vap-track]");
+    if (!button) return;
+    const nextTrack = button.dataset.vapTrack === "dub" ? "dub" : "sub";
+    if (nextTrack === animeTrack) return;
+    animeTrack = nextTrack;
+    $("vap-audio-track").querySelectorAll("[data-vap-track]").forEach(item => item.setAttribute("aria-pressed", String(item.dataset.vapTrack === animeTrack)));
+    const episode = activeEpisodes[activeEpisodeIndex];
+    if (currentPlaybackSessionId && episode) {
+      void syncPlaybackProgress(true);
+      currentPlaybackSessionId = "";
+      void requestPlayback(episode);
+    }
+  });
+  window.addEventListener("message", handleProviderMessage);
 }
 function bindAuth() {
   onAuthStateChanged(auth, user => {
