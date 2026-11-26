@@ -47,6 +47,6 @@ jobs:
       - name: Install Playwright test runner without changing the lockfile
         run: npm install --no-save --package-lock=false --no-audit --no-fund @playwright/test@1.55.0
       - name: Install Chromium and WebKit
-        run: npx playwright install --with-deps chromium webkit
+        run: npx playwright install chromium webkit
       - name: Test navigation in Chromium and WebKit
         run: npx playwright test
