@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { webcrypto } from "node:crypto";
 import {
-  allowedOrigin, jsonResponse, parsePlanConfig, publicPricing,
+  addPlanIntervalMillis, allowedOrigin, jsonResponse, parsePlanConfig, publicPricing,
   resolveCheckoutPlan, safeReference, verifyPaystackSignature
 } from "../cloudflare/functions/lib/anime-premium-service.js";
 
