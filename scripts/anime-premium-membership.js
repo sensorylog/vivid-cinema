@@ -35,7 +35,11 @@ function formatMoney(amount, currency) {
 }
 async function loadCountries() {
   try {
-    const controller = new AbortController();\n    const timeout = window.setTimeout(() => controller.abort(), 4500);\n    let response;\n    try { response = await fetch("https://restcountries.com/v3.1/all?fields=cca2,name,currencies", { cache: "force-cache", signal: controller.signal }); }\n    finally { window.clearTimeout(timeout); }
+    const controller = new AbortController();
+    const timeout = window.setTimeout(() => controller.abort(), 4500);
+    let response;
+    try { response = await fetch("https://restcountries.com/v3.1/all?fields=cca2,name,currencies", { cache: "force-cache", signal: controller.signal }); }
+    finally { window.clearTimeout(timeout); }
     if (!response.ok) throw new Error("Country list unavailable");
     const data = await response.json();
     const parsed = data.map(country => {
@@ -100,17 +104,20 @@ async function updatePrice() {
   selectedPaymentMethod = "card";
   const cardRadio = document.querySelector('input[name="vap-payment-method"][value="card"]');
   const mobileRadio = document.querySelector('input[name="vap-payment-method"][value="mobile_money"]');
-  cardRadio.checked = true;
-  cardRadio.disabled = false;
-  mobileRadio.disabled = true;
-  $("vap-card-method").setAttribute("aria-disabled", "false");
-  $("vap-mobile-method").setAttribute("aria-disabled", "true");
+  if (cardRadio) { cardRadio.checked = true; cardRadio.disabled = false; }
+  if (mobileRadio) mobileRadio.disabled = true;
+  $("vap-card-method")?.setAttribute("aria-disabled", "false");
+  $("vap-mobile-method")?.setAttribute("aria-disabled", "true");
   $("vap-method-note").textContent = "Use the same verified email address as your Vivid account on the Paystack page so your payment can be matched to your membership.";
   $("vap-checkout-button").disabled = !pricing.checkoutEnabled || (membershipActive && membershipAutoRenew) || !selectedPaymentMethod;
   $("vap-checkout-button").textContent = !pricing.checkoutEnabled ? "Checkout temporarily unavailable" : membershipActive ? (membershipAutoRenew ? "Membership active — auto-renew on" : "Renew manually →") : currentUser ? "Continue to secure checkout →" : "Sign in to subscribe →";
 }
 async function loadPricing() {
-  const response = await fetch("/api/anime-premium/pricing", { cache: "no-store" });
+  const controller = new AbortController();
+  const timeout = window.setTimeout(() => controller.abort(), 8000);
+  let response;
+  try { response = await fetch("/api/anime-premium/pricing", { cache: "no-store", signal: controller.signal }); }
+  finally { window.clearTimeout(timeout); }
   if (!response.ok) throw new Error("Premium pricing is temporarily unavailable.");
   pricing = await response.json();
   if (!pricing.ok || !pricing.plans || !Object.keys(pricing.plans).length) throw new Error("No Premium checkout currency is configured yet.");
