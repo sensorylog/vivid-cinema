@@ -13,7 +13,7 @@ export function licenseFor(metadata) {
   const url = cleanText(metadata?.licenseurl, 500);
   const rights = cleanText(metadata?.rights, 500);
   const normalized = url.toLowerCase();
-  if (normalized.includes("-nc/") || normalized.includes("-nd/")) return null;
+  if (/-nc(?:-sa)?\//.test(normalized) || /-nd(?:-sa)?\//.test(normalized)) return null;
   const match = ACCEPTED_LICENSES.find(pattern => pattern.test(url));
   if (match) {
     if (/publicdomain\/(?:mark|zero)\//i.test(url)) return "Public-domain declaration";
