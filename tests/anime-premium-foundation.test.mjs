@@ -22,7 +22,7 @@ test("Premium has its own route, namespaced assets and discoverable metadata", (
   assert.match(html, /scripts\/anime-premium\.js/);
   assert.match(html, /VIVID ANIME PREMIUM/);
   assert.match(html, /rel="canonical" href="https:\/\/vivid-cinema\.pages\.dev\/anime-premium\.html"/);
-  assert.match(styles, /\.vap-hero/);
+  assert.match(html, /Your anime, all in one place/);\n  assert.doesNotMatch(html, /future Premium membership/);\n  assert.match(styles, /\.vap-hero/);
   assert.match(styles, /padding-bottom:calc\(160px \+ env\(safe-area-inset-bottom/);
   assert.match(shell, /navLink\("anime-premium\.html", "bi-stars", "Premium"/);
   assert.match(sitemap, /https:\/\/vivid-cinema\.pages\.dev\/anime-premium\.html/);
