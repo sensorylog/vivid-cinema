@@ -28,7 +28,7 @@ test("Premium catalogue uses the existing anime metadata API and filters Japanes
 });
 
 test("catalogue cards open accessible title previews without exposing playback sources", () => {
-  assert.match(html, /<dialog id="vap-title-dialog"/);
+  assert.match(html, /<dialog[^>]*id="vap-title-dialog"/);
   assert.match(script, /dialog\.showModal\(\)/);
   assert.match(script, /Premium catalogue preview/);
   assert.doesNotMatch(script, /\.m3u8|\.mp4|playbackUrl|streamUrl/i);
