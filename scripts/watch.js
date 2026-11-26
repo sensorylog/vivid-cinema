@@ -1591,6 +1591,20 @@ async function load() {
     // Re-mount Player 2 after TMDB metadata arrives so its season and episode
     // selectors use the actual series seasons, not the early loading shell.
     mountSecondaryPlayer(currentParams, details.episode?.name || media.title || media.name, details);
+    if (isAnimePlayback() && aniListId) {
+      void import("./anime-enrichment.js").then(({ mountAnimeEnrichment }) => {
+        const recommendations = document.querySelector(".vivid-watch-recommendations");
+        if (!recommendations || !recommendations.isConnected) return;
+        let root = document.getElementById("vivid-anime-enrichment");
+        if (!root) {
+          root = document.createElement("section");
+          root.id = "vivid-anime-enrichment";
+          root.className = "vivid-anime-enrichment";
+          recommendations.before(root);
+        }
+        void mountAnimeEnrichment({ root, aniListId });
+      }).catch(error => console.warn("Vivid anime enrichment unavailable:", error));
+    }
     void loadWatchRecommendations(currentParams);
     // Metadata arrived after shell — re-arm
     // the primary timer if the player is still waiting.
