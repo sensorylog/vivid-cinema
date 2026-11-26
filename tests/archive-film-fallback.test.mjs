@@ -12,6 +12,8 @@ test("Archive Cinema accepts public-domain and commercial Creative Commons decla
 test("Archive Cinema rejects non-commercial, no-derivatives and undeclared rights", () => {
   assert.equal(licenseFor({ licenseurl: "https://creativecommons.org/licenses/by-nc/4.0/", rights: "Public domain" }), null);
   assert.equal(licenseFor({ licenseurl: "https://creativecommons.org/licenses/by-nd/4.0/" }), null);
+  assert.equal(licenseFor({ licenseurl: "https://creativecommons.org/licenses/by-nc-sa/4.0/", rights: "Public domain" }), null);
+  assert.equal(licenseFor({ licenseurl: "https://creativecommons.org/licenses/by-nd-sa/4.0/", rights: "Public domain" }), null);
   assert.equal(licenseFor({ licenseurl: "", rights: "All rights reserved" }), null);
   assert.equal(licenseFor({}), null);
 });
