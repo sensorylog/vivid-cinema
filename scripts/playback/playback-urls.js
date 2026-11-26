@@ -66,6 +66,7 @@ export function buildVidplusEmbedUrl(params, { tmdbId = "", aniListId = "", anim
   if (anime) {
     if (!/^\d+$/.test(String(aniListId || ""))) return "";
     query.set("dub", track === "dub" ? "true" : "false");
+    addResume(query, "progress", startAt);
     return base + "/embed/anime/" + encodeURIComponent(String(aniListId)) + "/" + Math.max(1, Number(params.episode) || 1) + "?" + query;
   }
   const id = tmdbOnlyId(params, tmdbId);
