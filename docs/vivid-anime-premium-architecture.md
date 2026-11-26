@@ -148,3 +148,12 @@ The admin source form accepts a candidate ID and priority. Re-submit the same ca
 The provider survey distinguishes **metadata/catalogue APIs**, **licensed playback distribution**, and **unlicensed third-party stream extractors**. They are not interchangeable. Publicly documented anime SDKs list scraper-based content adapters for third-party sites; their existence is not evidence that those sites grant VIVID distribution rights. Those adapters are not approved for Premium playback. Major services such as Crunchyroll explicitly restrict retransmission, framing/inline linking, and indexing without written permission. VIVID must therefore onboard a provider only after a signed content/distribution agreement or documented API/embed permission confirms the exact titles, territories, languages, subscription model, and licence window.
 
 Potential rights-holder/distribution outreach targets include Crunchyroll/Sony, HIDIVE/Sentai/AMC, and licensors/distributors surfaced through AniBiz. These are business-development targets, not currently integrated playback providers and not proof of available APIs. A provider is considered production-ready only after VIVID receives partner credentials and technical documentation, configures its resolver adapter and exact host allowlist, records per-title rights, and passes live playback tests in each licensed territory.
+
+
+Research references for provider onboarding:
+
+- Crunchyroll Terms of Service: https://www.crunchyroll.com/en/terms/privacy — prohibits retransmission, framing/inline linking, and indexing of its content without express written authorization.
+- AniBiz official anime IP marketplace: https://anibiz.com/ — a business-to-business route to verified licensors and rights holders, not a playback API.
+- Sony Group overview of Crunchyroll distribution: https://www.sony.com/en/SonyInfo/blog/2026/10/06/ — describes Crunchyroll's global distribution footprint and partner ecosystem.
+- HIDIVE country availability guidance: https://support.hidive.com/kb/guide/en/how-do-i-know-what-content-is-available-in-my-country-SyEubXSTwR/Steps/4307600 — confirms title availability is determined by territorial streaming rights.
+- Anime SDK provider documentation: https://anime-sdk.hexxt.dev/docs/providers/ — useful as a technical survey of adapter patterns, but its listed site-scraping adapters are not treated as authorised content sources.
