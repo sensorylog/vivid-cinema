@@ -152,7 +152,7 @@ function sourceAvailable(source) {
     if (source === "animeembed") return animeSeries && Boolean(aniListId);
     if (source === "vidy") return animeSeries && Boolean(aniListId) && animeTrack === "sub";
     // Generic TMDB embeds do not expose a reliable sub/dub selector.
-    if (["embedwave", "vidapi", "vidsrc"].includes(source)) return animeTrack === "sub" && (source === "embedwave" ? hasTmdbId() : hasFallbackId());
+    if (["embedwave", "vidapi", "vidsrc"].includes(source)) return (!animeSeries || animeTrack === "sub") && (source === "embedwave" ? hasTmdbId() : hasFallbackId());
     return false;
  }
   if (source === "vidapi" || source === "vidsrc" || source === "vidfast" || source === "embedapistream" || source === "moviesapi") return hasFallbackId();
@@ -1125,7 +1125,7 @@ function renderShell(params) {
     playerHasOpened = true;
     sourceAttempted.clear();
     const initialSource = isAnimePlayback()
-      ? (aniListId ? "vidplus" : malId ? "vidlink" : hasFallbackId() ? "vidsrc" : "")
+      ? (["vidplus", "vidlink", "animeembed", "vidy", "embedwave", "vidsrc", "vidapi"].find(sourceAvailable) || "")
       : (rememberedSource || activeSource || "vidapi");
     if (initialSource) {
       setPlayerSource(initialSource, params, startAt);
