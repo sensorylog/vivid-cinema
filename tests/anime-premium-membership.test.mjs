@@ -39,6 +39,7 @@ test("membership UI initialises pricing before Firebase auth and always exits lo
   assert.match(client, /withTimeout\(fetch\("\/api\/anime-premium\/pricing"/);
   assert.match(client, /Checking checkout availability/);
   assert.match(client, /Checkout temporarily unavailable/);
+  assert.match(client, /pricing\.checkoutMessage/);
   assert.match(client, /fetch\("\/api\/anime-premium\/exchange-rate\?currency=/);
   assert.match(client, /auth\.authStateReady\(\)/);
   assert.match(client, /Signed in as .*Your existing Vivid account will own your Anime Premium membership/);
