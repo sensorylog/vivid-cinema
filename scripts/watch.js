@@ -11,7 +11,7 @@ import { recordBehavior, startIntelligenceSync } from "./intelligence.js";
 import { playDirectStream, resolveDirectStream, stopDirectStream } from "./playback/player-engine.js";
 import { buildCustomEmbedUrl, getCustomPlaybackServer } from "./playback/playback-servers.js";
 import { mountWatchRoomPlayerLayout } from "./watch-room-player-layout.js";
-import { buildVidapiEmbedUrl, buildVidsrcEmbedUrl, buildVidlinkEmbedUrl, buildVidplusEmbedUrl, buildVidkingEmbedUrl, buildEmbedWaveUrl, buildVidFastUrl, buildEzVidApiUrl, buildEmbedApiStreamUrl, buildMoviesApiUrl } from "./playback/playback-urls.js";
+import { buildVidapiEmbedUrl, buildVidsrcEmbedUrl, buildVidlinkEmbedUrl, buildVidplusEmbedUrl, buildVidkingEmbedUrl, buildEmbedWaveUrl, buildVidFastUrl, buildEzVidApiUrl, buildEmbedApiStreamUrl, buildMoviesApiUrl, buildAnimeEmbedUrl, buildVidyAnimeUrl, buildAniweebAnimeUrl } from "./playback/playback-urls.js";
 
 const $ = (id) => document.getElementById(id);
 const route = getRoute();
@@ -26,6 +26,8 @@ const VIDPLUS_ORIGINS = new Set(["https://player.vidplus.to", "https://vidplus.t
 const VIDKING_ORIGINS = new Set(["https://www.vidking.net", "https://vidking.net"]);
 const VIDSRC_ORIGINS = new Set(["https://vidsrc.sh", "https://vidsrc.cc", "https://vidsrc2.ru"]);
 const MOVIESAPI_ORIGINS = new Set(["https://moviesapi.to", "https://www.moviesapi.to"]);
+const ANIMEEMBED_ORIGINS = new Set(["https://animeembed.com", "https://www.animeembed.com"]);
+const VIDY_ORIGINS = new Set(["https://vidy.st", "https://www.vidy.st"]);
 try { VIDSRC_ORIGINS.add(new URL(VIVID_CONFIG.api.vidsrcEmbedBaseUrl || "https://vidsrc.sh").origin); } catch { /* Keep the known HTTPS provider allowlist. */ }
 let media = null;
 let details = null;
@@ -140,6 +142,8 @@ function sourceAvailable(source) {
   if (isAnimePlayback()) {
     if (source === "vidplus") return Boolean(aniListId);
     if (source === "vidlink") return Boolean(malId);
+    if (["animeembed", "vidy", "aniweeb"].includes(source)) return Boolean(aniListId);
+    if (source === "embedwave") return hasTmdbId();
     if (source === "vidapi" || source === "vidsrc") return hasFallbackId();
     return false;
   }
@@ -152,7 +156,7 @@ function getNextSource(source) {
   // Anime providers use different catalog IDs; try only providers with a resolved ID.
   // Standard movie/TV providers use the documented TMDB-based URL builders.
   const order = isAnimePlayback()
-    ? ["vidplus", "vidlink", "vidsrc", "vidapi"]
+    ? ["vidplus", "vidlink", "animeembed", "vidy", "aniweeb", "embedwave", "vidsrc", "vidapi"]
     : ["vidapi", "vidsrc", "embedwave", "vidfast", "ezvidapi", "embedapistream", "moviesapi"];
   const index = order.indexOf(source);
   // Cycle through alternatives so a remembered last-position provider can still recover
@@ -168,9 +172,12 @@ function getSourceLabel(source) {
   if (source === "direct") return "Authorized direct stream · HLS/DASH";
   if (source === "vidsrc") return "VidSrc alternate source";
   if (source === "vidlink") return "VidLink alternate source";
-  if (source === "vidplus") return "VidPlus alternate source";
+  if (source === "vidplus") return "VidPlus anime source";
+  if (source === "animeembed") return "AnimeEmbed · AniList anime player";
+  if (source === "vidy") return "Vidy · AniList anime player";
+  if (source === "aniweeb") return "Aniweeb · multi-server anime player";
   if (source === "vidking") return "VidKing alternate source · resume seeking may be unavailable";
-  if (source === "embedwave") return "EmbedWave alternate source";
+  if (source === "embedwave") return isAnimePlayback() ? "EmbedWave · TMDB anime fallback" : "EmbedWave alternate source";
   if (source === "vidfast") return "VidFast.to alternate source";
   if (source === "ezvidapi") return "ezvidapi alternate source";
   if (source === "embedapistream") return "Embed API Stream alternate source";
@@ -237,7 +244,7 @@ function showFallbackPrompt(source) {
 
 function updateSourceLabel() {
   const count = document.querySelector(".vivid-server-count");
-  if (count) count.textContent = isAnimePlayback() ? "4 sources" : "7 sources";
+  if (count) count.textContent = isAnimePlayback() ? "Anime servers" : "7 sources";
   const label = document.getElementById("player-source-label");
   if (label) label.textContent = getSourceLabel(activeSource);
   document.querySelectorAll("[data-server-state]").forEach(node => {
@@ -247,7 +254,7 @@ function updateSourceLabel() {
   document.querySelectorAll("[data-player-source]").forEach(button => {
     const source = button.getAttribute("data-player-source");
     button.classList.toggle("is-active", source === activeSource);
-    button.hidden = isAnimePlayback() ? !["vidapi", "vidsrc", "vidplus", "vidlink"].includes(source) : !["vidapi", "vidsrc", "embedwave", "vidfast", "ezvidapi", "embedapistream", "moviesapi"].includes(source);
+    button.hidden = isAnimePlayback() ? !["vidapi", "vidsrc", "vidplus", "vidlink", "animeembed", "vidy", "aniweeb", "embedwave"].includes(source) : !["vidapi", "vidsrc", "embedwave", "vidfast", "ezvidapi", "embedapistream", "moviesapi"].includes(source);
     button.disabled = !sourceAvailable(source);
     button.setAttribute("aria-pressed", source === activeSource ? "true" : "false");
   });
@@ -412,8 +419,27 @@ function setPlayerSource(source, params, startAt = 0) {
       if (isAnimePlayback()) triggerFallback("anime_source_timeout");
       else showFallbackPrompt("vidplus");
     }, isAnimePlayback() ? 12000 : 25000);
+  } else if (["animeembed", "vidy", "aniweeb"].includes(source)) {
+    if (!aniListId) return;
+    primaryHealthy = false;
+    const builders = { animeembed: buildAnimeEmbedUrl, vidy: buildVidyAnimeUrl, aniweeb: buildAniweebAnimeUrl };
+    const embedUrl = builders[source]({ aniListId, episode: params.episode, track: "sub", startAt });
+    if (!embedUrl) return;
+    player.src = embedUrl;
+    if (status) {
+      status.textContent = "Loading " + getSourceLabel(source) + "…";
+      status.classList.remove("is-warning");
+      status.hidden = false;
+    }
+    if (source !== "aniweeb") {
+      fallbackTimer = window.setTimeout(() => {
+        fallbackTimer = null;
+        if (primaryHealthy || activeSource !== source) return;
+        showFallbackPrompt(source);
+      }, 25000);
+    }
   } else if (["embedwave", "vidfast", "ezvidapi", "embedapistream", "moviesapi"].includes(source)) {
-    if (isAnimePlayback()) return;
+    if (isAnimePlayback() && source !== "embedwave") return;
     primaryHealthy = false;
     const builders = { embedwave: buildEmbedWaveUrl, vidfast: buildVidFastUrl, ezvidapi: buildEzVidApiUrl, embedapistream: buildEmbedApiStreamUrl, moviesapi: buildMoviesApiUrl };
     const embedUrl = builders[source](params, { tmdbId, imdbId, startAt });
@@ -1260,7 +1286,7 @@ function renderShell(params) {
       const button = event.target.closest("[data-player-source]");
       if (!button || button.disabled || !serverPanel.contains(button)) return;
       const source = button.getAttribute("data-player-source");
-      if ((!["vidapi", "vidsrc", "vidlink", "vidplus", "vidking", "direct", "embedwave", "vidfast", "ezvidapi", "embedapistream", "moviesapi"].includes(source) && !(source?.startsWith("custom:"))) || !sourceAvailable(source)) return;
+      if ((!["vidapi", "vidsrc", "vidlink", "vidplus", "vidking", "direct", "embedwave", "vidfast", "ezvidapi", "embedapistream", "moviesapi", "animeembed", "vidy", "aniweeb"].includes(source) && !(source?.startsWith("custom:"))) || !sourceAvailable(source)) return;
       sourceAttempted.clear();
       const latestProgress = Number(getPlaybackProgress(progressKey())?.progress || route.params.get("startAt") || resumeAt || 0);
       setPlayerSource(source, params, latestProgress);
@@ -1318,14 +1344,18 @@ function handlePlayerEvent(event) {
   const isVidPlus = VIDPLUS_ORIGINS.has(event.origin);
   const isVidKing = VIDKING_ORIGINS.has(event.origin);
   const isMoviesApi = MOVIESAPI_ORIGINS.has(event.origin);
-  if (!isVidapi && !isFallback && !isVidLink && !isVidPlus && !isVidKing && !isMoviesApi) return;
+  const isAnimeEmbed = ANIMEEMBED_ORIGINS.has(event.origin);
+  const isVidy = VIDY_ORIGINS.has(event.origin);
+  if (!isVidapi && !isFallback && !isVidLink && !isVidPlus && !isVidKing && !isMoviesApi && !isAnimeEmbed && !isVidy) return;
   const originMatchesActiveSource =
     (activeSource === "vidapi" && isVidapi) ||
     (activeSource === "vidsrc" && isFallback) ||
     (activeSource === "vidlink" && isVidLink) ||
     (activeSource === "vidplus" && isVidPlus) ||
     (activeSource === "vidking" && isVidKing) ||
-    (activeSource === "moviesapi" && isMoviesApi);
+    (activeSource === "moviesapi" && isMoviesApi) ||
+    (activeSource === "animeembed" && isAnimeEmbed) ||
+    (activeSource === "vidy" && isVidy);
   // Ignore delayed messages from a previous iframe document after the user switches source.
   if (!originMatchesActiveSource) return;
   let payload = event.data;
@@ -1337,6 +1367,19 @@ function handlePlayerEvent(event) {
   if (!payload || typeof payload !== "object" || Array.isArray(payload)) return;
   if (isMoviesApi && payload.source === "moviesapi-player") {
     payload = { type: "PLAYER_EVENT", data: { ...payload, player_status: payload.event, player_progress: payload.currentTime, player_duration: payload.duration } };
+  }
+  if (isAnimeEmbed || isVidy) {
+    const message = payload.data && typeof payload.data === "object" ? payload.data : payload;
+    const eventName = String(message.event || "").toLowerCase();
+    if (isAnimeEmbed && payload.channel !== "animeembed") return;
+    if (!/^(ready|play|playing|pause|paused|buffering|progress|timeupdate|seeked|ended|error)$/i.test(eventName)) return;
+    payload = { type: "PLAYER_EVENT", data: {
+      ...message,
+      event: eventName,
+      player_status: eventName === "progress" ? "timeupdate" : eventName,
+      player_progress: message.currentTime ?? message.progress ?? message.position ?? 0,
+      player_duration: message.duration ?? 0
+    }};
   }
 
   // Opt-in, sanitized telemetry for provider messages. Never log full payloads or URLs.
