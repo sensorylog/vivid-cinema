@@ -222,6 +222,7 @@ function buildPrimaryLinks(page) {
     navLink("collection.html?collection=movies", "bi-film", "Movies", isCollectionType("movies")),
     navLink("collection.html?collection=tv", "bi-tv", "Series", isCollectionType("tv")),
     navLink("anime-premium.html", "bi-stars", "Anime Premium", page.startsWith("anime-premium")),
+    navLink("anime.html", "bi-stars", "Anime (Free)", page === "anime"),
     navLink("live.html", "bi-broadcast-pin", "Live", page === "live"),
     africanStoriesNavLink(page === "african-stories"),
     navLink("library.html", "bi-bookmark-fill", "Library", page === "library"),
