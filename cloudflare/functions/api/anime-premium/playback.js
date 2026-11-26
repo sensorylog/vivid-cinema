@@ -87,7 +87,6 @@ export async function onRequestPost({ request, env }) {
       throw new AnimePremiumError(451, "territory-or-rights-unavailable", "Vivid could not verify the playback territory for this request.");
     }
     let rightsEligible = false;
-    let lastProviderError = null;
     let selected = null;
     for (const candidate of candidates) {
       if (!candidate || candidate.active !== true || !candidate.sourceId || typeof candidate.provider !== "string") continue;
@@ -130,7 +129,7 @@ export async function onRequestPost({ request, env }) {
         selected = { candidate, url, expiresAt, mimeType };
         break;
       } catch (error) {
-        lastProviderError = error;
+        // Keep trying the next rights-cleared candidate; never relax its host or territory checks.
       }
     }
     if (!selected) {
