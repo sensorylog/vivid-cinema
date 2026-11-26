@@ -217,15 +217,11 @@ function handleProviderMessage(event) {
       providerLoadTimer = null;
       setStatus("Playing with AniXo · " + animeTrack.toUpperCase());
       if (Number.isFinite(Number(data.duration))) updateProviderProgress(data.currentTime ?? data.time, data.duration);
-    }
-    if (data.type === "aniembed:play") {
-      if (providerLoadTimer) window.clearTimeout(providerLoadTimer);
-      providerLoadTimer = null;
-      setStatus("Playing with AniXo · " + animeTrack.toUpperCase());
-      if (Number.isFinite(Number(data.duration))) updateProviderProgress(data.currentTime, data.duration);
     } else if (data.type === "aniembed:ended") {
       if (Number.isFinite(Number(data.duration))) updateProviderProgress(data.duration, data.duration, true);
-    } else if (data.type === "aniembed:error") fallbackToNextPlaybackServer("AniXo reported a playback error.");
+    } else if (data.type === "aniembed:error") {
+      fallbackToNextPlaybackServer("AniXo reported a playback error.");
+    }
     return;
   }
   if (["megaplay", "megaplay-legacy", "megavid", "megaflix"].includes(provider.id)) {
