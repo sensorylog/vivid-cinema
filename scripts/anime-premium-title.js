@@ -2,6 +2,7 @@ import { tmdbApi } from "./tmdb.js";
 import { getImageUrl, normalizeResults } from "./media.js";
 import { escapeHtml } from "./utils.js";
 import { hasLibraryItem, toggleLibraryItem } from "./library.js";
+import { markAnimeCompleted, unmarkAnimeCompleted } from "./anime-library.js";
 
 const $ = id => document.getElementById(id);
 const params = new URLSearchParams(window.location.search);
@@ -155,7 +156,8 @@ function libraryTitleItem(details) {
     title: titleName(details),
     year: releaseYear(details) === "Year unavailable" ? "" : releaseYear(details),
     poster_path: details.poster_path || "",
-    backdrop_path: details.backdrop_path || ""
+    backdrop_path: details.backdrop_path || "",
+    isAnime: true
   };
 }
 
