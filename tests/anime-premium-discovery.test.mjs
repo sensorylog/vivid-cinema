@@ -39,6 +39,8 @@ test("catalogue cards open dedicated title routes and signature cards use per-ti
   assert.match(html, /id="vap-identities"/);
   assert.match(script, /anime-premium-title\.html/);
   assert.match(script, /vap-identity-svg/);
+  assert.match(script, /items\.map\(identityCard\)/);
+  assert.match(script, /identityCardInstance/);
   assert.doesNotMatch(script, /\.m3u8|\.mp4|playbackUrl|streamUrl/i);
 });
 
