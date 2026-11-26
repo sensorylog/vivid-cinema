@@ -100,7 +100,9 @@ function rememberSuccessfulSource(source) {
 function getParams() {
   const id = route.params.get("id");
   const type = route.params.get("type") === "tv" ? "tv" : "movie";
-  const season = Math.max(0, Number.parseInt(route.params.get("season") || "1", 10) || 1);
+  const rawSeason = route.params.get("season");
+  const parsedSeason = rawSeason == null ? 1 : Number.parseInt(rawSeason, 10);
+  const season = Number.isFinite(parsedSeason) ? Math.max(0, parsedSeason) : 1;
   const episode = Math.max(1, Number.parseInt(route.params.get("episode") || "1", 10) || 1);
   return { id, type, season, episode };
 }
@@ -148,10 +150,11 @@ function sourceAvailable(source) {
   if (source === "direct") return false;
   if (isAnimePlayback()) {
     const animeSeries = currentParams?.type === "tv";
-    if (source === "vidplus") return animeSeries && Boolean(aniListId);
-    if (source === "vidlink") return animeSeries && Boolean(malId);
-    if (source === "animeembed") return animeSeries && Boolean(aniListId);
-    if (source === "vidy") return animeSeries && Boolean(aniListId) && animeTrack === "sub";
+    const nativeAnimeEpisode = animeSeries && Number(currentParams?.season) > 0;
+    if (source === "vidplus") return nativeAnimeEpisode && Boolean(aniListId);
+    if (source === "vidlink") return nativeAnimeEpisode && Boolean(malId);
+    if (source === "animeembed") return nativeAnimeEpisode && Boolean(aniListId);
+    if (source === "vidy") return nativeAnimeEpisode && Boolean(aniListId) && animeTrack === "sub";
     // Generic TMDB embeds do not expose a reliable sub/dub selector.
     if (["embedwave", "vidapi", "vidsrc"].includes(source)) return (!animeSeries || animeTrack === "sub") && (source === "embedwave" ? hasTmdbId() : hasFallbackId());
     return false;
@@ -267,7 +270,7 @@ function updateSourceLabel() {
     button.setAttribute("aria-pressed", source === activeSource ? "true" : "false");
   });
   const trackSwitch = $("player-anime-track-switch");
-  if (trackSwitch) trackSwitch.hidden = !(isAnimePlayback() && currentParams?.type === "tv");
+  if (trackSwitch) trackSwitch.hidden = !(isAnimePlayback() && currentParams?.type === "tv" && Number(currentParams?.season) > 0);
   document.querySelectorAll("[data-anime-track]").forEach(button => {
     const selected = button.getAttribute("data-anime-track") === animeTrack;
     button.classList.toggle("is-active", selected);
@@ -868,6 +871,11 @@ function mountSecondaryPlayer(params, title, detailsSnapshot = details) {
   if (!root) return;
 
   if (isAnimePlayback()) {
+    if (Number(params?.season) === 0) {
+      root.hidden = true;
+      root.innerHTML = "";
+      return;
+    }
     const animeParams = { ...params, episode: getAnimeProviderParams(params).episode, anime: true };
     void import("./playback/anime-secondary-player.js")
       .then(({ mountAnimeSecondaryPlayer }) => {
@@ -907,7 +915,7 @@ function mountSecondaryPlayer(params, title, detailsSnapshot = details) {
 function episodeNavigationMarkup(params) {
   if (params?.type !== "tv" || !media?.id) return "";
   const seasons = (Array.isArray(details?.seasons) ? details.seasons : [])
-    .filter(season => Number(season?.season_number) > 0 && Number(season?.episode_count) > 0)
+    .filter(season => (Number(season?.season_number) > 0 || (isAnimePlayback() && Number(season?.season_number) === 0)) && Number(season?.episode_count) > 0)
     .sort((a, b) => Number(a.season_number) - Number(b.season_number));
   const currentSeason = seasons.find(season => Number(season.season_number) === Number(params.season));
   if (!currentSeason) return "";
@@ -1653,6 +1661,7 @@ async function load() {
   currentParams = getParams();
   aniListId = "";
   malId = "";
+  animeTrack = isAnimePlayback() && Number(route.params.get("season") || 1) === 0 ? "sub" : readAnimeTrackPreference();
   animeEpisodeOffset = 0;
   tmdbId = /^\d+$/.test(String(currentParams.id || "")) ? String(currentParams.id) : "";
   if (!currentParams.id) {
