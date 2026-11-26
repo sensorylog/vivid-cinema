@@ -1,5 +1,6 @@
 import { tmdbApi } from "./tmdb.js";
-import { getImageUrl, getMediaUrl, normalizeMedia } from "./media.js";
+import { getImageUrl, normalizeMedia } from "./media.js";
+import { buildWatchUrl } from "./routes.js";
 import { escapeHtml } from "./utils.js";
 import { FREE_ANIME_SAMPLE_IDS } from "./anime-free-policy.js";
 
@@ -8,7 +9,7 @@ const status = document.getElementById("anime-status");
 const more = document.getElementById("anime-load-more");
 
 function card(item) {
-  const href = getMediaUrl({ ...item, media_type: "tv" }) + "&anime=1";
+  const href = buildWatchUrl(item.id, "tv", 1, 1) + "&anime=1";
   const title = item.title || item.name || "Anime title";
   return '<a class="vivid-anime-card vivid-free-anime-card" href="' + escapeHtml(href) + '">' +
     '<div class="vivid-anime-poster"><img loading="lazy" decoding="async" src="' + escapeHtml(getImageUrl(item.poster_path, "w342")) + '" alt="' + escapeHtml(title) + '">' +
