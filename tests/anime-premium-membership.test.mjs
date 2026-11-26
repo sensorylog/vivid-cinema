@@ -98,8 +98,9 @@ test("hosted page checkout requires verified identity and maps the three plans s
 test("webhook verification is the source of truth for membership activation and renewals", () => {
   assert.match(webhook, /verifyPaystackSignature/);
   assert.match(webhook, /transaction\/verify/);
-  assert.match(webhook, /Hosted Payment Pages use Paystack-generated references/);
+  assert.match(webhook, /Hosted subscription pages use Paystack-generated references/);
   assert.match(webhook, /matches\.length !== 1/);
+  assert.match(webhook, /!data\.plan && !data\.subscription && !data\.subscription_code/);
   assert.match(webhook, /checkoutSource === "hosted_payment_page"/);
   assert.match(webhook, /eventName === "charge\.success"/);
   assert.match(webhook, /invoice\.payment_success/);
