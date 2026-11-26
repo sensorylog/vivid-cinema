@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
 const read = path => readFile(new URL(path, import.meta.url), "utf8");
-const [html, client, returnHtml, returnScript, pricing, checkout, pageCheckout, webhook, membership, sendVerification, verifyEmail, sw, service, shell, headers, countriesApi] = await Promise.all([
+const [html, client, returnHtml, returnScript, pricing, checkout, pageCheckout, webhook, membership, sendVerification, verifyEmail, sw, service, shell, headers, countriesApi, exchangeRateApi] = await Promise.all([
   read("../anime-premium-membership.html"),
   read("../scripts/anime-premium-membership.js"),
   read("../anime-premium-return.html"),
@@ -19,7 +19,8 @@ const [html, client, returnHtml, returnScript, pricing, checkout, pageCheckout, 
   read("../cloudflare/functions/lib/anime-premium-service.js"),
   read("../scripts/app-shell.js"),
   read("../_headers"),
-  read("../cloudflare/functions/api/anime-premium/countries.js")
+  read("../cloudflare/functions/api/anime-premium/countries.js"),
+  read("../cloudflare/functions/api/anime-premium/exchange-rate.js")
 ]);
 
 test("membership page offers country selection and only supported Paystack card checkout", () => {
@@ -38,7 +39,7 @@ test("membership UI initialises pricing before Firebase auth and always exits lo
   assert.match(client, /withTimeout\(fetch\("\/api\/anime-premium\/pricing"/);
   assert.match(client, /Checking checkout availability/);
   assert.match(client, /Checkout temporarily unavailable/);
-  assert.match(client, /api\.frankfurter\.dev\/v2\/rates/);
+  assert.match(client, /fetch\("\/api\/anime-premium\/exchange-rate\?currency=/);
   assert.match(client, /auth\.authStateReady\(\)/);
   assert.match(client, /Signed in as .*Your existing Vivid account will own your Anime Premium membership/);
   assert.match(client, /Reference rate: 1 GHS =/);
@@ -52,7 +53,7 @@ test("membership UI initialises pricing before Firebase auth and always exits lo
   assert.match(html, /vap-country-status/);
   assert.match(shell, /window\.vividAuthUser = user \|\| null/);
   assert.match(shell, /window\.vividAuthResolved = true/);
-  assert.match(headers, /https:\/\/api\.frankfurter\.dev/);
+  assert.doesNotMatch(headers, /api\.frankfurter\.dev|open-rates\.currencyfreaks\.com/);
   assert.doesNotMatch(client, /restcountries\.com|annexare\/Countries/);
   assert.match(countriesApi, /restcountries\.com/);
   assert.match(countriesApi, /annexare\/Countries/);
