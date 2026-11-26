@@ -203,7 +203,7 @@ async function requestPlayback(episode, excludedCandidates = failedPlaybackCandi
           fallbackToNextPlaybackServer("The current authorised server could not recover.");
         } else if (data.type === Hls.ErrorTypes.NETWORK_ERROR) hls.startLoad();
         else if (data.type === Hls.ErrorTypes.MEDIA_ERROR) hls.recoverMediaError();
-        else showGate("Playback interrupted", "The authorised stream could not continue. Request a fresh playback session.", "Back to title", titleRoute(), true);
+        else fallbackToNextPlaybackServer("The authorised stream could not continue.");
       });
       hls.loadSource(streamUrl.href);
       hls.attachMedia(video);
