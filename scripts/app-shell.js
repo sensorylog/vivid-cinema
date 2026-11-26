@@ -384,7 +384,7 @@ function syncMobileNavigation() {
     navLink("home.html", "bi-house-fill", "Home", page === "home"),
     navLink("collection.html?collection=movies", "bi-film", "Movies", isCollectionType("movies")),
     navLink("collection.html?collection=tv", "bi-tv", "Series", isCollectionType("tv")),
-    navLink("anime-premium.html", "bi-stars", "Anime", page.startsWith("anime-premium")),
+    navLink("anime-premium.html", "bi-stars", "Anime Premium", page.startsWith("anime-premium")),
     '<button type="button" data-vivid-more-navigation aria-label="More destinations"><i class="bi bi-three-dots" aria-hidden="true"></i><span>More</span></button>'
   ].join("");
   syncMoreNavigation(nav, page);
