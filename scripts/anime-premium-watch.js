@@ -576,8 +576,15 @@ function renderError(error) {
 }
 window.addEventListener("pagehide", () => {
   if (currentPlaybackSessionId) void syncPlaybackProgress(true);
+  void flushPlaybackProgress();
   playbackRequestId += 1;
   disposePlayer();
+});
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "hidden") {
+    if (currentPlaybackSessionId) void syncPlaybackProgress(true);
+    void flushPlaybackProgress();
+  }
 });
 bindControls();
 bindAuth();
