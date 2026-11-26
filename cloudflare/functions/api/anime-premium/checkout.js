@@ -1,5 +1,5 @@
 import {
-  allowedOrigin, AnimePremiumError, getPremiumServices, jsonResponse, optionsResponse,
+  allowedOrigin, AnimePremiumError, enforceRateLimit, getPremiumServices, jsonResponse, optionsResponse,
   paystackRequest, requirePremiumUser, resolveCheckoutPlan, safeReference, timestampFromMillis
 } from "../../lib/anime-premium-service.js";
 
@@ -27,6 +27,7 @@ export async function onRequestPost({ request, env }) {
       throw new AnimePremiumError(400, "mobile-money-not-supported", "Mobile money checkout is not supported for the selected country. Choose card instead.");
     }
     const { db } = getPremiumServices(env);
+    await enforceRateLimit(db, user.uid, "checkout", 3, 10 * 60 * 1000);
     const reference = "VAP" + crypto.randomUUID().replace(/-/g, "").slice(0, 28).toUpperCase();
     if (!safeReference(reference)) throw new AnimePremiumError(500, "reference-generation-failed", "A checkout reference could not be created.");
     const now = Date.now();
