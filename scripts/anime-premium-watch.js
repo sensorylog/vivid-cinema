@@ -18,6 +18,7 @@ let seasonRequest = 0;
 let currentPlaybackSessionId = "";
 let lastProgressSync = 0;
 let progressSyncInFlight = false;
+let pendingProgressSnapshot = null;
 let activeHls = null;
 let playbackRequestId = 0;
 let playbackExpiryTimer = null;
@@ -159,9 +160,10 @@ async function requestPlayback(episode) {
     if (requestId !== playbackRequestId) return;
     const playback = payload?.playback;
     if (!playback?.url || !playback?.expiresAt || !playback?.sessionId) throw new Error("The playback service returned an incomplete session.");
+    const expiresAt = Date.parse(playback.expiresAt);
+    if (!Number.isFinite(expiresAt) || expiresAt <= Date.now()) throw new Error("The playback service returned an invalid or expired session.");
     const streamUrl = new URL(playback.url, window.location.origin);
     if (streamUrl.protocol !== "https:" || streamUrl.username || streamUrl.password) throw new Error("The playback service returned an unsafe stream URL.");
-    if (Date.parse(playback.expiresAt) <= Date.now()) throw new Error("The playback session has expired. Please try again.");
     const mimeType = String(playback.mimeType || "");
     if (!["video/mp4", "application/vnd.apple.mpegurl", "application/x-mpegURL"].includes(mimeType)) throw new Error("The playback service returned an unsupported media format.");
     const video = $("vap-player");
@@ -191,7 +193,7 @@ async function requestPlayback(episode) {
       hls.loadSource(streamUrl.href);
       hls.attachMedia(video);
     }
-    const expiresIn = Date.parse(playback.expiresAt) - Date.now();
+    const expiresIn = expiresAt - Date.now();
     playbackExpiryTimer = window.setTimeout(() => {
       showGate("Playback session expired", "For your security, this playback session has expired. Request a fresh authorised session to continue.", "Back to title", titleRoute(), true);
       setStatus("Playback session expired.");
@@ -218,6 +220,9 @@ async function selectEpisode(index, request = false) {
 }
 async function loadSeason(seasonNumber) {
   const request = ++seasonRequest;
+  playbackRequestId += 1;
+  pendingProgressSnapshot = null;
+  showGate("Loading season", "Choose an episode after the season list has loaded.");
   const season = Number(seasonNumber || 1);
   params.set("season", String(season));
   const episodeParam = Number(params.get("episode") || 1);
@@ -290,23 +295,35 @@ async function syncPlaybackProgress(force = false) {
   const video = $("vap-player");
   if (!currentPlaybackSessionId || !currentUser || !Number.isFinite(video.duration) || video.duration <= 0 || video.currentTime <= 0) return;
   if (!force && Date.now() - lastProgressSync < 15000) return;
+  pendingProgressSnapshot = {
+    sessionId: currentPlaybackSessionId,
+    user: currentUser,
+    currentTime: video.currentTime,
+    duration: video.duration
+  };
   if (progressSyncInFlight) return;
-  lastProgressSync = Date.now();
   progressSyncInFlight = true;
   try {
-    const token = await currentUser.getIdToken();
-    await fetch("/api/anime-premium/progress", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: "Bearer " + token },
-      cache: "no-store",
-      body: JSON.stringify({
-        sessionId: currentPlaybackSessionId,
-        currentTime: video.currentTime,
-        duration: video.duration
-      })
-    });
-  } catch (error) {
-    console.warn("Vivid Anime Premium playback progress could not be saved:", error);
+    while (pendingProgressSnapshot) {
+      const snapshot = pendingProgressSnapshot;
+      pendingProgressSnapshot = null;
+      lastProgressSync = Date.now();
+      try {
+        const token = await snapshot.user.getIdToken();
+        await fetch("/api/anime-premium/progress", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Authorization: "Bearer " + token },
+          cache: "no-store",
+          body: JSON.stringify({
+            sessionId: snapshot.sessionId,
+            currentTime: snapshot.currentTime,
+            duration: snapshot.duration
+          })
+        });
+      } catch (error) {
+        console.warn("Vivid Anime Premium playback progress could not be saved:", error);
+      }
+    }
   } finally {
     progressSyncInFlight = false;
   }
@@ -326,9 +343,11 @@ function bindControls() {
 function bindAuth() {
   onAuthStateChanged(auth, user => {
     const nextUser = user && !user.isAnonymous ? user : null;
-    if (currentUser?.uid && currentUser.uid !== nextUser?.uid && currentPlaybackSessionId) {
+    if (currentUser?.uid && currentUser.uid !== nextUser?.uid) {
       playbackRequestId += 1;
+      pendingProgressSnapshot = null;
       showGate("Vivid account changed", "Playback has stopped because the signed-in Vivid account changed. Sign in with the account that holds your Premium membership.");
+      setStatus("Playback stopped after the Vivid account changed.");
     }
     currentUser = nextUser;
     if (!currentUser) {
