@@ -106,25 +106,15 @@ async function updatePrice() {
       $("vap-price-note").textContent = "Local conversion is temporarily unavailable. Paystack will confirm the final " + checkoutCurrency + " amount before payment.";
     }
   }
+  selectedPaymentMethod = "card";
   const cardRadio = document.querySelector('input[name="vap-payment-method"][value="card"]');
   const mobileRadio = document.querySelector('input[name="vap-payment-method"][value="mobile_money"]');
-  const cardAvailable = Boolean(plan.cardAutoRenewAvailable);
-  const mobileAvailable = (pricing.mobileMoneyCountries || [...MOBILE_MONEY_COUNTRIES]).includes(selectedCountry) && ((selectedCountry === "GH" && checkoutCurrency === "GHS") || (selectedCountry === "KE" && checkoutCurrency === "KES"));
-  cardRadio.disabled = !cardAvailable;
-  mobileRadio.disabled = !mobileAvailable;
-  $("vap-card-method").setAttribute("aria-disabled", String(!cardAvailable));
-  $("vap-mobile-method").setAttribute("aria-disabled", String(!mobileAvailable));
-  if (selectedPaymentMethod === "card" && !cardAvailable) selectedPaymentMethod = mobileAvailable ? "mobile_money" : "";
-  if (selectedPaymentMethod === "mobile_money" && !mobileAvailable) selectedPaymentMethod = cardAvailable ? "card" : "";
-  if (!selectedPaymentMethod && (cardAvailable || mobileAvailable)) selectedPaymentMethod = cardAvailable ? "card" : "mobile_money";
-  if (selectedPaymentMethod) {
-    document.querySelector('input[name="vap-payment-method"][value="' + selectedPaymentMethod + '"]').checked = true;
-  }
-  $("vap-method-note").textContent = selectedPaymentMethod === "card"
-    ? "Card billing renews automatically " + period.renewal + " where the configured Paystack plan supports it."
-    : selectedPaymentMethod === "mobile_money"
-      ? "Mobile money is a one-time payment. Renew manually after " + period.renewal + "; no automatic debit is created."
-      : "No payment method is configured for this region yet.";
+  cardRadio.checked = true;
+  cardRadio.disabled = true;
+  mobileRadio.disabled = true;
+  $("vap-card-method").setAttribute("aria-disabled", "false");
+  $("vap-mobile-method").setAttribute("aria-disabled", "true");
+  $("vap-method-note").textContent = "You'll complete payment on Vivid's official Paystack page. Use the same verified email as your Vivid account so your membership can be matched after payment.";
   const membershipBlocked = membershipStatusUnavailable || membershipVerificationRequired;
   $("vap-checkout-button").disabled = !pricing.checkoutEnabled || membershipBlocked || (membershipActive && membershipAutoRenew) || !selectedPaymentMethod;
   $("vap-checkout-button").textContent = membershipStatusUnavailable
@@ -247,21 +237,21 @@ async function startCheckout() {
   $("vap-checkout-status").textContent = "";
   try {
     const token = await currentUser.getIdToken();
-    const response = await fetch("/api/anime-premium/checkout", {
+    const response = await fetch("/api/anime-premium/page-checkout", {
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: "Bearer " + token },
       cache: "no-store",
       signal: AbortSignal.timeout(15000),
-      body: JSON.stringify({ country: selectedCountry, paymentMethod: selectedPaymentMethod, planId: selectedPlanId })
+      body: JSON.stringify({ planId: selectedPlanId })
     });
     const payload = await response.json().catch(() => ({}));
     if (response.status === 403 && payload.code === "email-not-verified") {
       membershipVerificationRequired = true;
       if (pricing) await updatePrice();
     }
-    if (!response.ok || !payload.authorizationUrl) throw new Error(payload.message || "Secure checkout could not be started.");
-    $("vap-checkout-status").textContent = "Opening Paystack securely…";
-    window.location.assign(payload.authorizationUrl);
+    if (!response.ok || !payload.paymentPageUrl) throw new Error(payload.message || "Paystack payment page could not be opened.");
+    $("vap-checkout-status").textContent = "Opening your selected Paystack payment page… Use the same verified email as your Vivid account at checkout.";
+    window.location.assign(payload.paymentPageUrl);
   } catch (error) {
     await updatePrice();
     $("vap-checkout-status").textContent = error.message || "Checkout could not be started.";
