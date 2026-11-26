@@ -163,15 +163,15 @@ function updateFavoriteButton(details) {
   const button = $("vap-title-favorite");
   if (!button) return;
   const item = libraryTitleItem(details);
-  const saved = hasLibraryItem("favorites", item);
+  const saved = hasLibraryItem("watchLater", item);
   button.setAttribute("aria-pressed", String(saved));
   button.classList.toggle("is-saved", saved);
   button.innerHTML = saved
     ? '<i class="bi bi-bookmark-check" aria-hidden="true"></i> Added to My List'
     : '<i class="bi bi-bookmark-plus" aria-hidden="true"></i> Add to My List';
   button.onclick = () => {
-    const next = toggleLibraryItem("favorites", item);
-    const isSaved = (next.favorites || []).some(entry =>
+    const next = toggleLibraryItem("watchLater", item);
+    const isSaved = (next.watchLater || []).some(entry =>
       String(entry.id) === item.id && (entry.media_type || entry.mediaType || "movie") === mediaType
     );
     button.setAttribute("aria-pressed", String(isSaved));
