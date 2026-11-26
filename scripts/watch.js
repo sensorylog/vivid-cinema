@@ -425,7 +425,7 @@ function setPlayerSource(source, params, startAt = 0) {
   } else if (["animeembed", "vidy"].includes(source)) {
     if (!aniListId) return;
     primaryHealthy = false;
-    const builders = { animeembed: buildAnimeEmbedUrl, vidy: buildVidyAnimeUrl, aniweeb: buildAniweebAnimeUrl };
+    const builders = { animeembed: buildAnimeEmbedUrl, vidy: buildVidyAnimeUrl };
     const embedUrl = builders[source]({ aniListId, episode: params.episode, track: "sub", startAt });
     if (!embedUrl) return;
     player.src = embedUrl;
