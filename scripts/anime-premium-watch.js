@@ -380,6 +380,11 @@ function bindAuth() {
 function renderError(error) {
   $("vap-watch-content").innerHTML = '<section class="vap-title-error"><span class="vap-eyebrow">VIVID ANIME PREMIUM</span><h1>We couldn’t open this episode.</h1><p>' + escapeHtml(error?.message || "Please return to the Premium catalogue and choose a title.") + '</p><a class="vap-primary" href="anime-premium.html">Back to discovery <span aria-hidden="true">→</span></a></section>';
 }
+window.addEventListener("pagehide", () => {
+  if (currentPlaybackSessionId) void syncPlaybackProgress(true);
+  playbackRequestId += 1;
+  disposeHls();
+});
 bindControls();
 bindAuth();
 loadWatchPage().catch(renderError);
