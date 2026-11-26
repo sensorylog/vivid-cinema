@@ -18,3 +18,9 @@
 ## Verification still required
 
 Run `npm test` and `npm run check:syntax`, then test real episodes on desktop and mobile. Confirm title-to-ID mapping, season/episode correctness, audio track availability, provider playback, fallback behavior, and errors from upstream providers. Aniweeb embed availability and playback still require live device verification; the code cannot inspect media events inside arbitrary cross-origin iframes unless the provider exposes a supported messaging API.
+
+## Discovery catalogue scope
+
+- The TMDB discovery catalogue currently uses the Animation genre plus Japanese original-language filtering. This reduces western-cartoon contamination, but it is not a complete global anime index: Chinese donghua, non-Japanese productions, and titles with incomplete TMDB language/genre metadata can be omitted.
+- AniList autocomplete and the watch-page enrichment panel provide an additional anime-specific metadata layer, but they do not currently replace TMDB as the source of playback-compatible title IDs.
+- Treat catalogue completeness as a remaining validation item before declaring Phase 4 finished.
