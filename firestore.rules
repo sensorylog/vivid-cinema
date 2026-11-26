@@ -38,7 +38,7 @@ service cloud.firestore {
     function validLibraryData() {
       return request.resource.data.keys().hasOnly([
         'id','media_type','title','year','poster_path','backdrop_path','updatedAt',
-        'startedAt','lastWatchedAt','watchedSeconds','completion','completedAt'
+        'startedAt','lastWatchedAt','watchedSeconds','completion','completedAt','isAnime'
       ])
       && request.resource.data.id is string
       && request.resource.data.id.matches('^[0-9]+$')
@@ -60,13 +60,14 @@ service cloud.firestore {
         request.resource.data.completion >= 0 &&
         request.resource.data.completion <= 100
       ))
-      && (!request.resource.data.keys().hasAny(['completedAt']) || request.resource.data.completedAt is number);
+      && (!request.resource.data.keys().hasAny(['completedAt']) || request.resource.data.completedAt is number)
+      && (!request.resource.data.keys().hasAny(['isAnime']) || request.resource.data.isAnime is bool);
     }
 
     function validProgressData() {
       return request.resource.data.keys().hasOnly([
         'id','media_type','progress','duration','percentage','completed','completedAt',
-        'season','episode','title','updatedAt'
+        'season','episode','title','updatedAt','isAnime'
       ])
       && request.resource.data.id is string
       && request.resource.data.id.matches('^[0-9]+$')
@@ -86,12 +87,13 @@ service cloud.firestore {
       && (!request.resource.data.keys().hasAny(['episode']) || request.resource.data.episode == null || request.resource.data.episode is number)
       && request.resource.data.title is string
       && request.resource.data.title.size() <= 300
+      && (!request.resource.data.keys().hasAny(['isAnime']) || request.resource.data.isAnime is bool)
       && request.resource.data.updatedAt is number;
     }
 
     function validTombstoneData() {
       return request.resource.data.keys().hasOnly(['collection','contentId','deletedAt'])
-      && request.resource.data.collection in ['favorites','watchLater','history']
+      && request.resource.data.collection in ['favorites','watchLater','history','completed']
       && request.resource.data.contentId is string
       && request.resource.data.contentId.matches('^(movie|tv):[0-9]+$')
       && request.resource.data.deletedAt is number;
@@ -301,6 +303,12 @@ service cloud.firestore {
       }
 
       match /history/{contentId} {
+        allow read: if isOwner(userId);
+        allow create, update: if isOwner(userId) && validContentId(contentId) && validLibraryData();
+        allow delete: if isOwner(userId);
+      }
+
+      match /completed/{contentId} {
         allow read: if isOwner(userId);
         allow create, update: if isOwner(userId) && validContentId(contentId) && validLibraryData();
         allow delete: if isOwner(userId);
