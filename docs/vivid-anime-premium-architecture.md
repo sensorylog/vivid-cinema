@@ -100,3 +100,35 @@ The Premium entry route now acts as a dedicated discovery homepage rather than a
 - A playback response is accepted only when it includes an HTTPS URL, a future expiry time and a supported media MIME type. Missing, unauthenticated, unentitled or unavailable responses fail closed with an explicit gate state.
 - The protected playback endpoint and server-side membership/source resolution are intentionally reserved for Phase 5. Until then the player shell remains safely locked rather than inventing a stream.
 - The watch route, stylesheet and runtime are included in the offline app shell, syntax checks and dedicated tests.
+
+
+## Phase 5 implementation — Paystack, memberships and administration
+
+### Server-owned payment flow
+- Adds separate Cloudflare Pages API routes for public pricing, authenticated checkout, membership status, automatic renewal cancellation, Paystack webhook processing, protected playback and administrator operations.
+- Checkout requires a verified Firebase ID token and verified email. The browser sends only country and payment method; amount, currency, plan code, reference, renewal mode and user identity are derived or verified server-side.
+- Card checkout uses a configured Paystack monthly plan code and automatic renewal. Mobile money uses a one-time Paystack transaction and manual renewal. Mobile money is only offered for the currently supported GH/KE routes; the server validates this again.
+- The existing displayed Ghana price is represented as a configurable default of 5330 minor units (GH₵53.30) via ANIME_PREMIUM_GHS_MONTHLY_AMOUNT. Additional supported checkout currencies and their Paystack plan codes are configured in ANIME_PREMIUM_PLANS_JSON. This is configuration, not a final locked global price.
+- Country selection is populated from country/currency data; local-currency conversion is labelled as an estimate. Paystack's own checkout page displays the final billing currency and amount.
+- Payment return never grants access. The signed Paystack webhook verifies its signature, verifies the transaction with Paystack, checks the stored checkout amount/currency/reference, and idempotently updates the membership document.
+- Manual mobile-money renewals extend the existing entitlement period. Card subscription events maintain automatic-renewal state. Users can cancel card auto-renewal while retaining access through the paid period.
+
+### Entitlement and playback security
+- Firebase ID tokens are verified server-side; unverified email accounts cannot start checkout or use membership/playback APIs.
+- Membership, checkout, webhook-event, source-registry and audit collections are explicitly denied to browser clients in Firestore rules.
+- Playback checks the server-owned membership period before resolving an episode. The resolver is configured only through server secrets and the returned signed URL must be HTTPS, unexpired, use an allowed host and match an approved MIME type.
+- No playback URL is accepted from client state or an arbitrary third-party embed. If no authorised resolver/source is configured, playback returns a closed 404/503 state.
+
+### Administration
+- Adds a restricted admin workspace and server endpoints for membership grant/revoke and authorised source mappings.
+- Admin access is checked from Firebase admin claims or the server-side ANIME_PREMIUM_ADMIN_UIDS allowlist. Each manual membership/source change creates an audit record.
+- Source records contain provider/source IDs only; direct stream URLs are not entered in the browser admin form.
+
+### Required Cloudflare environment configuration before live payments
+- FIREBASE_SERVICE_ACCOUNT_JSON and FIREBASE_PROJECT_ID (existing Vivid server-side Firebase credentials).
+- PAYSTACK_SECRET_KEY and PAYSTACK_WEBHOOK_SECRET (server secrets; never expose them to the browser).
+- PAYSTACK_PLAN_GHS_MONTHLY or ANIME_PREMIUM_PLANS_JSON for each enabled checkout currency. Card auto-renew is unavailable for currencies without a configured Paystack plan code.
+- ANIME_PREMIUM_DEFAULT_CURRENCY (defaults to GHS) and optional ANIME_PREMIUM_GHS_MONTHLY_AMOUNT (defaults to 5330 minor units).
+- ANIME_PREMIUM_ADMIN_UIDS for server-side admin allowlisting when custom admin claims are not used.
+- ANIME_PREMIUM_STREAM_RESOLVER_URL, ANIME_PREMIUM_STREAM_RESOLVER_TOKEN and ANIME_PREMIUM_STREAM_HOSTS for an authorised playback resolver. Without these, the player remains safely unavailable.
+- Configure the Paystack webhook URL as /api/anime-premium/webhook on the Vivid production origin. Support Vivid donations remain on their existing, separate payment flow.
