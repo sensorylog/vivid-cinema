@@ -44,8 +44,13 @@ export async function onRequestPost({ request, env }) {
     if (!resolverUrl || !resolverToken || !hosts.size) {
       throw new AnimePremiumError(503, "playback-provider-not-configured", "The authorised playback provider is not configured yet.");
     }
+    const resolver = new URL(resolverUrl);
+    if (resolver.protocol !== "https:" || resolver.username || resolver.password) {
+      throw new AnimePremiumError(503, "playback-provider-not-configured", "The authorised playback resolver URL is invalid.");
+    }
     const source = sourceSnapshot.data();
-    const resolverResponse = await fetch(resolverUrl, {
+    if (!source.sourceId || !source.provider) throw new AnimePremiumError(404, "authorised-source-not-found", "No authorised playback source is available for this episode.");
+    const resolverResponse = await fetch(resolver.toString(), {
       method: "POST",
       headers: { Authorization: "Bearer " + resolverToken, "Content-Type": "application/json" },
       body: JSON.stringify({
