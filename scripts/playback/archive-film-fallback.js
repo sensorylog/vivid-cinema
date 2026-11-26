@@ -49,7 +49,7 @@ export function mountArchiveFilmSearch({ root, title = "", year = "", onPlay }) 
   const input = section.querySelector("input");
   const results = section.querySelector(".vivid-archive-results");
   const submit = section.querySelector('button[type="submit"]');
-  const defaultQuery = [title, year].filter(Boolean).join(" ");
+  const defaultQuery = cleanText(title, 120);
   input.value = cleanText(defaultQuery, 120);
 
   const status = message => {
@@ -62,6 +62,7 @@ export function mountArchiveFilmSearch({ root, title = "", year = "", onPlay }) 
 
   async function search(query) {
     const controller = new AbortController();
+    const timeoutId = window.setTimeout(() => controller.abort(), 15000);
     submit.disabled = true;
     status("Searching Internet Archive…");
     try {
@@ -127,6 +128,7 @@ export function mountArchiveFilmSearch({ root, title = "", year = "", onPlay }) 
       status(error?.name === "AbortError" ? "Search cancelled." : "Archive search is temporarily unavailable. Please try again.");
       console.warn("Vivid Archive Cinema search failed:", error);
     } finally {
+      window.clearTimeout(timeoutId);
       submit.disabled = false;
     }
   }
