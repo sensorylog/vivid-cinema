@@ -141,3 +141,12 @@ The Premium entry route now acts as a dedicated discovery homepage rather than a
 VIVID ANIME PREMIUM uses the same iframe-provider model as the existing VIVID Cinema player. The Cloudflare playback endpoint verifies membership and issues a two-hour playback session; the browser then builds URLs from the static provider registry in `scripts/playback/anime-premium-providers.js`. Provider-specific postMessage events are accepted only from the active iframe's exact origin and window. See `docs/vivid-anime-premium-streaming-provider-research.md` for the provider list, route contracts, ID mapping and QA gates.
 
 A provider's iframe route and published features do not guarantee that every title is indexed or that the provider is available in every territory. VIVID should measure actual title-level playback during QA and keep manual server switching available when a provider does not expose reliable readiness/error events.
+
+
+## Country directory, local price estimates and hosted checkout operations
+
+- The country selector is served by `/api/anime-premium/countries` from the bundled MIT-licensed `countries-list` ISO 3166-1 / ISO 4217 dataset. It must not depend on runtime requests to retired REST Countries v3.1 or mutable third-party CDN paths.
+- Local-currency estimates use CurrencyFreaks Open Rates with `base=GHS`, then select the rate for the country's ISO 4217 currency. This is a daily reference estimate, not a guaranteed card settlement quote. If a currency has no published rate, display “Rate unavailable”; never fabricate a conversion.
+- The client must call the exchange-rate helper with the selected country's currency code. The Paystack charge remains fixed in GHS and each hosted Payment Page is selected server-side by the chosen billing period.
+- Production Cloudflare Pages must have encrypted `FIREBASE_SERVICE_ACCOUNT_JSON` and `PAYSTACK_SECRET_KEY` secrets. The Firebase service account verifies the signed-in Vivid UID; the Paystack secret verifies the webhook/payment before membership is activated. Do not bypass either requirement to make the checkout button appear enabled.
+- After deploying, smoke-test the production endpoints directly: `/api/anime-premium/countries` should return 200 with at least 200 countries; `/api/anime-premium/exchange-rate?currency=NGN` should return a dated GHS-to-NGN quote; `/api/anime-premium/pricing` should report `checkoutEnabled: true` only after the production secrets are configured.
