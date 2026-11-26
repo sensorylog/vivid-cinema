@@ -210,3 +210,14 @@ test("AnimeEmbed and Vidy progress events are handled without requiring a TMDB p
   assert.match(source, /if \(isAnimeEmbed \|\| isVidy\) \{[\s\S]*?const eventName = String\(data\.event \|\| data\.player_status/);
   assert.match(source, /savePlaybackProgress\(progressKey\(\), \{ progress, duration, season, episode/);
 });
+
+test("anime provider timeouts fail over instead of silently waiting for manual intervention", () => {
+  assert.match(source, /if \(isAnimePlayback\(\)\) triggerFallback\("anime_source_timeout"\);[\s\S]*?showFallbackPrompt\(source\)/);
+  assert.match(source, /\["vidplus", "vidlink", "animeembed", "vidy", "embedwave", "vidsrc", "vidapi"\]\.find\(sourceAvailable\)/);
+});
+
+test("anime movie routes do not select episode-only AniList or MAL players", () => {
+  assert.match(source, /const animeSeries = currentParams\?\.type === "tv"/);
+  assert.match(source, /return animeSeries && Boolean\(aniListId\)/);
+  assert.match(source, /return animeSeries && Boolean\(malId\)/);
+});
