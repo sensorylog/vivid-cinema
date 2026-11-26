@@ -123,7 +123,7 @@ function renderServerOptions() {
     '<span class="vap-server-option-copy"><strong>' + escapeHtml(provider.label) + '</strong><small>' +
     escapeHtml(provider.available ? provider.note : (mediaType === "movie" ? "Episode-only provider" : "No matching catalogue ID")) +
     '</small></span><span class="vap-server-option-state">' +
-    (provider.available ? (provider.id === activeProviderId ? "Selected" : failedProviderIds.has(provider.id) ? "Failed · retry" : "Compatible") : "Unavailable") +
+    (provider.available ? (provider.id === activeProviderId ? "Selected" : failedProviderIds.has(provider.id) ? "Failed · retry" : "ID matched") : "Unavailable") +
     '</span></button>'
   ).join("");
   list.querySelectorAll("[data-vap-server]").forEach(button => button.addEventListener("click", () => activateProvider(button.dataset.vapServer)));
