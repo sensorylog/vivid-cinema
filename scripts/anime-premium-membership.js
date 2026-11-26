@@ -78,6 +78,9 @@ async function loadCountries() {
     select.value = countries.some(country => country.code === selectedCountry) ? selectedCountry : "GH";
   };
   countries = FALLBACK_COUNTRIES;
+  const countryStatus = $("vap-country-status");
+  if (countryStatus) countryStatus.textContent = "Loading the full international country list…";
+  let loadedFullCatalogue = false;
   selectedCountry = countries.some(country => country.code === saved) ? saved : "GH";
   render();
 
@@ -114,6 +117,8 @@ async function loadCountries() {
       if (parsed.length < 180) throw new Error("Country catalogue was incomplete (" + parsed.length + " entries).");
       const unique = [...new Map(parsed.map(country => [country.code, country])).values()];
       countries = unique.sort((left, right) => left.name.localeCompare(right.name));
+      loadedFullCatalogue = true;
+      if (countryStatus) countryStatus.textContent = "International country list loaded · " + countries.length + " countries available.";
       if (!countries.some(country => country.code === selectedCountry)) selectedCountry = "GH";
       render();
       break;
@@ -121,6 +126,7 @@ async function loadCountries() {
       console.warn("Country catalogue source failed; trying the next source:", error);
     }
   }
+  if (!loadedFullCatalogue && countryStatus) countryStatus.textContent = "The full country directory could not be reached. Showing the limited offline list of " + countries.length + " countries; please refresh to retry.";
   select.value = selectedCountry;
 }
 async function getExchangeRates(baseCurrency) {
