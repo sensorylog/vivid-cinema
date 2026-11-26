@@ -45,6 +45,7 @@ function setCheckoutState() {
   const button = $("vap-checkout-button");
   if (!button) return;
   button.disabled = !pricing.checkoutEnabled || (membershipActive && membershipAutoRenew) || !authReady;
+  if (!pricing.checkoutEnabled && pricing.checkoutMessage) $("vap-checkout-status").textContent = pricing.checkoutMessage;
   button.textContent = !pricing.checkoutEnabled ? "Checkout temporarily unavailable"
     : membershipActive && membershipAutoRenew ? "Membership active — auto-renew on"
     : !authReady ? "Checking your Vivid account…"
