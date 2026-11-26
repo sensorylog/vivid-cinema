@@ -236,3 +236,20 @@ export function addDaysMillis(days, from = Date.now()) {
 export function safeReference(value) {
   return typeof value === "string" && /^[A-Za-z0-9.=-]{6,120}$/.test(value);
 }
+
+export async function enforceRateLimit(db, uid, action, limit, windowMs) {
+  const now = Date.now();
+  const bucket = Math.floor(now / windowMs);
+  const reference = String(uid) + "_" + String(action).replace(/[^A-Za-z0-9_-]/g, "") + "_" + bucket;
+  const ref = db.collection("animePremiumRateLimits").doc(reference);
+  await db.runTransaction(async transaction => {
+    const snapshot = await transaction.get(ref);
+    const count = snapshot.exists ? Number(snapshot.data()?.count || 0) : 0;
+    if (count >= limit) throw new AnimePremiumError(429, "rate-limited", "Too many requests. Please wait a moment and try again.");
+    transaction.set(ref, {
+      uid, action, count: count + 1,
+      windowStart: Timestamp.fromMillis(bucket * windowMs),
+      expiresAt: Timestamp.fromMillis((bucket + 2) * windowMs)
+    }, { merge: true });
+  });
+}
