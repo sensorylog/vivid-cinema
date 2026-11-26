@@ -51,6 +51,11 @@ test("search, type, year and sort controls share one catalogue state", () => {
   assert.match(script, /function yearOf\(item\).*item\.year/);
 });
 
+test("featured action safely falls back to catalogue before a title is available", () => {
+  assert.match(script, /const target = \$\("vap-hero-open"\)\.dataset\.vapTitle \|\| ""/);
+  assert.match(script, /else \$\("vap-catalogue"\)\.scrollIntoView/);
+});
+
 test("failed Premium shelves leave loading state and expose a retry action", () => {
   assert.match(script, /Promise\.allSettled\(jobs\)/);
   assert.match(script, /renderShelfError\(/);
