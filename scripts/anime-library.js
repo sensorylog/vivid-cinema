@@ -3,6 +3,8 @@ import { getAllPlaybackProgress } from "./recommendations.js";
 import { auth } from "./firebase.js";
 
 const PREFERENCES_KEY = "vivid:anime-premium-preferences:v1";
+const PREFERENCES_OWNER_KEY = "vivid:anime-premium-preferences-owner:v1";
+const PREFERENCES_SNAPSHOT_PREFIX = "vivid:anime-premium-preferences-snapshot:";
 const MEDIA_TYPES = new Set(["movie", "tv"]);
 const TRACKS = new Set(["sub", "dub"]);
 
@@ -23,6 +25,19 @@ function normalizeItem(item = {}) {
   };
 }
 
+function ensurePreferencesOwner(uid) {
+  const nextOwner = String(uid || "guest");
+  const currentOwner = localStorage.getItem(PREFERENCES_OWNER_KEY) || "guest";
+  if (currentOwner === nextOwner) return;
+  const current = localStorage.getItem(PREFERENCES_KEY);
+  if (current) localStorage.setItem(PREFERENCES_SNAPSHOT_PREFIX + currentOwner, current);
+  const saved = localStorage.getItem(PREFERENCES_SNAPSHOT_PREFIX + nextOwner);
+  localStorage.setItem(PREFERENCES_KEY, saved || JSON.stringify({
+    track: "sub", autoplayNextEpisode: true, subtitleLanguage: "en", preferredPlayer: "auto", updatedAt: 0
+  }));
+  localStorage.setItem(PREFERENCES_OWNER_KEY, nextOwner);
+}
+
 function readStoredPreferences() {
   try {
     const value = JSON.parse(localStorage.getItem(PREFERENCES_KEY) || "{}");
@@ -33,6 +48,7 @@ function readStoredPreferences() {
 }
 
 export function getAnimeLibraryPreferences() {
+  ensurePreferencesOwner(auth?.currentUser?.uid || "guest");
   const stored = readStoredPreferences();
   return {
     track: TRACKS.has(stored.track) ? stored.track : "sub",
@@ -73,6 +89,7 @@ async function getPreferencesFirestore() {
 
 export async function syncAnimePreferencesForUser(user = null) {
   if (!user?.uid || String(auth?.currentUser?.uid || "") !== String(user.uid)) return getAnimeLibraryPreferences();
+  ensurePreferencesOwner(user.uid);
   const { db, doc, getDocFromServer, setDoc } = await getPreferencesFirestore();
   const reference = doc(db, "users", user.uid, "animePreferences", "default");
   const snapshot = await getDocFromServer(reference);
