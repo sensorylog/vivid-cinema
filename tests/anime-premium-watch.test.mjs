@@ -94,3 +94,11 @@ test("account changes invalidate pending playback and discard queued progress fr
   assert.match(script, /pendingProgressSnapshot = null/);
   assert.match(script, /Playback stopped after the Vivid account changed/);
 });
+
+test("HLS playback waits for manifest readiness and bounds fatal recovery attempts", () => {
+  assert.match(script, /Hls\.Events\.MANIFEST_PARSED/);
+  assert.match(script, /deferredHlsPlayback = true/);
+  assert.match(script, /hlsRecoveryAttempts \+= 1/);
+  assert.match(script, /hlsRecoveryAttempts > 2/);
+  assert.match(script, /requestId !== playbackRequestId/);
+});
