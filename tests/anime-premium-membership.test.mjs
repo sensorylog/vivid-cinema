@@ -76,6 +76,8 @@ test("webhook verification is the source of truth for membership activation and 
   assert.match(webhook, /verifyPaystackSignature/);
   assert.match(webhook, /transaction\/verify/);
   assert.match(webhook, /eventName === "charge\.success"/);
+  assert.match(webhook, /addPlanIntervalMillis\\(checkout\\.planId/);
+  assert.match(webhook, /addPlanIntervalMillis\\(value\\.planId/);
   assert.match(webhook, /invoice\.payment_success/);
   assert.match(webhook, /invoice\.payment_failed/);
   assert.match(webhook, /animePremiumMemberships/);
