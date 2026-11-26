@@ -3,6 +3,17 @@ import { getAuth } from "firebase-admin/auth";
 import { getFirestore, Timestamp } from "firebase-admin/firestore";
 
 const VERIFY_CONTINUE_URL = "https://vivid-cinema.pages.dev/verify-email.html";
+const ALLOWED_RETURN_DESTINATIONS = new Set(["anime-premium.html"]);
+
+function verificationContinueUrl(body) {
+  const requested = body && typeof body === "object" && typeof body.returnTo === "string"
+    ? body.returnTo
+    : "";
+  if (!ALLOWED_RETURN_DESTINATIONS.has(requested)) return VERIFY_CONTINUE_URL;
+  const url = new URL(VERIFY_CONTINUE_URL);
+  url.searchParams.set("returnTo", requested);
+  return url.toString();
+}
 const MIN_RESEND_INTERVAL_MS = 60_000;
 const DEFAULT_ALLOWED_ORIGINS = [
   "https://vivid-cinema.pages.dev",
@@ -128,7 +139,7 @@ export default async function handler(req, res) {
     }
 
     const verificationLink = await adminAuth.generateEmailVerificationLink(user.email, {
-      url: VERIFY_CONTINUE_URL,
+      url: verificationContinueUrl(req.body),
       handleCodeInApp: false
     });
     const response = await fetch("https://api.resend.com/emails", {
