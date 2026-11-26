@@ -70,8 +70,6 @@ async function loadCountries() {
   });
   select.replaceChildren(fragment);
   select.value = selectedCountry;
-  const countryStatus = $("vap-country-status");
-  if (countryStatus) countryStatus.textContent = "Complete country directory loaded · " + countries.length + " countries and territories available offline.";
 }
 async function getExchangeRate(currency) {
   const now = Date.now();
@@ -93,22 +91,22 @@ async function updatePrice() {
   const requestId = ++priceRequestId;
   const plan = PAGE_CHECKOUT_PLANS[selectedPlanId];
   const country = getCountry(selectedCountry);
-  const localCurrency = country.currency || "GHS";
-  $("vap-local-currency").textContent = localCurrency;
+  const localCurrency = country.currency || "";
+  $("vap-local-currency").textContent = localCurrency || "Not applicable";
   $("vap-checkout-currency").textContent = "GHS · Ghanaian Cedi";
-  $("vap-local-price").textContent = localCurrency === "GHS" ? formatMoney(plan.amountMajor, "GHS") : "Calculating…";
-  $("vap-price-note").textContent = "Retrieving the latest published reference rate…";
+  $("vap-local-price").textContent = localCurrency === "GHS" ? formatMoney(plan.amountMajor, "GHS") : localCurrency ? "Calculating…" : "Not available";
+  $("vap-price-note").textContent = localCurrency ? "Retrieving the latest published reference rate…" : "This territory has no separately assigned local currency. Paystack checkout remains in Ghanaian Cedis (GHS).";
   renderPlan();
   if (localCurrency === "GHS") {
     $("vap-price-note").textContent = "Paystack checkout charge: " + formatMoney(plan.amountMajor, "GHS") + ".";
-  } else {
+  } else if (localCurrency) {
     try {
       const quote = await getExchangeRate(localCurrency);
       if (requestId !== priceRequestId) return;
       const rate = quote.rate;
       if (Number.isFinite(rate) && rate > 0) {
         $("vap-local-price").textContent = "≈ " + formatMoney(plan.amountMajor * rate, localCurrency);
-        $("vap-price-note").textContent = "Reference rate: 1 GHS = " + rate.toFixed(6) + " " + localCurrency + (quote.date ? " · Rate date: " + quote.date : "") + ". Source: CurrencyFreaks Open Rates, blended daily reference rates from central banks and official sources. Paystack charges " + formatMoney(plan.amountMajor, "GHS") + "; your bank/card provider sets the final converted charge and may add fees.";
+        $("vap-price-note").textContent = "Reference rate: 1 GHS = " + rate.toFixed(6) + " " + localCurrency + (quote.date ? " · Rate date: " + quote.date : "") + ". Source: " + quote.source + ", daily indicative reference rates. Paystack charges " + formatMoney(plan.amountMajor, "GHS") + "; your bank/card provider sets the final converted charge and may add fees.";
       } else {
         $("vap-local-price").textContent = "Rate unavailable";
         $("vap-price-note").textContent = "No published GHS/" + localCurrency + " reference rate is currently available. We will not display an invented conversion. Paystack charges " + formatMoney(plan.amountMajor, "GHS") + "; your bank/card provider determines the converted amount.";
@@ -295,8 +293,6 @@ async function init() {
   $("vap-checkout-button").textContent = "Checking checkout availability…";
   const countriesTask = loadCountries().then(() => updatePrice()).catch(error => {
     console.error("Country selector initialisation failed:", error);
-    const status = $("vap-country-status");
-    if (status) status.textContent = "The full country directory is temporarily unavailable. Showing the offline country list; retry by refreshing the page.";
     $("vap-price-note").textContent = "Country information could not be loaded. The Paystack charge remains in Ghanaian Cedis (GHS).";
     if (!$("vap-country").options.length) {
       countries = FALLBACK_COUNTRIES;
