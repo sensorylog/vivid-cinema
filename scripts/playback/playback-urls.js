@@ -24,7 +24,7 @@ export function buildVidapiEmbedUrl(params, { startAt = 0 } = {}) {
   const query = new URLSearchParams({ autoplay: "1", controls: "1", overlay: "1" });
   addResume(query, "resumeAt", startAt);
   const path = params.type === "tv"
-    ? "/embed/tv/" + encodeURIComponent(id) + "/" + Math.max(1, Number(params.season) || 1) + "/" + Math.max(1, Number(params.episode) || 1)
+    ? "/embed/tv/" + encodeURIComponent(id) + "/" + seasonNumber(params.season) + "/" + Math.max(1, Number(params.episode) || 1)
     : "/embed/movie/" + encodeURIComponent(id);
   return base + path + "?" + query;
 }
@@ -35,7 +35,7 @@ export function buildVidsrcEmbedUrl(params, { tmdbId = "", imdbId = "", startAt 
   if (!id) return "";
   const base = cleanBase(VIVID_CONFIG.api.vidsrcEmbedBaseUrl, "https://vidsrc.sh");
   const path = params.type === "tv"
-    ? "/embed/tv/" + encodeURIComponent(id) + "/" + Math.max(1, Number(params.season) || 1) + "/" + Math.max(1, Number(params.episode) || 1)
+    ? "/embed/tv/" + encodeURIComponent(id) + "/" + seasonNumber(params.season) + "/" + Math.max(1, Number(params.episode) || 1)
     : "/embed/movie/" + encodeURIComponent(id);
   const query = new URLSearchParams({ ds_lang: "en" });
   addResume(query, "startAt", startAt);
@@ -55,7 +55,7 @@ export function buildVidlinkEmbedUrl(params, { tmdbId = "", malId = "", anime = 
   const id = tmdbOnlyId(params, tmdbId);
   if (!id) return "";
   const path = params.type === "tv"
-    ? "/tv/" + encodeURIComponent(id) + "/" + Math.max(1, Number(params.season) || 1) + "/" + Math.max(1, Number(params.episode) || 1)
+    ? "/tv/" + encodeURIComponent(id) + "/" + seasonNumber(params.season) + "/" + Math.max(1, Number(params.episode) || 1)
     : "/movie/" + encodeURIComponent(id);
   return base + path + "?" + query;
 }
@@ -73,7 +73,7 @@ export function buildVidplusEmbedUrl(params, { tmdbId = "", aniListId = "", anim
   if (!id) return "";
   addResume(query, "progress", startAt);
   const path = params.type === "tv"
-    ? "/embed/tv/" + encodeURIComponent(id) + "/" + Math.max(1, Number(params.season) || 1) + "/" + Math.max(1, Number(params.episode) || 1)
+    ? "/embed/tv/" + encodeURIComponent(id) + "/" + seasonNumber(params.season) + "/" + Math.max(1, Number(params.episode) || 1)
     : "/embed/movie/" + encodeURIComponent(id);
   return base + path + "?" + query;
 }
@@ -85,7 +85,7 @@ export function buildVidkingEmbedUrl(params, { tmdbId = "", startAt = 0 } = {}) 
   // VidKing documents progress as a timestamp in seconds.
   addResume(query, "progress", startAt);
   const path = params.type === "tv"
-    ? "/embed/tv/" + encodeURIComponent(id) + "/" + Math.max(1, Number(params.season) || 1) + "/" + Math.max(1, Number(params.episode) || 1)
+    ? "/embed/tv/" + encodeURIComponent(id) + "/" + seasonNumber(params.season) + "/" + Math.max(1, Number(params.episode) || 1)
     : "/embed/movie/" + encodeURIComponent(id);
   return "https://www.vidking.net" + path + "?" + query;
 }
@@ -94,10 +94,12 @@ export function buildVidkingEmbedUrl(params, { tmdbId = "", startAt = 0 } = {}) 
 function movieTvId(params, tmdbId = "", imdbId = "") {
   return standardId(params, tmdbId, imdbId);
 }
+const seasonNumber = value => { const parsed = Number.parseInt(value, 10); return Number.isFinite(parsed) && parsed >= 0 ? parsed : 1; };
+
 function movieTvPath(params, id, prefix = "/embed") {
   if (!id) return "";
   return params.type === "tv"
-    ? prefix + "/tv/" + encodeURIComponent(id) + "/" + Math.max(1, Number(params.season) || 1) + "/" + Math.max(1, Number(params.episode) || 1)
+    ? prefix + "/tv/" + encodeURIComponent(id) + "/" + seasonNumber(params.season) + "/" + Math.max(1, Number(params.episode) || 1)
     : prefix + "/movie/" + encodeURIComponent(id);
 }
 export function buildEmbedWaveUrl(params, { tmdbId = "" } = {}) {
@@ -120,7 +122,7 @@ export function buildMoviesApiUrl(params, { tmdbId = "", imdbId = "", startAt = 
   const id = movieTvId(params, tmdbId, imdbId);
   if (!id) return "";
   const path = params.type === "tv"
-    ? "/tv/" + encodeURIComponent(id) + "/" + Math.max(1, Number(params.season) || 1) + "/" + Math.max(1, Number(params.episode) || 1)
+    ? "/tv/" + encodeURIComponent(id) + "/" + seasonNumber(params.season) + "/" + Math.max(1, Number(params.episode) || 1)
     : "/movie/" + encodeURIComponent(id);
   const query = new URLSearchParams({ theme: "e50914" });
   addResume(query, "t", startAt);
