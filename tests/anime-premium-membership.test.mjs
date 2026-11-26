@@ -107,6 +107,9 @@ test("webhook verification is the source of truth for membership activation and 
   assert.match(webhook, /transaction\/verify/);
   assert.match(webhook, /Payment Page transactions have Paystack-generated references/);
   assert.match(webhook, /matches\.length !== 1/);
+  assert.match(webhook, /Hosted Paystack charge has no subscription evidence/);
+  assert.match(webhook, /safeReference\(subscriptionCode\)/);
+  assert.match(webhook, /data\.subscription\?\.amount/);
   assert.match(webhook, /checkoutSource === "hosted_payment_page"/);
   assert.match(webhook, /eventName === "charge\.success"/);
   assert.match(webhook, /invoice\.payment_success/);
