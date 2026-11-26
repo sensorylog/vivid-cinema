@@ -293,6 +293,20 @@ function renderTitle(details) {
   activeTitleDetails = details;
   const name = titleName(details);
   document.title = name + " · VIVID ANIME PREMIUM";
+  const canonicalUrl = new URL("anime-premium-title.html", window.location.origin);
+  canonicalUrl.searchParams.set("id", String(details.id));
+  canonicalUrl.searchParams.set("type", mediaType);
+  const canonical = document.querySelector('link[rel="canonical"]');
+  if (canonical) canonical.href = canonicalUrl.toString();
+  const description = String(details.overview || "Explore the story, characters and world behind " + name + " on Vivid Anime Premium.").replace(/\s+/g, " ").trim().slice(0, 160);
+  const descriptionMeta = document.querySelector('meta[name="description"]');
+  if (descriptionMeta) descriptionMeta.content = description;
+  const socialTitle = document.querySelector('meta[property="og:title"]');
+  if (socialTitle) socialTitle.content = document.title;
+  const socialDescription = document.querySelector('meta[property="og:description"]');
+  if (socialDescription) socialDescription.content = description;
+  const socialUrl = document.querySelector('meta[property="og:url"]');
+  if (socialUrl) socialUrl.content = canonicalUrl.toString();
   $("vap-title-name").textContent = name;
   const watchParams = new URLSearchParams({ id: String(details.id), type: mediaType });
   if (mediaType === "tv") { watchParams.set("season", "1"); watchParams.set("episode", "1"); }
