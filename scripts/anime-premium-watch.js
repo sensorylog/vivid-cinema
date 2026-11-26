@@ -27,6 +27,7 @@ let providerOptions = [];
 let failedProviderIds = new Set();
 let baseAnimeIds = { aniListId: "", malId: "" };
 let seasonAnimeIds = { aniListId: "", malId: "" };
+let animeIdPromise = Promise.resolve(baseAnimeIds);
 let animeTrack = "sub";
 let latestProviderProgress = null;
 let lastProgressSync = 0;
@@ -262,6 +263,7 @@ async function requestPlayback(episode) {
   showGate("Checking Premium access", "Vivid is verifying your account before opening the anime servers.", "Open Vivid account", "account.html", true);
   setStatus("Checking your Premium access…");
   try {
+    if (mediaType === "tv") await animeIdPromise;
     const token = await currentUser.getIdToken();
     if (requestId !== playbackRequestId) return;
     const response = await fetch("/api/anime-premium/playback", {
@@ -374,7 +376,11 @@ async function loadSeason(seasonNumber) {
     seasonDetails = result;
     if (season > 1) {
       const seasonLabel = result.name && !/^season\s+\d+$/i.test(result.name) ? result.name : "season " + season;
-      const resolvedSeasonIds = await resolveAnimeIds(titleName(titleDetails) + " " + seasonLabel).catch(() => ({ aniListId: "", malId: "" }));
+      const [baseIds, resolvedSeasonIds] = await Promise.all([
+        animeIdPromise,
+        resolveAnimeIds(titleName(titleDetails) + " " + seasonLabel).catch(() => ({ aniListId: "", malId: "" }))
+      ]);
+      baseAnimeIds = baseIds || baseAnimeIds;
       if (request !== seasonRequest) return;
       seasonAnimeIds = { aniListId: resolvedSeasonIds.aniListId || baseAnimeIds.aniListId, malId: resolvedSeasonIds.malId || baseAnimeIds.malId };
     } else seasonAnimeIds = { ...baseAnimeIds };
@@ -404,7 +410,11 @@ async function loadWatchPage() {
   const getDetails = mediaType === "movie" ? tmdbApi.movieDetails : tmdbApi.tvDetails;
   titleDetails = await getDetails(titleId);
   if (!titleDetails?.id) throw new Error("This anime title could not be found.");
-  baseAnimeIds = await resolveAnimeIds(titleName(titleDetails)).catch(() => ({ aniListId: "", malId: "" }));
+  animeIdPromise = resolveAnimeIds(titleName(titleDetails)).then(ids => {
+    baseAnimeIds = ids || { aniListId: "", malId: "" };
+    if (mediaType === "tv" && Number(params.get("season") || 1) === 1) seasonAnimeIds = { ...baseAnimeIds };
+    return baseAnimeIds;
+  }).catch(() => baseAnimeIds);
   seasonAnimeIds = { ...baseAnimeIds };
   const name = titleName(titleDetails);
   document.title = "Watch " + name + " · VIVID ANIME PREMIUM";
