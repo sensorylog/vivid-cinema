@@ -20,6 +20,7 @@ test("signup and resend use the authenticated external verification API", () => 
   assert.doesNotMatch(auth, /firebase-functions\.js|httpsCallable|getFunctions/);
   assert.doesNotMatch(auth, /sendEmailVerification/);
   assert.match(auth, /Verify My Email/);
+  assert.match(auth, /JSON\.stringify\(postAuthDestination\(\) === "anime-premium\.html" \? \{ returnTo: "anime-premium\.html" \} : \{\}\)/);
 });
 
 test("Google redirect recovery only runs when a redirect was explicitly started", () => {
@@ -56,6 +57,9 @@ test("external API verifies Firebase identity before sending a custom email", ()
   assert.match(api, /Access-Control-Allow-Origin/);
   assert.match(api, /DEFAULT_ALLOWED_ORIGINS/);
   assert.match(api, /VERIFY_CONTINUE_URL = "https:\/\/vivid-cinema\.pages\.dev\/verify-email\.html"/);
+  assert.match(api, /ALLOWED_RETURN_DESTINATIONS = new Set\(\["anime-premium\.html"\]\)/);
+  assert.match(api, /function verificationContinueUrl\(body\)/);
+  assert.match(api, /url: verificationContinueUrl\(req\.body\)/);
   assert.match(api, /"https:\/\/vivid-cinema\.pages\.dev"/);
   assert.match(api, /new Set\(\[\.\.\.DEFAULT_ALLOWED_ORIGINS, \.\.\.configured\]\)/);
   assert.match(packageJson, /"firebase-admin": "\^14\.5\.0"/);
@@ -68,6 +72,9 @@ test("verification handler applies Firebase action code before showing success",
   assert.match(handler, /params\.get\("oobCode"\)/);
   assert.match(handler, /await applyActionCode\(auth, code\)/);
   assert.match(handler, /Email verified successfully!/);
+  assert.match(handler, /function loginDestination\(\)/);
+  assert.match(handler, /requested === "anime-premium\.html"/);
+  assert.match(handler, /login\.html\?returnTo=anime-premium\.html/);
   assert.match(handler, /expired or already been used/);
 });
 
