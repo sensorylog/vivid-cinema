@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
 const read = path => readFile(new URL(path, import.meta.url), "utf8");
-const [html, titleScript, discovery, tmdb, sw, syntax, css, library] = await Promise.all([
+const [html, titleScript, discovery, tmdb, sw, syntax, css, discoveryCss, library] = await Promise.all([
   read("../anime-premium-title.html"),
   read("../scripts/anime-premium-title.js"),
   read("../scripts/anime-premium-discovery.js"),
@@ -11,6 +11,7 @@ const [html, titleScript, discovery, tmdb, sw, syntax, css, library] = await Pro
   read("../service-worker.js"),
   read("../automation/check-syntax.mjs"),
   read("../styles/vivid-anime-premium-title.css"),
+  read("../styles/vivid-anime-premium.css"),
   read("../scripts/library.js")
 ]);
 
@@ -50,13 +51,13 @@ test("anime identity cards keep per-title SVG silhouette masks across desktop an
   assert.match(discovery, /clipPath/);
   assert.match(discovery, /items\.map\(identityCard\)/);
   assert.match(discovery, /vap-identity-mobile-poster/);
-  assert.match(css, /\.vap-identity-svg\{display:block;width:100%;height:100%\}/);
+  assert.match(discoveryCss, /\.vap-identity-svg\{display:block;width:100%;height:100%\}/);
   assert.match(discovery, /anime-premium-title\.html/);
   assert.match(css, /vap-title-hero\.is-scrolled/);
 });
 
 test("title route and runtime are available offline and included in syntax checks", () => {
-  assert.match(sw, /vivid-cinema-shell-v358/);
+  assert.match(sw, /vivid-cinema-shell-v359/);
   assert.match(sw, /scripts\/anime-eligibility\.js/);
   assert.match(sw, /anime-premium-title\.html/);
   assert.match(sw, /vivid-anime-premium-title\.css/);
