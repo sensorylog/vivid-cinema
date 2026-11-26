@@ -73,7 +73,7 @@ async function updatePrice() {
   const checkoutCurrency = getCheckoutCurrency(selectedCountry);
   const plan = PAGE_CHECKOUT_PLANS[selectedPlanId];
   $("vap-local-currency").textContent = localCurrency;
-  $("vap-checkout-currency").textContent = checkoutCurrency;
+  $("vap-checkout-currency").textContent = checkoutCurrency === "GHS" ? "GHS · Ghanaian Cedi" : checkoutCurrency;
   if (!plan) {
     $("vap-local-price").textContent = "Price unavailable";
     $("vap-price-note").textContent = "Vivid has not configured a checkout price for this region yet.";
@@ -83,16 +83,16 @@ async function updatePrice() {
   const baseAmount = Number(plan.amountMajor);
   if (localCurrency === checkoutCurrency) {
     $("vap-local-price").textContent = formatMoney(baseAmount, checkoutCurrency);
-    $("vap-price-note").textContent = "Exact checkout currency. Paystack will confirm the final amount before payment.";
+    $("vap-price-note").textContent = "Your selected country uses Ghanaian Cedis. Paystack will charge " + formatMoney(baseAmount, checkoutCurrency) + ".";
   } else {
     const rates = await getExchangeRates(checkoutCurrency);
     const rate = rates?.[localCurrency];
     if (Number.isFinite(rate) && rate > 0) {
       $("vap-local-price").textContent = "≈ " + formatMoney(baseAmount * rate, localCurrency);
-      $("vap-price-note").textContent = "Estimated local equivalent. Paystack checkout will charge " + formatMoney(baseAmount, checkoutCurrency) + " in " + checkoutCurrency + ".";
+      $("vap-price-note").textContent = "Estimated price in " + localCurrency + ". At Paystack checkout, the plan remains " + formatMoney(baseAmount, checkoutCurrency) + " in Ghanaian Cedis (GHS). Your bank or card provider converts it using its rate; the final card charge may vary and foreign transaction fees may apply.";
     } else {
       $("vap-local-price").textContent = formatMoney(baseAmount, checkoutCurrency);
-      $("vap-price-note").textContent = "Local conversion is temporarily unavailable. Paystack will confirm the final " + checkoutCurrency + " amount before payment.";
+      $("vap-price-note").textContent = "We could not retrieve the local exchange rate right now. Paystack will charge the fixed " + formatMoney(baseAmount, checkoutCurrency) + " in Ghanaian Cedis (GHS), and your bank or card provider will convert it.";
     }
   }
   selectedPaymentMethod = "card";
