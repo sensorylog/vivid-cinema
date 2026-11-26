@@ -400,6 +400,9 @@ test("Anime Premium billing, memberships, playback sources and audit records are
     await setDoc(doc(db, "animePremiumSources", "tv_123_s1_e1"), {
       provider: "approved-provider", sourceId: "rights-cleared-source", active: true
     });
+    await setDoc(doc(db, "animePremiumProfiles", "premium-user"), { favorites: [] });
+    await setDoc(doc(db, "animePremiumPlaybackSessions", "session-one"), { uid: "premium-user" });
+    await setDoc(doc(db, "animePremiumRateLimits", "premium-user_profile_1"), { uid: "premium-user", count: 1 });
     await setDoc(doc(db, "animePremiumAdminAudit", "audit-one"), {
       action: "membership_override", uid: "premium-user"
     });
@@ -413,6 +416,9 @@ test("Anime Premium billing, memberships, playback sources and audit records are
     "animePremiumWebhookEvents/event-one",
     "animePremiumPendingSubscriptions/sub-one",
     "animePremiumSources/tv_123_s1_e1",
+    "animePremiumProfiles/premium-user",
+    "animePremiumPlaybackSessions/session-one",
+    "animePremiumRateLimits/premium-user_profile_1",
     "animePremiumAdminAudit/audit-one"
   ];
   for (const path of privatePaths) {
