@@ -22,6 +22,7 @@ test("Premium pricing has a configurable GHS default and does not expose Paystac
   const publicData = publicPricing({ PAYSTACK_PLAN_GHS_MONTHLY: "PLN_PRIVATE_CODE" });
   assert.equal(publicData.plans.GHS.amountMinor, 5330);
   assert.equal(publicData.plans.GHS.cardAutoRenewAvailable, true);
+  assert.equal(publicData.checkoutEnabled, false);
   assert.doesNotMatch(JSON.stringify(publicData), /PLN_PRIVATE_CODE/);
 });
 
@@ -88,6 +89,8 @@ test("timestamped Paystack-Signature validates v1 and rejects stale webhook requ
 
 test("Premium API responses are no-store and CORS is limited to Vivid origins", () => {
   assert.equal(allowedOrigin("https://vivid-cinema.pages.dev"), true);
+  assert.equal(allowedOrigin("https://feat-vivid-anime-premium.vivid-cinema.pages.dev"), true);
+  assert.equal(allowedOrigin("https://vivid-cinema.pages.dev.attacker.example"), false);
   assert.equal(allowedOrigin("https://attacker.example"), false);
   assert.equal(allowedOrigin("https://preview.example", { VIVID_ALLOWED_ORIGINS: "https://preview.example" }), true);
   const response = jsonResponse({ ok: true }, 200, "https://vivid-cinema.pages.dev");
