@@ -18,6 +18,8 @@ let countries = FALLBACK_COUNTRIES;
 let currentUser = null;
 let membershipActive = false;
 let membershipAutoRenew = false;
+let membershipStatusUnavailable = false;
+let membershipVerificationRequired = false;
 let selectedCountry = "GH";
 let selectedPaymentMethod = "card";
 const rateCache = new Map();
@@ -115,9 +117,22 @@ async function updatePrice() {
     : selectedPaymentMethod === "mobile_money"
       ? "Mobile money is a one-time payment. Renew manually each month; no automatic debit is created."
       : "No payment method is configured for this region yet.";
-  $("vap-checkout-button").disabled = !pricing.checkoutEnabled || (membershipActive && membershipAutoRenew) || !selectedPaymentMethod;
-  $("vap-checkout-button").textContent = !pricing.checkoutEnabled ? "Checkout temporarily unavailable" : membershipActive ? (membershipAutoRenew ? "Membership active — auto-renew on" : "Renew manually →") : currentUser ? "Continue to secure checkout →" : "Sign in to subscribe →";
-  if (!pricing.checkoutEnabled) {
+  const membershipBlocked = membershipStatusUnavailable || membershipVerificationRequired;
+  $("vap-checkout-button").disabled = !pricing.checkoutEnabled || membershipBlocked || (membershipActive && membershipAutoRenew) || !selectedPaymentMethod;
+  $("vap-checkout-button").textContent = membershipStatusUnavailable
+    ? "Membership status unavailable"
+    : membershipVerificationRequired
+      ? "Verify email to subscribe"
+      : !pricing.checkoutEnabled
+        ? "Checkout temporarily unavailable"
+        : membershipActive
+          ? (membershipAutoRenew ? "Membership active — auto-renew on" : "Renew manually →")
+          : currentUser ? "Continue to secure checkout →" : "Sign in to subscribe →";
+  if (membershipStatusUnavailable) {
+    $("vap-checkout-status").textContent = "Vivid could not verify your current membership. Reload this page and check again before paying.";
+  } else if (membershipVerificationRequired) {
+    $("vap-checkout-status").textContent = "Verify your Vivid email address before subscribing.";
+  } else if (!pricing.checkoutEnabled) {
     $("vap-checkout-status").textContent = "Your membership price is available, but secure Paystack checkout has not been enabled in this environment.";
   } else if (!selectedPaymentMethod) {
     $("vap-checkout-status").textContent = "No supported payment method is configured for this country yet.";
@@ -139,6 +154,8 @@ async function loadMembership() {
   if (!currentUser) {
     membershipActive = false;
     membershipAutoRenew = false;
+    membershipStatusUnavailable = false;
+    membershipVerificationRequired = false;
     $("vap-account-status").innerHTML = 'Already subscribed? <a href="auth.html?returnTo=anime-premium-membership.html">Sign in with your Vivid account</a>.';
     return;
   }
@@ -149,11 +166,20 @@ async function loadMembership() {
       cache: "no-store"
     });
     if (response.status === 403) {
-      $("vap-checkout-status").textContent = "Verify your Vivid email address before subscribing.";
+      membershipVerificationRequired = true;
+      if (pricing) await updatePrice();
+      else $("vap-checkout-status").textContent = "Verify your Vivid email address before subscribing.";
       return;
     }
-    if (!response.ok) return;
+    if (!response.ok) {
+      membershipStatusUnavailable = true;
+      if (pricing) await updatePrice();
+      else $("vap-checkout-status").textContent = "Vivid could not verify your current membership. Reload and try again before paying.";
+      return;
+    }
     const payload = await response.json();
+    membershipStatusUnavailable = false;
+    membershipVerificationRequired = false;
     const membership = payload.membership || {};
     membershipActive = membership.active === true;
     membershipAutoRenew = membership.autoRenew === true;
@@ -165,10 +191,19 @@ async function loadMembership() {
       $("vap-account-status").textContent = "You are signed in with your Vivid account.";
     }
   } catch (error) {
+    membershipStatusUnavailable = true;
     console.warn("Vivid Anime Premium membership status could not be loaded:", error);
+    if (pricing) await updatePrice();
+    else $("vap-checkout-status").textContent = "Vivid could not verify your current membership. Reload and try again before paying.";
   }
 }
 async function startCheckout() {
+  if (membershipStatusUnavailable || membershipVerificationRequired) {
+    $("vap-checkout-status").textContent = membershipVerificationRequired
+      ? "Verify your Vivid email address before subscribing."
+      : "Vivid must verify your current membership before another payment can be started.";
+    return;
+  }
   if (!pricing?.checkoutEnabled) { $("vap-checkout-status").textContent = "Secure checkout is not enabled in this environment yet."; return; }
   if (membershipActive && membershipAutoRenew) return;
   if (!currentUser) {
@@ -262,6 +297,8 @@ async function initAuth() {
       else {
         membershipActive = false;
         membershipAutoRenew = false;
+        membershipStatusUnavailable = false;
+        membershipVerificationRequired = false;
         $("vap-account-status").innerHTML = 'Already subscribed? <a href="auth.html?returnTo=anime-premium-membership.html">Sign in with your Vivid account</a>.';
       }
       if (pricing) await updatePrice();
