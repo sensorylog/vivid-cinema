@@ -34,9 +34,14 @@ async function handleChargeSuccess(db, env, data, eventRef) {
     if (!checkoutSnapshot.exists) return;
     checkout = checkoutSnapshot.data() || {};
   } else {
-    // Hosted Payment Pages use Paystack-generated references. Their signed
-    // charge.success payload is the authoritative receipt for this flow.
+    // Hosted subscription pages use Paystack-generated references. Their
+    // signed charge.success payload is authoritative. Requiring plan evidence
+    // also keeps ordinary Support Vivid donations from matching Premium prices.
     if (String(data.status || "").toLowerCase() !== "success") return;
+    if (!data.plan && !data.subscription && !data.subscription_code) {
+      console.warn("Ignoring a successful Paystack charge without subscription-page evidence.", { reference });
+      return;
+    }
     const email = String(data.customer?.email || "").trim().toLowerCase();
     const amount = Number(data.amount || 0);
     const currency = String(data.currency || "").toUpperCase();
