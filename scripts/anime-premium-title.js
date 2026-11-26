@@ -16,6 +16,13 @@ let backdropTimer = null;
 let backdropAdvancing = false;
 let activeTitleDetails = null;
 
+function withTimeout(promise, milliseconds, message) {
+  let timer;
+  return Promise.race([
+    promise,
+    new Promise((_, reject) => { timer = window.setTimeout(() => reject(new Error(message)), milliseconds); })
+  ]).finally(() => window.clearTimeout(timer));
+}
 function titleName(details) { return details.title || details.name || "Anime title"; }
 function releaseYear(details) {
   const date = details.release_date || details.first_air_date || "";
@@ -257,7 +264,10 @@ async function loadTitle() {
   if (!titleId) throw new Error("This title link is invalid. Return to the Premium catalogue and choose an anime.");
   const getDetails = mediaType === "movie" ? tmdbApi.movieDetails : tmdbApi.tvDetails;
   const getImages = mediaType === "movie" ? tmdbApi.movieImages : tmdbApi.tvImages;
-  const [detailsResult, imagesResult] = await Promise.allSettled([getDetails(titleId), getImages(titleId)]);
+  const [detailsResult, imagesResult] = await Promise.allSettled([
+    withTimeout(getDetails(titleId), 15000, "Anime title details timed out. Please try again."),
+    withTimeout(getImages(titleId), 12000, "Anime artwork timed out.")
+  ]);
   if (detailsResult.status !== "fulfilled") throw detailsResult.reason || new Error("The anime title is unavailable.");
   const details = detailsResult.value;
   if (!details?.id) throw new Error("The anime title could not be found.");
