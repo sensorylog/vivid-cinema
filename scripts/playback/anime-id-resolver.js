@@ -1,6 +1,9 @@
 const ANILIST_URL = "https://graphql.anilist.co";
 const JIKAN_URL = "https://api.jikan.moe/v4/anime";
 const REQUEST_TIMEOUT_MS = 6500;
+const RESOLVER_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
+const EMPTY_RESULT_CACHE_TTL_MS = 5 * 60 * 1000;
+const resolverCache = new Map();
 
 export function normalizeAnimeTitle(value) {
   return String(value || "")
@@ -146,9 +149,28 @@ async function findJikanMatch(title, options = {}) {
   return { malId: String(ranked.candidate.mal_id), episodeOffset };
 }
 
+function resolverCacheKey(title, options) {
+  return [
+    normalizeAnimeTitle(title),
+    normalizeAnimeTitle(options.seasonTitle || ""),
+    String(options.seasonYear || ""),
+    String(options.globalEpisode || ""),
+    String(options.localEpisode || ""),
+    String(options.episodeOffset || "")
+  ].join("|");
+}
+
+export function clearAnimeIdResolverCache() {
+  resolverCache.clear();
+}
+
 export async function resolveAnimeIds(title, options = {}) {
   const cleanTitle = String(title || "").trim();
   if (!cleanTitle) return { aniListId: "", malId: "" };
+  const key = resolverCacheKey(cleanTitle, options);
+  const cached = resolverCache.get(key);
+  if (cached && cached.expiresAt > Date.now()) return { ...cached.result };
+  if (cached) resolverCache.delete(key);
 
   // Prefer a season-specific catalogue entry when TMDB provides a distinct
   // season title/year. Otherwise retain a continuous episode offset for
@@ -164,5 +186,8 @@ export async function resolveAnimeIds(title, options = {}) {
   if (Object.keys(options).length) {
     result.episodeOffset = aniList?.episodeOffset ?? jikan?.episodeOffset ?? Math.max(0, Number(options.episodeOffset) || 0);
   }
+  const ttl = result.aniListId || result.malId ? RESOLVER_CACHE_TTL_MS : EMPTY_RESULT_CACHE_TTL_MS;
+  resolverCache.set(key, { result: { ...result }, expiresAt: Date.now() + ttl });
+  while (resolverCache.size > 150) resolverCache.delete(resolverCache.keys().next().value);
   return result;
 }
