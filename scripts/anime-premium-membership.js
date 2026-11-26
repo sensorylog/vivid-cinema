@@ -226,6 +226,7 @@ async function startCheckout() {
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: "Bearer " + token },
       cache: "no-store",
+      signal: AbortSignal.timeout(15000),
       body: JSON.stringify({ country: selectedCountry, paymentMethod: selectedPaymentMethod })
     });
     const payload = await response.json().catch(() => ({}));
@@ -236,8 +237,7 @@ async function startCheckout() {
     await updatePrice();
     $("vap-checkout-status").textContent = error.message || "Checkout could not be started.";
   } finally {
-    button.disabled = !pricing.checkoutEnabled || (membershipActive && membershipAutoRenew) || !selectedPaymentMethod;
-    button.textContent = !pricing.checkoutEnabled ? "Checkout temporarily unavailable" : membershipActive ? (membershipAutoRenew ? "Membership active — auto-renew on" : "Renew manually →") : currentUser ? "Continue to secure checkout →" : "Sign in to subscribe →";
+    if (pricing) await updatePrice();
   }
 }
 
@@ -252,6 +252,7 @@ async function cancelAutomaticRenewal() {
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: "Bearer " + token },
       cache: "no-store",
+      signal: AbortSignal.timeout(10000),
       body: JSON.stringify({})
     });
     const payload = await response.json().catch(() => ({}));
