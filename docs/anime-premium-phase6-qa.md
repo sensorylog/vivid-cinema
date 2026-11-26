@@ -47,3 +47,21 @@ Use a real signed-in browser session. The library page is private and must remai
 ## Release guard
 - [ ] Keep the Android APK and Windows package jobs skipped until every phase and all manual QA are complete.
 - [ ] Do not publish or release packages during this phase.
+
+
+## Premium experience integration and loading
+
+- [ ] Desktop primary navigation opens Anime Premium directly and marks every Premium route active.
+- [ ] Mobile bottom navigation opens Anime Premium directly; the More menu keeps the legacy free Anime route separate.
+- [ ] Discover, My Anime, Membership, Free Anime and Vivid Cinema tabs are consistent across all Premium routes.
+- [ ] My Anime loads the shared Vivid app shell, account navigation and mobile bottom navigation.
+- [ ] Failed discovery shelves replace loading placeholders with a clear retry action.
+- [ ] The featured hero action remains safe before catalogue data is available.
+- [ ] Membership pricing loads independently of the optional country list and Firebase account restoration.
+- [ ] Country and exchange-rate lookups time out and fall back without blocking the subscription page.
+- [ ] A missing pricing API, unavailable Paystack configuration, unverified email or failed membership check produces an explicit state.
+- [ ] Checkout remains disabled when the current membership cannot be verified; users are not invited to pay twice because of a temporary API failure.
+- [ ] Firebase authentication outages do not leave the watch, library or payment-return route stuck on an indefinite loading state.
+- [ ] Verify the production Cloudflare Pages environment has the required Firebase and Paystack variables and that `/api/anime-premium/pricing` returns a valid public pricing payload.
+- [ ] Verify Paystack checkout, signed webhook activation, membership refresh, cancellation and protected playback in a real production-like account.
+- [ ] Complete desktop and mobile browser QA, including iOS Safari and Android Chrome, before any public release.
