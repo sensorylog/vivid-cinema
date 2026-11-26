@@ -1,5 +1,5 @@
 // Bump this version whenever the precached app shell changes.
-const CACHE_NAME = "vivid-cinema-shell-v334";
+const CACHE_NAME = "vivid-cinema-shell-v335";
 const HLS_LIBRARY_URL = "https://cdn.jsdelivr.net/npm/hls.js@1.7.3/dist/hls.min.js";
 const APP_SHELL = [
   HLS_LIBRARY_URL,
@@ -27,7 +27,7 @@ const APP_SHELL = [
   "./scripts/collection.js","./scripts/person.js","./scripts/recommendations.js","./scripts/release-alerts.js","./scripts/cinema-reminders.js",
   "./scripts/push-notifications.js","./scripts/news.js","./scripts/news.js?v=20261018-feedback-sync-4",
   "./scripts/editorial-desk.js","./scripts/title.js","./scripts/playback/player-engine.js","./scripts/playback/playback-servers.js","./scripts/playback/server-settings.js",
-  "./scripts/watch.js","./scripts/watch.js?v=anime-phase5-player-1","./scripts/anime-enrichment.js","./styles/vivid-watch-polish.css?v=anime-enrichment-2","./scripts/playback/tflix-secondary-player.js","./scripts/playback/playback-urls.js","./scripts/playback/anime-playback.js","./scripts/landing.js","./scripts/account.js",
+  "./scripts/watch.js","./scripts/watch.js?v=anime-phase5-player-2","./scripts/anime-enrichment.js","./styles/vivid-watch-polish.css?v=anime-phase5-player-1","./scripts/playback/tflix-secondary-player.js","./scripts/playback/playback-urls.js","./scripts/playback/anime-playback.js","./scripts/landing.js","./scripts/account.js",
   "./scripts/account-bootstrap.js","./scripts/account-bootstrap.js?v=20261016-account-bootstrap-1","./scripts/auth.js","./scripts/auth.js?v=20261123-signup-only-1","./scripts/verify-email.js",
   "./scripts/anime.js","./scripts/anime.js?v=discovery-3","./scripts/anime-discovery.js","./scripts/live.js","./scripts/home-breathe.js","./data/live-channels.json","./script.js",
   "./script.js?v=20261006-2","./scripts/watch.js?v=watch-player-server-scroll-1","./scripts/account.js?v=20261016-account-runtime-2","./styles/vivid-news.css?v=20261021-this-week-1","./scripts/newsroom.js?v=20261020-newsroom-images-3",
