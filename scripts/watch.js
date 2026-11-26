@@ -1291,7 +1291,7 @@ function renderShell(params) {
       const button = event.target.closest("[data-player-source]");
       if (!button || button.disabled || !serverPanel.contains(button)) return;
       const source = button.getAttribute("data-player-source");
-      if ((!["vidapi", "vidsrc", "vidlink", "vidplus", "vidking", "direct", "embedwave", "vidfast", "ezvidapi", "embedapistream", "moviesapi", "animeembed", "vidy", "aniweeb"].includes(source) && !(source?.startsWith("custom:"))) || !sourceAvailable(source)) return;
+      if ((!["vidapi", "vidsrc", "vidlink", "vidplus", "vidking", "direct", "embedwave", "vidfast", "ezvidapi", "embedapistream", "moviesapi", "animeembed", "vidy"].includes(source) && !(source?.startsWith("custom:"))) || !sourceAvailable(source)) return;
       sourceAttempted.clear();
       const latestProgress = Number(getPlaybackProgress(progressKey())?.progress || route.params.get("startAt") || resumeAt || 0);
       setPlayerSource(source, params, latestProgress);
