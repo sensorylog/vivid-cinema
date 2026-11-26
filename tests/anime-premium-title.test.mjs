@@ -16,6 +16,7 @@ const [html, titleScript, discovery, tmdb, sw, syntax, css] = await Promise.all(
 test("Premium title route has its own cinematic title shell and content sections", () => {
   assert.match(html, /data-vivid-page="anime-premium-title"/);
   assert.match(html, /scripts\/anime-premium-title\.js/);
+  assert.match(html, /anime-premium-watch\.html/);
   assert.match(html, /styles\/vivid-anime-premium-title\.css/);
   for (const id of ["vap-title-hero", "vap-title-backdrop-a", "vap-title-backdrop-b", "vap-title-facts", "vap-title-cast", "vap-title-related"]) {
     assert.match(html, new RegExp('id="' + id + '"'));
