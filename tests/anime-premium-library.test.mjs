@@ -25,6 +25,7 @@ test("private Premium Anime Library is no-index and has membership-gated section
     assert.match(html, new RegExp('id="' + id + '"'));
   }
   assert.match(script, /fetch\("\/api\/anime-premium\/membership"/);
+  assert.match(script, /getIdToken\(true\)/);
   assert.match(script, /payload\?\.membership\?\.active === true/);
   assert.match(profileApi, /animePremiumMemberships/);
   assert.match(profileApi, /premium-membership-required/);
