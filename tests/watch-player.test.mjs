@@ -204,6 +204,7 @@ test("VidSrc forwards progress, seek, readiness and explicit play/pause transiti
 test("Archive Cinema is integrated as a rights-filtered movie fallback in Player 1", async () => {
   assert.match(source, /id="vivid-archive-search"/);
   assert.match(source, /mountArchiveFilmSearch/);
+  assert.match(source, /archiveRoot && params\?\.type === "movie" && !isAnimePlayback\(\)/);
   assert.match(source, /providerId: "archive"/);
   assert.match(source, /https:\/\/archive\.org\/embed\//);
   const archive = await readFile(new URL("../scripts/playback/archive-film-fallback.js", import.meta.url), "utf8");
