@@ -22,7 +22,9 @@ let currentUser = null;
 let membershipActive = false;
 let membershipAutoRenew = false;
 let selectedCountry = "GH";
-let selectedPaymentMethod = "card";\nlet selectedPlanId = "monthly";\nconst PAGE_CHECKOUT_PLANS = { monthly: { amountMajor: 53.30 }, biannually: { amountMajor: 287.82 }, annually: { amountMajor: 511.68 } };
+let selectedPaymentMethod = "card";
+let selectedPlanId = "monthly";
+const PAGE_CHECKOUT_PLANS = { monthly: { amountMajor: 53.30 }, biannually: { amountMajor: 287.82 }, annually: { amountMajor: 511.68 } };
 const rateCache = new Map();
 
 function getCountry(code) { return countries.find(country => country.code === code) || FALLBACK_COUNTRIES[0]; }
