@@ -121,6 +121,7 @@ test("webhook verification is the source of truth for membership activation and 
   assert.match(webhook, /animePremiumMemberships/);
   assert.match(membership, /animePremiumMemberships/);
   assert.match(membership, /currentPeriodEnd/);
+  assert.match(membership, /env\.PAYSTACK_SECRET_KEY && data\.autoRenew/);
 });
 
 test("payment return checks server membership and never grants access from the callback", () => {
