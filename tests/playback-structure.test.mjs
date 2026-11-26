@@ -62,6 +62,6 @@ test("watch experience polish covers both players and responsive accessible cont
   ]) {
     assert.ok(styles.includes(selector), "watch polish should include " + selector);
   }
-  assert.match(watchHtml, /vivid-watch-polish\\.css\\?v=anime-enrichment-2/);
+  assert.match(watchHtml, /vivid-watch-polish\.css\?v=anime-enrichment-2/);
 });
 
