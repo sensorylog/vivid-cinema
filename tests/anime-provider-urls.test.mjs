@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { buildAnimeEmbedUrl, buildVidyAnimeUrl } from "../scripts/playback/playback-urls.js";
+import { buildAnimeEmbedUrl, buildVidyAnimeUrl, buildVidlinkEmbedUrl, buildVidplusEmbedUrl } from "../scripts/playback/playback-urls.js";
 const ids={aniListId:"21",episode:4,track:"sub"};
 test("AnimeEmbed uses its documented AniList iframe route and track parameter",()=>{
  assert.equal(buildAnimeEmbedUrl(ids),"https://animeembed.com/embed/ani/21/4?track=sub&autoPlay=0");
