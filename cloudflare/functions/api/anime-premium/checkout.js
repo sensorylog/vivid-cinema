@@ -8,7 +8,7 @@ export function onRequestOptions({ request, env }) {
 }
 export async function onRequestPost({ request, env }) {
   const origin = request.headers.get("Origin") || "";
-  if (!allowedOrigin(origin, env)) return jsonResponse({ ok: false, code: "origin-not-allowed", message: "This origin is not allowed." }, 403, "", env);
+  if (origin && !allowedOrigin(origin, env)) return jsonResponse({ ok: false, code: "origin-not-allowed", message: "This origin is not allowed." }, 403, "", env);
   try {
     const raw = await request.text();
     if (raw.length > 8000) throw new AnimePremiumError(400, "invalid-request", "This checkout request is too large.");
@@ -46,7 +46,9 @@ export async function onRequestPost({ request, env }) {
       createdAt: timestampFromMillis(now),
       updatedAt: timestampFromMillis(now)
     });
-    const callbackUrl = new URL("/anime-premium-return.html", origin).toString();
+    const baseOrigin = origin || new URL(request.url).origin;
+    if (!allowedOrigin(baseOrigin, env)) throw new AnimePremiumError(403, "origin-not-allowed", "This checkout origin is not allowed.");
+    const callbackUrl = new URL("/anime-premium-return.html", baseOrigin).toString();
     const paystackBody = {
       email: user.email,
       amount: String(plan.amount),
