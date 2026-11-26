@@ -54,6 +54,7 @@ function renderPlan() {
   if ($("vap-price-period")) $("vap-price-period").textContent = "/ " + plan.period;
   const pill = document.querySelector(".vap-plan-pill");
   if (pill) pill.textContent = plan.label.toUpperCase() + " MEMBERSHIP";
+  if ($("vap-card-description")) $("vap-card-description").textContent = "Secure Paystack card billing for " + plan.label.toLowerCase() + ".";
   document.querySelectorAll("[data-vap-plan]").forEach(button => {
     const active = button.dataset.vapPlan === selectedPlanId;
     button.classList.toggle("is-active", active);
