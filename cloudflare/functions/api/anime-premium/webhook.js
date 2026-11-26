@@ -28,33 +28,17 @@ async function handleChargeSuccess(db, env, data, eventRef) {
   let checkoutSnapshot;
   let checkout = {};
   let hostedPageCheckout = false;
-  let pendingSubscriptionDoc = null;
-  let pendingSubscription = {};
   if (reference.startsWith("VAP") && safeReference(reference)) {
     checkoutRef = db.collection("animePremiumCheckouts").doc(reference);
     checkoutSnapshot = await checkoutRef.get();
     if (!checkoutSnapshot.exists) return;
     checkout = checkoutSnapshot.data() || {};
   } else {
-    // Hosted subscription pages use Paystack-generated references. Their
-    // signed charge.success payload is authoritative. Requiring plan evidence
-    // also keeps ordinary Support Vivid donations from matching Premium prices.
+    // Payment Page transactions have Paystack-generated references, not the
+    // Vivid VAP references used by the API-initialized checkout flow. Their
+    // signed charge.success payload is the authoritative payment receipt.
     if (String(data.status || "").toLowerCase() !== "success") return;
-    if (!data.plan && !data.subscription && !data.subscription_code) {
-      console.warn("Ignoring a successful Paystack charge without subscription-page evidence.", { reference });
-      return;
-    }
     const email = String(data.customer?.email || "").trim().toLowerCase();
-    const customerCode = String(data.customer?.customer_code || "");
-    if (customerCode) {
-      const pendingSubscriptionSnapshot = await db.collection("animePremiumPendingSubscriptions").where("customerCode", "==", customerCode).limit(1).get();
-      pendingSubscriptionDoc = pendingSubscriptionSnapshot.empty ? null : pendingSubscriptionSnapshot.docs[0];
-      pendingSubscription = pendingSubscriptionDoc ? pendingSubscriptionDoc.data() || {} : {};
-    }
-    if (!data.plan && !data.subscription && !data.subscription_code && !pendingSubscriptionDoc) {
-      console.warn("Ignoring a successful Paystack charge without subscription-page evidence.", { reference });
-      return;
-    }
     const amount = Number(data.amount || 0);
     const currency = String(data.currency || "").toUpperCase();
     if (!email || !amount || !currency) return;
@@ -68,7 +52,8 @@ async function handleChargeSuccess(db, env, data, eventRef) {
         String(value.currency || "").toUpperCase() === currency &&
         created > now - 24 * 60 * 60 * 1000;
     });
-    // Do not guess if more than one pending checkout could own this payment.
+    // Never guess which account/plan a payment belongs to. If more than one
+    // pending order matches, leave it for manual reconciliation.
     if (matches.length !== 1) {
       console.warn("Hosted Paystack payment did not map to exactly one pending Vivid checkout.", {
         reference, email, amount, currency, matches: matches.length
@@ -94,15 +79,16 @@ async function handleChargeSuccess(db, env, data, eventRef) {
   const membershipRef = db.collection("animePremiumMemberships").doc(uid);
   const now = Date.now();
   const customerCode = String(verified.customer?.customer_code || data.customer?.customer_code || "");
-  if (!pendingSubscriptionDoc && customerCode) {
-    const pendingSubscriptionSnapshot = await db.collection("animePremiumPendingSubscriptions").where("customerCode", "==", customerCode).limit(1).get();
-    pendingSubscriptionDoc = pendingSubscriptionSnapshot.empty ? null : pendingSubscriptionSnapshot.docs[0];
-    pendingSubscription = pendingSubscriptionDoc ? pendingSubscriptionDoc.data() || {} : {};
-  }
+  const pendingSubscriptionSnapshot = customerCode
+    ? await db.collection("animePremiumPendingSubscriptions").where("customerCode", "==", customerCode).limit(1).get()
+    : null;
+  const pendingSubscriptionDoc = pendingSubscriptionSnapshot && !pendingSubscriptionSnapshot.empty ? pendingSubscriptionSnapshot.docs[0] : null;
+  const pendingSubscription = pendingSubscriptionDoc ? pendingSubscriptionDoc.data() || {} : {};
   const paystackSubscriptionCode = String(verified.subscription?.subscription_code || data.subscription?.subscription_code || data.subscription_code || pendingSubscription.subscriptionCode || "");
   const subscriptionEmailToken = String(verified.subscription?.email_token || data.subscription?.email_token || pendingSubscription.emailToken || "");
   const requestedNextPayment = millis(verified.subscription?.next_payment_date || data.subscription?.next_payment_date);
   const hasRecurringPlan = Boolean(paystackSubscriptionCode);
+
   await db.runTransaction(async transaction => {
     const [eventSnapshot, liveCheckout, existingMembership] = await Promise.all([
       transaction.get(eventRef),
