@@ -156,11 +156,7 @@ function activateProvider(providerId) {
   setStatus("Opening " + provider.label + " · " + animeTrack.toUpperCase() + "…");
   providerLoadTimer = window.setTimeout(() => {
     if (generation !== providerRequestId || activeProviderId !== provider.id) return;
-    if (provider.events) {
-      fallbackToNextPlaybackServer(provider.label + " did not report playback readiness.");
-      return;
-    }
-    setStatus(provider.label + " has not confirmed playback yet. If the video is stuck, try the next server.");
+    setStatus(provider.label + " has not confirmed playback. The player may still be loading; use the next server if it remains stuck.");
     $("vap-server-next").hidden = providerOptions.filter(item => item.available && item.id !== provider.id).length === 0;
   }, 18000);
   return true;
@@ -240,7 +236,9 @@ function handleProviderMessage(event) {
     if (["aniembed:ready", "aniembed:play", "aniembed:progress", "aniembed:timeupdate"].includes(data.type)) {
       if (providerLoadTimer) window.clearTimeout(providerLoadTimer);
       providerLoadTimer = null;
-      setStatus("Playing with AniXo · " + animeTrack.toUpperCase());
+      setStatus(data.type === "aniembed:ready"
+        ? provider.label + " is ready. Press play in the player."
+        : "Playing · " + animeTrack.toUpperCase());
       if (Number.isFinite(Number(data.duration))) updateProviderProgress(data.currentTime ?? data.time, data.duration);
     } else if (data.type === "aniembed:ended") {
       if (Number.isFinite(Number(data.duration))) updateProviderProgress(data.duration, data.duration, true);
@@ -310,7 +308,10 @@ function handleProviderMessage(event) {
     if (!healthy) return;
     if (providerLoadTimer) window.clearTimeout(providerLoadTimer);
     providerLoadTimer = null;
-    setStatus("Playing with " + provider.label + " · " + animeTrack.toUpperCase());
+    const confirmedPlaying = /^(play|playing|timeupdate|progress|seeked|started)$/.test(eventName) || progress > 0;
+    setStatus(confirmedPlaying
+      ? "Playing · " + animeTrack.toUpperCase()
+      : provider.label + " is ready. Press play in the player.");
     if (progress > 0 && duration > 0) updateProviderProgress(progress, duration);
     if (/^(ended|completed)$/.test(eventName) && duration > 0) updateProviderProgress(duration, duration, true);
   }
