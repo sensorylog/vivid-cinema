@@ -1,6 +1,6 @@
 # Archive Cinema fallback
 
-Archive Cinema is an additional discovery source in Player 1 for movie pages. It searches Internet Archive movie records, checks each candidate's metadata, and offers only records that have a browser-playable video file plus an explicit public-domain or commercial Creative Commons rights declaration.
+Archive Cinema is a last-resort discovery source in Player 1 for movie pages. It stays hidden and makes no archive requests while Vivid's normal movie servers are available. Only after every available Vivid movie server has been tried and none can play the title does the archive option appear and search Internet Archive. It searches Internet Archive movie records, checks each candidate's metadata, and offers only records that have a browser-playable video file plus an explicit public-domain or commercial Creative Commons rights declaration.
 
 ## Flow
 
@@ -22,7 +22,7 @@ Internet Archive's own guidance:
 
 ## Playback behavior
 
-- Available on movie watch pages only; Free Anime and Premium Anime source restrictions remain unchanged.
+- Available only as a last resort on movie watch pages after all configured Vivid movie servers have been attempted without success. It is not shown for ordinary successful playback, TV episodes, Free Anime or Premium Anime; their source restrictions remain unchanged.\n- No Internet Archive catalogue request is made until the fallback is revealed after movie-server exhaustion.
 - Uses Player 1's existing iframe and the Archive's official embed URL.
 - Archive playback is user-selected and is not part of automatic server failover.
 - The archive player controls playback, subtitles, quality and progress. Vivid cannot inspect its cross-origin iframe internals.
