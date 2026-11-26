@@ -108,15 +108,25 @@ export async function requirePremiumUser(request, env) {
   }
   return claims;
 }
+const PLAN_INTERVALS = Object.freeze({
+  monthly: { interval: "monthly", label: "Monthly", months: 1 },
+  biannually: { interval: "biannually", label: "6 months", months: 6 },
+  annually: { interval: "annually", label: "Annual", months: 12 }
+});
+export function addPlanIntervalMillis(planId, from = Date.now()) {
+  const plan = PLAN_INTERVALS[String(planId || "monthly")] || PLAN_INTERVALS.monthly;
+  const date = new Date(from);
+  date.setUTCMonth(date.getUTCMonth() + plan.months);
+  return date.getTime();
+}
 export function parsePlanConfig(env = {}) {
   const defaultCurrency = String(env.ANIME_PREMIUM_DEFAULT_CURRENCY || "GHS").toUpperCase();
   if (!SUPPORTED_PAYSTACK_CURRENCIES.includes(defaultCurrency)) throw new AnimePremiumError(503, "pricing-not-configured", "The default Premium checkout currency is not supported.");
+  const result = { monthly: {}, biannually: {}, annually: {} };
   const defaultAmount = Number(env.ANIME_PREMIUM_GHS_MONTHLY_AMOUNT || DEFAULT_GHS_MINOR);
-  const result = {};
   if (Number.isSafeInteger(defaultAmount) && defaultAmount > 0) {
-    result.GHS = {
-      currency: "GHS",
-      amount: defaultAmount,
+    result.monthly.GHS = {
+      currency: "GHS", amount: defaultAmount,
       planCode: String(env.PAYSTACK_PLAN_GHS_MONTHLY || "").trim(),
       interval: "monthly"
     };
@@ -126,50 +136,67 @@ export function parsePlanConfig(env = {}) {
     let configured;
     try { configured = JSON.parse(raw); }
     catch { throw new AnimePremiumError(503, "pricing-not-configured", "Premium pricing is not configured correctly."); }
-    const source = configured.monthly && typeof configured.monthly === "object" ? configured.monthly : configured;
-    for (const [currencyValue, value] of Object.entries(source || {})) {
-      const currency = String(currencyValue).toUpperCase();
-      const amount = Number(value?.amountMinor ?? value?.amount);
-      if (!SUPPORTED_PAYSTACK_CURRENCIES.includes(currency) || !Number.isSafeInteger(amount) || amount < 1) continue;
-      result[currency] = {
-        currency,
-        amount,
-        planCode: String(value.planCode || value.plan_code || env["PAYSTACK_PLAN_" + currency + "_MONTHLY"] || "").trim(),
-        interval: "monthly"
-      };
+    // Backwards compatibility: the previous shape was a flat currency map for monthly billing.
+    const isPeriodMap = Object.keys(PLAN_INTERVALS).some(key => configured?.[key] && typeof configured[key] === "object");
+    const periodSource = isPeriodMap ? configured : { monthly: configured };
+    for (const [periodValue, currencies] of Object.entries(periodSource || {})) {
+      const periodId = String(periodValue).toLowerCase();
+      const period = PLAN_INTERVALS[periodId];
+      if (!period || !currencies || typeof currencies !== "object") continue;
+      for (const [currencyValue, value] of Object.entries(currencies)) {
+        const currency = String(currencyValue).toUpperCase();
+        const amount = Number(value?.amountMinor ?? value?.amount);
+        if (!SUPPORTED_PAYSTACK_CURRENCIES.includes(currency) || !Number.isSafeInteger(amount) || amount < 1) continue;
+        result[periodId][currency] = {
+          currency, amount,
+          planCode: String(value.planCode || value.plan_code || env["PAYSTACK_PLAN_" + currency + "_" + periodId.toUpperCase()] || "").trim(),
+          interval: period.interval
+        };
+      }
     }
   }
-  if (!result[defaultCurrency]) throw new AnimePremiumError(503, "pricing-not-configured", "The default Premium checkout currency is not configured.");
+  if (!result.monthly[defaultCurrency]) throw new AnimePremiumError(503, "pricing-not-configured", "The default Premium monthly checkout price is not configured.");
   return { defaultCurrency, plans: result };
 }
-export function resolveCheckoutPlan(country, env = {}) {
+export function resolveCheckoutPlan(country, env = {}, planId = "monthly") {
   const { defaultCurrency, plans } = parsePlanConfig(env);
   const code = String(country || "").trim().toUpperCase();
+  const periodId = String(planId || "monthly").toLowerCase();
   if (!/^[A-Z]{2}$/.test(code)) throw new AnimePremiumError(400, "invalid-country", "Choose a valid country.");
+  if (!PLAN_INTERVALS[periodId]) throw new AnimePremiumError(400, "invalid-plan", "Choose a valid Premium billing period.");
+  const periodPlans = plans[periodId];
   const preferred = COUNTRY_PAYSTACK_CURRENCY[code] || defaultCurrency;
-  const currency = plans[preferred] ? preferred : defaultCurrency;
+  const currency = periodPlans[preferred] ? preferred : defaultCurrency;
+  const selected = periodPlans[currency];
+  if (!selected) throw new AnimePremiumError(503, "plan-not-configured", "This Premium billing period is not configured for the selected checkout currency yet.");
   return {
     country: code,
+    planId: periodId,
     localCheckoutCurrency: preferred,
-    ...plans[currency],
+    ...selected,
     fallback: currency !== preferred,
     mobileMoneyAvailable: (code === "GH" && currency === "GHS") || (code === "KE" && currency === "KES")
   };
 }
 export function publicPricing(env = {}) {
   const { defaultCurrency, plans } = parsePlanConfig(env);
-  return {
-    defaultCurrency,
-    checkoutEnabled: env.PAYSTACK_LIVE_ENABLED === "true" && Boolean(env.PAYSTACK_SECRET_KEY),
-    supportedCurrencies: SUPPORTED_PAYSTACK_CURRENCIES.filter(currency => Boolean(plans[currency])),
-    mobileMoneyCountries: [...MOBILE_MONEY_COUNTRIES],
-    plans: Object.fromEntries(Object.entries(plans).map(([currency, plan]) => [currency, {
+  const publicPlans = Object.fromEntries(Object.entries(plans).map(([periodId, currencies]) => [
+    periodId,
+    Object.fromEntries(Object.entries(currencies).map(([currency, plan]) => [currency, {
       currency,
       amountMinor: plan.amount,
       amountMajor: plan.amount / 100,
       cardAutoRenewAvailable: Boolean(plan.planCode),
-      mobileMoneyAvailable: ["GHS", "KES"].includes(currency)
+      mobileMoneyAvailable: ["GHS", "KES"].includes(currency),
+      interval: plan.interval
     }]))
+  ]));
+  return {
+    defaultCurrency,
+    checkoutEnabled: env.PAYSTACK_LIVE_ENABLED === "true" && Boolean(env.PAYSTACK_SECRET_KEY),
+    supportedCurrencies: SUPPORTED_PAYSTACK_CURRENCIES.filter(currency => Boolean(plans.monthly[currency])),
+    mobileMoneyCountries: [...MOBILE_MONEY_COUNTRIES],
+    plans: publicPlans
   };
 }
 export async function paystackRequest(env, path, options = {}) {
