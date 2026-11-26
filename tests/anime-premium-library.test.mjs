@@ -31,6 +31,13 @@ test("private Premium Anime Library is no-index and has membership-gated section
   assert.match(script, /anime-premium-membership\.html/);
 });
 
+test("private library shows a sync state and bounds cloud data loading", () => {
+  assert.match(script, /Syncing your private anime library/);
+  assert.match(script, /withTimeout\(syncLibraryForUser\(user\), 10000/);
+  assert.match(script, /withTimeout\(syncPlaybackProgressForUser\(user\), 10000/);
+  assert.match(script, /withTimeout\(syncAnimePreferencesForUser\(user\), 10000/);
+});
+
 test("private library route includes the shared app shell and recovers from auth loading failures", () => {
   assert.match(html, /scripts\/app-shell\.js/);
   assert.match(html, /scripts\/anime-premium\.js/);
