@@ -3,13 +3,14 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
 const read = path => readFile(new URL(path, import.meta.url), "utf8");
-const [html, client, returnHtml, returnScript, pricing, checkout, webhook, membership, sendVerification, verifyEmail, sw, service] = await Promise.all([
+const [html, client, returnHtml, returnScript, pricing, checkout, pageCheckout, webhook, membership, sendVerification, verifyEmail, sw, service] = await Promise.all([
   read("../anime-premium-membership.html"),
   read("../scripts/anime-premium-membership.js"),
   read("../anime-premium-return.html"),
   read("../scripts/anime-premium-return.js"),
   read("../cloudflare/functions/api/anime-premium/pricing.js"),
   read("../cloudflare/functions/api/anime-premium/checkout.js"),
+  read("../cloudflare/functions/api/anime-premium/page-checkout.js"),
   read("../cloudflare/functions/api/anime-premium/webhook.js"),
   read("../cloudflare/functions/api/anime-premium/membership.js"),
   read("../api/send-verification.js"),
@@ -31,22 +32,19 @@ test("membership page offers global country selection and separate renewal metho
 test("local currency display is an estimate while Paystack checkout currency is explicit", () => {
   assert.match(client, /restcountries\.com/);
   assert.match(client, /open\.er-api\.com/);
-  assert.match(client, /Estimated local equivalent/);
-  assert.match(client, /Paystack checkout will charge/);
+  assert.match(client, /Estimated price in/);
+  assert.match(client, /Ghanaian Cedis/);
   assert.match(client, /localStorage\.setItem\("vivid:anime-premium-country"/);
 });
 
-test("client sends only country and payment method; server owns the amount and Paystack secret", () => {
-  assert.match(client, /fetch\("\/api\/anime-premium\/checkout"/);
-  assert.match(client, /JSON\.stringify\(\{ country: selectedCountry, paymentMethod: selectedPaymentMethod \}\)/);
+test("client selects one of the three server-owned hosted Paystack plan pages", () => {
+  assert.match(client, /fetch\("\/api\/anime-premium\/page-checkout"/);
+  assert.match(client, /JSON\.stringify\(\{ planId: selectedPlanId \}\)/);
+  assert.match(client, /data-vap-plan/);
+  assert.match(client, /monthly: \{ amountMajor: 53\.30 \}/);
+  assert.match(client, /biannually: \{ amountMajor: 287\.82 \}/);
+  assert.match(client, /annually: \{ amountMajor: 511\.68 \}/);
   assert.doesNotMatch(client, /PAYSTACK_SECRET_KEY|pk_live_|PaystackPop/);
-  assert.match(checkout, /transaction/);
-  assert.match(service, /PAYSTACK_SECRET_KEY/);
-  assert.match(checkout, /PAYSTACK_LIVE_ENABLED !== "true"/);
-  assert.match(client, /pricing\.checkoutEnabled/);
-  assert.match(checkout, /paystackBody\.plan = plan\.planCode/);
-  assert.match(checkout, /channels: paymentMethod === "card" \? \["card"\] : \["mobile_money"\]/);
-  assert.match(checkout, /renewalMode = paymentMethod === "card" \? "automatic" : "manual"/);
 });
 
 test("webhook verification is the source of truth for membership activation and renewals", () => {
