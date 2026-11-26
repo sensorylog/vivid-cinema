@@ -78,6 +78,7 @@ async function updatePrice() {
     $("vap-local-price").textContent = "Price unavailable";
     $("vap-price-note").textContent = "Vivid has not configured a checkout price for this region yet.";
     $("vap-checkout-button").disabled = true;
+    $("vap-checkout-status").textContent = "No checkout price is configured for this country yet. Please choose another region or contact Vivid support.";
     return;
   }
   const baseAmount = Number(plan.amountMajor);
@@ -116,6 +117,11 @@ async function updatePrice() {
       : "No payment method is configured for this region yet.";
   $("vap-checkout-button").disabled = !pricing.checkoutEnabled || (membershipActive && membershipAutoRenew) || !selectedPaymentMethod;
   $("vap-checkout-button").textContent = !pricing.checkoutEnabled ? "Checkout temporarily unavailable" : membershipActive ? (membershipAutoRenew ? "Membership active — auto-renew on" : "Renew manually →") : currentUser ? "Continue to secure checkout →" : "Sign in to subscribe →";
+  $("vap-checkout-status").textContent = !pricing.checkoutEnabled
+    ? "Your membership price is available, but secure Paystack checkout has not been enabled in this environment."
+    : !selectedPaymentMethod
+      ? "No supported payment method is configured for this country yet."
+      : "";
 }
 async function loadPricing() {
   const response = await fetch("/api/anime-premium/pricing", { cache: "no-store", signal: AbortSignal.timeout(8000) });
