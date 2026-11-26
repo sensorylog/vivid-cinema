@@ -135,25 +135,8 @@ The Premium entry route now acts as a dedicated discovery homepage rather than a
 - Configure the Paystack webhook URL as /api/anime-premium/webhook on the Vivid production origin. Support Vivid donations remain on their existing, separate payment flow.
 
 
-## Licensed multi-server playback routing
+## Third-party anime embed playback
 
-Premium episode source records support up to eight independently configured candidates in the `candidates` array. Each candidate has its own provider adapter ID, opaque resolver source ID, priority, active flag, verified-rights reference, licensed ISO territory list, and licence start/end timestamps. The playback endpoint tries candidates in ascending priority order and continues only when a candidate is unavailable or returns an invalid session. Every candidate is checked against the request's Cloudflare country and its own licence window before its resolver is contacted.
+VIVID ANIME PREMIUM uses the same iframe-provider model as the existing VIVID Cinema player. The Cloudflare playback endpoint verifies membership and issues a two-hour playback session; the browser then builds URLs from the static provider registry in `scripts/playback/anime-premium-providers.js`. Provider-specific postMessage events are accepted only from the active iframe's exact origin and window. See `docs/vivid-anime-premium-streaming-provider-research.md` for the provider list, route contracts, ID mapping and QA gates.
 
-Provider adapters are server-side only. `ANIME_PREMIUM_PROVIDER_RESOLVERS_JSON` maps each approved provider ID to an HTTPS resolver URL, a server-held token, and exact allowed stream hostnames. Resolver requests reject redirects and time out after 12 seconds. Returned playback URLs must be HTTPS, credential-free, hosted on that provider's allowlist, unexpired, no more than one hour ahead, and use a supported MP4/HLS MIME type. The browser never receives resolver credentials or a list of arbitrary source URLs.
-
-The admin source form accepts a candidate ID and priority. Re-submit the same candidate ID to update it; use a different ID to add another server candidate. The maximum is eight per episode. Existing single-source records remain readable during migration.
-
-### Provider research and onboarding policy
-
-The provider survey distinguishes **metadata/catalogue APIs**, **licensed playback distribution**, and **unlicensed third-party stream extractors**. They are not interchangeable. Publicly documented anime SDKs list scraper-based content adapters for third-party sites; their existence is not evidence that those sites grant VIVID distribution rights. Those adapters are not approved for Premium playback. Major services such as Crunchyroll explicitly restrict retransmission, framing/inline linking, and indexing without written permission. VIVID must therefore onboard a provider only after a signed content/distribution agreement or documented API/embed permission confirms the exact titles, territories, languages, subscription model, and licence window.
-
-Potential rights-holder/distribution outreach targets include Crunchyroll/Sony, HIDIVE/Sentai/AMC, and licensors/distributors surfaced through AniBiz. These are business-development targets, not currently integrated playback providers and not proof of available APIs. A provider is considered production-ready only after VIVID receives partner credentials and technical documentation, configures its resolver adapter and exact host allowlist, records per-title rights, and passes live playback tests in each licensed territory.
-
-
-Research references for provider onboarding:
-
-- Crunchyroll Terms of Service: https://www.crunchyroll.com/en/terms/privacy — prohibits retransmission, framing/inline linking, and indexing of its content without express written authorization.
-- AniBiz official anime IP marketplace: https://anibiz.com/ — a business-to-business route to verified licensors and rights holders, not a playback API.
-- Sony Group overview of Crunchyroll distribution: https://www.sony.com/en/SonyInfo/blog/2026/10/06/ — describes Crunchyroll's global distribution footprint and partner ecosystem.
-- HIDIVE country availability guidance: https://support.hidive.com/kb/guide/en/how-do-i-know-what-content-is-available-in-my-country-SyEubXSTwR/Steps/4307600 — confirms title availability is determined by territorial streaming rights.
-- Anime SDK provider documentation: https://anime-sdk.hexxt.dev/docs/providers/ — useful as a technical survey of adapter patterns, but its listed site-scraping adapters are not treated as authorised content sources.
+A provider's iframe route and published features do not guarantee that every title is indexed or that the provider is available in every territory. VIVID should measure actual title-level playback during QA and keep manual server switching available when a provider does not expose reliable readiness/error events.
