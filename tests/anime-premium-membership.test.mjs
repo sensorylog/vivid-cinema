@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
 const read = path => readFile(new URL(path, import.meta.url), "utf8");
-const [html, client, returnHtml, returnScript, pricing, checkout, pageCheckout, webhook, membership, sendVerification, verifyEmail, sw, service] = await Promise.all([
+const [html, client, returnHtml, returnScript, pricing, checkout, pageCheckout, webhook, membership, sendVerification, verifyEmail, sw, service, shell, headers] = await Promise.all([
   read("../anime-premium-membership.html"),
   read("../scripts/anime-premium-membership.js"),
   read("../anime-premium-return.html"),
@@ -16,7 +16,9 @@ const [html, client, returnHtml, returnScript, pricing, checkout, pageCheckout, 
   read("../api/send-verification.js"),
   read("../scripts/verify-email.js"),
   read("../service-worker.js"),
-  read("../cloudflare/functions/lib/anime-premium-service.js")
+  read("../cloudflare/functions/lib/anime-premium-service.js"),
+  read("../scripts/app-shell.js"),
+  read("../_headers")
 ]);
 
 test("membership page offers country selection and only supported Paystack card checkout", () => {
@@ -42,6 +44,16 @@ test("membership UI initialises pricing before Firebase auth and always exits lo
   assert.match(client, /Rate unavailable/);
   assert.match(client, /bank\/card provider sets the final converted charge/);
   assert.match(client, /restcountries\.com/);
+  assert.match(client, /window\.vividAuthResolved/);
+  assert.match(client, /window\.vividAuthUser/);
+  assert.match(client, /International country list loaded/);
+  assert.match(client, /limited offline list/);
+  assert.match(html, /vap-country-status/);
+  assert.match(shell, /window\.vividAuthUser = user \|\| null/);
+  assert.match(shell, /window\.vividAuthResolved = true/);
+  assert.match(headers, /https:\/\/restcountries\.com/);
+  assert.match(headers, /https:\/\/cdn\.jsdelivr\.net/);
+  assert.match(headers, /https:\/\/api\.frankfurter\.dev/);
   assert.match(client, /annexare\/Countries/);
   assert.match(client, /parsed\.length < 180/);
   assert.match(client, /new Map\(parsed\.map\(country => \[country\.code, country\]\)\)/);
@@ -89,7 +101,7 @@ test("payment return checks server membership and never grants access from the c
 test("membership return survives Vivid email verification and is cached offline", () => {
   assert.match(sendVerification, /anime-premium-membership\.html/);
   assert.match(verifyEmail, /anime-premium-membership\.html/);
-  assert.match(sw, /vivid-cinema-shell-v351/);
+  assert.match(sw, /vivid-cinema-shell-v352/);
   assert.match(sw, /anime-premium-membership\.html/);
   assert.match(sw, /anime-premium-return\.html/);
   assert.match(sw, /anime-premium-membership\.js/);
