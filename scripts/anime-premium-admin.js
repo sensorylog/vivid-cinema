@@ -70,7 +70,7 @@ async function submitSource(event) {
     season: mediaType === "tv" && $("vap-admin-source-scope").value === "episode" ? Number($("vap-admin-season").value || 1) : null,
     episode: mediaType === "tv" && $("vap-admin-source-scope").value === "episode" ? Number($("vap-admin-episode").value || 1) : null,
     provider: $("vap-admin-provider").value.trim(),
-    candidateId: $("vap-admin-candidate-id").value.trim(),
+    candidateId: $("vap-admin-candidate-id").value.trim() || $("vap-admin-provider").value.trim(),
     priority: Number($("vap-admin-priority").value || 50),
     sourceId: $("vap-admin-source-id").value.trim(),
     allowedTerritories: territories,
