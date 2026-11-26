@@ -452,7 +452,8 @@ function setPlayerSource(source, params, startAt = 0) {
     fallbackTimer = window.setTimeout(() => {
         fallbackTimer = null;
         if (primaryHealthy || activeSource !== source) return;
-        showFallbackPrompt(source);
+        if (isAnimePlayback()) triggerFallback("anime_source_timeout");
+        else showFallbackPrompt(source);
     }, 25000);
   } else if (["embedwave", "vidfast", "ezvidapi", "embedapistream", "moviesapi"].includes(source)) {
     if (isAnimePlayback() && source !== "embedwave") return;
@@ -469,7 +470,8 @@ function setPlayerSource(source, params, startAt = 0) {
     fallbackTimer = window.setTimeout(() => {
       fallbackTimer = null;
       if (primaryHealthy || activeSource !== source) return;
-      showFallbackPrompt(source);
+      if (isAnimePlayback()) triggerFallback("anime_source_timeout");
+      else showFallbackPrompt(source);
     }, 25000);
   } else if (source === "vidking") {
     if (isAnimePlayback() || !hasFallbackId()) return;
