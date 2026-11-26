@@ -123,3 +123,12 @@ test("playback resolver supports isolated server-side adapters per approved prov
   assert.match(playback, /settings\?\.allowedHosts/);
   assert.match(playback, /url\.protocol !== "https:"/);
 });
+
+test("playback enforces verified territory and licence-window rights before resolving a provider", () => {
+  assert.match(playback, /request\.cf\?\.country/);
+  assert.match(playback, /source\.rightsVerified !== true/);
+  assert.match(playback, /source\.allowedTerritories\.includes\(territory\)/);
+  assert.match(playback, /licenseStartsAt > Date\.now\(\)/);
+  assert.match(playback, /licenseEndsAt <= Date\.now\(\)/);
+  assert.match(playback, /territory-or-rights-unavailable/);
+});
