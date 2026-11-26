@@ -151,7 +151,7 @@ const FAVORITES_KEY = "vivid:anime-premium:my-list";
 function readFavorites() {
   try {
     const value = JSON.parse(localStorage.getItem(FAVORITES_KEY) || "[]");
-    return Array.isArray(value) ? value.filter(item => item && /^\\d{1,12}$/.test(String(item.id)) && ["tv", "movie"].includes(item.type)) : [];
+    return Array.isArray(value) ? value.filter(item => item && /^\d{1,12}$/.test(String(item.id)) && ["tv", "movie"].includes(item.type)) : [];
   } catch {
     return [];
   }
