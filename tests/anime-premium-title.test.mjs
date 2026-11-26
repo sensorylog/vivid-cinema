@@ -82,6 +82,8 @@ test("Anime Premium My List uses the shared Vivid Library Watch Later collection
   assert.match(html, /data-vap-member-action type="button" hidden/);
   assert.match(titleScript, /Sign in & subscribe/);
   assert.match(titleScript, /api\/anime-premium\/membership/);
+  assert.match(titleScript, /getIdToken\(true\)/);
+  assert.match(titleScript, /Verify your email/);
   assert.doesNotMatch(titleScript, /vivid:anime-premium:my-list/);
   assert.match(library, /export function toggleLibraryItem\(collection,item\)/);
   assert.match(library, /export function syncLibraryForUser\(user=null\)/);
