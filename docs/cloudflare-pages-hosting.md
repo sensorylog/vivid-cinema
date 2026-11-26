@@ -33,8 +33,8 @@ The build bundles every route under `cloudflare/functions/`, including the Anime
 - `FIREBASE_SERVICE_ACCOUNT_JSON` and `FIREBASE_PROJECT_ID` for authenticated membership, checkout, playback, progress, cancellation and admin operations.
 - `PAYSTACK_SECRET_KEY` and `PAYSTACK_WEBHOOK_SECRET` as Cloudflare secrets.
 - `PAYSTACK_LIVE_ENABLED=true` only after the Paystack merchant, live plan codes and webhook are ready. Preview deployments should remain disabled.
-- `PAYSTACK_PLAN_GHS_MONTHLY` or `ANIME_PREMIUM_PLANS_JSON` with a valid Paystack plan code for each currency offering automatic card renewal.
-- Optional `ANIME_PREMIUM_DEFAULT_CURRENCY` (defaults to `GHS`), `ANIME_PREMIUM_GHS_MONTHLY_AMOUNT` (defaults to 5330 minor units), and `ANIME_PREMIUM_ADMIN_UIDS` for server-side administrator allowlisting.
+- `PAYSTACK_PLAN_GHS_MONTHLY` remains supported for legacy monthly billing. Configure `ANIME_PREMIUM_PLANS_JSON` with period-first `monthly`, `biannually` and `annually` currency/amount/plan-code entries for all enabled plans. Each card plan code must match the configured Paystack amount and interval; mobile money remains manual.
+- Optional `ANIME_PREMIUM_DEFAULT_CURRENCY` (defaults to `GHS`), `ANIME_PREMIUM_GHS_MONTHLY_AMOUNT` (defaults to 5330 minor units), and `ANIME_PREMIUM_ADMIN_UIDS` for server-side administrator allowlisting. Six-month and annual prices are intentionally not hard-coded and must be approved/configured.
 - Configure the Paystack webhook URL as `/api/anime-premium/webhook` on the production Vivid origin.
 
 The public pricing endpoint can display the configured price while checkout is disabled. Authenticated membership and payment operations must not be considered ready until the Firebase and Paystack settings above are present and the webhook has been verified.
@@ -62,3 +62,6 @@ The Firebase Hosting deployment workflow is manual-only. When intentionally test
 ## Rollback and boundaries
 
 If Cloudflare has an outage or a regression, Firebase Hosting remains the intended backup. This repository change does not delete the Firebase project, Firebase Auth, Firestore, App Check, or the existing Firebase Hosting configuration. Static hosting bandwidth limits and Firebase service quotas are separate; Cloudflare Pages does not remove quotas imposed by Firebase or other APIs.
+
+
+The legacy Free Anime route is now a curated six-series, first-episode sampler. The dedicated Anime Premium route remains the full catalogue and protected membership experience. See `docs/vivid-anime-premium-architecture.md` for the free/Premium boundary and the multi-period Paystack configuration schema.
