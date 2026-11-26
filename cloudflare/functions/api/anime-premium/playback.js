@@ -108,14 +108,14 @@ export async function onRequestPost({ request, env }) {
     const resolverDeadline = Date.now() + 25000;
     for (const candidate of candidates) {
       if (Date.now() >= resolverDeadline) break;
-      if (!candidate || excludedCandidates.has(String(candidate.candidateId || candidate.provider || "legacy")) ||
-          candidate.active !== true || !candidate.sourceId || typeof candidate.provider !== "string") continue;
+      if (!candidate || candidate.active !== true || !candidate.sourceId || typeof candidate.provider !== "string") continue;
       const licenseStartsAt = timestampMillis(candidate.licenseStartsAt);
       const licenseEndsAt = timestampMillis(candidate.licenseEndsAt);
       if (candidate.rightsVerified !== true || !Array.isArray(candidate.allowedTerritories) ||
           !candidate.allowedTerritories.includes(territory) || !Number.isFinite(licenseStartsAt) ||
           !Number.isFinite(licenseEndsAt) || licenseStartsAt > Date.now() || licenseEndsAt <= Date.now()) continue;
       rightsEligible = true;
+      if (excludedCandidates.has(String(candidate.candidateId || candidate.provider || "legacy"))) continue;
       try {
         const provider = providerResolver(env, candidate.provider);
         const resolverResponse = await fetch(provider.url.toString(), {
