@@ -30,7 +30,7 @@ The separate anime Player 2 remains independent and retains AniXo, AniLink, Mega
 ## Phase 5 player engineering
 
 - Anime series use one persisted Sub / Dub preference shared by Player 1 and Player 2. VidPlus, VidLink and AnimeEmbed receive the selected track; Vidy and generic TMDB fallbacks are restricted to Sub because their documented routes do not expose a reliable track selector.
-- Split TMDB seasons are converted to a continuous episode number for AniList / MAL anime-native endpoints. TMDB season and episode values remain unchanged for generic TV fallback embeds and Vivid progress records.
+- TMDB season title/year and catalogue episode counts are used to prefer a season-specific AniList/MAL entry when available; otherwise split TMDB seasons are converted to a continuous episode number for a single-entry anime catalogue. TMDB season and episode values remain unchanged for generic TV fallback embeds and Vivid progress records.
 - AnimeEmbed messages are accepted only when the documented `animeembed` channel and version 1 envelope match, and the message comes from the active iframe origin. Vidy and AnimeEmbed playback progress is normalized into Vivid progress events instead of being incorrectly treated as a TMDB `player_info` message.
 - Player 1 anime-native and compatibility providers automatically fail over after a timeout when no valid playback event arrives. Player 2 automatically advances only when an iframe fails or never emits a load event; a loaded cross-origin page is not treated as proof of video playback and remains manually switchable.
 
