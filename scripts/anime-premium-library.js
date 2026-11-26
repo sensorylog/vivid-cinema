@@ -150,10 +150,10 @@ window.addEventListener("vivid:anime-preferences-changed", render);
 
 async function initAuth() {
   try {
-    const [{ auth }, { onAuthStateChanged }] = await Promise.all([
+    const [{ auth }, { onAuthStateChanged }] = await withTimeout(Promise.all([
       import("./firebase.js"),
       import("https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js")
-    ]);
+    ]), 10000, "Vivid account services timed out.");
     if (typeof auth.authStateReady === "function") await auth.authStateReady();
     onAuthStateChanged(auth, user => {
       currentUser = user && !user.isAnonymous ? user : null;
