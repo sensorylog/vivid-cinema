@@ -72,6 +72,7 @@ test("Premium title page supports Watch Later and explicit completed-title state
 test("Anime preferences sync to the authenticated Vivid account and are owner-protected", () => {
   assert.match(module, /syncAnimePreferencesForUser/);
   assert.match(module, /import\("\.\/firebase\.js"\)/);
+  assert.match(module, /await authPromise/);
   assert.doesNotMatch(module, /^import \{ auth \}/m);
   assert.match(module, /getDocFromServer/);
   assert.match(module, /setDoc\(reference, local/);
