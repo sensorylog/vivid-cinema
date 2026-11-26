@@ -44,6 +44,7 @@ test("country checkout mapping selects configured Paystack currencies and safe f
   assert.equal(resolveCheckoutPlan("GH", env).mobileMoneyAvailable, true);
   assert.equal(resolveCheckoutPlan("KE", env).mobileMoneyAvailable, true);
   assert.equal(resolveCheckoutPlan("NG", env).mobileMoneyAvailable, false);
+  assert.equal(resolveCheckoutPlan("KE", { ANIME_PREMIUM_GHS_MONTHLY_AMOUNT: "5330" }).mobileMoneyAvailable, false);
   assert.throws(() => resolveCheckoutPlan("GHA", env), /valid country/i);
 });
 
