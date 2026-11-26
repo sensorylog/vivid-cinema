@@ -75,3 +75,17 @@ test("library sync normalizes numeric and missing years to Firestore-safe string
   assert.equal(missingYear.year, "");
   assert.equal(typeof missingYear.year, "string");
 });
+
+test("manual cloud library sync initializes App Check before Firestore access", () => {
+  const syncBody = library.slice(
+    library.indexOf("async function performLibrarySyncForUser"),
+    library.indexOf("const syncInFlight")
+  );
+  assert.match(syncBody, /const firebase = await getFirebase\(\);/);
+  assert.match(syncBody, /await firebase\.ensureAppCheck\(\);/);
+  assert.ok(
+    syncBody.indexOf("await firebase.ensureAppCheck()") <
+    syncBody.indexOf("getDocsFromServer"),
+    "App Check must initialize before the first Firestore server read"
+  );
+});
