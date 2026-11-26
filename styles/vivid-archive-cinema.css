@@ -18,3 +18,5 @@
 .vivid-archive-result button{flex-shrink:0}
 .vivid-archive-result button:focus-visible,.vivid-archive-search-row button:focus-visible,.vivid-archive-search-row input:focus-visible{outline:2px solid #d9ff76;outline-offset:2px}
 @media(max-width:480px){.vivid-archive-result{align-items:flex-start;flex-direction:column}.vivid-archive-result button{width:100%}}
+
+.vivid-archive-source-link{color:#c7b4ff;font-size:11px;text-decoration:underline;text-underline-offset:3px}
