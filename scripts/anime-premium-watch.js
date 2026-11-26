@@ -117,11 +117,11 @@ function renderServerOptions() {
     '<span class="vap-server-option-copy"><strong>' + escapeHtml(provider.label) + '</strong><small>' +
     escapeHtml(provider.available ? provider.note : (mediaType === "movie" ? "Episode-only provider" : "No matching catalogue ID")) +
     '</small></span><span class="vap-server-option-state">' +
-    (provider.available ? (provider.id === activeProviderId ? "Selected" : failedProviderIds.has(provider.id) ? "Failed · retry" : "Ready") : "Unavailable") +
+    (provider.available ? (provider.id === activeProviderId ? "Selected" : failedProviderIds.has(provider.id) ? "Failed · retry" : "Compatible") : "Unavailable") +
     '</span></button>'
   ).join("");
   list.querySelectorAll("[data-vap-server]").forEach(button => button.addEventListener("click", () => activateProvider(button.dataset.vapServer)));
-  $("vap-server-count").textContent = providerOptions.filter(item => item.available).length + " available";
+  $("vap-server-count").textContent = providerOptions.filter(item => item.available).length + " compatible";
 }
 function activateProvider(providerId) {
   const provider = providerOptions.find(item => item.id === providerId && item.available);
