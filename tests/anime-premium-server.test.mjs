@@ -163,3 +163,10 @@ test("playback endpoint validates skip lists and excludes failed candidates with
   assert.match(playback, /candidate\.rightsVerified !== true/);
   assert.match(playback, /candidateId: String\(selected\.candidate\.candidateId/);
 });
+
+
+test("multi-server resolver fallback has a bounded total deadline", () => {
+  assert.match(playback, /const resolverDeadline = Date\.now\(\) \+ 25000/);
+  assert.match(playback, /if \(Date\.now\(\) >= resolverDeadline\) break/);
+  assert.match(playback, /AbortSignal\.timeout\(Math\.min\(12000, Math\.max\(1, resolverDeadline - Date\.now\(\)\)\)\)/);
+});
