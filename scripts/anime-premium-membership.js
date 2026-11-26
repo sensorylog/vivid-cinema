@@ -278,32 +278,64 @@ function bind() {
   $("vap-checkout-button").addEventListener("click", startCheckout);
   $("vap-cancel-renewal").addEventListener("click", cancelAutomaticRenewal);
 }
+async function applyAuthenticatedUser(user) {
+  currentUser = user && !user.isAnonymous ? user : null;
+  authReady = true;
+  if (currentUser) {
+    const label = currentUser.displayName || currentUser.email || "your Vivid account";
+    $("vap-account-status").textContent = "Signed in as " + label + ". Your existing Vivid account will own your Anime Premium membership.";
+  } else {
+    $("vap-account-status").innerHTML = 'Already subscribed? <a href="auth.html?returnTo=anime-premium-membership.html">Sign in with your Vivid account</a>.';
+  }
+  try { await loadMembership(); }
+  catch (error) {
+    console.warn("Premium membership lookup failed:", error);
+    $("vap-checkout-status").textContent = "Your Vivid account is signed in, but membership status could not be checked. You can retry shortly.";
+  }
+  setCheckoutState();
+}
 async function initialiseAuth() {
+  // Reuse the shared shell's already-restored Firebase session. This avoids
+  // starting a second auth bootstrap on the membership page.
+  if (window.vividAuthResolved === true) {
+    await applyAuthenticatedUser(window.vividAuthUser || null);
+    return;
+  }
+  const shellUser = await new Promise(resolve => {
+    let settled = false;
+    const finish = user => {
+      if (settled) return;
+      settled = true;
+      window.removeEventListener("vivid:auth-ready", onReady);
+      window.clearTimeout(timer);
+      resolve(user);
+    };
+    const onReady = event => finish(event.detail || null);
+    window.addEventListener("vivid:auth-ready", onReady, { once: true });
+    const timer = window.setTimeout(() => finish(undefined), 3500);
+    if (window.vividAuthResolved === true) finish(window.vividAuthUser || null);
+  });
+  if (shellUser !== undefined) {
+    await applyAuthenticatedUser(shellUser);
+    return;
+  }
+  // Fallback for pages where the shared shell cannot initialise.
   try {
     const [{ auth }, { onAuthStateChanged }] = await withTimeout(Promise.all([
       import("./firebase.js"),
       import("https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js")
     ]), 9000, "Vivid sign-in initialisation timed out.");
     if (typeof auth.authStateReady === "function") await withTimeout(auth.authStateReady(), 9000, "Restoring your saved Vivid sign-in timed out.");
-    currentUser = auth.currentUser && !auth.currentUser.isAnonymous ? auth.currentUser : null;
-    onAuthStateChanged(auth, async user => {
-      currentUser = user && !user.isAnonymous ? user : null;
-      authReady = true;
-      try { await loadMembership(); }
-      catch (error) { console.warn("Premium membership lookup failed:", error); }
-      setCheckoutState();
-      if (!currentUser) $("vap-account-status").innerHTML = 'Already subscribed? <a href="auth.html?returnTo=anime-premium-membership.html">Sign in with your Vivid account</a>.';
-    }, error => {
+    await applyAuthenticatedUser(auth.currentUser || null);
+    onAuthStateChanged(auth, user => { void applyAuthenticatedUser(user); }, error => {
       console.warn("Vivid authentication state unavailable:", error);
-      authReady = true;
-      setCheckoutState();
       $("vap-checkout-status").textContent = "We could not verify your Vivid sign-in. Refresh the page or sign in again.";
     });
   } catch (error) {
     console.error("Vivid authentication module could not initialise:", error);
     authReady = true;
     setCheckoutState();
-    $("vap-checkout-status").textContent = "Vivid sign-in could not be loaded. Refresh the page and try again.";
+    $("vap-checkout-status").textContent = "Vivid account verification is temporarily unavailable. Your saved sign-in may still be active; refresh and try again.";
   }
 }
 async function init() {
