@@ -11,8 +11,15 @@ const shelves = [
   { id: "vap-films", title: "Anime films", sort: "popularity.desc", type: "movie" },
   { id: "vap-top-rated", title: "Highest rated", sort: "vote_average.desc", type: "all" }
 ];
+const IDENTITY_MASKS = [
+  "M120 5 L202 40 L235 112 L208 268 L120 316 L32 268 L5 112 L38 40 Z",
+  "M120 4 C150 34 222 45 232 126 C242 214 185 285 120 316 C55 285 -2 214 8 126 C18 45 90 34 120 4 Z",
+  "M120 4 L151 40 L212 28 L203 95 L238 146 L192 196 L182 284 L120 316 L58 284 L48 196 L2 146 L37 95 L28 28 L89 40 Z",
+  "M120 5 C157 29 220 24 235 95 L205 173 L220 252 L120 316 L20 252 L35 173 L5 95 C20 24 83 29 120 5 Z",
+  "M120 4 L224 72 L202 226 L120 316 L38 226 L16 72 Z",
+  "M120 4 C173 36 229 67 230 140 C230 220 175 291 120 316 C65 291 10 220 10 140 C11 67 67 36 120 4 Z"
+];
 let activeItems = [];
-let heroTimer = null;
 
 function titleOf(item) { return item.title || item.name || "Untitled anime"; }
 function dateOf(item) { return item.release_date || item.first_air_date || ""; }
@@ -22,7 +29,7 @@ function unique(items) {
   const seen = new Set();
   return (items || []).filter(item => {
     const key = String(item.media_type || "tv") + ":" + String(item.id || "");
-    if (!item?.id || seen.has(key)) return false;
+    if (!item || !item.id || seen.has(key)) return false;
     seen.add(key);
     return true;
   });
@@ -33,47 +40,36 @@ function sorted(items, sort) {
   if (sort === "first_air_date.desc") return copy.sort((a,b) => yearOf(b).localeCompare(yearOf(a)));
   return copy.sort((a,b) => Number(b.raw?.popularity || b.popularity || 0) - Number(a.raw?.popularity || a.popularity || 0));
 }
+function titleUrl(item) {
+  return "anime-premium-title.html?id=" + encodeURIComponent(item.id) + "&type=" + encodeURIComponent(item.media_type || "tv");
+}
 function card(item) {
   const title = titleOf(item);
   const poster = imageOf(item);
   const type = item.media_type === "movie" ? "FILM" : "SERIES";
-  return '<button class="vap-title-card" type="button" data-vap-title="' + escapeHtml(item.media_type + ":" + item.id) + '" aria-label="View ' + escapeHtml(title) + '">' +
+  return '<a class="vap-title-card" href="' + escapeHtml(titleUrl(item)) + '" aria-label="Explore ' + escapeHtml(title) + '">' +
     '<span class="vap-poster-wrap">' + (poster ? '<img loading="lazy" decoding="async" src="' + escapeHtml(poster) + '" alt="' + escapeHtml(title) + ' poster">' : '<span class="vap-poster-fallback">VIVID</span>') +
     '<span class="vap-card-tag">PREMIUM</span><span class="vap-card-type">' + type + '</span><span class="vap-card-play" aria-hidden="true">↗</span></span>' +
-    '<span class="vap-card-copy"><strong>' + escapeHtml(title) + '</strong><small>' + escapeHtml(yearOf(item) || "Anime") + ' · ★ ' + (Number(item.vote_average) ? Number(item.vote_average).toFixed(1) : "—") + '</small></span></button>';
+    '<span class="vap-card-copy"><strong>' + escapeHtml(title) + '</strong><small>' + escapeHtml(yearOf(item) || "Anime") + ' · ★ ' + (Number(item.vote_average) ? Number(item.vote_average).toFixed(1) : "—") + '</small></span></a>';
+}
+function identityCard(item) {
+  const title = titleOf(item);
+  const poster = imageOf(item, "w500");
+  const key = String(item.media_type || "tv") + ":" + String(item.id);
+  let seed = 0;
+  for (const char of key) seed = (seed * 31 + char.charCodeAt(0)) >>> 0;
+  const maskId = "vap-identity-" + (item.media_type || "tv") + "-" + String(item.id).replace(/[^0-9]/g, "");
+  const path = IDENTITY_MASKS[seed % IDENTITY_MASKS.length];
+  const type = item.media_type === "movie" ? "ANIME FILM" : "ANIME SERIES";
+  return '<a class="vap-identity-card" href="' + escapeHtml(titleUrl(item)) + '" aria-label="Explore ' + escapeHtml(title) + '">' +
+    '<span class="vap-identity-art">' +
+      (poster ? '<svg class="vap-identity-svg" viewBox="0 0 240 320" aria-hidden="true"><defs><clipPath id="' + maskId + '"><path d="' + path + '"/></clipPath></defs><image href="' + escapeHtml(poster) + '" width="240" height="320" preserveAspectRatio="xMidYMid slice" clip-path="url(#' + maskId + ')"/></svg><img class="vap-identity-mobile-poster" loading="lazy" decoding="async" src="' + escapeHtml(poster) + '" alt="' + escapeHtml(title) + ' poster">' : '<span class="vap-identity-fallback">VIVID</span>') +
+      '<span class="vap-identity-shade"></span><span class="vap-identity-stamp">VAP / ' + String((seed % 90) + 10) + '</span>' +
+    '</span><span class="vap-identity-copy"><small>' + type + '</small><strong>' + escapeHtml(title) + '</strong><span>' + escapeHtml(yearOf(item) || "Premium collection") + '</span></span></a>';
 }
 function renderShelf(container, items) {
   if (!container) return;
   container.innerHTML = items.length ? items.map(card).join("") : '<p class="vap-inline-empty">No titles are available in this collection right now.</p>';
-}
-function showDialog(item) {
-  const dialog = $("vap-title-dialog");
-  if (!dialog || !item) return;
-  const title = titleOf(item);
-  const backdrop = getImageUrl(item.backdrop_path || item.poster_path, "w1280");
-  const art = $("vap-dialog-art");
-  art.style.backgroundImage = backdrop ? 'linear-gradient(0deg,#100e18 0%,rgba(16,14,24,.35) 65%,rgba(16,14,24,.05)),url("' + backdrop.replace(/["\\]/g, "") + '")' : "linear-gradient(135deg,#30204b,#100e18)";
-  $("vap-dialog-title").textContent = title;
-  $("vap-dialog-meta").textContent = (item.media_type === "movie" ? "Anime film" : "Anime series") + " · " + (yearOf(item) || "Release year unavailable") + " · ★ " + (Number(item.vote_average) ? Number(item.vote_average).toFixed(1) : "—");
-  $("vap-dialog-overview").textContent = item.overview || "A synopsis for this title is not available yet.";
-  $("vap-dialog-access").textContent = "This is a Premium catalogue preview. Playback and membership access will be enabled through the verified Vivid account system.";
-  dialog.showModal();
-}
-function bindCards() {
-  document.querySelectorAll("[data-vap-title]").forEach(button => {
-    if (button.id === "vap-hero-open" || button.dataset.bound === "true") return;
-    button.dataset.bound = "true";
-    button.addEventListener("click", () => {
-      const [type, id] = button.dataset.vapTitle.split(":");
-      const item = activeItems.find(entry => String(entry.media_type || "tv") === type && String(entry.id) === id) ||
-        window.__vividAnimePremiumItems?.find(entry => String(entry.media_type || "tv") === type && String(entry.id) === id);
-      if (item) showDialog(item);
-      else {
-        const cached = window.__vividAnimePremiumById?.[type + ":" + id];
-        if (cached) showDialog(cached);
-      }
-    });
-  });
 }
 function setItems(items) {
   const clean = unique(items);
@@ -86,19 +82,19 @@ function setItems(items) {
 async function loadShelves() {
   const jobs = shelves.map(async shelf => {
     const result = await getAnimePage(1, { type: shelf.type, sort_by: shelf.sort });
-    const items = sorted(result.items || [], shelf.sort).slice(0, 12);
-    return { shelf, items };
+    return { shelf, items: sorted(result.items || [], shelf.sort).slice(0, 12) };
   });
   const results = await Promise.allSettled(jobs);
   const all = [];
   for (const result of results) {
     if (result.status !== "fulfilled") continue;
-    const { shelf, items } = result.value;
-    renderShelf($(shelf.id), items);
-    all.push(...items);
+    renderShelf($(result.value.shelf.id), result.value.items);
+    all.push(...result.value.items);
   }
-  setItems(all);
-  bindCards();
+  const registered = setItems(all);
+  const identityItems = unique(registered).slice(0, 9);
+  const identityRail = $("vap-identities");
+  if (identityRail) identityRail.innerHTML = identityItems.length ? identityItems.map(identityCard).join("") : '<p class="vap-inline-empty">Signature anime identities will appear here.</p>';
   const featured = sorted(all, "popularity.desc").find(item => item.backdrop_path) || all[0];
   if (featured) setHero(featured);
 }
@@ -110,8 +106,7 @@ function setHero(item) {
   $("vap-hero-copy").textContent = item.overview || "Discover a new favourite from the Vivid Anime Premium catalogue.";
   $("vap-hero-meta").textContent = (item.media_type === "movie" ? "FEATURED ANIME FILM" : "FEATURED ANIME SERIES") + " · " + (yearOf(item) || "VIVID ANIME");
   $("vap-hero-open").dataset.vapTitle = (item.media_type || "tv") + ":" + item.id;
-  activeItems = setItems([item, ...(window.__vividAnimePremiumItems || [])]);
-  bindCards();
+  activeItems = setItems([item]);
 }
 async function searchAnime(query, page = 1) {
   const response = await tmdbApi.searchMulti(query, page);
@@ -121,7 +116,10 @@ async function searchAnime(query, page = 1) {
   );
   return raw.flatMap(item => normalizeResults([item], item.media_type));
 }
-function updateStatus(message) { const node = $("vap-catalogue-status"); if (node) node.textContent = message; }
+function updateStatus(message) {
+  const node = $("vap-catalogue-status");
+  if (node) node.textContent = message;
+}
 async function loadCatalogue(reset = true) {
   const request = ++state.request;
   if (reset) state.page = 1;
@@ -145,16 +143,12 @@ async function loadCatalogue(reset = true) {
     const items = sorted(result.items || [], state.sort);
     const combined = reset ? items : [...activeItems, ...items];
     activeItems = setItems(combined);
-    $("vap-catalogue-grid").innerHTML = items.length ? items.map(card).join("") : '<div class="vap-empty-state"><strong>No anime found</strong><span>Try a different title, year or filter.</span></div>';
-    if (!reset && items.length) {
-      const prior = $("vap-catalogue-grid").dataset.previousHtml || "";
-      $("vap-catalogue-grid").innerHTML = prior + items.map(card).join("");
-    }
-    $("vap-catalogue-grid").dataset.previousHtml = $("vap-catalogue-grid").innerHTML;
+    const markup = items.length ? items.map(card).join("") : '<div class="vap-empty-state"><strong>No anime found</strong><span>Try a different title, year or filter.</span></div>';
+    if (reset) $("vap-catalogue-grid").innerHTML = markup;
+    else $("vap-catalogue-grid").insertAdjacentHTML("beforeend", markup);
     state.totalPages = Number(result.totalPages || 1);
     $("vap-load-more").hidden = Boolean(query) || state.page >= state.totalPages;
     updateStatus(query ? items.length + " matching anime titles" : "Showing page " + state.page + " of " + state.totalPages + (result.partial ? " · Some catalogue sources did not respond." : ""));
-    bindCards();
   } catch (error) {
     if (request !== state.request) return;
     updateStatus("The catalogue could not load. Please try again.");
@@ -196,24 +190,15 @@ function bindFilters() {
     if (event.target.closest("#vap-retry")) loadCatalogue(true);
   });
   document.querySelectorAll("[data-vap-collection]").forEach(button => button.addEventListener("click", () => {
-    const type = button.dataset.vapCollection;
-    state.type = type;
+    state.type = button.dataset.vapCollection;
     document.querySelectorAll("[data-vap-type]").forEach(item => {
-      const active = item.dataset.vapType === type;
+      const active = item.dataset.vapType === state.type;
       item.classList.toggle("is-active", active);
       item.setAttribute("aria-pressed", String(active));
     });
     $("vap-catalogue").scrollIntoView({ behavior: "smooth", block: "start" });
     loadCatalogue(true);
   }));
-}
-function bindDialog() {
-  const dialog = $("vap-title-dialog");
-  $("vap-dialog-close").addEventListener("click", () => dialog.close());
-  dialog.addEventListener("click", event => { if (event.target === dialog) dialog.close(); });
-  $("vap-dialog-account").addEventListener("click", () => {
-    window.location.href = "auth.html?returnTo=anime-premium.html";
-  });
 }
 function populateYears() {
   const select = $("vap-year");
@@ -227,12 +212,10 @@ function populateYears() {
 }
 function init() {
   bindFilters();
-  bindDialog();
   populateYears();
   $("vap-hero-open").addEventListener("click", () => {
     const [type, id] = $("vap-hero-open").dataset.vapTitle.split(":");
-    const item = window.__vividAnimePremiumById?.[type + ":" + id];
-    if (item) showDialog(item);
+    if (id) window.location.href = "anime-premium-title.html?id=" + encodeURIComponent(id) + "&type=" + encodeURIComponent(type);
   });
   loadShelves().then(() => loadCatalogue(true)).catch(error => {
     console.warn("Vivid Anime Premium discovery initialization failed:", error);
