@@ -13,6 +13,12 @@ export function listAnimeSecondaryServers() {
   return SERVERS.map(server => ({ ...server }));
 }
 
+export function getNextAnimeSecondaryServer(currentServer, attempted = []) {
+  const seen = new Set(Array.isArray(attempted) ? attempted : []);
+  seen.add(String(currentServer || ""));
+  return SERVERS.find(server => !seen.has(server.id))?.id || null;
+}
+
 export function buildAnimeSecondaryServerUrl(serverId, { aniListId, malId, episode = 1, track = "sub" } = {}) {
   const ani = numericId(aniListId);
   const mal = numericId(malId);
@@ -73,6 +79,7 @@ export function mountAnimeSecondaryPlayer({ root, params, media, title, aniListI
   let track = initial.track;
   let generation = 0;
   let timer = 0;
+  const attemptedServers = new Set();
 
   root.hidden = false;
   root.innerHTML =
@@ -123,8 +130,20 @@ export function mountAnimeSecondaryPlayer({ root, params, media, title, aniListI
 
   function setStatus(message) { status.textContent = message; }
 
-  function loadServer(serverId) {
+  function tryNextServer(reason) {
+    const nextServer = getNextAnimeSecondaryServer(selectedServer, [...attemptedServers]);
+    if (!nextServer) {
+      setStatus("No other Player 2 servers remain after " + reason + ". Choose a server manually or try again later.");
+      return false;
+    }
+    setStatus(reason + " · switching to " + (SERVERS.find(item => item.id === nextServer)?.name || "another server") + "…");
+    return loadServer(nextServer, { automatic: true });
+  }
+
+  function loadServer(serverId, { automatic = false } = {}) {
     const server = SERVERS.find(item => item.id === serverId);
+    if (!automatic) attemptedServers.clear();
+    if (attemptedServers.has(serverId)) return false;
     const url = buildAnimeSecondaryServerUrl(serverId, { aniListId: ani, malId: mal, episode, track });
     if (!server || !url) {
       setStatus("This server cannot resolve this anime's available catalog ID.");
@@ -133,6 +152,8 @@ export function mountAnimeSecondaryPlayer({ root, params, media, title, aniListI
     generation += 1;
     const thisGeneration = generation;
     if (timer) window.clearTimeout(timer);
+    timer = 0;
+    attemptedServers.add(serverId);
     selectedServer = serverId;
     savePreferences(selectedServer, track);
     updateButtons();
@@ -144,25 +165,32 @@ export function mountAnimeSecondaryPlayer({ root, params, media, title, aniListI
     frame.allowFullscreen = true;
     frame.referrerPolicy = "origin";
     frame.loading = "eager";
+    let frameLoaded = false;
     frame.addEventListener("load", () => {
       if (thisGeneration !== generation) return;
+      frameLoaded = true;
       if (timer) window.clearTimeout(timer);
       timer = 0;
-      setStatus(server.name + " page loaded. If video does not start, switch to another server.");
+      setStatus(server.name + " player page loaded. Actual video playback is not yet confirmed; switch servers if the player stays blank.");
     });
     frame.addEventListener("error", () => {
       if (thisGeneration !== generation) return;
       if (timer) window.clearTimeout(timer);
       timer = 0;
-      setStatus(server.name + " failed to load. Try another server.");
+      tryNextServer(server.name + " failed to load");
     });
     screen.appendChild(frame);
     frame.src = url;
     setStatus("Loading " + server.name + " · " + track.toUpperCase() + "…");
     timer = window.setTimeout(() => {
       if (thisGeneration !== generation) return;
-      setStatus(server.name + " is taking a while. The iframe may load without the video starting; try another server if needed.");
-    }, 12000);
+      timer = 0;
+      if (!frameLoaded) {
+        tryNextServer(server.name + " did not load in time");
+        return;
+      }
+      setStatus(server.name + " loaded its player page, but Vivid cannot confirm that the episode started. Switch servers if there is no video.");
+    }, 14000);
     return true;
   }
 
