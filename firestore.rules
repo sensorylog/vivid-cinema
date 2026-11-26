@@ -867,6 +867,9 @@ service cloud.firestore {
     match /animePremiumCheckouts/{reference} {
       allow read, write: if false;
     }
+    match /animePremiumPendingSubscriptions/{subscriptionCode} {
+      allow read, write: if false;
+    }
     match /animePremiumWebhookEvents/{eventId} {
       allow read, write: if false;
     }
