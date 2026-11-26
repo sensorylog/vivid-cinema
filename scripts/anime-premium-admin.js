@@ -69,6 +69,8 @@ async function submitSource(event) {
     season: Number($("vap-admin-season").value || 1),
     episode: Number($("vap-admin-episode").value || 1),
     provider: $("vap-admin-provider").value.trim(),
+    candidateId: $("vap-admin-candidate-id").value.trim(),
+    priority: Number($("vap-admin-priority").value || 50),
     sourceId: $("vap-admin-source-id").value.trim(),
     allowedTerritories: territories,
     rightsReference: $("vap-admin-rights-reference").value.trim(),
