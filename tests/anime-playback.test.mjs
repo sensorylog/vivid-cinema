@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { getAnimeGlobalEpisode, normalizeAnimeTrack, readAnimeTrackPreference, writeAnimeTrackPreference, normalizeAnimeProviderMessage } from "../scripts/playback/anime-playback.js";
+import { getAnimeGlobalEpisode, getAnimeEpisodeOffset, normalizeAnimeTrack, readAnimeTrackPreference, writeAnimeTrackPreference, normalizeAnimeProviderMessage } from "../scripts/playback/anime-playback.js";
 
 test("anime episode mapping converts split TMDB seasons to continuous anime episode numbers", () => {
   const seasons = [
@@ -46,4 +46,10 @@ test("Vidy JSON-string events normalize while malformed or unknown events are re
   assert.equal(message.data.player_progress, 9);
   assert.equal(normalizeAnimeProviderMessage("vidy", "{bad json"), null);
   assert.equal(normalizeAnimeProviderMessage("vidy", { event: "arbitrary" }), null);
+});
+
+test("anime episode offsets ignore TMDB specials and return the exact preceding episode count", () => {
+  const seasons = [{ season_number: 0, episode_count: 4 }, { season_number: 1, episode_count: 12 }, { season_number: 2, episode_count: 13 }];
+  assert.equal(getAnimeEpisodeOffset({ type: "tv", season: 2, episode: 1 }, seasons), 12);
+  assert.equal(getAnimeEpisodeOffset({ type: "tv", season: 1, episode: 1 }, seasons), 0);
 });
