@@ -1,5 +1,6 @@
 import { getLocalLibrary, upsertLibraryItem, removeLibraryItem } from "./library.js";
 import { getAllPlaybackProgress } from "./recommendations.js";
+import { auth } from "./firebase.js";
 
 const PREFERENCES_KEY = "vivid:anime-premium-preferences:v1";
 const MEDIA_TYPES = new Set(["movie", "tv"]);
@@ -37,7 +38,8 @@ export function getAnimeLibraryPreferences() {
     track: TRACKS.has(stored.track) ? stored.track : "sub",
     autoplayNextEpisode: stored.autoplayNextEpisode !== false,
     subtitleLanguage: String(stored.subtitleLanguage || "en").slice(0, 12),
-    preferredPlayer: String(stored.preferredPlayer || "auto").slice(0, 32)
+    preferredPlayer: String(stored.preferredPlayer || "auto").slice(0, 32),
+    updatedAt: Number(stored.updatedAt) || 0
   };
 }
 
@@ -49,11 +51,49 @@ export function saveAnimeLibraryPreferences(patch = {}) {
     track: TRACKS.has(patch.track) ? patch.track : current.track,
     autoplayNextEpisode: patch.autoplayNextEpisode == null ? current.autoplayNextEpisode : Boolean(patch.autoplayNextEpisode),
     subtitleLanguage: String(patch.subtitleLanguage ?? current.subtitleLanguage).slice(0, 12),
-    preferredPlayer: String(patch.preferredPlayer ?? current.preferredPlayer).slice(0, 32)
+    preferredPlayer: String(patch.preferredPlayer ?? current.preferredPlayer).slice(0, 32),
+    updatedAt: Date.now()
   };
   localStorage.setItem(PREFERENCES_KEY, JSON.stringify(next));
   window.dispatchEvent(new CustomEvent("vivid:anime-preferences-changed", { detail: next }));
+  if (auth?.currentUser?.uid) void syncAnimePreferencesForUser(auth.currentUser).catch(error => console.warn("Anime preferences cloud sync unavailable:", error));
   return next;
+}
+
+let preferencesFirebasePromise = null;
+async function getPreferencesFirestore() {
+  if (!preferencesFirebasePromise) {
+    preferencesFirebasePromise = import("https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js")
+      .then(sdk => ({ doc: sdk.doc, getDocFromServer: sdk.getDocFromServer, setDoc: sdk.setDoc }))
+      .catch(error => { preferencesFirebasePromise = null; throw error; });
+  }
+  const { db } = await import("./firebase.js");
+  return { db, ...(await preferencesFirebasePromise) };
+}
+
+export async function syncAnimePreferencesForUser(user = null) {
+  if (!user?.uid || String(auth?.currentUser?.uid || "") !== String(user.uid)) return getAnimeLibraryPreferences();
+  const { db, doc, getDocFromServer, setDoc } = await getPreferencesFirestore();
+  const reference = doc(db, "users", user.uid, "animePreferences", "default");
+  const snapshot = await getDocFromServer(reference);
+  const local = getAnimeLibraryPreferences();
+  if (snapshot.exists()) {
+    const remote = snapshot.data() || {};
+    if (Number(remote.updatedAt || 0) > Number(local.updatedAt || 0)) {
+      const merged = {
+        track: TRACKS.has(remote.track) ? remote.track : local.track,
+        autoplayNextEpisode: remote.autoplayNextEpisode !== false,
+        subtitleLanguage: String(remote.subtitleLanguage || local.subtitleLanguage).slice(0, 12),
+        preferredPlayer: String(remote.preferredPlayer || local.preferredPlayer).slice(0, 32),
+        updatedAt: Number(remote.updatedAt) || Date.now()
+      };
+      localStorage.setItem(PREFERENCES_KEY, JSON.stringify(merged));
+      window.dispatchEvent(new CustomEvent("vivid:anime-preferences-changed", { detail: merged }));
+      return merged;
+    }
+  }
+  await setDoc(reference, local, { merge: true });
+  return local;
 }
 
 function isAnime(item) {
