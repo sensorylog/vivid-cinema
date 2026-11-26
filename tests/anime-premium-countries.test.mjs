@@ -1,18 +1,20 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { onRequestGet } from "../cloudflare/functions/api/anime-premium/countries.js";
+import { ANIME_PREMIUM_COUNTRIES } from "../scripts/anime-premium-countries.js";
 
-test("country directory endpoint returns a complete normalized catalogue through the same origin", async () => {
+test("bundled country directory contains the complete international country and territory catalogue", async () => {
+  assert.ok(ANIME_PREMIUM_COUNTRIES.length >= 240);
+  assert.ok(ANIME_PREMIUM_COUNTRIES.some(country => country.code === "GH" && country.currency === "GHS"));
+  assert.ok(ANIME_PREMIUM_COUNTRIES.some(country => country.code === "NG" && country.currency === "NGN"));
+  assert.ok(ANIME_PREMIUM_COUNTRIES.some(country => country.code === "CA" && country.currency === "CAD"));
+  assert.ok(ANIME_PREMIUM_COUNTRIES.some(country => country.code === "GB" && country.currency === "GBP"));
+  assert.ok(ANIME_PREMIUM_COUNTRIES.some(country => country.code === "DE" && country.currency === "EUR"));
+});
+
+test("country directory endpoint serves the bundled list without any external network request", async () => {
   const originalFetch = globalThis.fetch;
-  const rows = Array.from({ length: 200 }, (_, index) => ({
-    cca2: String.fromCharCode(65 + Math.floor(index / 26)) + String.fromCharCode(65 + (index % 26)),
-    name: { common: "Country " + String(index).padStart(3, "0") },
-    currencies: { XXX: { name: "Test currency" } }
-  }));
-  globalThis.fetch = async url => {
-    assert.match(String(url), /restcountries\.com/);
-    return new Response(JSON.stringify(rows), { status: 200, headers: { "Content-Type": "application/json" } });
-  };
+  globalThis.fetch = async () => { throw new Error("country endpoint must not fetch external APIs"); };
   try {
     const response = await onRequestGet({
       request: new Request("https://vivid-cinema.pages.dev/api/anime-premium/countries"),
@@ -21,54 +23,19 @@ test("country directory endpoint returns a complete normalized catalogue through
     const payload = await response.json();
     assert.equal(response.status, 200);
     assert.equal(payload.ok, true);
-    assert.equal(payload.count, 200);
-    assert.equal(payload.countries.length, 200);
-    assert.equal(payload.countries[0].currency, "XXX");
-    assert.equal(payload.countries[0].name, "Country 000");
+    assert.equal(payload.count, ANIME_PREMIUM_COUNTRIES.length);
+    assert.equal(payload.countries.length, ANIME_PREMIUM_COUNTRIES.length);
   } finally {
     globalThis.fetch = originalFetch;
   }
 });
 
-test("country directory endpoint falls back to its maintained secondary dataset", async () => {
-  const originalFetch = globalThis.fetch;
-  const data = Object.fromEntries(Array.from({ length: 190 }, (_, index) => [
-    String.fromCharCode(65 + Math.floor(index / 26)) + String.fromCharCode(65 + (index % 26)),
-    { name: "Backup country " + index, currency: ["USD"] }
-  ]));
-  let calls = 0;
-  globalThis.fetch = async url => {
-    calls += 1;
-    if (String(url).includes("restcountries.com")) throw new Error("primary source offline");
-    return new Response(JSON.stringify(data), { status: 200, headers: { "Content-Type": "application/json" } });
-  };
-  try {
-    const response = await onRequestGet({
-      request: new Request("https://vivid-cinema.pages.dev/api/anime-premium/countries"),
-      env: {}
-    });
-    const payload = await response.json();
-    assert.equal(response.status, 200);
-    assert.equal(calls, 2);
-    assert.equal(payload.count, 190);
-  } finally {
-    globalThis.fetch = originalFetch;
-  }
-});
-
-test("country directory endpoint reports an honest unavailable response if both sources fail", async () => {
-  const originalFetch = globalThis.fetch;
-  globalThis.fetch = async () => { throw new Error("upstream offline"); };
-  try {
-    const response = await onRequestGet({
-      request: new Request("https://vivid-cinema.pages.dev/api/anime-premium/countries"),
-      env: {}
-    });
-    const payload = await response.json();
-    assert.equal(response.status, 503);
-    assert.equal(payload.ok, false);
-    assert.equal(payload.code, "country-directory-unavailable");
-  } finally {
-    globalThis.fetch = originalFetch;
-  }
+test("country directory endpoint respects Vivid origin restrictions", async () => {
+  const response = await onRequestGet({
+    request: new Request("https://vivid-cinema.pages.dev/api/anime-premium/countries", {
+      headers: { Origin: "https://attacker.example" }
+    }),
+    env: {}
+  });
+  assert.equal(response.status, 403);
 });
