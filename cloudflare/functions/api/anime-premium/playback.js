@@ -18,7 +18,7 @@ export async function onRequestPost({ request, env }) {
     try { body = JSON.parse(raw); } catch { throw new AnimePremiumError(400, "invalid-request", "A valid playback request is required."); }
     const mediaType = body.mediaType === "movie" ? "movie" : body.mediaType === "tv" ? "tv" : "";
     const titleId = String(body.titleId || "");
-    if (!mediaType || !/^\\d{1,12}$/.test(titleId)) throw new AnimePremiumError(400, "invalid-title", "A valid anime title is required.");
+    if (!mediaType || !/^\d{1,12}$/.test(titleId)) throw new AnimePremiumError(400, "invalid-title", "A valid anime title is required.");
     const season = mediaType === "tv" ? Number(body.season) : null;
     const episode = mediaType === "tv" ? Number(body.episode) : null;
     if (mediaType === "tv" && (!Number.isInteger(season) || season < 1 || season > 100 || !Number.isInteger(episode) || episode < 1 || episode > 10000)) {
