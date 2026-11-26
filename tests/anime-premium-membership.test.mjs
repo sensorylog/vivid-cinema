@@ -84,7 +84,7 @@ test("client selects one of the three server-owned hosted Paystack plan pages", 
 
 test("hosted page checkout requires verified identity and maps the three plans server-side", () => {
   assert.match(pageCheckout, /requirePremiumUser/);
-  assert.doesNotMatch(pageCheckout, /PAYSTACK_SECRET_KEY|paystackRequest/);
+  assert.match(pageCheckout, /PAYSTACK_SECRET_KEY/);\n  assert.doesNotMatch(pageCheckout, /paystackRequest/);
   assert.match(pageCheckout, /PAYSTACK_WEBHOOK_SECRET \|\| env\.PAYSTACK_SECRET_KEY/);
   assert.match(pageCheckout, /paymentPageUrl\.searchParams\.set\("email", email\)/);
   assert.match(pageCheckout, /paymentPageUrl\.searchParams\.set\("read-only", "email"\)/);
