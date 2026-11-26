@@ -58,10 +58,10 @@ test("membership UI initialises pricing before Firebase auth and always exits lo
   assert.match(shell, /window\.vividAuthResolved = true/);
   assert.doesNotMatch(client, /api\.frankfurter\.dev|open-rates\.currencyfreaks\.com/);
   assert.doesNotMatch(client, /restcountries\.com|annexare\/Countries/);
-  assert.match(countriesApi, /restcountries\.com/);
-  assert.match(countriesApi, /annexare\/Countries/);
-  assert.match(countriesApi, /countries\.length < 180/);
-  assert.match(client, /unique\.length < 180/);
+  assert.match(countriesApi, /ANIME_PREMIUM_COUNTRIES/);
+  assert.match(countriesApi, /Do not fetch countries/);
+  assert.match(countriesApi, /countries, count: countries\.length/);
+  assert.doesNotMatch(client, /unique\.length < 180/);
   assert.match(client, /countries = ANIME_PREMIUM_COUNTRIES/);
   assert.match(client, /option\.textContent = .*country\.name.*country\.currency/);
   assert.match(client, /CurrencyFreaks Open Rates, blended daily reference rates/);
