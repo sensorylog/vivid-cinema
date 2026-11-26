@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
 const read = path => readFile(new URL(path, import.meta.url), "utf8");
-const [html, client, returnHtml, returnScript, pricing, checkout, pageCheckout, webhook, membership, sendVerification, verifyEmail, sw, service, shell, headers] = await Promise.all([
+const [html, client, returnHtml, returnScript, pricing, checkout, pageCheckout, webhook, membership, sendVerification, verifyEmail, sw, service, shell, headers, countriesApi] = await Promise.all([
   read("../anime-premium-membership.html"),
   read("../scripts/anime-premium-membership.js"),
   read("../anime-premium-return.html"),
@@ -18,7 +18,8 @@ const [html, client, returnHtml, returnScript, pricing, checkout, pageCheckout, 
   read("../service-worker.js"),
   read("../cloudflare/functions/lib/anime-premium-service.js"),
   read("../scripts/app-shell.js"),
-  read("../_headers")
+  read("../_headers"),
+  read("../cloudflare/functions/api/anime-premium/countries.js")
 ]);
 
 test("membership page offers country selection and only supported Paystack card checkout", () => {
@@ -75,7 +76,7 @@ test("client selects one of the three server-owned hosted Paystack plan pages", 
 });
 
 test("hosted page checkout requires verified identity and maps the three plans server-side", () => {
-  assert.match(pageCheckout, /requirePremiumUser/);
+  assert.match(pageCheckout, /requirePremiumUser/);\n  assert.match(pageCheckout, /PAYSTACK_SECRET_KEY/);\n  assert.doesNotMatch(pageCheckout, /PAYSTACK_LIVE_ENABLED/);
   assert.match(pageCheckout, /monthly: \{ amount: 5330, currency: "GHS", url:/);
   assert.match(pageCheckout, /biannually: \{ amount: 28782, currency: "GHS", url:/);
   assert.match(pageCheckout, /annually: \{ amount: 51168, currency: "GHS", url:/);
@@ -101,10 +102,10 @@ test("payment return checks server membership and never grants access from the c
 test("membership return survives Vivid email verification and is cached offline", () => {
   assert.match(sendVerification, /anime-premium-membership\.html/);
   assert.match(verifyEmail, /anime-premium-membership\.html/);
-  assert.match(sw, /vivid-cinema-shell-v352/);
+  assert.match(sw, /vivid-cinema-shell-v353/);
   assert.match(sw, /anime-premium-membership\.html/);
   assert.match(sw, /anime-premium-return\.html/);
   assert.match(sw, /anime-premium-membership\.js/);
   assert.match(sw, /anime-premium-return\.js/);
-  assert.match(pricing, /publicPricing/);
+  assert.match(pricing, /publicPricing/);\n  assert.match(service, /checkoutEnabled: Boolean\\(env\\.PAYSTACK_SECRET_KEY && env\\.FIREBASE_SERVICE_ACCOUNT_JSON\\)/);
 });
