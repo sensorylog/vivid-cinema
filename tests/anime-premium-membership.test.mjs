@@ -41,6 +41,8 @@ test("membership UI initialises pricing before Firebase auth and always exits lo
   assert.match(client, /Checkout temporarily unavailable/);
   assert.match(client, /pricing\.checkoutMessage/);
   assert.match(client, /fetch\("\/api\/anime-premium\/exchange-rate\?currency=/);
+  assert.match(client, /getExchangeRate\(localCurrency\)/);
+  assert.doesNotMatch(client, /getExchangeRates\(/);
   assert.match(client, /auth\.authStateReady\(\)/);
   assert.match(client, /Signed in as .*Your existing Vivid account will own your Anime Premium membership/);
   assert.match(client, /Reference rate: 1 GHS =/);
@@ -82,7 +84,10 @@ test("client selects one of the three server-owned hosted Paystack plan pages", 
 
 test("hosted page checkout requires verified identity and maps the three plans server-side", () => {
   assert.match(pageCheckout, /requirePremiumUser/);
-  assert.match(pageCheckout, /PAYSTACK_SECRET_KEY/);
+  assert.doesNotMatch(pageCheckout, /PAYSTACK_SECRET_KEY|paystackRequest/);
+  assert.match(pageCheckout, /paymentPageUrl\.searchParams\.set\("email", email\)/);
+  assert.match(pageCheckout, /paymentPageUrl\.searchParams\.set\("read-only", "email"\)/);
+  assert.match(pageCheckout, /checkoutSource: "hosted_payment_page"/);
   assert.doesNotMatch(pageCheckout, /PAYSTACK_LIVE_ENABLED/);
   assert.match(pageCheckout, /monthly: \{ amount: 5330, currency: "GHS", url:/);
   assert.match(pageCheckout, /biannually: \{ amount: 28782, currency: "GHS", url:/);
@@ -92,6 +97,9 @@ test("hosted page checkout requires verified identity and maps the three plans s
 test("webhook verification is the source of truth for membership activation and renewals", () => {
   assert.match(webhook, /verifyPaystackSignature/);
   assert.match(webhook, /transaction\/verify/);
+  assert.match(webhook, /Hosted Paystack page transactions have Paystack-generated references/);
+  assert.match(webhook, /matches\.length !== 1/);
+  assert.match(webhook, /checkoutSource === "hosted_payment_page"/);
   assert.match(webhook, /eventName === "charge\.success"/);
   assert.match(webhook, /invoice\.payment_success/);
   assert.match(webhook, /invoice\.payment_failed/);
@@ -115,5 +123,6 @@ test("membership return survives Vivid email verification and is cached offline"
   assert.match(sw, /anime-premium-membership\.js/);
   assert.match(sw, /anime-premium-return\.js/);
   assert.match(pricing, /publicPricing/);
-  assert.match(service, /checkoutEnabled: Boolean\(env\.PAYSTACK_SECRET_KEY && env\.FIREBASE_SERVICE_ACCOUNT_JSON\)/);
+  assert.match(service, /PAYSTACK_WEBHOOK_SECRET \|\| env\.PAYSTACK_SECRET_KEY/);
+  assert.match(service, /checkoutEnabled: Boolean\(env\.FIREBASE_SERVICE_ACCOUNT_JSON && \(env\.PAYSTACK_WEBHOOK_SECRET \|\| env\.PAYSTACK_SECRET_KEY\)\)/);
 });
