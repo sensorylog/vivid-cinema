@@ -24,13 +24,20 @@ test("Premium watch page has a responsive embedded player and multi-server selec
 });
 
 test("Premium access is verified through the existing Firebase account before a provider iframe opens", () => {
-  assert.match(script, /import \{ auth \} from "\.\/firebase\.js"/);
+  assert.match(script, /import\("\.\/firebase\.js"\)/);
+  assert.doesNotMatch(script, /^import \{ auth \}/m);
   assert.match(script, /onAuthStateChanged\(auth/);
   assert.match(script, /currentUser\.getIdToken\(\)/);
   assert.match(script, /fetch\("\/api\/anime-premium\/playback"/);
   assert.match(script, /response\.status === 403/);
   assert.match(script, /activateProvider\(first\.id\)/);
   assert.doesNotMatch(script, /initializeApp\s*\(|getAuth\s*\(/);
+});
+
+test("watch page waits for optional auth restoration without blocking episode metadata", () => {
+  assert.match(script, /async function bindAuth\(\)/);
+  assert.match(script, /authReady = bindAuth\(\)/);
+  assert.match(script, /await authReady/);
 });
 
 test("Premium watch resolves AniList and MAL identifiers independently and supports season-specific lookups", () => {
@@ -75,7 +82,7 @@ test("Playback sessions expire and account changes stop embedded playback", () =
 });
 
 test("Watch page assets are cached and syntax-checked", () => {
-  assert.match(sw, /vivid-cinema-shell-v352/);
+  assert.match(sw, /vivid-cinema-shell-v353/);
   assert.match(sw, /anime-premium-watch\.html/);
   assert.match(sw, /anime-premium-providers\.js/);
   assert.match(syntax, /scripts\/anime-premium-watch\.js/);
