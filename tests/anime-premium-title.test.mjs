@@ -62,6 +62,7 @@ test("title route and runtime are available offline and included in syntax check
 test("title My List control saves, restores and removes a title without blocking discovery", () => {
   assert.match(titleScript, /const FAVORITES_KEY = "vivid:anime-premium:my-list"/);
   assert.match(titleScript, /function readFavorites\(\)/);
+  assert.match(titleScript, /\/\^\\d\{1,12\}\$\//);
   assert.match(titleScript, /function updateFavoriteButton\(details\)/);
   assert.match(titleScript, /localStorage\.setItem\(FAVORITES_KEY/);
   assert.match(titleScript, /aria-pressed/);
