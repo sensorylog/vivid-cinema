@@ -20,10 +20,11 @@ const COUNTRY_PAYSTACK_CURRENCY = Object.freeze({
   NZ: "USD", UG: "USD", TZ: "USD", RW: "USD", CI: "USD",
   SN: "USD", CM: "USD", ET: "USD"
 });
-const MOBILE_MONEY_COUNTRIES = new Set(["GH", "KE", "CI", "SN"]);
+const MOBILE_MONEY_COUNTRIES = new Set(["GH", "KE"]);
 let cachedProjectId = "";
 let cachedDb = null;
 let cachedServiceAccount = null;
+let cachedServiceAccountRaw = "";
 
 export class AnimePremiumError extends Error {
   constructor(status, code, message) {
@@ -68,7 +69,7 @@ export function optionsResponse(origin, env = {}) {
 export function getPremiumServices(env) {
   const raw = String(env.FIREBASE_SERVICE_ACCOUNT_JSON || "");
   if (!raw) throw new AnimePremiumError(503, "firebase-not-configured", "The Vivid membership service is not configured.");
-  if (cachedDb && cachedProjectId === String(env.FIREBASE_PROJECT_ID || "")) {
+  if (cachedDb && cachedServiceAccountRaw === raw && cachedProjectId === String(env.FIREBASE_PROJECT_ID || cachedServiceAccount?.project_id || "")) {
     return { db: cachedDb, serviceAccount: cachedServiceAccount, projectId: cachedProjectId };
   }
   let serviceAccount;
@@ -82,6 +83,7 @@ export function getPremiumServices(env) {
   cachedDb = getFirestore(app);
   cachedProjectId = projectId;
   cachedServiceAccount = serviceAccount;
+  cachedServiceAccountRaw = raw;
   return { db: cachedDb, serviceAccount, projectId };
 }
 export async function requirePremiumUser(request, env) {
@@ -101,6 +103,7 @@ export async function requirePremiumUser(request, env) {
 }
 export function parsePlanConfig(env = {}) {
   const defaultCurrency = String(env.ANIME_PREMIUM_DEFAULT_CURRENCY || "GHS").toUpperCase();
+  if (!SUPPORTED_PAYSTACK_CURRENCIES.includes(defaultCurrency)) throw new AnimePremiumError(503, "pricing-not-configured", "The default Premium checkout currency is not supported.");
   const defaultAmount = Number(env.ANIME_PREMIUM_GHS_MONTHLY_AMOUNT || DEFAULT_GHS_MINOR);
   const result = {};
   if (Number.isSafeInteger(defaultAmount) && defaultAmount > 0) {
@@ -201,7 +204,12 @@ export async function verifyPaystackSignature(request, rawBody, env = {}) {
     const time = Number(timestamp);
     if (!Number.isFinite(time) || Math.abs(Date.now() / 1000 - time) > 300) return false;
     const signatures = values.filter(value => value.startsWith("v1=")).map(value => value.slice(3).split(":").pop());
-    const expected = await hmacHex(webhookSecret, new TextEncoder().encode(timestamp + "." + new TextDecoder().decode(rawBody)));
+    const prefix = new TextEncoder().encode(timestamp + ".");
+    const body = rawBody instanceof Uint8Array ? rawBody : new Uint8Array(rawBody);
+    const signed = new Uint8Array(prefix.length + body.length);
+    signed.set(prefix, 0);
+    signed.set(body, prefix.length);
+    const expected = await hmacHex(webhookSecret, signed);
     return signatures.some(signature => constantTimeEqual(signature, expected));
   }
   const legacy = request.headers.get("x-paystack-signature") || "";
@@ -217,5 +225,5 @@ export function addDaysMillis(days, from = Date.now()) {
   return from + Number(days) * 24 * 60 * 60 * 1000;
 }
 export function safeReference(value) {
-  return typeof value === "string" && /^[A-Za-z0-9.=~-]{6,120}$/.test(value);
+  return typeof value === "string" && /^[A-Za-z0-9.=-]{6,120}$/.test(value);
 }
