@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { buildAnimeSecondaryServerUrl, listAnimeSecondaryServers } from "../scripts/playback/anime-secondary-player.js";
+import { buildAnimeSecondaryServerUrl, listAnimeSecondaryServers, getNextAnimeSecondaryServer } from "../scripts/playback/anime-secondary-player.js";
 
 const ids = { aniListId: "21", malId: "21", episode: 3, track: "sub" };
 
@@ -26,4 +26,9 @@ test("anime Player 2 supports dub and MAL fallbacks where documented", () => {
 test("anime Player 2 rejects invalid IDs and unknown providers", () => {
   assert.equal(buildAnimeSecondaryServerUrl("anixo", { aniListId: "not-an-id", episode: 1 }), "");
   assert.equal(buildAnimeSecondaryServerUrl("nope", ids), "");
+});
+
+test("anime Player 2 selects the next untried server without repeating attempts", () => {
+  assert.equal(getNextAnimeSecondaryServer("anixo", ["anixo", "anilink"]), "megaplay");
+  assert.equal(getNextAnimeSecondaryServer("megaflix", ["anixo", "anilink", "megaplay", "megavid", "megaflix"]), null);
 });
