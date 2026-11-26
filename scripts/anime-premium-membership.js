@@ -80,53 +80,30 @@ async function loadCountries() {
   countries = FALLBACK_COUNTRIES;
   const countryStatus = $("vap-country-status");
   if (countryStatus) countryStatus.textContent = "Loading the full international country list…";
-  let loadedFullCatalogue = false;
   selectedCountry = countries.some(country => country.code === saved) ? saved : "GH";
   render();
 
-  const normaliseRestCountries = data => data.map(country => ({
-    code: String(country.cca2 || "").toUpperCase(),
-    name: country.name?.common || country.cca2,
-    currency: Object.keys(country.currencies || {}).sort()[0] || ""
-  })).filter(country => /^[A-Z]{2}$/.test(country.code) && country.name && country.currency);
-
-  const normaliseAnnexare = data => Object.entries(data || {}).map(([code, country]) => ({
-    code: code.toUpperCase(),
-    name: country.name || code,
-    currency: Array.isArray(country.currency) ? country.currency[0] : (country.currency || "")
-  })).filter(country => /^[A-Z]{2}$/.test(country.code) && country.name && /^[A-Z]{3}$/.test(country.currency));
-
-  // Try the full REST Countries catalogue first, then a separate maintained ISO country
-  // dataset so a temporary outage cannot strand users with the tiny emergency list.
-  const sources = [
-    async () => {
-      const response = await withTimeout(fetch("https://restcountries.com/v3.1/all?fields=cca2,name,currencies", { cache: "force-cache" }), 5000, "REST Countries request timed out.");
-      if (!response.ok) throw new Error("REST Countries unavailable");
-      return normaliseRestCountries(await response.json());
-    },
-    async () => {
-      const response = await withTimeout(fetch("https://cdn.jsdelivr.net/gh/annexare/Countries@master/dist/countries.json", { cache: "force-cache" }), 6000, "Backup country catalogue request timed out.");
-      if (!response.ok) throw new Error("Backup country catalogue unavailable");
-      return normaliseAnnexare(await response.json());
-    }
-  ];
-
-  for (const source of sources) {
-    try {
-      const parsed = await source();
-      if (parsed.length < 180) throw new Error("Country catalogue was incomplete (" + parsed.length + " entries).");
-      const unique = [...new Map(parsed.map(country => [country.code, country])).values()];
-      countries = unique.sort((left, right) => left.name.localeCompare(right.name));
-      loadedFullCatalogue = true;
-      if (countryStatus) countryStatus.textContent = "International country list loaded · " + countries.length + " countries available.";
-      if (!countries.some(country => country.code === selectedCountry)) selectedCountry = "GH";
-      render();
-      break;
-    } catch (error) {
-      console.warn("Country catalogue source failed; trying the next source:", error);
-    }
-  }
-  if (!loadedFullCatalogue && countryStatus) countryStatus.textContent = "The full country directory could not be reached. Showing the limited offline list of " + countries.length + " countries; please refresh to retry.";
+  // Use Vivid's same-origin Pages Function instead of depending on browser
+  // access to third-party country APIs (which can be blocked by mobile WebViews,
+  // content blockers, DNS filtering, or a deployment CSP).
+  const response = await withTimeout(
+    fetch("/api/anime-premium/countries", { cache: "no-store", credentials: "same-origin" }),
+    10000,
+    "The international country directory request timed out."
+  );
+  if (!response.ok) throw new Error("The international country directory is unavailable (" + response.status + ").");
+  const payload = await response.json();
+  const parsed = Array.isArray(payload.countries) ? payload.countries : [];
+  const unique = [...new Map(parsed.map(country => [String(country.code || "").toUpperCase(), {
+    code: String(country.code || "").toUpperCase(),
+    name: String(country.name || ""),
+    currency: String(country.currency || "").toUpperCase()
+  }])).values()].filter(country => /^[A-Z]{2}$/.test(country.code) && country.name);
+  if (!payload.ok || unique.length < 180) throw new Error("The international country directory returned an incomplete list.");
+  countries = unique.sort((left, right) => left.name.localeCompare(right.name));
+  if (!countries.some(country => country.code === selectedCountry)) selectedCountry = "GH";
+  render();
+  if (countryStatus) countryStatus.textContent = "International country list loaded · " + countries.length + " countries available.";
   select.value = selectedCountry;
 }
 async function getExchangeRates(baseCurrency) {
