@@ -19,7 +19,10 @@ const [html, client, returnHtml, returnScript, pricing, checkout, webhook, membe
 ]);
 
 test("membership page offers global country selection and separate renewal methods", () => {
-  assert.match(html, /id="vap-country"/);\n  assert.match(html, /data-vap-plan="monthly"/);\n  assert.match(html, /data-vap-plan="biannually"/);\n  assert.match(html, /data-vap-plan="annually"/);
+  assert.match(html, /id="vap-country"/);
+  assert.match(html, /data-vap-plan="monthly"/);
+  assert.match(html, /data-vap-plan="biannually"/);
+  assert.match(html, /data-vap-plan="annually"/);
   assert.match(html, /value="card"/);
   assert.match(html, /value="mobile_money"/);
   assert.match(html, /Automatic renewal for this billing period/);
@@ -59,7 +62,9 @@ test("client sends only country and payment method; server owns the amount and P
   assert.match(checkout, /transaction/);
   assert.match(service, /PAYSTACK_SECRET_KEY/);
   assert.match(checkout, /PAYSTACK_LIVE_ENABLED !== "true"/);
-  assert.match(client, /pricing\.checkoutEnabled/);\n  assert.match(client, /PLAN_LABELS/);\n  assert.match(client, /pricing\.plans\[selectedPlanId\]/);
+  assert.match(client, /pricing\.checkoutEnabled/);
+  assert.match(client, /PLAN_LABELS/);
+  assert.match(client, /pricing\.plans\[selectedPlanId\]/);
   assert.match(checkout, /paystackBody\.plan = plan\.planCode/);
   assert.match(checkout, /channels: paymentMethod === "card" \? \["card"\] : \["mobile_money"\]/);
   assert.match(checkout, /renewalMode = paymentMethod === "card" \? "automatic" : "manual"/);
