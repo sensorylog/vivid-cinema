@@ -18,6 +18,35 @@ let seasonRequest = 0;
 let currentPlaybackSessionId = "";
 let lastProgressSync = 0;
 let progressSyncInFlight = false;
+let activeHls = null;
+let playbackRequestId = 0;
+let playbackExpiryTimer = null;
+let hlsLibraryPromise = null;
+const HLS_LIBRARY_URL = "https://cdn.jsdelivr.net/npm/hls.js@1.7.3/dist/hls.min.js";
+
+function loadHlsLibrary() {
+  if (window.Hls) return Promise.resolve(window.Hls);
+  if (hlsLibraryPromise) return hlsLibraryPromise;
+  hlsLibraryPromise = new Promise((resolve, reject) => {
+    const script = document.createElement("script");
+    script.src = HLS_LIBRARY_URL;
+    script.async = true;
+    script.crossOrigin = "anonymous";
+    script.onload = () => window.Hls ? resolve(window.Hls) : reject(new Error("The HLS playback engine did not initialise."));
+    script.onerror = () => reject(new Error("The HLS playback engine could not be loaded. Check your connection and try again."));
+    document.head.appendChild(script);
+  }).catch(error => { hlsLibraryPromise = null; throw error; });
+  return hlsLibraryPromise;
+}
+
+function disposeHls() {
+  if (activeHls) {
+    try { activeHls.destroy(); } catch {}
+    activeHls = null;
+  }
+  if (playbackExpiryTimer) window.clearTimeout(playbackExpiryTimer);
+  playbackExpiryTimer = null;
+}
 
 function titleName(details) { return details.title || details.name || "Anime title"; }
 function titleRoute() {
@@ -32,6 +61,7 @@ function watchRoute(season, episode) {
   return "anime-premium-watch.html?" + query.toString();
 }
 function showGate(title, message, actionLabel = "Sign in to Vivid", actionHref = "auth.html?returnTo=anime-premium.html", retry = false) {
+  disposeHls();
   currentPlaybackSessionId = "";
   $("vap-player").pause();
   $("vap-player").removeAttribute("src");
@@ -86,6 +116,7 @@ function updateEpisodeControls() {
   });
 }
 async function requestPlayback(episode) {
+  const requestId = ++playbackRequestId;
   if (!currentUser) {
     showGate("Sign in to continue", "A Vivid account is required before Premium playback can be checked. Sign in with the same account you use across Vivid Cinema.");
     setStatus("Sign in with your existing Vivid account to continue.");
@@ -95,6 +126,7 @@ async function requestPlayback(episode) {
   setStatus("Checking your Premium access…");
   try {
     const token = await currentUser.getIdToken();
+    if (requestId !== playbackRequestId) return;
     const response = await fetch("/api/anime-premium/playback", {
       method: "POST",
       headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token },
@@ -106,6 +138,7 @@ async function requestPlayback(episode) {
         episode: mediaType === "tv" ? Number(episode.episode_number || 1) : null
       })
     });
+    if (requestId !== playbackRequestId) return;
     if (response.status === 401) {
       showGate("Sign in required", "Your Vivid session needs to be refreshed before playback can start.");
       setStatus("Please sign in again.");
@@ -123,6 +156,7 @@ async function requestPlayback(episode) {
     }
     if (!response.ok) throw new Error("The protected playback request could not be completed.");
     const payload = await response.json();
+    if (requestId !== playbackRequestId) return;
     const playback = payload?.playback;
     if (!playback?.url || !playback?.expiresAt || !playback?.sessionId) throw new Error("The playback service returned an incomplete session.");
     const streamUrl = new URL(playback.url, window.location.origin);
@@ -131,15 +165,38 @@ async function requestPlayback(episode) {
     const mimeType = String(playback.mimeType || "");
     if (!["video/mp4", "application/vnd.apple.mpegurl", "application/x-mpegURL"].includes(mimeType)) throw new Error("The playback service returned an unsupported media format.");
     const video = $("vap-player");
-    if (mimeType !== "video/mp4" && !video.canPlayType(mimeType)) throw new Error("This browser does not support the authorised stream format.");
     currentPlaybackSessionId = String(playback.sessionId);
     lastProgressSync = 0;
-    video.src = streamUrl.href;
     video.hidden = false;
     $("vap-player-gate").hidden = true;
-    video.load();
+    if (mimeType === "video/mp4") {
+      video.src = streamUrl.href;
+      video.load();
+    } else if (video.canPlayType(mimeType) || video.canPlayType("application/x-mpegURL")) {
+      video.src = streamUrl.href;
+      video.load();
+    } else {
+      const Hls = await loadHlsLibrary();
+      if (requestId !== playbackRequestId) return;
+      if (!Hls.isSupported()) throw new Error("This browser cannot play the authorised HLS stream.");
+      activeHls = new Hls({ enableWorker: true, lowLatencyMode: false, backBufferLength: 90, maxBufferLength: 30 });
+      activeHls.on(Hls.Events.ERROR, (_event, data) => {
+        if (!data?.fatal || !activeHls) return;
+        setStatus("The authorised stream encountered a playback error. Try again or choose another episode.");
+        if (data.type === Hls.ErrorTypes.NETWORK_ERROR) activeHls.startLoad();
+        else if (data.type === Hls.ErrorTypes.MEDIA_ERROR) activeHls.recoverMediaError();
+        else showGate("Playback interrupted", "The authorised stream could not continue. Request a fresh playback session.", "Back to title", titleRoute(), true);
+      });
+      activeHls.loadSource(streamUrl.href);
+      activeHls.attachMedia(video);
+    }
+    const expiresIn = Date.parse(playback.expiresAt) - Date.now();
+    playbackExpiryTimer = window.setTimeout(() => {
+      showGate("Playback session expired", "For your security, this playback session has expired. Request a fresh authorised session to continue.", "Back to title", titleRoute(), true);
+      setStatus("Playback session expired.");
+    }, Math.max(0, expiresIn));
     try { await video.play(); } catch { setStatus("Your episode is ready. Press play to begin."); }
-    setStatus("Authorised playback session opened.");
+    if (requestId === playbackRequestId) setStatus("Authorised playback session opened.");
   } catch (error) {
     showGate("Playback could not start", error?.message || "Try again in a moment.", "Back to title", titleRoute(), true);
     setStatus(error?.message || "Playback could not start.");
