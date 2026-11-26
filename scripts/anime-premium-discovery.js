@@ -22,22 +22,23 @@ const IDENTITY_MASKS = [
 let activeItems = [];
 
 function titleOf(item) { return item.title || item.name || "Untitled anime"; }
-function dateOf(item) { return item.release_date || item.first_air_date || ""; }
+function dateOf(item) { return item.release_date || item.first_air_date || item.date || ""; }
 function yearOf(item) { return dateOf(item).slice(0, 4) || String(item.year || ""); }
 function imageOf(item, size = "w342") { return getImageUrl(item.poster_path || item.backdrop_path, size); }
 function unique(items) {
   const seen = new Set();
   return (items || []).filter(item => {
-    const key = String(item.media_type || "tv") + ":" + String(item.id || "");
-    if (!item || !item.id || seen.has(key)) return false;
+    if (!item || !item.id) return false;
+    const key = String(item.media_type || "tv") + ":" + String(item.id);
+    if (seen.has(key)) return false;
     seen.add(key);
     return true;
   });
 }
 function sorted(items, sort) {
   const copy = [...items];
-  if (sort === "vote_average.desc") return copy.sort((a,b) => Number(b.vote_average || 0) - Number(a.vote_average || 0) || Number(b.vote_count || 0) - Number(a.vote_count || 0));
-  if (sort === "first_air_date.desc") return copy.sort((a,b) => yearOf(b).localeCompare(yearOf(a)));
+  if (sort === "vote_average.desc") return copy.sort((a,b) => Number(b.vote_average || 0) - Number(a.vote_average || 0) || Number(b.vote_count || b.raw?.vote_count || 0) - Number(a.vote_count || a.raw?.vote_count || 0));
+  if (sort === "first_air_date.desc") return copy.sort((a,b) => yearOf(b).localeCompare(yearOf(a)) || dateOf(b).localeCompare(dateOf(a)));
   return copy.sort((a,b) => Number(b.raw?.popularity || b.popularity || 0) - Number(a.raw?.popularity || a.popularity || 0));
 }
 function titleUrl(item) {
@@ -106,15 +107,20 @@ function setHero(item) {
   $("vap-hero-copy").textContent = item.overview || "Discover a new favourite from the Vivid Anime Premium catalogue.";
   $("vap-hero-meta").textContent = (item.media_type === "movie" ? "FEATURED ANIME FILM" : "FEATURED ANIME SERIES") + " · " + (yearOf(item) || "VIVID ANIME");
   $("vap-hero-open").dataset.vapTitle = (item.media_type || "tv") + ":" + item.id;
-  activeItems = setItems([item]);
+  setItems([item]);
 }
 async function searchAnime(query, page = 1) {
   const response = await tmdbApi.searchMulti(query, page);
   const raw = (response.results || []).filter(item =>
     ["movie", "tv"].includes(item.media_type) &&
-    (item.original_language === "ja" || (item.genre_ids || []).includes(16))
+    (item.original_language === "ja" || (item.genre_ids || []).includes(16)) &&
+    (state.type === "all" || item.media_type === state.type) &&
+    (!state.year || yearOf(item) === state.year)
   );
-  return raw.flatMap(item => normalizeResults([item], item.media_type));
+  return {
+    items: raw.flatMap(item => normalizeResults([item], item.media_type)),
+    totalPages: Math.min(500, Number(response.total_pages || 1))
+  };
 }
 function updateStatus(message) {
   const node = $("vap-catalogue-status");
@@ -130,8 +136,7 @@ async function loadCatalogue(reset = true) {
   try {
     let result;
     if (query) {
-      const items = await searchAnime(query, state.page);
-      result = { items, totalPages: items.length ? 1 : 0 };
+      result = await searchAnime(query, state.page);
     } else {
       result = await getAnimePage(state.page, {
         type: state.type === "all" ? "" : state.type,
@@ -147,8 +152,10 @@ async function loadCatalogue(reset = true) {
     if (reset) $("vap-catalogue-grid").innerHTML = markup;
     else $("vap-catalogue-grid").insertAdjacentHTML("beforeend", markup);
     state.totalPages = Number(result.totalPages || 1);
-    $("vap-load-more").hidden = Boolean(query) || state.page >= state.totalPages;
-    updateStatus(query ? items.length + " matching anime titles" : "Showing page " + state.page + " of " + state.totalPages + (result.partial ? " · Some catalogue sources did not respond." : ""));
+    $("vap-load-more").hidden = state.page >= state.totalPages;
+    updateStatus(query
+      ? "Showing " + activeItems.length + " matching anime titles · page " + state.page + " of " + state.totalPages
+      : "Showing page " + state.page + " of " + state.totalPages + (result.partial ? " · Some catalogue sources did not respond." : ""));
   } catch (error) {
     if (request !== state.request) return;
     updateStatus("The catalogue could not load. Please try again.");
