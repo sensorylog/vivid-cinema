@@ -12,6 +12,7 @@ test("anime discovery constrains catalogue to animation and Japanese-language ti
  assert.match(discovery,/with_genres:ANIMATION_GENRE/);assert.match(discovery,/with_original_language:"ja"/);
  assert.match(discovery,/with_text_query/);assert.match(discovery,/filters.decade/);assert.match(discovery,/first_air_date\.gte/);assert.match(discovery,/primary_release_date\.gte/);
 });
+test("decade changes immediately reload the catalogue and trending uses the full decade range",()=>{assert.match(script,/\["anime-type","anime-genre","anime-year","anime-decade","anime-rating","anime-sort"\]/);assert.match(discovery,/year<start\|\|year>start\+9/);});
 test("anime controls submit searches, reset filters and use stale-request protection",()=>{
  assert.match(script,/addEventListener\("submit"/);assert.match(script,/data-anime-shelf/);assert.match(script,/requestToken/);assert.match(script,/getAnimePage/);
 });
