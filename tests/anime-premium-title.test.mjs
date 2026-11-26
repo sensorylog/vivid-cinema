@@ -74,7 +74,7 @@ test("Anime Premium My List uses the shared Vivid Library Watch Later collection
   assert.match(titleScript, /vap:my-list-changed/);
   assert.match(titleScript, /Subscribe to Vivid Anime Premium/);
   assert.match(titleScript, /isAnimeMetadata\(details\)/);
-  assert.match(titleScript, /related\.filter\(item => item\.poster_path && isAnimeMetadata\(item\)\)/);
+  assert.match(titleScript, /related\.filter\(item => item\.poster_path && isAnimeMetadata\(item\)\)/);\n  assert.match(titleScript, /canonicalUrl\.searchParams\.set\("id"/);\n  assert.match(titleScript, /meta\[property="og:title"\]/);\n  assert.match(titleScript, /descriptionMeta\.content = description/);
   assert.match(titleScript, /setMemberActionsVisible\(premiumMembershipActive\)/);
   assert.match(html, /data-vap-member-action type="button" hidden/);
   assert.match(titleScript, /Sign in & subscribe/);
