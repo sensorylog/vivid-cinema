@@ -49,6 +49,7 @@ const files = [
   "scripts/playback/anime-id-resolver.js",
   "scripts/playback/anime-premium-providers.js",
   "scripts/anime-premium-membership.js",
+  "cloudflare/functions/api/anime-premium/page-checkout.js",
   "scripts/anime-premium-return.js",
   "scripts/anime-premium-admin.js",
   "scripts/auth.js",
