@@ -103,96 +103,29 @@ test("Premium API responses are no-store and CORS is limited to Vivid origins", 
   assert.equal(response.headers.get("Access-Control-Allow-Origin"), "https://vivid-cinema.pages.dev");
 });
 
-test("server playback requires an active membership and a resolver-approved host", () => {
+test("Premium playback endpoint checks membership and issues an expiring third-party embed session", () => {
+  assert.match(playback, /requirePremiumUser/);
   assert.match(playback, /animePremiumMemberships/);
-  assert.match(playback, /animePremiumSources/);
-  assert.match(playback, /ANIME_PREMIUM_STREAM_RESOLVER_TOKEN/);
-  assert.match(playback, /ANIME_PREMIUM_STREAM_HOSTS/);
-  assert.match(playback, /url\.protocol !== "https:"/);
-  assert.match(playback, /expiresAt > Date\.now\(\) \+ 60 \* 60 \* 1000/);
-  assert.match(playback, /application\/vnd\.apple\.mpegurl/);
+  assert.match(playback, /\["active", "past_due"\]/);
+  assert.match(playback, /animePremiumPlaybackSessions/);
+  assert.match(playback, /providerMode: "vivid-third-party-embeds"/);
+  assert.match(playback, /expiresAt: timestampFromMillis\(expiresAt\)/);
+  assert.match(playback, /2 \* 60 \* 60 \* 1000/);
+  assert.doesNotMatch(playback, /animePremiumSources|ANIME_PREMIUM_STREAM_RESOLVER|ANIME_PREMIUM_PROVIDER_RESOLVERS_JSON/);
 });
 
-test("playback resolver supports isolated server-side adapters per approved provider", () => {
-  assert.match(playback, /ANIME_PREMIUM_PROVIDER_RESOLVERS_JSON/);
-  assert.match(playback, /providers\?\.\[providerId\]/);
-  assert.match(playback, /providerResolver\(env, candidate\.provider\)/);
-  assert.match(playback, /provider\.url\.toString\(\)/);
-  assert.match(playback, /provider\.token/);
-  assert.match(playback, /provider\.hosts\.has\(url\.hostname\.toLowerCase\(\)\)/);
-  assert.match(playback, /settings\?\.allowedHosts/);
-  assert.match(playback, /url\.protocol !== "https:"/);
+test("Premium playback validates the requested TMDB title and episode bounds", () => {
+  assert.match(playback, /invalid-title/);
+  assert.match(playback, /invalid-episode/);
+  assert.match(playback, /titleId = String\(body\.titleId \|\| ""\)/);
+  assert.match(playback, /season < 1 \|\| season > 100/);
+  assert.match(playback, /episode < 1 \|\| episode > 10000/);
 });
 
-test("playback enforces verified territory and licence-window rights before resolving a provider", () => {
-  assert.match(playback, /request\.cf\?\.country/);
-  assert.match(playback, /candidate\.rightsVerified !== true/);
-  assert.match(playback, /candidate\.allowedTerritories\.includes\(territory\)/);
-  assert.match(playback, /licenseStartsAt > Date\.now\(\)/);
-  assert.match(playback, /licenseEndsAt <= Date\.now\(\)/);
-  assert.match(playback, /territory-or-rights-unavailable/);
-});
-
-
-test("playback walks multiple licensed source candidates in priority order and fails closed", () => {
-  assert.match(playback, /Array\.isArray\(source\.candidates\)/);
-  assert.match(playback, /candidates\.slice\(0, 8\)/);
-  assert.match(playback, /for \(const candidate of candidates\)/);
-  assert.match(playback, /candidate\.rightsVerified !== true/);
-  assert.match(playback, /candidate\.allowedTerritories\.includes\(territory\)/);
-  assert.match(playback, /redirect: "error"/);
-  assert.match(playback, /AbortSignal\.timeout\(12000\)/);
-  assert.match(playback, /No authorised streaming server could open this episode/);
-  assert.match(playback, /selected\.candidate\.provider/);
-});
-
-test("admin source registry stores and sorts up to eight independent authorised server candidates", async () => {
-  const adminSources = await readFile(new URL("../cloudflare/functions/api/anime-premium/admin/sources.js", import.meta.url), "utf8");
-  assert.match(adminSources, /existing\.candidates/);
-  assert.match(adminSources, /candidateId/);
-  assert.match(adminSources, /candidates\.sort/);
-  assert.match(adminSources, /candidates\.length > 8/);
-  assert.match(adminSources, /rightsVerified: true/);
-});
-
-
-test("playback endpoint validates skip lists and excludes failed candidates without weakening rights checks", () => {
-  assert.match(playback, /invalid-server-fallback/);
-  assert.match(playback, /excludedRaw\.length > 8/);
-  assert.match(playback, /excludedCandidates\.has/);
-  assert.match(playback, /candidate\.rightsVerified !== true/);
-  assert.match(playback, /candidateId: String\(selected\.candidate\.candidateId/);
-});
-
-
-test("multi-server resolver fallback has a bounded total deadline", () => {
-  assert.match(playback, /const resolverDeadline = Date\.now\(\) \+ 25000/);
-  assert.match(playback, /if \(Date\.now\(\) >= resolverDeadline\) break/);
-  assert.match(playback, /AbortSignal\.timeout\(Math\.min\(12000, Math\.max\(1, resolverDeadline - Date\.now\(\)\)\)\)/);
-});
-
-
-test("title-level source mappings are considered after episode-specific licensed candidates", () => {
-  assert.match(playback, /lookupKeys = mediaType === "tv" \? \[sourceKey, "tv_" \+ titleId\]/);
-  assert.match(playback, /sourceRecords\.flatMap/);
-  assert.match(playback, /registryRank/);
-  assert.match(playback, /left\.registryRank - right\.registryRank/);
-  assert.match(playback, /sourceKey: selected\.candidate\.registryKey/);
-});
-
-test("admin source registry supports episode-level and whole-title mappings", async () => {
-  const adminSources = await readFile(new URL("../cloudflare/functions/api/anime-premium/admin/sources.js", import.meta.url), "utf8");
-  const adminPage = await readFile(new URL("../anime-premium-admin.html", import.meta.url), "utf8");
-  const adminScript = await readFile(new URL("../scripts/anime-premium-admin.js", import.meta.url), "utf8");
-  assert.match(adminSources, /body\.scope === "title"/);
-  assert.match(adminSources, /mediaType \+ "_" \+ titleId/);
-  assert.match(adminPage, /vap-admin-source-scope/);
-  assert.match(adminScript, /scope: mediaType === "tv" \?/);
-  assert.match(adminScript, /addEventListener\("change", updateSourceScope\)/);
-});
-
-
-test("admin form defaults an empty candidate ID to the approved provider ID", async () => {
-  const adminScript = await readFile(new URL("../scripts/anime-premium-admin.js", import.meta.url), "utf8");
-  assert.match(adminScript, /candidateId: \$\("vap-admin-candidate-id"\)\.value\.trim\(\) \|\| \$\("vap-admin-provider"\)\.value\.trim\(\)/);
+test("Premium progress requires a live session owned by the signed-in user", async () => {
+  const progress = await readFile(new URL("../cloudflare/functions/api/anime-premium/progress.js", import.meta.url), "utf8");
+  assert.match(progress, /animePremiumPlaybackSessions/);
+  assert.match(progress, /session\.uid !== user\.uid/);
+  assert.match(progress, /sessionExpiry <= Date\.now\(\)/);
+  assert.match(progress, /animePremiumProfiles/);
 });
