@@ -23,7 +23,7 @@ searchInput.addEventListener("input",()=>{
  },280);
 });
 searchForm.addEventListener("submit",e=>{e.preventDefault();readControls();void load(true);});searchClear.addEventListener("click",()=>{searchInput.value="";suggestions?.replaceChildren();readControls();void load(true);searchInput.focus();});
-["anime-type","anime-genre","anime-year","anime-rating","anime-sort"].forEach(id=>document.getElementById(id).addEventListener("change",()=>{readControls();void load(true);}));
+["anime-type","anime-genre","anime-year","anime-decade","anime-rating","anime-sort"].forEach(id=>document.getElementById(id).addEventListener("change",()=>{readControls();void load(true);}));
 document.querySelectorAll("[data-anime-shelf]").forEach(button=>{button.setAttribute("aria-pressed",String(button.classList.contains("is-active")));button.addEventListener("click",()=>{filters.shelf=button.dataset.animeShelf||"";setActive("[data-anime-shelf]","data-anime-shelf",filters.shelf);void load(true);});});
 document.getElementById("anime-reset-filters").addEventListener("click",()=>{searchInput.value="";suggestions?.replaceChildren();["anime-type","anime-genre","anime-year","anime-decade","anime-rating"].forEach(id=>document.getElementById(id).value="");document.getElementById("anime-sort").value="popularity.desc";filters={type:"",sort_by:"popularity.desc",genre:"",year:"",decade:"",rating:"",query:"",shelf:""};setActive("[data-anime-shelf]","data-anime-shelf","");void load(true);});
 more.addEventListener("click",()=>void load(false));grid.addEventListener("click",e=>{if(e.target.closest("[data-anime-retry]"))void load(true);});load(true);
