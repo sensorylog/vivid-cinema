@@ -126,3 +126,9 @@ test("watcher requests ordered server candidates and automatically fails over af
   assert.match(script, /failedPlaybackCandidates = \[\.\.\.new Set/);
   assert.match(script, /Trying the next authorised server/);
 });
+
+
+test("watcher can fail over when HLS.js is unavailable or unsupported", () => {
+  assert.match(script, /fallbackToNextPlaybackServer\("The HLS playback engine could not load/);
+  assert.match(script, /fallbackToNextPlaybackServer\("This browser cannot use the HLS engine/);
+});
