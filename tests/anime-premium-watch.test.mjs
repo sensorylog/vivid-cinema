@@ -45,7 +45,7 @@ test("Provider fallback switches embeds without requesting arbitrary stream URLs
   assert.match(script, /failedProviderIds\.add\(activeProviderId\)/);
   assert.match(script, /providerOptions\.find\(item => item\.available && !failedProviderIds\.has\(item\.id\)\)/);
   assert.match(script, /frame\.src = provider\.url/);
-  assert.match(script, /event\.origin !== provider\.origin/);
+  assert.match(script, /event\.origin !== expectedOrigin/);
   assert.match(script, /event\.source !== frame\.contentWindow/);
   assert.doesNotMatch(script, /ANIME_PREMIUM_STREAM_RESOLVER|excludeCandidateIds|HLS_LIBRARY_URL/);
 });
@@ -57,6 +57,8 @@ test("Progress messages are origin-checked and saved through the Premium progres
   assert.match(script, /message\\.type === "watching-log"/);
   assert.match(script, /if \(provider\.events\)/);
   assert.match(script, /provider\.id === "vidrift"/);
+  assert.match(script, /\["vidapi", "vidsrc", "vidlink", "vidplus"\]\.includes\(provider\.id\)/);
+  assert.match(script, /new URL\(provider\?\.url \|\| ""\)\.origin/);
   assert.match(script, /\["megaplay", "megaplay-legacy", "megavid", "megaflix"\]/);
   assert.match(script, /message\.type === "watching-log"/);
   assert.match(script, /if \(provider\.events\)/);
