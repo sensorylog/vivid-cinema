@@ -53,6 +53,9 @@ test("Provider fallback switches embeds without requesting arbitrary stream URLs
 test("Progress messages are origin-checked and saved through the Premium progress endpoint", () => {
   assert.match(script, /anilink-player:progress/);
   assert.match(script, /aniembed:play/);
+  assert.match(script, /provider\\.id === "vidrift"/);
+  assert.match(script, /message\\.type === "watching-log"/);
+  assert.match(script, /if \(provider\.events\)/);
   assert.match(script, /provider\.id === "megavid"/);
   assert.match(script, /fetch\("\/api\/anime-premium\/progress"/);
   assert.match(script, /keepalive: snapshot\.keepalive/);
