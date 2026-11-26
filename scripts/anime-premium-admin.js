@@ -66,8 +66,9 @@ async function submitSource(event) {
   const payload = {
     mediaType,
     titleId: $("vap-admin-title-id").value.trim(),
-    season: Number($("vap-admin-season").value || 1),
-    episode: Number($("vap-admin-episode").value || 1),
+    scope: mediaType === "tv" ? $("vap-admin-source-scope").value : "title",
+    season: mediaType === "tv" && $("vap-admin-source-scope").value === "episode" ? Number($("vap-admin-season").value || 1) : null,
+    episode: mediaType === "tv" && $("vap-admin-source-scope").value === "episode" ? Number($("vap-admin-episode").value || 1) : null,
     provider: $("vap-admin-provider").value.trim(),
     candidateId: $("vap-admin-candidate-id").value.trim(),
     priority: Number($("vap-admin-priority").value || 50),
@@ -89,11 +90,15 @@ function bind() {
   $("vap-admin-refresh").addEventListener("click", loadMemberships);
   $("vap-admin-membership-form").addEventListener("submit", submitMembership);
   $("vap-admin-source-form").addEventListener("submit", submitSource);
-  $("vap-admin-media-type").addEventListener("change", () => {
-    const isMovie = $("vap-admin-media-type").value === "movie";
-    $("vap-admin-season").disabled = isMovie;
-    $("vap-admin-episode").disabled = isMovie;
-  });
+  const updateSourceScope = () => {
+    const isEpisode = $("vap-admin-media-type").value === "tv" && $("vap-admin-source-scope").value === "episode";
+    $("vap-admin-season").disabled = !isEpisode;
+    $("vap-admin-episode").disabled = !isEpisode;
+    $("vap-admin-source-scope").disabled = $("vap-admin-media-type").value === "movie";
+  };
+  $("vap-admin-media-type").addEventListener("change", updateSourceScope);
+  $("vap-admin-source-scope").addEventListener("change", updateSourceScope);
+  updateSourceScope();
 }
 bind();
 onAuthStateChanged(auth, user => {
