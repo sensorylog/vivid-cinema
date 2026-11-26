@@ -56,7 +56,7 @@ test("Anime Premium is a first-class desktop destination while free anime stays 
 });
 
 test("Premium route and assets are included in the offline app shell", () => {
-  assert.match(serviceWorker, /vivid-cinema-shell-v369/);
+  assert.match(serviceWorker, /vivid-cinema-shell-v370/);
   assert.match(serviceWorker, /"\.\/anime-premium\.html"/);
   assert.match(serviceWorker, /"\.\/styles\/vivid-anime-premium\.css"/);
   assert.match(serviceWorker, /"\.\/scripts\/anime-premium\.js"/);
