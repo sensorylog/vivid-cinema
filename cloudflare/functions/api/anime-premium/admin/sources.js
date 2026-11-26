@@ -1,5 +1,5 @@
 import {
-  allowedOrigin, AnimePremiumError, getPremiumServices, jsonResponse, optionsResponse,
+  allowedOrigin, AnimePremiumError, enforceRateLimit, getPremiumServices, jsonResponse, optionsResponse,
   requirePremiumUser, timestampFromMillis
 } from "../../../lib/anime-premium-service.js";
 
@@ -33,6 +33,7 @@ export async function onRequest({ request, env }) {
       throw new AnimePremiumError(400, "invalid-episode", "Enter a valid season and episode.");
     }
     const { db } = getPremiumServices(env);
+    await enforceRateLimit(db, user.uid, "admin-sources", 20, 60 * 1000);
     const key = mediaType + "_" + titleId + (mediaType === "tv" ? "_s" + season + "_e" + episode : "");
     const now = Date.now();
     await db.collection("animePremiumSources").doc(key).set({
