@@ -14,11 +14,32 @@ function millis(value) {
 }
 async function handleChargeSuccess(db, env, data, eventRef) {
   const reference = String(data.reference || "");
-  if (!reference.startsWith("VAP") || !safeReference(reference)) return;
-  const checkoutRef = db.collection("animePremiumCheckouts").doc(reference);
-  const checkoutSnapshot = await checkoutRef.get();
-  if (!checkoutSnapshot.exists) return;
-  const checkout = checkoutSnapshot.data() || {};
+  let checkoutRef;
+  let checkoutSnapshot;
+  let checkout = {};
+  if (reference.startsWith("VAP") && safeReference(reference)) {
+    checkoutRef = db.collection("animePremiumCheckouts").doc(reference);
+    checkoutSnapshot = await checkoutRef.get();
+    if (!checkoutSnapshot.exists) return;
+    checkout = checkoutSnapshot.data() || {};
+  } else {
+    const email = String(data.customer?.email || data.customer?.customer_email || "").trim().toLowerCase();
+    const amount = Number(data.amount || 0);
+    const currency = String(data.currency || "").toUpperCase();
+    if (!email || !amount || !currency) return;
+    const pending = await db.collection("animePremiumPageCheckouts")
+      .where("email", "==", email).where("status", "==", "pending").limit(10).get();
+    const now = Date.now();
+    const match = pending.docs.find(doc => {
+      const value = doc.data() || {};
+      const created = typeof value.createdAt?.toMillis === "function" ? value.createdAt.toMillis() : Number(value.createdAt || 0);
+      return Number(value.amount) === amount && String(value.currency || "").toUpperCase() === currency && created > now - 24 * 60 * 60 * 1000;
+    });
+    if (!match) return;
+    checkoutRef = match.ref;
+    checkoutSnapshot = match;
+    checkout = checkoutSnapshot.data() || {};
+  }
   if (checkout.status === "paid") return;
   const verified = await paystackRequest(env, "/transaction/verify/" + encodeURIComponent(reference), { method: "GET" });
   if (verified.status !== "success" || String(verified.reference) !== reference ||
