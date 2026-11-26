@@ -329,7 +329,21 @@ async function init() {
   $("vap-checkout-button").textContent = "Checking checkout availability…";
   const countriesTask = loadCountries().then(() => updatePrice()).catch(error => {
     console.error("Country selector initialisation failed:", error);
+    const status = $("vap-country-status");
+    if (status) status.textContent = "The full country directory is temporarily unavailable. Showing the offline country list; retry by refreshing the page.";
     $("vap-price-note").textContent = "Country information could not be loaded. The Paystack charge remains in Ghanaian Cedis (GHS).";
+    if (!$("vap-country").options.length) {
+      countries = FALLBACK_COUNTRIES;
+      selectedCountry = countries.some(country => country.code === selectedCountry) ? selectedCountry : "GH";
+      const select = $("vap-country");
+      select.replaceChildren(...countries.map(country => {
+        const option = document.createElement("option");
+        option.value = country.code;
+        option.textContent = country.name + (country.currency ? " (" + country.currency + ")" : "");
+        return option;
+      }));
+      select.value = selectedCountry;
+    }
   });
   const pricingTask = loadPricing().then(() => updatePrice()).catch(error => {
     console.error("Premium pricing initialisation failed:", error);
