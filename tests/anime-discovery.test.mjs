@@ -15,3 +15,10 @@ test("anime discovery constrains catalogue to animation and Japanese-language ti
 test("anime controls submit searches, reset filters and use stale-request protection",()=>{
  assert.match(script,/addEventListener\("submit"/);assert.match(script,/data-anime-shelf/);assert.match(script,/requestToken/);assert.match(script,/getAnimePage/);
 });
+
+test("anime search offers debounced AniList autocomplete suggestions",()=>{
+ assert.match(page,/list="anime-search-suggestions"/);
+ assert.match(script,/addEventListener\("input"/);
+ assert.match(script,/graphql\.anilist\.co/);
+ assert.match(script,/AbortController/);
+});
