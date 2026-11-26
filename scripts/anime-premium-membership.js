@@ -66,35 +66,60 @@ async function loadCountries() {
   const select = $("vap-country");
   if (!select) throw new Error("Country selector is missing from the membership page.");
   const saved = (() => { try { return localStorage.getItem("vivid:anime-premium-country") || "GH"; } catch { return "GH"; } })();
-  // Render a usable selector immediately; remote country metadata can improve it afterwards.
-  countries = FALLBACK_COUNTRIES;
   const render = () => {
-    select.innerHTML = countries.map(country => {
+    const fragment = document.createDocumentFragment();
+    countries.forEach(country => {
       const option = document.createElement("option");
       option.value = country.code;
-      option.textContent = country.name;
-      return option;
-    }).map(option => option.outerHTML).join("");
+      option.textContent = country.name + (country.currency ? " (" + country.currency + ")" : "");
+      fragment.appendChild(option);
+    });
+    select.replaceChildren(fragment);
     select.value = countries.some(country => country.code === selectedCountry) ? selectedCountry : "GH";
   };
+  countries = FALLBACK_COUNTRIES;
   selectedCountry = countries.some(country => country.code === saved) ? saved : "GH";
   render();
-  try {
-    const response = await withTimeout(fetch("https://restcountries.com/v3.1/all?fields=cca2,name,currencies", { cache: "force-cache" }), 4000, "Country list request timed out.");
-    if (!response.ok) throw new Error("Country list unavailable");
-    const data = await response.json();
-    const parsed = data.map(country => ({
-      code: String(country.cca2 || "").toUpperCase(),
-      name: country.name?.common || country.cca2,
-      currency: Object.keys(country.currencies || {})[0] || ""
-    })).filter(country => /^[A-Z]{2}$/.test(country.code) && country.name && country.currency);
-    if (parsed.length > 180) {
-      countries = parsed.sort((a, b) => a.name.localeCompare(b.name));
+
+  const normaliseRestCountries = data => data.map(country => ({
+    code: String(country.cca2 || "").toUpperCase(),
+    name: country.name?.common || country.cca2,
+    currency: Object.keys(country.currencies || {}).sort()[0] || ""
+  })).filter(country => /^[A-Z]{2}$/.test(country.code) && country.name && country.currency);
+
+  const normaliseAnnexare = data => Object.entries(data || {}).map(([code, country]) => ({
+    code: code.toUpperCase(),
+    name: country.name || code,
+    currency: Array.isArray(country.currency) ? country.currency[0] : (country.currency || "")
+  })).filter(country => /^[A-Z]{2}$/.test(country.code) && country.name && /^[A-Z]{3}$/.test(country.currency));
+
+  // Try the full REST Countries catalogue first, then a separate maintained ISO country
+  // dataset so a temporary outage cannot strand users with the tiny emergency list.
+  const sources = [
+    async () => {
+      const response = await withTimeout(fetch("https://restcountries.com/v3.1/all?fields=cca2,name,currencies", { cache: "force-cache" }), 5000, "REST Countries request timed out.");
+      if (!response.ok) throw new Error("REST Countries unavailable");
+      return normaliseRestCountries(await response.json());
+    },
+    async () => {
+      const response = await withTimeout(fetch("https://cdn.jsdelivr.net/gh/annexare/Countries@master/dist/countries.json", { cache: "force-cache" }), 6000, "Backup country catalogue request timed out.");
+      if (!response.ok) throw new Error("Backup country catalogue unavailable");
+      return normaliseAnnexare(await response.json());
+    }
+  ];
+
+  for (const source of sources) {
+    try {
+      const parsed = await source();
+      if (parsed.length < 180) throw new Error("Country catalogue was incomplete (" + parsed.length + " entries).");
+      const unique = [...new Map(parsed.map(country => [country.code, country])).values()];
+      countries = unique.sort((left, right) => left.name.localeCompare(right.name));
       if (!countries.some(country => country.code === selectedCountry)) selectedCountry = "GH";
       render();
+      break;
+    } catch (error) {
+      console.warn("Country catalogue source failed; trying the next source:", error);
     }
-  } catch (error) {
-    console.warn("Using the built-in country list:", error);
   }
   select.value = selectedCountry;
 }
