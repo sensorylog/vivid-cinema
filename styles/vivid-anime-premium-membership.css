@@ -64,3 +64,7 @@
 .vap-return-card p{max-width:470px;margin:0;color:#aaa1b5;font-size:.75rem;line-height:1.7}
 .vap-return-card .vap-return-reference{color:#837a8d;font-size:.6rem;letter-spacing:.08em}
 .vap-return-card .vap-primary,.vap-return-card .vap-secondary{display:inline-flex;justify-content:center;align-items:center;gap:10px;text-decoration:none}
+
+.vap-current-membership button{border:1px solid rgba(255,255,255,.16);border-radius:999px;padding:9px 13px;background:transparent;color:#d7cde2;font:inherit;font-size:.58rem;font-weight:850;cursor:pointer}
+.vap-current-membership button[hidden]{display:none}
+.vap-current-membership button:hover{border-color:rgba(215,197,255,.55);color:#fff}
