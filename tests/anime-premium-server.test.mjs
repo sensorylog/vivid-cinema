@@ -22,6 +22,8 @@ test("Premium pricing has a configurable GHS default and does not expose Paystac
   const publicData = publicPricing({ PAYSTACK_PLAN_GHS_MONTHLY: "PLN_PRIVATE_CODE" });
   assert.equal(publicData.plans.GHS.amountMinor, 5330);
   assert.equal(publicData.plans.GHS.cardAutoRenewAvailable, true);
+  assert.equal(publicData.plans.GHS.mobileMoneyAvailable, true);
+  assert.deepEqual(publicData.mobileMoneyCountries, ["GH", "KE"]);
   assert.equal(publicData.checkoutEnabled, false);
   assert.doesNotMatch(JSON.stringify(publicData), /PLN_PRIVATE_CODE/);
 });
