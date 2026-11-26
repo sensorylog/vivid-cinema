@@ -85,6 +85,7 @@ test("payment return checks server membership and never grants access from the c
 test("payment return can render its status even if Firebase auth is temporarily unavailable", () => {
   assert.match(returnScript, /import\("\.\/firebase\.js"\)/);
   assert.doesNotMatch(returnScript, /^import \{ auth \}/m);
+  assert.match(returnScript, /Vivid account services timed out/);
   assert.match(returnScript, /async function initAuth\(\)/);
 });
 
