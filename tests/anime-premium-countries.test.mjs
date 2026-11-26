@@ -5,7 +5,7 @@ import { onRequestGet } from "../cloudflare/functions/api/anime-premium/countrie
 test("country directory endpoint returns a complete normalized catalogue through the same origin", async () => {
   const originalFetch = globalThis.fetch;
   const rows = Array.from({ length: 200 }, (_, index) => ({
-    cca2: "X" + String(index).padStart(1, "0"),
+    cca2: String.fromCharCode(65 + Math.floor(index / 26)) + String.fromCharCode(65 + (index % 26)),
     name: { common: "Country " + String(index).padStart(3, "0") },
     currencies: { XXX: { name: "Test currency" } }
   }));
@@ -33,7 +33,7 @@ test("country directory endpoint returns a complete normalized catalogue through
 test("country directory endpoint falls back to its maintained secondary dataset", async () => {
   const originalFetch = globalThis.fetch;
   const data = Object.fromEntries(Array.from({ length: 190 }, (_, index) => [
-    "Q" + String(index).padStart(1, "0"),
+    String.fromCharCode(65 + Math.floor(index / 26)) + String.fromCharCode(65 + (index % 26)),
     { name: "Backup country " + index, currency: ["USD"] }
   ]));
   let calls = 0;
