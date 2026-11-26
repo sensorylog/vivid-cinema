@@ -1,4 +1,4 @@
-import { ANIME_PREMIUM_COUNTRIES } from "../../lib/anime-premium-countries.js";
+import { ANIME_PREMIUM_COUNTRIES } from "../../../../scripts/anime-premium-countries.js";
 import { allowedOrigin, jsonResponse, optionsResponse } from "../../lib/anime-premium-service.js";
 
 export function onRequestOptions({ request, env }) {
