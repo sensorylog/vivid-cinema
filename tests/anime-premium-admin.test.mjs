@@ -16,6 +16,19 @@ const [html, client, members, sources, cancel, webhook, rules] = await Promise.a
 test("admin page provides audited membership and authorised source operations", () => {
   assert.match(html, /vap-admin-membership-form/);
   assert.match(html, /vap-admin-source-form/);
+  assert.match(html, /vap-admin-territories/);
+  assert.match(html, /vap-admin-rights-reference/);
+  assert.match(html, /vap-admin-license-start/);
+  assert.match(html, /vap-admin-license-end/);
+  assert.match(html, /vap-admin-rights-verified/);
+  assert.match(client, /allowedTerritories:/);
+  assert.match(client, /rightsReference:/);
+  assert.match(client, /licenseStartsAt:/);
+  assert.match(client, /licenseEndsAt:/);
+  assert.match(client, /rightsVerified:/);
+  assert.match(serverSources, /rightsVerified !== true/);
+  assert.match(serverSources, /allowedTerritories/);
+  assert.match(serverSources, /licenseEndsAt/);
   assert.match(html, /server-verified operations/i);
   assert.match(client, /getIdToken\(\)/);
   assert.match(client, /api\/anime-premium\/admin\/memberships/);
