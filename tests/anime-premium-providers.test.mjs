@@ -57,3 +57,14 @@ test("provider builders reject invalid catalogue IDs and unknown provider names"
   assert.equal(buildAnimePremiumProviderUrl("embedwave", { ...episode, tmdbId: "" }), "");
   assert.equal(buildAnimePremiumProviderUrl("unknown", episode), "");
 });
+
+
+test("provider event capability is explicit so only event-capable sources use automatic timeout failover", () => {
+  const providers = Object.fromEntries(listAnimePremiumProviders().map(item => [item.id, item]));
+  for (const id of ["vidplus", "vidlink", "vidsrc", "anixo", "anilink", "megaplay", "megavid", "megaflix", "vidapi", "vidrift"]) {
+    assert.equal(providers[id].events, true, id + " should expose playback events");
+  }
+  for (const id of ["megaplay-legacy", "embedwave", "vidfast"]) {
+    assert.equal(providers[id].events, false, id + " should use manual fallback");
+  }
+});
