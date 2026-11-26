@@ -1,7 +1,7 @@
 import { tmdbApi } from "./tmdb.js";
 import { resolveAndroidPlayerBackAction } from "./android-navigation.js";
 import { resolveAnimeIds } from "./playback/anime-id-resolver.js";
-import { getAnimeGlobalEpisode, readAnimeTrackPreference, writeAnimeTrackPreference, normalizeAnimeProviderMessage } from "./playback/anime-playback.js";
+import { getAnimeGlobalEpisode, readAnimeTrackPreference, writeAnimeTrackPreference, normalizeAnimeTrack, normalizeAnimeProviderMessage } from "./playback/anime-playback.js";
 import { getImageUrl, getMediaUrl, normalizeMedia, normalizeResults } from "./media.js";
 import { buildTitleUrl, buildWatchUrl, getRoute } from "./routes.js";
 import { escapeHtml } from "./utils.js";
@@ -277,6 +277,22 @@ function updateSourceLabel() {
     count.textContent = isAnimePlayback() ? available + " available anime servers" : "7 sources";
   }
 }
+
+window.addEventListener("vivid:anime-track-changed", event => {
+  const nextTrack = normalizeAnimeTrack(event.detail?.track);
+  if (nextTrack === animeTrack) return;
+  animeTrack = writeAnimeTrackPreference(nextTrack);
+  sourceAttempted.clear();
+  primaryHealthy = false;
+  updateSourceLabel();
+  if (isAnimePlayback() && currentParams?.type === "tv" && !$("player-overlay")?.hidden) {
+    const nextSource = sourceAvailable(activeSource) ? activeSource : getNextSource(activeSource);
+    if (nextSource) {
+      const saved = getPlaybackProgress(progressKey());
+      setPlayerSource(nextSource, currentParams, Number(saved?.progress || route.params.get("startAt") || 0));
+    }
+  }
+});
 
 function setPlayerSource(source, params, startAt = 0) {
   const player = $("vidapi-player");
@@ -1032,6 +1048,7 @@ function renderShell(params) {
       const nextTrack = button.getAttribute("data-anime-track") === "dub" ? "dub" : "sub";
       if (nextTrack === animeTrack) return;
       animeTrack = writeAnimeTrackPreference(nextTrack);
+      window.dispatchEvent(new CustomEvent("vivid:anime-track-changed", { detail: { track: animeTrack, source: "player1" } }));
       sourceAttempted.clear();
       primaryHealthy = false;
       updateSourceLabel();
