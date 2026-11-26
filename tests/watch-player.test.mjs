@@ -198,3 +198,15 @@ test("VidSrc forwards progress, seek, readiness and explicit play/pause transiti
   assert.match(source, /eventType: providerStatus/);
   assert.match(source, /normalizedStatus/);
 });
+
+test("anime native player receives sub/dub preference and global episode mapping", () => {
+  assert.match(source, /getAnimeGlobalEpisode\(params, details\?\.seasons\)/);
+  assert.match(source, /track: animeTrack/);
+  assert.match(source, /data-anime-track="sub"/);
+  assert.match(source, /data-anime-track="dub"/);
+});
+
+test("AnimeEmbed and Vidy progress events are handled without requiring a TMDB player_info object", () => {
+  assert.match(source, /if \(isAnimeEmbed \|\| isVidy\) \{[\s\S]*?const eventName = String\(data\.event \|\| data\.player_status/);
+  assert.match(source, /savePlaybackProgress\(progressKey\(\), \{ progress, duration, season, episode/);
+});
