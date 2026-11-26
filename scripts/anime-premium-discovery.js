@@ -61,7 +61,7 @@ function showDialog(item) {
 }
 function bindCards() {
   document.querySelectorAll("[data-vap-title]").forEach(button => {
-    if (button.dataset.bound === "true") return;
+    if (button.id === "vap-hero-open" || button.dataset.bound === "true") return;
     button.dataset.bound = "true";
     button.addEventListener("click", () => {
       const [type, id] = button.dataset.vapTitle.split(":");
@@ -77,8 +77,10 @@ function bindCards() {
 }
 function setItems(items) {
   const clean = unique(items);
-  window.__vividAnimePremiumItems = clean;
-  window.__vividAnimePremiumById = Object.fromEntries(clean.map(item => [(item.media_type || "tv") + ":" + item.id, item]));
+  const registry = new Map(Object.entries(window.__vividAnimePremiumById || {}));
+  clean.forEach(item => registry.set((item.media_type || "tv") + ":" + item.id, item));
+  window.__vividAnimePremiumItems = [...registry.values()];
+  window.__vividAnimePremiumById = Object.fromEntries(registry);
   return clean;
 }
 async function loadShelves() {
