@@ -112,3 +112,14 @@ test("server playback requires an active membership and a resolver-approved host
   assert.match(playback, /expiresAt > Date\.now\(\) \+ 60 \* 60 \* 1000/);
   assert.match(playback, /application\/vnd\.apple\.mpegurl/);
 });
+
+test("playback resolver supports isolated server-side adapters per approved provider", () => {
+  assert.match(playback, /ANIME_PREMIUM_PROVIDER_RESOLVERS_JSON/);
+  assert.match(playback, /providers\?\.\[providerId\]/);
+  assert.match(playback, /providerResolver\(env, source\.provider\)/);
+  assert.match(playback, /provider\.url\.toString\(\)/);
+  assert.match(playback, /provider\.token/);
+  assert.match(playback, /provider\.hosts\.has\(url\.hostname\.toLowerCase\(\)\)/);
+  assert.match(playback, /settings\?\.allowedHosts/);
+  assert.match(playback, /url\.protocol !== "https:"/);
+});
