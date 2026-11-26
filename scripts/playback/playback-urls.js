@@ -127,7 +127,7 @@ export function buildMoviesApiUrl(params, { tmdbId = "", imdbId = "", startAt = 
 }
 
 export function buildAnimeEmbedUrl({ aniListId = "", episode = 1, track = "sub", startAt = 0 } = {}) {
-  const id = /^\\d+$/.test(String(aniListId || "")) ? String(aniListId) : "";
+  const id = /^\d+$/.test(String(aniListId || "")) ? String(aniListId) : "";
   if (!id) return "";
   const query = new URLSearchParams({ track: track === "dub" ? "dub" : "sub", autoPlay: "0" });
   if (Number(startAt) > 0) query.set("start", String(Math.floor(Number(startAt))));
@@ -135,7 +135,7 @@ export function buildAnimeEmbedUrl({ aniListId = "", episode = 1, track = "sub",
 }
 
 export function buildVidyAnimeUrl({ aniListId = "", episode = 1, startAt = 0 } = {}) {
-  const id = /^\\d+$/.test(String(aniListId || "")) ? String(aniListId) : "";
+  const id = /^\d+$/.test(String(aniListId || "")) ? String(aniListId) : "";
   if (!id) return "";
   const query = new URLSearchParams({ color: "E50914", episodeSelector: "true", nextEpisode: "true" });
   if (Number(startAt) > 0) query.set("progress", String(Math.floor(Number(startAt))));
@@ -143,7 +143,7 @@ export function buildVidyAnimeUrl({ aniListId = "", episode = 1, startAt = 0 } =
 }
 
 export function buildAniweebAnimeUrl({ aniListId = "", episode = 1, track = "sub" } = {}) {
-  const id = /^\\d+$/.test(String(aniListId || "")) ? String(aniListId) : "";
+  const id = /^\d+$/.test(String(aniListId || "")) ? String(aniListId) : "";
   if (!id) return "";
   const query = new URLSearchParams({ track: track === "dub" ? "dub" : "sub" });
   return "https://api.aniweeb.net/embed/ani/" + id + "/" + Math.max(1, Number(episode) || 1) + "?" + query;
