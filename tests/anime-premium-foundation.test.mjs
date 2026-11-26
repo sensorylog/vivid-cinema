@@ -51,6 +51,7 @@ test("Anime Premium is a first-class desktop destination while free anime stays 
   assert.match(shell, /navLink\("anime-premium\.html", "bi-stars", "Anime Premium"/);
   assert.equal((shell.match(/page\.startsWith\("anime-premium"\)/g) || []).length, 2);
   assert.match(shell, /navLink\("anime\.html", "bi-stars", "Anime \(Free\)"/);
+  assert.match(shell, /navLink\("anime-premium\.html", "bi-stars", "Anime Premium"/);
   assert.doesNotMatch(shell, /"anime-premium", "library"/);
 });
 
