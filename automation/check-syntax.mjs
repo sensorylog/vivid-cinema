@@ -44,6 +44,8 @@ const files = [
   "scripts/anime-premium-discovery.js",
   "scripts/anime-premium-title.js",
   "scripts/anime-premium-watch.js",
+  "scripts/anime-library.js",
+  "scripts/anime-premium-library.js",
   "scripts/playback/anime-id-resolver.js",
   "scripts/playback/anime-premium-providers.js",
   "scripts/anime-premium-membership.js",
