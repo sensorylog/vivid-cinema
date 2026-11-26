@@ -45,3 +45,8 @@ The separate anime Player 2 remains independent and retains AniXo, AniLink, Mega
 - AnimeEmbed: https://animeembed.com/
 - Vidy: https://www.vidy.st/
 - Aniweeb: https://api.aniweeb.net/docs
+
+
+## Validation status
+
+The provider route builders and watch-page adapter wiring have focused Node tests in the repository's root test suite. Live playback still needs device/browser verification for each provider and each title; a successful iframe response is not a guarantee of playable episode media.
