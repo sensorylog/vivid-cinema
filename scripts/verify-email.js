@@ -15,8 +15,9 @@ function loginDestination() {
     try { requested = new URL(params.get("continueUrl"), window.location.origin).searchParams.get("returnTo"); }
     catch { requested = null; }
   }
-  return requested === "anime-premium.html"
-    ? "login.html?returnTo=anime-premium.html"
+  const allowed = new Set(["anime-premium.html", "anime-premium-membership.html"]);
+  return allowed.has(requested)
+    ? "login.html?returnTo=" + encodeURIComponent(requested)
     : "login.html";
 }
 
