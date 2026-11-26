@@ -28,7 +28,7 @@ let cachedServiceAccountRaw = "";
 
 export function isValidEmailAddress(value) {
   const email = String(value || "").trim();
-  return email.length <= 254 && /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email);
+  return email.length <= 254 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
 export class AnimePremiumError extends Error {
