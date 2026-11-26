@@ -1,5 +1,5 @@
 import {
-  allowedOrigin, AnimePremiumError, getPremiumServices, jsonResponse, optionsResponse,
+  allowedOrigin, AnimePremiumError, enforceRateLimit, getPremiumServices, jsonResponse, optionsResponse,
   requirePremiumUser, timestampFromMillis
 } from "../../lib/anime-premium-service.js";
 
@@ -27,6 +27,7 @@ export async function onRequestPost({ request, env }) {
       throw new AnimePremiumError(400, "invalid-episode", "Choose a valid season and episode.");
     }
     const { db } = getPremiumServices(env);
+    await enforceRateLimit(db, user.uid, "playback", 40, 60 * 1000);
     const membershipSnapshot = await db.collection("animePremiumMemberships").doc(user.uid).get();
     const membership = membershipSnapshot.exists ? membershipSnapshot.data() : null;
     const end = typeof membership?.currentPeriodEnd?.toMillis === "function" ? membership.currentPeriodEnd.toMillis() : Number(membership?.currentPeriodEnd || 0);
