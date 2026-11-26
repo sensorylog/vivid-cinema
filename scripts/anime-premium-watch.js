@@ -148,6 +148,10 @@ function activateProvider(providerId) {
   setStatus("Opening " + provider.label + " · " + animeTrack.toUpperCase() + "…");
   providerLoadTimer = window.setTimeout(() => {
     if (generation !== providerRequestId || activeProviderId !== provider.id) return;
+    if (provider.events) {
+      fallbackToNextPlaybackServer(provider.label + " did not report playback readiness.");
+      return;
+    }
     setStatus(provider.label + " has not confirmed playback yet. If the video is stuck, try the next server.");
     $("vap-server-next").hidden = providerOptions.filter(item => item.available && item.id !== provider.id).length === 0;
   }, 18000);
@@ -176,7 +180,10 @@ function handleProviderMessage(event) {
   const provider = providerOptions.find(item => item.id === activeProviderId);
   const frame = $("vap-player-frame");
   if (!provider || !frame?.contentWindow || event.source !== frame.contentWindow || event.origin !== provider.origin) return;
-  const data = event.data;
+  let data = event.data;
+  if (typeof data === "string") {
+    try { data = JSON.parse(data); } catch { return; }
+  }
   if (!data || typeof data !== "object") return;
   if (provider.id === "anilink" && typeof data.type === "string" && data.type.startsWith("anilink-player:")) {
     const type = data.type.slice("anilink-player:".length), payload = data.payload && typeof data.payload === "object" ? data.payload : {};
