@@ -3,6 +3,7 @@ import { auth } from "./firebase.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
 import { getImageUrl, normalizeResults } from "./media.js";
 import { escapeHtml } from "./utils.js";
+import { isAnimeMetadata } from "./anime-eligibility.js";
 import { hasLibraryItem, toggleLibraryItem } from "./library.js";
 import { markAnimeCompleted, unmarkAnimeCompleted, addAnimeFavorite, removeAnimeFavorite } from "./anime-library.js";
 
@@ -19,23 +20,33 @@ let backdropAdvancing = false;
 let activeTitleDetails = null;
 let activeVividUser = null;
 let premiumMembershipActive = false;
+let titleAccessRequest = 0;
+
+function setMemberActionsVisible(visible) {
+  document.querySelectorAll("[data-vap-member-action]").forEach(button => { button.hidden = !visible; });
+}
 
 
 async function syncTitleAccess(user) {
+  const requestId = ++titleAccessRequest;
   activeVividUser = user && !user.isAnonymous ? user : null;
   premiumMembershipActive = false;
   if (activeVividUser) {
     try {
       const token = await activeVividUser.getIdToken();
       const response = await fetch("/api/anime-premium/membership", { headers: { Authorization: "Bearer " + token }, cache: "no-store" });
+      if (requestId !== titleAccessRequest || activeVividUser?.uid !== user.uid) return;
       if (response.ok) {
         const payload = await response.json();
         premiumMembershipActive = payload?.membership?.active === true;
       }
     } catch (error) {
+      if (requestId !== titleAccessRequest) return;
       console.warn("Vivid Anime Premium membership status could not be checked:", error);
     }
   }
+  if (requestId !== titleAccessRequest) return;
+  setMemberActionsVisible(premiumMembershipActive);
   const primary = $("vap-title-account");
   const watch = $("vap-title-watch");
   const membership = $("vap-title-membership");
@@ -310,6 +321,7 @@ async function loadTitle() {
   if (detailsResult.status !== "fulfilled") throw detailsResult.reason || new Error("The anime title is unavailable.");
   const details = detailsResult.value;
   if (!details?.id) throw new Error("The anime title could not be found.");
+  if (!isAnimeMetadata(details)) throw new Error("This title is not listed as Japanese animation in the Vivid Anime Premium catalogue.");
   const images = imagesResult.status === "fulfilled" ? imagesResult.value || {} : {};
   renderTitle(details);
   startBackdrop(imageSlides(details, images));
