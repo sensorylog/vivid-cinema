@@ -22,6 +22,13 @@ const IDENTITY_MASKS = [
 let activeItems = [];
 let shelfRequest = 0;
 
+function withTimeout(promise, milliseconds, message) {
+  let timer;
+  return Promise.race([
+    promise,
+    new Promise((_, reject) => { timer = window.setTimeout(() => reject(new Error(message)), milliseconds); })
+  ]).finally(() => window.clearTimeout(timer));
+}
 function titleOf(item) { return item.title || item.name || "Untitled anime"; }
 function dateOf(item) { return item.release_date || item.first_air_date || item.date || ""; }
 function yearOf(item) { return dateOf(item).slice(0, 4) || String(item.year || ""); }
@@ -88,7 +95,11 @@ function setItems(items) {
 async function loadShelves() {
   const request = ++shelfRequest;
   const jobs = shelves.map(async shelf => {
-    const result = await getAnimePage(1, { type: shelf.type, sort_by: shelf.sort });
+    const result = await withTimeout(
+      getAnimePage(1, { type: shelf.type, sort_by: shelf.sort }),
+      12000,
+      "This anime collection took too long to respond."
+    );
     return { shelf, items: sorted(result.items || [], shelf.sort).slice(0, 12) };
   });
   const results = await Promise.allSettled(jobs);
@@ -154,13 +165,13 @@ async function loadCatalogue(reset = true) {
   try {
     let result;
     if (query) {
-      result = await searchAnime(query, state.page);
+      result = await withTimeout(searchAnime(query, state.page), 15000, "Anime search timed out. Please try again.");
     } else {
-      result = await getAnimePage(state.page, {
+      result = await withTimeout(getAnimePage(state.page, {
         type: state.type === "all" ? "" : state.type,
         sort_by: state.sort,
         year: state.year || undefined
-      });
+      }), 15000, "The anime catalogue timed out. Please try again.");
     }
     if (request !== state.request) return;
     const items = sorted(result.items || [], state.sort);
@@ -247,10 +258,10 @@ function init() {
     if (id) window.location.href = "anime-premium-title.html?id=" + encodeURIComponent(id) + "&type=" + encodeURIComponent(type);
     else $("vap-catalogue").scrollIntoView({ behavior: "smooth", block: "start" });
   });
-  loadShelves().then(() => loadCatalogue(true)).catch(error => {
-    console.warn("Vivid Anime Premium discovery initialization failed:", error);
-    loadCatalogue(true);
+  void loadShelves().catch(error => {
+    console.warn("Vivid Anime Premium shelves could not initialize:", error);
   });
+  void loadCatalogue(true);
 }
 if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init, { once: true });
 else init();
