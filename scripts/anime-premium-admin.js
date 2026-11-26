@@ -54,6 +54,15 @@ async function submitMembership(event) {
 async function submitSource(event) {
   event.preventDefault();
   const mediaType = $("vap-admin-media-type").value;
+  const territories = $("vap-admin-territories").value.split(",").map(value => value.trim().toUpperCase()).filter(Boolean);
+  const licenseStart = new Date($("vap-admin-license-start").value);
+  const licenseEnd = new Date($("vap-admin-license-end").value);
+  if (!territories.length || territories.some(code => !/^[A-Z]{2}$/.test(code)) ||
+      !Number.isFinite(licenseStart.getTime()) || !Number.isFinite(licenseEnd.getTime()) ||
+      licenseEnd <= licenseStart || !$("vap-admin-rights-verified").checked) {
+    status("Verify the licence, territory list and valid start/end dates before saving this provider source.", true);
+    return;
+  }
   const payload = {
     mediaType,
     titleId: $("vap-admin-title-id").value.trim(),
@@ -61,10 +70,10 @@ async function submitSource(event) {
     episode: Number($("vap-admin-episode").value || 1),
     provider: $("vap-admin-provider").value.trim(),
     sourceId: $("vap-admin-source-id").value.trim(),
-    allowedTerritories: $("vap-admin-territories").value.split(",").map(value => value.trim().toUpperCase()).filter(Boolean),
+    allowedTerritories: territories,
     rightsReference: $("vap-admin-rights-reference").value.trim(),
-    licenseStartsAt: new Date($("vap-admin-license-start").value).toISOString(),
-    licenseEndsAt: new Date($("vap-admin-license-end").value).toISOString(),
+    licenseStartsAt: licenseStart.toISOString(),
+    licenseEndsAt: licenseEnd.toISOString(),
     rightsVerified: $("vap-admin-rights-verified").checked,
     active: $("vap-admin-source-active").checked
   };
