@@ -29,7 +29,7 @@ test("private Premium Anime Library is no-index and has membership-gated section
   assert.match(script, /payload\?\.membership\?\.active === true/);
   assert.match(profileApi, /animePremiumMemberships/);
   assert.match(profileApi, /premium-membership-required/);
-  assert.match(profileApi, /periodEnd <= Date\.now\(\)/);
+  assert.match(profileApi, /hasPremiumMembership\(user, membership, env\)/);
   assert.match(script, /reason === "verify"/);
   for (const provider of ["vidplus", "vidlink", "vidsrc", "anixo", "anilink", "megaplay", "megaplay-legacy", "megavid", "megaflix", "vidapi", "embedwave", "vidfast", "embedapistream", "vidrift"]) assert.ok(html.includes('value="' + provider + '"'));
   assert.match(script, /auth\.html\?returnTo=anime-premium-library\.html/);
