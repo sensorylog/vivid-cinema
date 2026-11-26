@@ -34,6 +34,12 @@ test("Premium access is verified through the existing Firebase account before a 
   assert.doesNotMatch(script, /initializeApp\s*\(|getAuth\s*\(/);
 });
 
+test("watch metadata and identity lookups have bounded loading times", () => {
+  assert.match(script, /withTimeout\(getDetails\(titleId\), 15000/);
+  assert.match(script, /withTimeout\(tmdbApi\.tvSeason/);
+  assert.match(script, /withTimeout\(resolveAnimeIds\(titleName\(titleDetails\)\), 10000/);
+});
+
 test("watch page waits for optional auth restoration without blocking episode metadata", () => {
   assert.match(script, /async function bindAuth\(\)/);
   assert.match(script, /authReady = bindAuth\(\)/);
