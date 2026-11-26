@@ -21,8 +21,8 @@ export async function onRequestPost({ request, env }) {
     let body;
     try { body = JSON.parse(raw); } catch { throw new AnimePremiumError(400, "invalid-request", "A valid checkout request is required."); }
     const user = await requirePremiumUser(request, env);
-    if (!String(env.PAYSTACK_WEBHOOK_SECRET || "").trim()) {
-      throw new AnimePremiumError(503, "webhook-verification-not-configured", "Paystack webhook signing secret is not configured. Vivid cannot safely activate membership until the webhook signing secret is added.");
+    if (!String(env.PAYSTACK_WEBHOOK_SECRET || env.PAYSTACK_SECRET_KEY || "").trim()) {
+      throw new AnimePremiumError(503, "webhook-verification-not-configured", "Paystack payment verification is not configured. Vivid needs a server-side webhook signing secret or legacy Paystack secret key before it can safely activate membership.");
     }
     const planId = String(body.planId || "monthly").toLowerCase();
     const plan = PAGE_PLANS[planId];
