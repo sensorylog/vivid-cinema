@@ -4,7 +4,7 @@
 
 VIVID ANIME PREMIUM is a new, independent anime destination inside Vivid Cinema. It will have its own route family, presentation layer, catalogue experience, title/detail experience, watch experience, subscription entitlements and administration surface.
 
-The existing Movies & TV product remains unchanged. The current `anime.html` page and its supporting implementation are intentionally untouched during the Premium build. Restricting that existing free anime experience is the final implementation task, after all six Premium phases have been integrated and tested.
+The existing Movies & TV product remains unchanged. The legacy `anime.html` route is the clearly labelled Free Anime sampler: six curated series, one first-episode preview per series, and a direct upgrade path. The full catalogue, complete series/films, dedicated watch experience and personal anime library belong to VIVID ANIME PREMIUM.
 
 ## Identity and authentication
 
@@ -77,7 +77,7 @@ The Premium entry route now acts as a dedicated discovery homepage rather than a
 - Discovery uses TMDB metadata and artwork only. It does not expose stream URLs, playback files, third-party embeds, checkout or client-side membership state.
 - TMDB attribution is shown in the Premium footer. Image usage remains subject to the applicable TMDB terms.
 - The discovery module is namespaced, included in the offline app shell and included in scoped syntax checks.
-- The existing anime.html experience remains untouched. Premium playback and entitlement checks remain reserved for the later watch and membership phases.
+- The existing `anime.html` route remains a separate Free Anime entry point and is limited to the curated sample policy in `scripts/anime-free-policy.js`.
 
 
 ## Phase 3 implementation — anime identity and title experience
@@ -110,8 +110,8 @@ The Premium entry route now acts as a dedicated discovery homepage rather than a
 ### Server-owned payment flow
 - Adds separate Cloudflare Pages API routes for public pricing, authenticated checkout, membership status, automatic renewal cancellation, Paystack webhook processing, protected playback and administrator operations.
 - Checkout requires a verified Firebase ID token and verified email. The browser sends only country and payment method; amount, currency, plan code, reference, renewal mode and user identity are derived or verified server-side.
-- Card checkout uses a configured Paystack monthly plan code and automatic renewal. Mobile money uses a one-time Paystack transaction and manual renewal. Mobile money is only offered for the currently supported GH/KE routes; the server validates this again.
-- The existing displayed Ghana price is represented as a configurable default of 5330 minor units (GH₵53.30) via ANIME_PREMIUM_GHS_MONTHLY_AMOUNT. Additional supported checkout currencies and their Paystack plan codes are configured in ANIME_PREMIUM_PLANS_JSON. This is configuration, not a final locked global price.
+- Card checkout uses a configured Paystack plan code for the selected monthly, biannual (every 6 months) or annual interval and renews automatically. Mobile money uses a one-time Paystack transaction for the selected period and requires manual renewal. Mobile money is only offered for the currently supported GH/KE routes; the server validates this again.
+- The existing displayed Ghana monthly price is represented as a configurable default of 5330 minor units (GH₵53.30) via `ANIME_PREMIUM_GHS_MONTHLY_AMOUNT`. Monthly, biannual and annual amounts and recurring Paystack plan codes are configured per currency and interval in `ANIME_PREMIUM_PLANS_JSON`. Six-month and annual prices are not invented in code; they must be approved and configured by Vivid before those options can be enabled.
 - Country selection is populated from country/currency data; local-currency conversion is labelled as an estimate. Paystack's own checkout page displays the final billing currency and amount.
 - Payment return never grants access. The signed Paystack webhook verifies its signature, verifies the transaction with Paystack, checks the stored checkout amount/currency/reference, and idempotently updates the membership document.
 - Manual mobile-money renewals extend the existing entitlement period. Card subscription events maintain automatic-renewal state. Users can cancel card auto-renewal while retaining access through the paid period.
@@ -130,7 +130,7 @@ The Premium entry route now acts as a dedicated discovery homepage rather than a
 - FIREBASE_SERVICE_ACCOUNT_JSON and FIREBASE_PROJECT_ID (existing Vivid server-side Firebase credentials).
 - PAYSTACK_SECRET_KEY and PAYSTACK_WEBHOOK_SECRET (server secrets; never expose them to the browser).
 - PAYSTACK_LIVE_ENABLED=true only in the production environment after the Paystack merchant, plan codes and webhook are configured. Checkout stays disabled in previews by default.
-- PAYSTACK_PLAN_GHS_MONTHLY or ANIME_PREMIUM_PLANS_JSON for each enabled checkout currency. Card auto-renew is unavailable for currencies without a configured Paystack plan code.
+- `PAYSTACK_PLAN_GHS_MONTHLY` remains supported for legacy monthly setup. Use `ANIME_PREMIUM_PLANS_JSON` for each currency and billing period; card auto-renew is unavailable for a period/currency without its matching Paystack plan code.
 - ANIME_PREMIUM_DEFAULT_CURRENCY (defaults to GHS) and optional ANIME_PREMIUM_GHS_MONTHLY_AMOUNT (defaults to 5330 minor units).
 - ANIME_PREMIUM_ADMIN_UIDS for server-side admin allowlisting when custom admin claims are not used.
  - Configure the Paystack webhook URL as /api/anime-premium/webhook on the Vivid production origin. Support Vivid donations remain on their existing, separate payment flow.
@@ -141,3 +141,32 @@ The Premium entry route now acts as a dedicated discovery homepage rather than a
 VIVID ANIME PREMIUM uses the same iframe-provider model as the existing VIVID Cinema player. The Cloudflare playback endpoint verifies membership and issues a two-hour playback session; the browser then builds URLs from the static provider registry in `scripts/playback/anime-premium-providers.js`. Provider-specific postMessage events are accepted only from the active iframe's exact origin and window. See `docs/vivid-anime-premium-streaming-provider-research.md` for the provider list, route contracts, ID mapping and QA gates.
 
 A provider's iframe route and published features do not guarantee that every title is indexed or that the provider is available in every territory. VIVID should measure actual title-level playback during QA and keep manual server switching available when a provider does not expose reliable readiness/error events.
+
+## Free Anime and Premium boundary
+
+- Free Anime is a sampler, not a second full catalogue: six curated TV series and only Season 1, Episode 1 of each.
+- The free page labels each sample and links directly to the Premium destination. The generic watch route blocks other anime titles and episodes from the Free Anime entry point and does not mount episode navigation for the sample.
+- VIVID ANIME PREMIUM remains the full catalogue, film/series discovery, dedicated title/watch pages, protected playback, membership and personal anime library.
+- The client-side free preview gate is a product UX boundary, not DRM; third-party embeds cannot provide strong server-side content enforcement when users can open those providers outside Vivid.
+
+## Multi-period Paystack configuration
+
+`ANIME_PREMIUM_PLANS_JSON` uses period-first configuration. Example values below are placeholders and must be replaced with the approved Vivid prices and actual Paystack plan codes:
+
+```json
+{
+  "monthly": {
+    "GHS": { "amountMinor": 5330, "planCode": "PLN_MONTHLY_GHS" }
+  },
+  "biannually": {
+    "GHS": { "amountMinor": 0, "planCode": "PLN_SIX_MONTHS_GHS" }
+  },
+  "annually": {
+    "GHS": { "amountMinor": 0, "planCode": "PLN_ANNUAL_GHS" }
+  }
+}
+```
+
+Use the Paystack Dashboard to create plans with intervals `monthly`, `biannually` and `annually`; the plan code configured for a currency/period must have the same amount and interval as the server configuration. Mobile money does not use a recurring plan code and remains a one-time manual renewal for the chosen period. The server stores the selected period with the checkout and grants the matching entitlement duration only after the signed webhook and Paystack transaction verification succeed.
+
+The Paystack hosted Payment Page URL supplied during implementation is not currently used by the Vivid in-app checkout. Vivid creates a server-owned transaction tied to the signed-in Firebase UID and relies on the webhook to activate access. Do not replace this with a static public payment URL unless the payment flow is redesigned to securely associate and verify each payment against the Vivid account.
