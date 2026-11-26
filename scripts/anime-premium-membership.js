@@ -21,13 +21,16 @@ let membershipAutoRenew = false;
 let membershipStatusUnavailable = false;
 let membershipVerificationRequired = false;
 let selectedCountry = "GH";
+let selectedPlanId = "monthly";
+const PLAN_LABELS = { monthly: { title: "MONTHLY MEMBERSHIP", price: "/ month", renewal: "each month" }, biannually: { title: "6-MONTH MEMBERSHIP", price: "/ 6 months", renewal: "every 6 months" }, annually: { title: "ANNUAL MEMBERSHIP", price: "/ year", renewal: "each year" } };
 let selectedPaymentMethod = "card";
 const rateCache = new Map();
 
 function getCountry(code) { return countries.find(country => country.code === code) || FALLBACK_COUNTRIES[0]; }
 function getCheckoutCurrency(countryCode) {
+  const periodPlans = pricing.plans[selectedPlanId] || {};
   const preferred = COUNTRY_TO_PAYSTACK[countryCode] || pricing.defaultCurrency;
-  return pricing.plans[preferred] ? preferred : pricing.defaultCurrency;
+  return periodPlans[preferred] ? preferred : pricing.defaultCurrency;
 }
 function formatMoney(amount, currency) {
   try { return new Intl.NumberFormat(undefined, { style: "currency", currency, maximumFractionDigits: 2 }).format(amount); }
@@ -73,7 +76,7 @@ async function updatePrice() {
   const country = getCountry(selectedCountry);
   const localCurrency = country.currency || pricing.defaultCurrency;
   const checkoutCurrency = getCheckoutCurrency(selectedCountry);
-  const plan = pricing.plans[checkoutCurrency];
+  const plan = pricing.plans[selectedPlanId]?.[checkoutCurrency];
   $("vap-local-currency").textContent = localCurrency;
   $("vap-checkout-currency").textContent = checkoutCurrency;
   if (!plan) {
@@ -83,6 +86,9 @@ async function updatePrice() {
     $("vap-checkout-status").textContent = "No checkout price is configured for this country yet. Please choose another region or contact Vivid support.";
     return;
   }
+  const period = PLAN_LABELS[selectedPlanId] || PLAN_LABELS.monthly;
+  $("vap-plan-pill").textContent = period.title;
+  $("vap-price-period").textContent = period.price;
   const baseAmount = Number(plan.amountMajor);
   if (localCurrency === checkoutCurrency) {
     $("vap-local-price").textContent = formatMoney(baseAmount, checkoutCurrency);
@@ -113,9 +119,9 @@ async function updatePrice() {
     document.querySelector('input[name="vap-payment-method"][value="' + selectedPaymentMethod + '"]').checked = true;
   }
   $("vap-method-note").textContent = selectedPaymentMethod === "card"
-    ? "Card billing renews automatically each month where the configured Paystack plan supports it."
+    ? "Card billing renews automatically " + period.renewal + " where the configured Paystack plan supports it."
     : selectedPaymentMethod === "mobile_money"
-      ? "Mobile money is a one-time payment. Renew manually each month; no automatic debit is created."
+      ? "Mobile money is a one-time payment. Renew manually after " + period.renewal + "; no automatic debit is created."
       : "No payment method is configured for this region yet.";
   const membershipBlocked = membershipStatusUnavailable || membershipVerificationRequired;
   $("vap-checkout-button").disabled = !pricing.checkoutEnabled || membershipBlocked || (membershipActive && membershipAutoRenew) || !selectedPaymentMethod;
@@ -148,6 +154,20 @@ async function loadPricing() {
   }
   if (!payload.plans || !Object.keys(payload.plans).length) throw new Error("No Premium checkout currency is configured yet.");
   pricing = payload;
+  const periodButtons = [...document.querySelectorAll("[data-vap-plan]")];
+  periodButtons.forEach(button => {
+    const configured = Object.values(pricing.plans[button.dataset.vapPlan] || {}).length > 0;
+    button.disabled = !configured;
+    button.hidden = !configured;
+  });
+  if (!pricing.plans[selectedPlanId] || !Object.keys(pricing.plans[selectedPlanId]).length) {
+    selectedPlanId = ["monthly", "biannually", "annually"].find(key => Object.keys(pricing.plans[key] || {}).length) || "monthly";
+  }
+  periodButtons.forEach(button => {
+    const active = button.dataset.vapPlan === selectedPlanId;
+    button.classList.toggle("is-active", active);
+    button.setAttribute("aria-pressed", String(active));
+  });
   await updatePrice();
 }
 async function loadMembership() {
@@ -188,7 +208,8 @@ async function loadMembership() {
     $("vap-cancel-renewal").hidden = !membershipActive || !membership.canCancelAutoRenew;
     if (membershipActive) {
       $("vap-current-membership").hidden = false;
-      $("vap-membership-state").textContent = membership.autoRenew ? "Your Premium membership is active and set to renew automatically." : "Your Premium membership is active.";
+      const activePlan = PLAN_LABELS[membership.planId] || PLAN_LABELS.monthly;
+      $("vap-membership-state").textContent = "Your " + activePlan.title.toLowerCase() + " is active" + (membership.autoRenew ? " and set to renew automatically." : ".");
       $("vap-membership-period").textContent = "Access through " + (membership.currentPeriodEnd ? new Date(membership.currentPeriodEnd).toLocaleDateString() : "the current billing period") + " · " + (membership.autoRenew ? (membership.canCancelAutoRenew ? "Card auto-renewal is on" : "Card auto-renewal is on · contact support to cancel") : "Manual renewal");
       $("vap-account-status").textContent = "You are signed in with your Vivid account.";
     }
@@ -227,7 +248,7 @@ async function startCheckout() {
       headers: { "Content-Type": "application/json", Authorization: "Bearer " + token },
       cache: "no-store",
       signal: AbortSignal.timeout(15000),
-      body: JSON.stringify({ country: selectedCountry, paymentMethod: selectedPaymentMethod })
+      body: JSON.stringify({ country: selectedCountry, paymentMethod: selectedPaymentMethod, planId: selectedPlanId })
     });
     const payload = await response.json().catch(() => ({}));
     if (response.status === 403 && payload.code === "email-not-verified") {
@@ -274,6 +295,18 @@ async function cancelAutomaticRenewal() {
 }
 
 function bind() {
+  document.querySelectorAll("[data-vap-plan]").forEach(button => button.addEventListener("click", async () => {
+    if (button.disabled) return;
+    selectedPlanId = button.dataset.vapPlan;
+    document.querySelectorAll("[data-vap-plan]").forEach(option => {
+      const active = option === button;
+      option.classList.toggle("is-active", active);
+      option.setAttribute("aria-pressed", String(active));
+    });
+    selectedPaymentMethod = "";
+    $("vap-checkout-status").textContent = "";
+    await updatePrice();
+  }));
   $("vap-country").addEventListener("change", async event => {
     selectedCountry = event.target.value;
     localStorage.setItem("vivid:anime-premium-country", selectedCountry);
