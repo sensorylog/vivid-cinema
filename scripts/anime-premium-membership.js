@@ -22,14 +22,11 @@ let currentUser = null;
 let membershipActive = false;
 let membershipAutoRenew = false;
 let selectedCountry = "GH";
-let selectedPaymentMethod = "card";
+let selectedPaymentMethod = "card";\nlet selectedPlanId = "monthly";\nconst PAGE_CHECKOUT_PLANS = { monthly: { amountMajor: 53.30 }, biannually: { amountMajor: 287.82 }, annually: { amountMajor: 511.68 } };
 const rateCache = new Map();
 
 function getCountry(code) { return countries.find(country => country.code === code) || FALLBACK_COUNTRIES[0]; }
-function getCheckoutCurrency(countryCode) {
-  const preferred = COUNTRY_TO_PAYSTACK[countryCode] || pricing.defaultCurrency;
-  return pricing.plans[preferred] ? preferred : pricing.defaultCurrency;
-}
+function getCheckoutCurrency(countryCode) { return "GHS"; }
 function formatMoney(amount, currency) {
   try { return new Intl.NumberFormat(undefined, { style: "currency", currency, maximumFractionDigits: 2 }).format(amount); }
   catch { return amount.toFixed(2) + " " + currency; }
@@ -74,7 +71,7 @@ async function updatePrice() {
   const country = getCountry(selectedCountry);
   const localCurrency = country.currency || pricing.defaultCurrency;
   const checkoutCurrency = getCheckoutCurrency(selectedCountry);
-  const plan = pricing.plans[checkoutCurrency];
+  const plan = PAGE_CHECKOUT_PLANS[selectedPlanId];
   $("vap-local-currency").textContent = localCurrency;
   $("vap-checkout-currency").textContent = checkoutCurrency;
   if (!plan) {
@@ -98,25 +95,15 @@ async function updatePrice() {
       $("vap-price-note").textContent = "Local conversion is temporarily unavailable. Paystack will confirm the final " + checkoutCurrency + " amount before payment.";
     }
   }
+  selectedPaymentMethod = "card";
   const cardRadio = document.querySelector('input[name="vap-payment-method"][value="card"]');
   const mobileRadio = document.querySelector('input[name="vap-payment-method"][value="mobile_money"]');
-  const cardAvailable = Boolean(plan.cardAutoRenewAvailable);
-  const mobileAvailable = (pricing.mobileMoneyCountries || [...MOBILE_MONEY_COUNTRIES]).includes(selectedCountry) && ((selectedCountry === "GH" && checkoutCurrency === "GHS") || (selectedCountry === "KE" && checkoutCurrency === "KES"));
-  cardRadio.disabled = !cardAvailable;
-  mobileRadio.disabled = !mobileAvailable;
-  $("vap-card-method").setAttribute("aria-disabled", String(!cardAvailable));
-  $("vap-mobile-method").setAttribute("aria-disabled", String(!mobileAvailable));
-  if (selectedPaymentMethod === "card" && !cardAvailable) selectedPaymentMethod = mobileAvailable ? "mobile_money" : "";
-  if (selectedPaymentMethod === "mobile_money" && !mobileAvailable) selectedPaymentMethod = cardAvailable ? "card" : "";
-  if (!selectedPaymentMethod && (cardAvailable || mobileAvailable)) selectedPaymentMethod = cardAvailable ? "card" : "mobile_money";
-  if (selectedPaymentMethod) {
-    document.querySelector('input[name="vap-payment-method"][value="' + selectedPaymentMethod + '"]').checked = true;
-  }
-  $("vap-method-note").textContent = selectedPaymentMethod === "card"
-    ? "Card billing renews automatically each month where the configured Paystack plan supports it."
-    : selectedPaymentMethod === "mobile_money"
-      ? "Mobile money is a one-time payment. Renew manually each month; no automatic debit is created."
-      : "No payment method is configured for this region yet.";
+  cardRadio.checked = true;
+  cardRadio.disabled = true;
+  mobileRadio.disabled = true;
+  $("vap-card-method").setAttribute("aria-disabled", "false");
+  $("vap-mobile-method").setAttribute("aria-disabled", "true");
+  $("vap-method-note").textContent = "Use the same verified email address as your Vivid account on the Paystack page so your payment can be matched to your membership.";
   $("vap-checkout-button").disabled = !pricing.checkoutEnabled || (membershipActive && membershipAutoRenew) || !selectedPaymentMethod;
   $("vap-checkout-button").textContent = !pricing.checkoutEnabled ? "Checkout temporarily unavailable" : membershipActive ? (membershipAutoRenew ? "Membership active — auto-renew on" : "Renew manually →") : currentUser ? "Continue to secure checkout →" : "Sign in to subscribe →";
 }
@@ -177,16 +164,16 @@ async function startCheckout() {
   $("vap-checkout-status").textContent = "";
   try {
     const token = await currentUser.getIdToken();
-    const response = await fetch("/api/anime-premium/checkout", {
+    const response = await fetch("/api/anime-premium/page-checkout", {
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: "Bearer " + token },
       cache: "no-store",
-      body: JSON.stringify({ country: selectedCountry, paymentMethod: selectedPaymentMethod })
+      body: JSON.stringify({ planId: selectedPlanId })
     });
     const payload = await response.json().catch(() => ({}));
-    if (!response.ok || !payload.authorizationUrl) throw new Error(payload.message || "Secure checkout could not be started.");
-    $("vap-checkout-status").textContent = "Opening Paystack securely…";
-    window.location.assign(payload.authorizationUrl);
+    if (!response.ok || !payload.paymentPageUrl) throw new Error(payload.message || "Paystack payment page could not be opened.");
+    $("vap-checkout-status").textContent = "Opening your selected Paystack page. Use the same verified email as your Vivid account.";
+    window.location.assign(payload.paymentPageUrl);
   } catch (error) {
     $("vap-checkout-status").textContent = error.message || "Checkout could not be started.";
     await updatePrice();
