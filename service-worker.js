@@ -1,8 +1,6 @@
 // Bump this version whenever the precached app shell changes.
-const CACHE_NAME = "vivid-cinema-shell-v338";
-const HLS_LIBRARY_URL = "https://cdn.jsdelivr.net/npm/hls.js@1.7.3/dist/hls.min.js";
+const CACHE_NAME = "vivid-cinema-shell-v339";
 const APP_SHELL = [
-  HLS_LIBRARY_URL,
   "./","./index.html","./home.html","./african-stories.html","./downloads.html","./my-downloads.html","./for-you.html",
   "./person.html","./discover.html","./collection.html","./title.html","./watch.html",
   "./scripts/downloads/desktop-offline.js?windows-offline-hls-v3","./scripts/downloads/transcode-player.js?windows-offline-hls-v4","./scripts/downloads/browser-hls-adapter.js","./scripts/downloads.js?v=direct-download-v4","./styles/vivid-premium-experience.css?v=3","./styles/vivid-media-layout.css?v=1","./styles/my-downloads.css?v=offline-cinema-redesign-2",
@@ -46,7 +44,7 @@ async function cacheAsset(cache,asset){
  const response=await fetch(asset,{cache:"no-store",redirect:"follow"});
  // Never precache a response whose request crossed a redirect. Safari can reject
  // a redirected response when a service worker returns it for a navigation.
- const allowedResponseType=response.type==="basic"||(asset===HLS_LIBRARY_URL&&response.type==="cors");
+ const allowedResponseType=response.type==="basic";
  const expectedUrl=new URL(asset,self.location.href).href;
  if(!response.ok||!allowedResponseType||!isSafeResponse(response)||response.url!==expectedUrl)throw new Error("Unsafe or unavailable precache response: "+asset);
  await cache.put(asset,response.clone());
@@ -157,21 +155,6 @@ self.addEventListener("fetch",event=>{
  const request=event.request;
  if(request.method!=="GET")return;
  const url=new URL(request.url);
- if(url.href===HLS_LIBRARY_URL){
-  event.respondWith((async()=>{
-   const cached=await safeCachedResponse(HLS_LIBRARY_URL);
-   if(cached)return cached;
-   try{
-    const response=await fetch(request,{cache:"no-store",redirect:"error"});
-    if(response.ok&&response.type==="cors"&&isSafeResponse(response)){
-     const cache=await caches.open(CACHE_NAME);
-     await cache.put(HLS_LIBRARY_URL,response.clone());
-    }
-    return response;
-   }catch{return new Response("",{status:504,statusText:"Offline"});}
-  })());
-  return;
- }
  if(url.origin!==self.location.origin)return;
  // Authentication must not depend on stale cached documents or SDK bundles.
  // Always try the network first for auth pages, auth modules and Firebase config.
