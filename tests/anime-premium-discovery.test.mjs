@@ -23,7 +23,7 @@ test("Premium discovery exposes search, collections, type, year and sort control
 test("Premium catalogue uses the existing anime metadata API and filters Japanese animation", () => {
   assert.match(script, /getAnimePage\(/);
   assert.match(script, /tmdbApi\.searchMulti\(/);
-  assert.match(script, /isAnimeMetadata\\(item\\)/);
+  assert.match(script, /isAnimeMetadata\(item\)/);
   assert.match(script, /item\.original_language === "ja"/);
   assert.doesNotMatch(script, /initializeApp\s*\(|getAuth\s*\(/);
 });
@@ -45,7 +45,7 @@ test("catalogue cards open dedicated title routes and signature cards use per-ti
 
 test("search respects the selected media type and release year and supports result pagination", () => {
   assert.match(script, /tmdbApi\.searchMulti\(query, page\)/);
-  assert.match(script, /isAnimeMetadata\\(item\\)/);
+  assert.match(script, /isAnimeMetadata\(item\)/);
   assert.match(script, /state\.type === "all" \|\| item\.media_type === state\.type/);
   assert.match(script, /!state\.year \|\| yearOf\(item\) === state\.year/);
   assert.match(script, /totalPages: Math\.min\(500, Number\(response\.total_pages \|\| 1\)\)/);
