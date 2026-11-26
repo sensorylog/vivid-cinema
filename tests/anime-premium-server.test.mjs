@@ -145,8 +145,7 @@ test("Premium API responses are no-store and CORS is limited to Vivid origins", 
 
 test("Premium playback endpoint checks membership and issues an expiring third-party embed session", () => {
   assert.match(playback, /requirePremiumUser/);
-  assert.match(playback, /animePremiumMemberships/);
-  assert.match(playback, /\["active", "past_due"\]/);
+  assert.match(playback, /hasPremiumMembership\(user, membership, env\)/);
   assert.match(playback, /animePremiumPlaybackSessions/);
   assert.match(playback, /providerMode: "vivid-third-party-embeds"/);
   assert.match(playback, /expiresAt: timestampFromMillis\(expiresAt\)/);
