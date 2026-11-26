@@ -2,7 +2,7 @@ import { VIVID_CONFIG } from "../../../../scripts/config.js";
 import { isAnimeMetadata } from "../../../../scripts/anime-eligibility.js";
 import {
   allowedOrigin, AnimePremiumError, enforceRateLimit, getPremiumServices,
-  jsonResponse, optionsResponse, requirePremiumUser, timestampFromMillis
+  jsonResponse, optionsResponse, requirePremiumUser, timestampFromMillis, hasPremiumMembership
 } from "../../lib/anime-premium-service.js";
 
 export function onRequestOptions({ request, env }) {
@@ -31,10 +31,7 @@ export async function onRequestPost({ request, env }) {
     await enforceRateLimit(db, user.uid, "playback", 40, 60 * 1000);
     const membershipSnapshot = await db.collection("animePremiumMemberships").doc(user.uid).get();
     const membership = membershipSnapshot.exists ? membershipSnapshot.data() : null;
-    const periodEnd = typeof membership?.currentPeriodEnd?.toMillis === "function"
-      ? membership.currentPeriodEnd.toMillis()
-      : Number(membership?.currentPeriodEnd || 0);
-    if (!membership || !["active", "past_due"].includes(membership.status) || periodEnd <= Date.now()) {
+    if (!hasPremiumMembership(user, membership, env)) {
       throw new AnimePremiumError(403, "premium-membership-required", "An active Vivid Anime Premium membership is required.");
     }
 
