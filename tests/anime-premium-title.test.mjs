@@ -40,6 +40,8 @@ test("title experience stays metadata-only and uses official trailer links only"
   assert.match(tmdb, /tvImages: \(id\)/);
   assert.match(titleScript, /video\.site === "YouTube"/);
   assert.match(titleScript, /video\.official === true/);
+  assert.match(titleScript, /const official = videos\.find\(video => video\.official === true\)/);
+  assert.doesNotMatch(titleScript, /videos\.find\(video => video\.official === true\) \|\| videos\[0\]/);
   assert.doesNotMatch(titleScript, /<video|playbackUrl|streamUrl|\.m3u8|\.mp4/i);
 });
 
