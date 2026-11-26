@@ -25,7 +25,7 @@ test("Premium has its own route, namespaced assets and discoverable metadata", (
 });
 
 test("Premium reuses the existing Vivid Firebase authentication instance", () => {
-  assert.match(client, /import \{ auth \} from "\.\/firebase\.js"/);
+  assert.match(client, /import\("\.\/firebase\.js"\)/);
   assert.match(client, /onAuthStateChanged\(auth/);
   assert.match(client, /!user\.isAnonymous/);
   assert.doesNotMatch(client, /initializeApp\s*\(/);
