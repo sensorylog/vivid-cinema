@@ -74,3 +74,23 @@ test("playback sessions expire safely and stale episode requests cannot replace 
   assert.match(script, /disposeHls\(\)/);
   assert.match(script, /window\.clearTimeout\(playbackExpiryTimer\)/);
 });
+
+test("invalid playback expiry timestamps fail closed instead of creating an immediate or endless session", () => {
+  assert.match(script, /const expiresAt = Date\.parse\(playback\.expiresAt\)/);
+  assert.match(script, /!Number\.isFinite\(expiresAt\) \|\| expiresAt <= Date\.now\(\)/);
+  assert.match(script, /const expiresIn = expiresAt - Date\.now\(\)/);
+});
+
+test("episode navigation preserves the final progress snapshot and invalidates stale playback requests", () => {
+  assert.match(script, /if \(currentPlaybackSessionId\) void syncPlaybackProgress\(true\)/);
+  assert.match(script, /playbackRequestId \+= 1;[\s\S]*showGate\("Loading season"/);
+  assert.match(script, /pendingProgressSnapshot = \{/);
+  assert.match(script, /while \(pendingProgressSnapshot\)/);
+  assert.match(script, /sessionId: snapshot\.sessionId/);
+});
+
+test("account changes invalidate pending playback and discard queued progress from the prior account", () => {
+  assert.match(script, /currentUser\?\.uid && currentUser\.uid !== nextUser\?\.uid/);
+  assert.match(script, /pendingProgressSnapshot = null/);
+  assert.match(script, /Playback stopped after the Vivid account changed/);
+});
