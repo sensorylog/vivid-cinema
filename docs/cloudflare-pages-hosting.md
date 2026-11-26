@@ -18,7 +18,7 @@
 - Build output directory: `dist`
 - Root directory: `/`
 - Build-time dependencies: the build installs the isolated Cloudflare function dependencies under `cloudflare/` before bundling the Pages Function.
-- Runtime secrets: `FIREBASE_SERVICE_ACCOUNT_JSON`, `PAYSTACK_SECRET_KEY`, and `PAYSTACK_WEBHOOK_SECRET` must be configured in Pages Settings → Variables and Secrets (Production and Preview). Set `FIREBASE_PROJECT_ID` when it cannot be derived from the service account.
+- Runtime secret: `FIREBASE_SERVICE_ACCOUNT_JSON` must be configured in Pages Settings → Variables and Secrets (Production and Preview). Configure `PAYSTACK_SECRET_KEY` and `PAYSTACK_WEBHOOK_SECRET` in Production only; do not expose live Paystack credentials to Preview. Set `FIREBASE_PROJECT_ID` when it cannot be derived from the service account.
 
 The shared script `automation/build-static-dist.mjs` creates the static `dist/` assets and excludes repository/backend source. The `build:web` command then bundles `cloudflare/functions/` into the `dist/_worker.js/` directory (`index.js` entrypoint); the root Firebase Functions directory is not used as the Pages Functions source. Do not publish the repository root.
 
