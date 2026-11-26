@@ -1,7 +1,7 @@
 body.vap-title-page{overflow-x:hidden}
 .vap-title-page .vap-shell{max-width:1600px}
 .vap-title-hero{position:relative;isolation:isolate;min-height:min(850px,calc(100svh - 82px));display:flex;align-items:flex-end;overflow:hidden;background:#09070f;border-bottom:1px solid var(--vap-line)}
-.vap-title-backdrop{position:absolute;z-index:0;inset:0;background-position:center 28%;background-size:cover;background-repeat:no-repeat;opacity:0;transform:scale(1.045);transition:opacity:1.8s cubic-bezier(.2,.65,.25,1);will-change:opacity,transform}
+.vap-title-backdrop{position:absolute;z-index:0;inset:0;background-position:center 28%;background-size:cover;background-repeat:no-repeat;opacity:0;transform:scale(1.045);transition:opacity 1.8s cubic-bezier(.2,.65,.25,1);will-change:opacity,transform}
 .vap-title-backdrop.is-active{opacity:1;animation:vap-title-kenburns 8.5s ease-out both}
 @keyframes vap-title-kenburns{0%{transform:scale(1.015) translate3d(0,0,0)}100%{transform:scale(1.075) translate3d(-.7%,-.5%,0)}}
 .vap-title-hero-shade{position:absolute;z-index:1;inset:0;background:linear-gradient(90deg,rgba(8,7,13,.97) 0%,rgba(8,7,13,.82) 33%,rgba(8,7,13,.36) 70%,rgba(8,7,13,.16) 100%),linear-gradient(0deg,#08070d 0%,rgba(8,7,13,.22) 45%,rgba(8,7,13,.08) 100%)}
