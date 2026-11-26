@@ -158,7 +158,9 @@ async function loadPricing() {
   periodButtons.forEach(button => {
     const configured = Object.values(pricing.plans[button.dataset.vapPlan] || {}).length > 0;
     button.disabled = !configured;
-    button.hidden = !configured;
+    button.hidden = false;
+    const hint = button.querySelector("small");
+    if (hint && !configured) hint.textContent = "Not configured yet";
   });
   if (!pricing.plans[selectedPlanId] || !Object.keys(pricing.plans[selectedPlanId]).length) {
     selectedPlanId = ["monthly", "biannually", "annually"].find(key => Object.keys(pricing.plans[key] || {}).length) || "monthly";
