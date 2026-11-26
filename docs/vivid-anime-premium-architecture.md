@@ -127,6 +127,7 @@ The Premium entry route now acts as a dedicated discovery homepage rather than a
 ### Required Cloudflare environment configuration before live payments
 - FIREBASE_SERVICE_ACCOUNT_JSON and FIREBASE_PROJECT_ID (existing Vivid server-side Firebase credentials).
 - PAYSTACK_SECRET_KEY and PAYSTACK_WEBHOOK_SECRET (server secrets; never expose them to the browser).
+- PAYSTACK_LIVE_ENABLED=true only in the production environment after the Paystack merchant, plan codes and webhook are configured. Checkout stays disabled in previews by default.
 - PAYSTACK_PLAN_GHS_MONTHLY or ANIME_PREMIUM_PLANS_JSON for each enabled checkout currency. Card auto-renew is unavailable for currencies without a configured Paystack plan code.
 - ANIME_PREMIUM_DEFAULT_CURRENCY (defaults to GHS) and optional ANIME_PREMIUM_GHS_MONTHLY_AMOUNT (defaults to 5330 minor units).
 - ANIME_PREMIUM_ADMIN_UIDS for server-side admin allowlisting when custom admin claims are not used.
