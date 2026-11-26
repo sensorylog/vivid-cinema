@@ -58,9 +58,11 @@ test("core app routes remain navigable with the service worker active", async ({
 
 async function dismissTransientHomeOverlays(page) {
   const onboardingSkip = page.locator("#vivid-onboarding-skip");
-  if (await onboardingSkip.count() && await onboardingSkip.isVisible()) await onboardingSkip.click();
+  await onboardingSkip.waitFor({ state: "visible", timeout: 5000 }).catch(() => {});
+  if (await onboardingSkip.isVisible().catch(() => false)) await onboardingSkip.click();
   const inviteClose = page.locator("#vivid-social-invite .vivid-social-invite-close");
-  if (await inviteClose.count() && await inviteClose.isVisible()) await inviteClose.click();
+  await inviteClose.waitFor({ state: "visible", timeout: 1000 }).catch(() => {});
+  if (await inviteClose.isVisible().catch(() => false)) await inviteClose.click();
 }
 
 test("mobile navigation stays within five destinations and exposes secondary routes through More", async ({ page }) => {
