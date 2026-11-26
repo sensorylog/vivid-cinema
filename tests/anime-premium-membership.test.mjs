@@ -36,6 +36,14 @@ test("local currency display is an estimate while Paystack checkout currency is 
   assert.match(client, /localStorage\.setItem\("vivid:anime-premium-country"/);
 });
 
+test("membership pricing is not blocked by optional country or Firebase auth requests", () => {
+  assert.match(client, /void loadCountries\(\)/);
+  assert.match(client, /async function initAuth\(\)/);
+  assert.match(client, /import\("\.\/firebase\.js"\)/);
+  assert.doesNotMatch(client, /^import \{ auth \}/m);
+  assert.match(client, /AbortSignal\.timeout\(5000\)/);
+});
+
 test("client sends only country and payment method; server owns the amount and Paystack secret", () => {
   assert.match(client, /fetch\("\/api\/anime-premium\/checkout"/);
   assert.match(client, /JSON\.stringify\(\{ country: selectedCountry, paymentMethod: selectedPaymentMethod \}\)/);
@@ -69,7 +77,7 @@ test("payment return checks server membership and never grants access from the c
 test("membership return survives Vivid email verification and is cached offline", () => {
   assert.match(sendVerification, /anime-premium-membership\.html/);
   assert.match(verifyEmail, /anime-premium-membership\.html/);
-  assert.match(sw, /vivid-cinema-shell-v351/);
+  assert.match(sw, /vivid-cinema-shell-v352/);
   assert.match(sw, /anime-premium-membership\.html/);
   assert.match(sw, /anime-premium-return\.html/);
   assert.match(sw, /anime-premium-membership\.js/);
