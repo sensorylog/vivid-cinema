@@ -159,7 +159,7 @@ export async function resolveAnimeIds(title, options = {}) {
   ]);
   const result = {
     aniListId: aniList?.aniListId || "",
-    malId: aniList?.malId || jikan?.malId || ""
+    malId: aniList ? aniList.malId : (jikan?.malId || "")
   };
   if (Object.keys(options).length) {
     result.episodeOffset = aniList?.episodeOffset ?? jikan?.episodeOffset ?? Math.max(0, Number(options.episodeOffset) || 0);
