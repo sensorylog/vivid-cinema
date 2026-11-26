@@ -78,3 +78,15 @@ The Premium entry route now acts as a dedicated discovery homepage rather than a
 - TMDB attribution is shown in the Premium footer. Image usage remains subject to the applicable TMDB terms.
 - The discovery module is namespaced, included in the offline app shell and included in scoped syntax checks.
 - The existing anime.html experience remains untouched. Premium playback and entitlement checks remain reserved for the later watch and membership phases.
+
+
+## Phase 3 implementation — anime identity and title experience
+
+- Each anime card in the Signature Worlds rail receives a deterministic title-specific SVG silhouette mask, layered poster artwork, a Vivid identity stamp and a title lockup. The whole card remains a stable anchor target.
+- Mobile uses a simpler rounded poster fallback; dense shelves and catalogue grids keep conventional poster cards for scanning speed.
+- Cards and the featured hero now open the dedicated anime-premium-title.html route with a validated numeric TMDB id and explicit movie/series type.
+- The title route loads title metadata, cast, genres, recommendations and available official YouTube trailer links through the existing TMDB integration.
+- The Living Cinematic Backdrop selects multiple images belonging to the same anime, preloads the next image before switching, crossfades two persistent layers over 1.8 seconds, and advances every 8.5 seconds. A subtle Ken Burns movement adds depth without interrupting the image transition.
+- Backdrop motion respects reduced-motion preferences, overlapping transitions are prevented, and the hero artwork/content fades as the reader scrolls into the title details.
+- Title discovery remains metadata-only: the page does not create a playback session or expose stream URLs. Playback and membership remain reserved for their later phases.
+- The title route, stylesheet and runtime are added to the offline app shell and scoped syntax checks, with dedicated structural tests for the identity masks and backdrop lifecycle.
