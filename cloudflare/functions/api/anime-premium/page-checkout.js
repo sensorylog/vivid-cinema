@@ -21,7 +21,7 @@ export async function onRequestPost({ request, env }) {
     let body;
     try { body = JSON.parse(raw); } catch { throw new AnimePremiumError(400, "invalid-request", "A valid checkout request is required."); }
     const user = await requirePremiumUser(request, env);
-    if (env.PAYSTACK_LIVE_ENABLED !== "true") throw new AnimePremiumError(503, "checkout-disabled", "Paystack checkout is not enabled in this environment.");
+    if (!String(env.PAYSTACK_SECRET_KEY || "").trim()) throw new AnimePremiumError(503, "checkout-verification-not-configured", "Secure payment verification is not configured yet. Please contact Vivid support.");
     const planId = String(body.planId || "monthly").toLowerCase();
     const plan = PAGE_PLANS[planId];
     if (!plan) throw new AnimePremiumError(400, "invalid-plan", "Choose a valid Premium billing period.");
