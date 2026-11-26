@@ -145,7 +145,7 @@ function sourceAvailable(source) {
 }
 
 function getNextSource(source) {
-  if (isAnimePlayback()) return null;
+  if (isAnimePlayback() || source === "archive") return null;
   const order = ["vidapi", "vidsrc", "embedwave", "vidfast", "ezvidapi", "embedapistream", "moviesapi"];
   const index = order.indexOf(source);
   const candidates = [...order.slice(index + 1), ...order.slice(0, Math.max(0, index))];
@@ -155,6 +155,7 @@ function getNextSource(source) {
 function getSourceLabel(source) {
   if (typeof source === "string" && source.startsWith("custom:")) return (getCustomPlaybackServer(source.slice(7))?.name || "Custom server") + " · external embed";
   if (source === "direct") return "Authorized direct stream · HLS/DASH";
+  if (source === "archive") return "Internet Archive · declared public-domain / CC source";
   if (source === "vidsrc") return "VidSrc alternate source";
   if (source === "vidlink") return "VidLink alternate source";
   if (source === "vidplus") return "VidPlus alternate source";
@@ -901,7 +902,7 @@ function renderShell(params) {
       '<button type="button" class="vivid-player-source" data-player-source="vidplus" hidden aria-pressed="false"><span class="vivid-server-dot"></span><span><strong>VidPlus</strong><small>Additional source · support varies</small></span><span class="vivid-server-state" data-server-state="vidplus">Available</span></button>' +
       '<button type="button" class="vivid-player-source" data-player-source="vidking" hidden aria-pressed="false"><span class="vivid-server-dot"></span><span><strong>VidKing</strong><small>Extra source · resume seeking may vary</small></span><span class="vivid-server-state" data-server-state="vidking">Available</span></button>' +
       '<button type="button" class="vivid-player-source" data-player-source="direct" hidden aria-pressed="false" hidden><span class="vivid-server-dot"></span><span><strong>Direct stream</strong><small>Authorized HLS/DASH · adaptive quality</small></span><span class="vivid-server-state" data-server-state="direct">Unavailable</span></button>' +
-      '<p>Choose another source if playback does not start. Direct streams appear only when an authorized integration is available.</p></aside></div>' + playerInfoMarkup() + '</section></div>' +
+      '<div id="vivid-archive-search" class="vivid-archive-search-host"></div><p>Choose another source if playback does not start. Archive Cinema searches Internet Archive listings with declared public-domain or commercial Creative Commons rights; uploader declarations are not independently verified.</p></aside></div>' + playerInfoMarkup() + '</section></div>' +
     '<section id="vivid-tflix-player" class="vivid-tflix-player" aria-label="Additional streaming player"></section>' +
     '<section id="watch-episode-navigation" class="vivid-episode-navigation" aria-label="TV episode navigation">' + episodeNavigationMarkup(params) + '</section>' +
     '<section class="vivid-watch-recommendations"><div class="vivid-section-heading"><div><span>MORE TO DISCOVER</span><h2>You might also like</h2></div></div><div id="watch-recommendations" class="vivid-watch-rec-rail">' + recommendationCards() + '</div></section>';
@@ -977,6 +978,40 @@ function renderShell(params) {
     serverMenu.parentNode.insertBefore(picker, serverMenu);
     picker.append(serverMenu, serverPanel);
     serverPanel.hidden = true;
+    const archiveRoot = $("vivid-archive-search");
+    if (archiveRoot && !isAnimePlayback()) {
+      void import("./playback/archive-film-fallback.js").then(({ mountArchiveFilmSearch }) => {
+        if (!archiveRoot.isConnected) return;
+        mountArchiveFilmSearch({
+          root: archiveRoot,
+          title: media?.title || "",
+          year: String(media?.release_date || media?.first_air_date || "").slice(0, 4),
+          onPlay: item => {
+            if (!/^[a-z0-9._-]{1,180}$/i.test(String(item?.identifier || ""))) return;
+            const currentPlayer = $("vidapi-player");
+            if (!currentPlayer) return;
+            activeSource = "archive";
+            sourceAttempted.add("archive");
+            primaryHealthy = false;
+            clearFallbackTimer();
+            currentPlayer.src = "https://archive.org/embed/" + encodeURIComponent(item.identifier) + "?autoplay=1";
+            currentPlayer.hidden = false;
+            $("vivid-direct-player")?.setAttribute("hidden", "");
+            const currentStatus = $("player-status");
+            if (currentStatus) {
+              currentStatus.textContent = "Opening " + String(item.title || "archive film") + " · " + String(item.license || "declared rights") + ". Source rights declarations are supplied by the archive uploader.";
+              currentStatus.classList.remove("is-warning");
+              currentStatus.hidden = false;
+            }
+            const sourceLabel = $("player-source-label");
+            if (sourceLabel) sourceLabel.textContent = getSourceLabel("archive");
+            window.dispatchEvent(new CustomEvent("vivid:player-source-changed", { detail: { source: "archive", identifier: item.identifier } }));
+            window.dispatchEvent(new CustomEvent("vivid:player-adapter-selected", { detail: { playerId: "player1", providerId: "archive" } }));
+            closeServerMenu();
+          }
+        });
+      }).catch(error => console.warn("Vivid Archive Cinema could not initialize:", error));
+    }
     serverMenu.setAttribute("aria-expanded", "false");
   }
   const positionServerPanel = () => {
