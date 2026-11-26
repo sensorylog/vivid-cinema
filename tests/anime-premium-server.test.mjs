@@ -100,3 +100,13 @@ test("Premium API responses are no-store and CORS is limited to Vivid origins", 
   assert.equal(response.headers.get("Cache-Control"), "no-store, max-age=0");
   assert.equal(response.headers.get("Access-Control-Allow-Origin"), "https://vivid-cinema.pages.dev");
 });
+
+test("server playback requires an active membership and a resolver-approved host", () => {
+  assert.match(playback, /animePremiumMemberships/);
+  assert.match(playback, /animePremiumSources/);
+  assert.match(playback, /ANIME_PREMIUM_STREAM_RESOLVER_TOKEN/);
+  assert.match(playback, /ANIME_PREMIUM_STREAM_HOSTS/);
+  assert.match(playback, /url\.protocol !== "https:"/);
+  assert.match(playback, /expiresAt > Date\.now\(\) \+ 60 \* 60 \* 1000/);
+  assert.match(playback, /application\/vnd\.apple\.mpegurl/);
+});
