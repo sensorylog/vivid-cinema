@@ -28,7 +28,7 @@
   <section class="vap-watch-heading"><div><span class="vap-eyebrow">VIVID ANIME PREMIUM</span><h1 id="vap-watch-title">Your next episode.</h1><p id="vap-watch-subtitle">Loading your selected anime…</p></div><a id="vap-watch-title-link" href="anime-premium.html">Title details <span aria-hidden="true">→</span></a></section>
   <section class="vap-player-shell" aria-label="Premium anime player">
     <div class="vap-player-stage" id="vap-player-stage">
-      <video id="vap-player" controls playsinline preload="metadata" controlsList="nodownload noplaybackrate" disablePictureInPicture hidden></video>
+      <iframe id="vap-player-frame" title="VIVID ANIME PREMIUM player" allow="autoplay; fullscreen; picture-in-picture; encrypted-media" allowfullscreen referrerpolicy="origin" loading="eager" hidden></iframe>
       <div class="vap-player-gate" id="vap-player-gate" role="status" aria-live="polite">
         <span class="vap-player-lock"><i class="bi bi-shield-lock" aria-hidden="true"></i></span>
         <strong id="vap-player-gate-title">Protected Premium playback</strong>
@@ -37,6 +37,12 @@
         <button class="vap-player-retry" id="vap-player-retry" type="button" hidden>Try again</button>
       </div>
     </div>
+    <div class="vap-server-panel">
+      <div class="vap-server-panel-heading"><div><span class="vap-eyebrow">MULTI-SERVER PLAYBACK</span><strong>Choose your streaming server</strong></div><span id="vap-server-count">0 available</span></div>
+      <div class="vap-audio-track" id="vap-audio-track" aria-label="Audio language"><button type="button" data-vap-track="sub" aria-pressed="true">Sub</button><button type="button" data-vap-track="dub" aria-pressed="false">Dub</button></div>
+      <div class="vap-server-list" id="vap-server-list"><p class="vap-watch-loading">Servers will appear after Premium access is verified.</p></div>
+      <button class="vap-player-next-server" id="vap-server-next" type="button" hidden>Try next server <span aria-hidden="true">→</span></button>
+    </div>
     <div class="vap-player-controls"><div><span class="vap-eyebrow">NOW SELECTED</span><strong id="vap-current-episode">Choose an episode</strong></div><div class="vap-episode-stepper"><button type="button" id="vap-previous-episode" disabled aria-label="Previous episode"><i class="bi bi-skip-backward-fill"></i></button><button type="button" id="vap-next-episode" disabled aria-label="Next episode"><i class="bi bi-skip-forward-fill"></i></button></div></div>
     <p class="vap-player-status" id="vap-player-status" role="status" aria-live="polite">Select an episode to check your Premium access.</p>
   </section>
@@ -44,7 +50,7 @@
     <div class="vap-episode-heading"><div><span class="vap-eyebrow">THE JOURNEY</span><h2>Episodes</h2></div><label id="vap-season-picker-wrap"><span>Season</span><select id="vap-season-picker" aria-label="Select season"></select></label></div>
     <div class="vap-episode-grid" id="vap-episode-grid"><p class="vap-watch-loading">Loading episodes…</p></div>
   </section>
-  <section class="vap-watch-notice"><i class="bi bi-shield-check" aria-hidden="true"></i><p>Vivid selects from rights-cleared server candidates, checks territory and licence windows, and automatically tries the next approved server if playback fails. Unverified third-party embeds and client-supplied stream links are not accepted.</p></section>
+  <section class="vap-watch-notice"><i class="bi bi-shield-check" aria-hidden="true"></i><p>Vivid checks your Premium membership before opening its anime streaming servers. Choose another server if one is unavailable. Some providers report playback progress and errors to Vivid; others are controlled inside their own player.</p></section>
 </main>
 <footer class="vap-footer"><span>© 2026 Vivid Cinema</span><span><a href="terms.html">Terms</a><a href="privacy.html">Privacy</a><a href="help.html">Help</a></span></footer>
 </div>
