@@ -126,5 +126,7 @@ test("membership return survives Vivid email verification and is cached offline"
   assert.match(sw, /anime-premium-return\.js/);
   assert.match(pricing, /publicPricing/);
   assert.match(service, /PAYSTACK_WEBHOOK_SECRET/);
-  assert.match(service, /checkoutEnabled: Boolean\(env\.FIREBASE_SERVICE_ACCOUNT_JSON && \(env\.PAYSTACK_WEBHOOK_SECRET \|\| env\.PAYSTACK_SECRET_KEY\)\)/);\n  assert.match(service, /const webhookSecret = String\(env\.PAYSTACK_WEBHOOK_SECRET \|\| ""\)/);\n  assert.match(service, /const secret = String\(env\.PAYSTACK_SECRET_KEY \|\| ""\)/);
+  assert.match(service, /checkoutEnabled: Boolean\(env\.FIREBASE_SERVICE_ACCOUNT_JSON && \(env\.PAYSTACK_WEBHOOK_SECRET \|\| env\.PAYSTACK_SECRET_KEY\)\)/);
+  assert.match(service, /const webhookSecret = String\(env\.PAYSTACK_WEBHOOK_SECRET \|\| ""\)/);
+  assert.match(service, /const secret = String\(env\.PAYSTACK_SECRET_KEY \|\| ""\)/);
 });
