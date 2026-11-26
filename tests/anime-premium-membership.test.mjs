@@ -24,7 +24,9 @@ const [html, client, returnHtml, returnScript, pricing, checkout, pageCheckout, 
 ]);
 
 test("membership page offers country selection and only supported Paystack card checkout", () => {
-  assert.match(html, /rel="canonical" href="https:\/\/vivid-cinema\.pages\.dev\/anime-premium-membership\.html"/);\n  assert.match(html, /og:title/);\n  assert.match(html, /id="vap-country"/);
+  assert.match(html, /rel="canonical" href="https:\/\/vivid-cinema\.pages\.dev\/anime-premium-membership\.html"/);
+  assert.match(html, /og:title/);
+  assert.match(html, /id="vap-country"/);
   assert.match(html, /id="vap-card-method"/);
   assert.doesNotMatch(html, /value="mobile_money"|Automatic monthly renewal|Manual renewal each month/);
   assert.match(html, /anime-premium-membership\.js/);
