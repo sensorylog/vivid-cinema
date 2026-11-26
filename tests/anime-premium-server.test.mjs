@@ -168,6 +168,7 @@ test("Premium progress requires a live session owned by the signed-in user", asy
   assert.match(progress, /session\.uid !== user\.uid/);
   assert.match(progress, /sessionExpiry <= Date\.now\(\)/);
   assert.match(progress, /animePremiumProfiles/);
+  assert.match(progress, /hasPremiumMembership\(user, membership, env\)/);
 });
 
 test("time-limited Premium test access is restricted to verified allowlisted email and expiry", () => {
