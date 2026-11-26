@@ -162,12 +162,13 @@ export function publicPricing(env = {}) {
     defaultCurrency,
     checkoutEnabled: env.PAYSTACK_LIVE_ENABLED === "true" && Boolean(env.PAYSTACK_SECRET_KEY),
     supportedCurrencies: SUPPORTED_PAYSTACK_CURRENCIES.filter(currency => Boolean(plans[currency])),
+    mobileMoneyCountries: [...MOBILE_MONEY_COUNTRIES],
     plans: Object.fromEntries(Object.entries(plans).map(([currency, plan]) => [currency, {
       currency,
       amountMinor: plan.amount,
       amountMajor: plan.amount / 100,
       cardAutoRenewAvailable: Boolean(plan.planCode),
-      mobileMoneyAvailable: true
+      mobileMoneyAvailable: ["GHS", "KES"].includes(currency)
     }]))
   };
 }
