@@ -52,6 +52,7 @@ test("anime identity cards keep per-title SVG silhouette masks across desktop an
   assert.match(discovery, /items\.map\(identityCard\)/);
   assert.match(discovery, /vap-identity-mobile-poster/);
   assert.match(discoveryCss, /\.vap-identity-svg\{display:block;width:100%;height:100%\}/);
+  assert.match(discoveryCss, /\.vap-identity-shade\{display:none!important\}/);
   assert.match(discovery, /anime-premium-title\.html/);
   assert.match(css, /vap-title-hero\.is-scrolled/);
 });
