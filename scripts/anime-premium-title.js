@@ -16,7 +16,9 @@ let activeBackdropLayer = 0;
 let backdropIndex = 0;
 let backdropTimer = null;
 let backdropAdvancing = false;
-let activeTitleDetails = null;\nlet activeVividUser = null;\nlet premiumMembershipActive = false;
+let activeTitleDetails = null;
+let activeVividUser = null;
+let premiumMembershipActive = false;
 
 
 async function syncTitleAccess(user) {
@@ -61,7 +63,8 @@ onAuthStateChanged(auth, user => { void syncTitleAccess(user); }, error => {
   console.warn("Vivid Anime Premium account status could not be resolved:", error);
   void syncTitleAccess(null);
 });
-\nfunction titleName(details) { return details.title || details.name || "Anime title"; }
+
+function titleName(details) { return details.title || details.name || "Anime title"; }
 function releaseYear(details) {
   const date = details.release_date || details.first_air_date || "";
   return date.slice(0, 4) || "Year unavailable";
@@ -283,7 +286,8 @@ function renderTitle(details) {
   const watchParams = new URLSearchParams({ id: String(details.id), type: mediaType });
   if (mediaType === "tv") { watchParams.set("season", "1"); watchParams.set("episode", "1"); }
   $("vap-title-watch").href = "anime-premium-watch.html?" + watchParams.toString();
-  $("vap-title-watch").hidden = false;
+  $("vap-title-watch").hidden = true;
+  void syncTitleAccess(activeVividUser);
   $("vap-title-meta").textContent = (mediaType === "movie" ? "ANIME FILM" : "ANIME SERIES") + " · " + releaseYear(details) + " · VIVID ANIME PREMIUM";
   $("vap-title-tagline").textContent = details.tagline || "";
   $("vap-title-overview").textContent = details.overview || "Explore the characters, setting and story behind this anime.";
