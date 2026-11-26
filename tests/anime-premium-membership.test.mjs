@@ -44,6 +44,10 @@ test("membership pricing is not blocked by optional country or Firebase auth req
   assert.match(client, /AbortSignal\.timeout\(5000\)/);
   assert.match(client, /AbortSignal\.timeout\(8000\)/);
   assert.match(client, /has not been enabled in this environment/);
+  assert.match(client, /membershipStatusUnavailable/);
+  assert.match(client, /membershipVerificationRequired/);
+  assert.match(client, /AbortSignal\.timeout\(10000\)/);
+  assert.match(client, /if \(membershipStatusUnavailable \|\| membershipVerificationRequired\)/);
 });
 
 test("client sends only country and payment method; server owns the amount and Paystack secret", () => {
