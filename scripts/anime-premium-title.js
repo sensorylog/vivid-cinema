@@ -161,6 +161,23 @@ function libraryTitleItem(details) {
   };
 }
 
+function updateCompletedButton(details) {
+  const button = $("vap-title-completed");
+  if (!button) return;
+  const item = libraryTitleItem(details);
+  const saved = hasLibraryItem("completed", item);
+  button.setAttribute("aria-pressed", String(saved));
+  button.classList.toggle("is-saved", saved);
+  button.innerHTML = saved
+    ? '<i class="bi bi-check-circle-fill" aria-hidden="true"></i> Completed'
+    : '<i class="bi bi-check-circle" aria-hidden="true"></i> Mark as completed';
+  button.onclick = () => {
+    if (hasLibraryItem("completed", item)) unmarkAnimeCompleted(item.id, mediaType);
+    else markAnimeCompleted(item);
+    updateCompletedButton(details);
+  };
+}
+
 function updateFavoriteButton(details) {
   const button = $("vap-title-favorite");
   if (!button) return;
@@ -192,6 +209,7 @@ window.addEventListener("vivid:library-changed", () => {
   const name = $("vap-title-name")?.textContent;
   if (!name || !activeTitleDetails) return;
   updateFavoriteButton(activeTitleDetails);
+  updateCompletedButton(activeTitleDetails);
 });
 
 function renderTitle(details) {
@@ -208,6 +226,7 @@ function renderTitle(details) {
   $("vap-title-overview").textContent = details.overview || "Explore the characters, setting and story behind this anime.";
   $("vap-title-description").textContent = details.overview || "A story from the Vivid Anime Premium collection.";
   updateFavoriteButton(details);
+  updateCompletedButton(details);
   renderFacts(details);
   renderGenres(details);
   renderCast(details);
