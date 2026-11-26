@@ -1,6 +1,7 @@
 import { tmdbApi } from "./tmdb.js";
 import { resolveAndroidPlayerBackAction } from "./android-navigation.js";
 import { resolveAnimeIds } from "./playback/anime-id-resolver.js";
+import { getAnimeGlobalEpisode, readAnimeTrackPreference, writeAnimeTrackPreference } from "./playback/anime-playback.js";
 import { getImageUrl, getMediaUrl, normalizeMedia, normalizeResults } from "./media.js";
 import { buildTitleUrl, buildWatchUrl, getRoute } from "./routes.js";
 import { escapeHtml } from "./utils.js";
@@ -49,6 +50,7 @@ let imdbId = "";
 let tmdbId = "";
 let aniListId = "";
 let malId = "";
+let animeTrack = readAnimeTrackPreference();
 const PRIMARY_FALLBACK_MS = 11000;
 const ANIME_FALLBACK_MS = 11000;
 const SOURCE_PREFERENCES_KEY = "vivid:playback-source-preferences:v3";
@@ -136,17 +138,23 @@ function isAnimePlayback() {
   return route.params.get("anime") === "1";
 }
 
+function getAnimeProviderParams(params = currentParams) {
+  return { ...params, episode: getAnimeGlobalEpisode(params, details?.seasons) };
+}
+
 function sourceAvailable(source) {
   if (typeof source === "string" && source.startsWith("custom:")) return false;
   if (source === "direct") return false;
   if (isAnimePlayback()) {
-    if (source === "vidplus") return Boolean(aniListId);
-    if (source === "vidlink") return Boolean(malId);
-    if (["animeembed", "vidy"].includes(source)) return Boolean(aniListId);
-    if (source === "embedwave") return hasTmdbId();
-    if (source === "vidapi" || source === "vidsrc") return hasFallbackId();
+    const animeSeries = currentParams?.type === "tv";
+    if (source === "vidplus") return animeSeries && Boolean(aniListId);
+    if (source === "vidlink") return animeSeries && Boolean(malId);
+    if (source === "animeembed") return animeSeries && Boolean(aniListId);
+    if (source === "vidy") return animeSeries && Boolean(aniListId) && animeTrack === "sub";
+    // Generic TMDB embeds do not expose a reliable sub/dub selector.
+    if (["embedwave", "vidapi", "vidsrc"].includes(source)) return animeTrack === "sub" && (source === "embedwave" ? hasTmdbId() : hasFallbackId());
     return false;
-  }
+ }
   if (source === "vidapi" || source === "vidsrc" || source === "vidfast" || source === "embedapistream" || source === "moviesapi") return hasFallbackId();
   if (source === "embedwave" || source === "ezvidapi") return hasTmdbId();
   return false;
@@ -256,6 +264,13 @@ function updateSourceLabel() {
     button.hidden = isAnimePlayback() ? !["vidapi", "vidsrc", "vidplus", "vidlink", "animeembed", "vidy", "embedwave"].includes(source) : !["vidapi", "vidsrc", "embedwave", "vidfast", "ezvidapi", "embedapistream", "moviesapi"].includes(source);
     button.disabled = !sourceAvailable(source);
     button.setAttribute("aria-pressed", source === activeSource ? "true" : "false");
+  });
+  const trackSwitch = $("player-anime-track-switch");
+  if (trackSwitch) trackSwitch.hidden = !(isAnimePlayback() && currentParams?.type === "tv");
+  document.querySelectorAll("[data-anime-track]").forEach(button => {
+    const selected = button.getAttribute("data-anime-track") === animeTrack;
+    button.classList.toggle("is-active", selected);
+    button.setAttribute("aria-pressed", selected ? "true" : "false");
   });
   if (count) {
     const available = [...document.querySelectorAll("[data-player-source]")].filter(button => !button.hidden && !button.disabled).length;
@@ -376,7 +391,7 @@ function setPlayerSource(source, params, startAt = 0) {
   if (source === "vidlink") {
     if (route.params.get("anime") === "1" ? !malId : !hasFallbackId()) return;
     primaryHealthy = false;
-    const vidlinkUrl = buildVidlinkEmbedUrl(params, { tmdbId, malId, anime: isAnimePlayback(), startAt });
+    const vidlinkUrl = buildVidlinkEmbedUrl(isAnimePlayback() ? getAnimeProviderParams(params) : params, { tmdbId, malId, anime: isAnimePlayback(), track: animeTrack, startAt });
     if (!vidlinkUrl) return;
     player.src = vidlinkUrl;
     if (status) {
@@ -408,7 +423,7 @@ function setPlayerSource(source, params, startAt = 0) {
   } else if (source === "vidplus") {
     if (route.params.get("anime") === "1" ? !aniListId : !hasFallbackId()) return;
     primaryHealthy = false;
-    const vidplusUrl = buildVidplusEmbedUrl(params, { tmdbId, aniListId, anime: isAnimePlayback(), startAt });
+    const vidplusUrl = buildVidplusEmbedUrl(isAnimePlayback() ? getAnimeProviderParams(params) : params, { tmdbId, aniListId, anime: isAnimePlayback(), track: animeTrack, startAt });
     if (!vidplusUrl) return;
     player.src = vidplusUrl;
     if (status) {
@@ -426,7 +441,7 @@ function setPlayerSource(source, params, startAt = 0) {
     if (!aniListId) return;
     primaryHealthy = false;
     const builders = { animeembed: buildAnimeEmbedUrl, vidy: buildVidyAnimeUrl };
-    const embedUrl = builders[source]({ aniListId, episode: params.episode, track: "sub", startAt });
+    const embedUrl = builders[source]({ aniListId, episode: getAnimeProviderParams(params).episode, track: animeTrack, startAt });
     if (!embedUrl) return;
     player.src = embedUrl;
     if (status) {
@@ -927,7 +942,7 @@ function renderShell(params) {
     '<div id="player-overlay" class="vivid-player-overlay vivid-player-inline" role="presentation"><section class="vivid-player-dialog" role="region" aria-labelledby="player-dialog-title">' +
       '<header class="vivid-player-dialog-head"><div class="vivid-player-dialog-heading"><span class="vivid-player-live-dot" aria-hidden="true"></span><div><span class="vivid-player-dialog-eyebrow">' + (isWatchRoomCinemaMode ? "VIVID CINEMA · PRIVATE SCREENING" : "VIVID CINEMA · PLAYER 1") + '</span><h2 id="player-dialog-title">' + escapeHtml(episodeTitle || title) + '</h2><span id="player-source-label" class="vivid-player-current-source">Choose a player to begin</span></div></div><div class="vivid-player-dialog-actions"><button type="button" id="player-server-menu" class="vivid-player-switch vivid-server-menu" aria-controls="player-server-panel" aria-expanded="false"><i class="bi bi-hdd-network" aria-hidden="true"></i> Servers <i class="bi bi-arrow-down" aria-hidden="true"></i></button><button type="button" id="player-return-inline" class="vivid-player-switch" aria-label="Return to cinema stage" title="Return to cinema stage" hidden><i class="bi bi-arrow-up-left-square" aria-hidden="true"></i></button><button type="button" id="player-fullscreen" class="vivid-player-switch vivid-player-fullscreen" aria-label="Enter fullscreen" title="Fullscreen" aria-pressed="false"><i class="bi bi-arrows-fullscreen" aria-hidden="true"></i></button><button type="button" id="player-close" class="vivid-player-close" aria-label="Close player"><i class="bi bi-x-lg" aria-hidden="true"></i></button></div></header>' +
       '<div class="vivid-player-layout"><div class="vivid-player-main"><div class="vivid-player-frame"><div id="player-status" class="vivid-player-status" role="status" aria-live="polite">' + (resumeAt > 5 ? "Ready to resume when you choose a player." : "Choose a player to begin playback.") + '</div><button type="button" id="player-try-next" class="vivid-player-try-next" hidden>Try next server</button><iframe id="vidapi-player" title="' + escapeHtml(title) + ' player" allow="encrypted-media; autoplay *; fullscreen *; picture-in-picture *; clipboard-write" allowfullscreen referrerpolicy="origin" loading="eager"></iframe><video id="vivid-direct-player" title="' + escapeHtml(title) + ' direct stream player" controls playsinline preload="metadata" hidden></video></div><footer class="vivid-player-dialog-foot"><span><i class="bi bi-keyboard" aria-hidden="true"></i> Press Esc to close</span><a href="' + escapeHtml(buildTitleUrl(media.id, media.media_type)) + '">Title details</a></footer></div>' +
-      '<aside id="player-server-panel" class="vivid-server-panel" aria-label="Vivid Cinema playback servers" hidden><div class="vivid-server-panel-heading"><div><strong>Playback servers</strong><span>Choose a source</span></div><span class="vivid-server-count">7 sources</span></div>' +
+      '<aside id="player-server-panel" class="vivid-server-panel" aria-label="Vivid Cinema playback servers" hidden><div class="vivid-server-panel-heading"><div><strong>Playback servers</strong><span>Choose a source</span></div><span class="vivid-server-count">7 sources</span></div><div id="player-anime-track-switch" class="vivid-anime-track-switch" hidden aria-label="Anime audio track"><span>Audio track</span><button type="button" data-anime-track="sub" aria-pressed="true">Sub</button><button type="button" data-anime-track="dub" aria-pressed="false">Dub</button></div>' +
       '<button type="button" class="vivid-player-source" data-player-source="vidapi" aria-pressed="true"><span class="vivid-server-dot"></span><span><strong>VidAPI</strong><small>TMDB / IMDb fallback · native anime route not documented</small></span><span class="vivid-server-state" data-server-state="vidapi">Ready</span></button>' +
       '<button type="button" class="vivid-player-source" data-player-source="vidsrc" aria-pressed="false"><span class="vivid-server-dot"></span><span><strong>VidSrc</strong><small>TMDB / IMDb fallback · anime coverage varies</small></span><span class="vivid-server-state" data-server-state="vidsrc">Available</span></button>' +
       '<button type="button" class="vivid-player-source" data-player-source="vidlink" hidden aria-pressed="false"><span class="vivid-server-dot"></span><span><strong>VidLink</strong><small>Alternate streaming source</small></span><span class="vivid-server-state" data-server-state="vidlink">Available</span></button>' +
@@ -1010,6 +1025,28 @@ function renderShell(params) {
   if (isWatchRoomCinemaMode && closePlayer) closePlayer.hidden = true;
   const serverMenu = $("player-server-menu");
   const serverPanel = $("player-server-panel");
+  document.querySelectorAll("[data-anime-track]").forEach(button => {
+    button.addEventListener("click", () => {
+      const nextTrack = button.getAttribute("data-anime-track") === "dub" ? "dub" : "sub";
+      if (nextTrack === animeTrack) return;
+      animeTrack = writeAnimeTrackPreference(nextTrack);
+      sourceAttempted.clear();
+      primaryHealthy = false;
+      updateSourceLabel();
+      const nextSource = sourceAvailable(activeSource) ? activeSource : getNextSource(activeSource);
+      if (nextSource && currentParams) {
+        const saved = getPlaybackProgress(progressKey());
+        setPlayerSource(nextSource, currentParams, Number(saved?.progress || route.params.get("startAt") || 0));
+      } else {
+        const status = $("player-status");
+        if (status) {
+          status.textContent = "No available player supports this audio track for the selected title.";
+          status.classList.add("is-warning");
+          status.hidden = false;
+        }
+      }
+    });
+  });
   if (serverMenu && serverPanel) {
     const picker = document.createElement("div");
     picker.className = "vivid-server-picker";
@@ -1421,6 +1458,31 @@ function handlePlayerEvent(event) {
     Number(eventData.currentTime) > 0;
   if (!isPlaybackSignal) return;
   const data = payload.data;
+  if (isAnimeEmbed || isVidy) {
+    const eventName = String(data.event || data.player_status || "").toLowerCase();
+    if (!/^(play|playing|pause|paused|timeupdate|progress|seeked|ended|completed)$/i.test(eventName)) return;
+    primaryHealthy = true;
+    clearFallbackTimer();
+    updateSourceLabel();
+    const status = $("player-status");
+    if (status) status.hidden = true;
+    if ($("player-try-next")) $("player-try-next").hidden = true;
+    const progress = Math.max(0, Number(data.player_progress ?? data.currentTime ?? data.progress) || 0);
+    const duration = Math.max(0, Number(data.player_duration ?? data.duration) || 0);
+    const season = currentParams?.season;
+    const episode = currentParams?.episode;
+    if (progress > 0) {
+      savePlaybackProgress(progressKey(), { progress, duration, season, episode, title: media.title, media_type: media.media_type, id: media.id });
+      recordWatchActivity(progress, duration);
+      recordBehavior("playback_progress", media, { progress, duration, percentage: duration ? Math.round(progress / duration * 100) : 0, season, episode });
+    }
+    if (/^(ended|completed)$/i.test(eventName)) {
+      recordBehavior("watch_completed", media, { duration, season, episode });
+      upsertLibraryItem("history", { ...historyItem(), completion: 100, completedAt: Date.now(), updatedAt: Date.now() });
+      completePlaybackProgress(progressKey(), { duration, season, episode, title: media.title, media_type: media.media_type, id: media.id });
+    }
+    return;
+  }
   if (isVidKing) {
     const eventName = String(data.event || "").toLowerCase();
     const mediaType = String(data.mediaType || "").toLowerCase();
