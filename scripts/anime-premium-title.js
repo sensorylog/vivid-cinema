@@ -179,7 +179,7 @@ function updateFavoriteButton(details) {
     button.innerHTML = isSaved
       ? '<i class="bi bi-bookmark-check" aria-hidden="true"></i> Added to My List'
       : '<i class="bi bi-bookmark-plus" aria-hidden="true"></i> Add to My List';
-    button.dispatchEvent(new CustomEvent("vap:favorites-changed", {
+    button.dispatchEvent(new CustomEvent("vap:my-list-changed", {
       bubbles: true,
       detail: { id: item.id, type: mediaType, saved: isSaved }
     }));
