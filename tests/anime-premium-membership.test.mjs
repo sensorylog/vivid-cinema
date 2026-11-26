@@ -48,11 +48,11 @@ test("membership UI initialises pricing before Firebase auth and always exits lo
   assert.match(client, /Reference rate: 1 GHS =/);
   assert.match(client, /Rate unavailable/);
   assert.match(client, /bank\/card provider sets the final converted charge/);
-  assert.match(client, /fetch\("\/api\/anime-premium\/countries"/);
+  assert.match(client, /ANIME_PREMIUM_COUNTRIES/);
   assert.match(client, /window\.vividAuthResolved/);
   assert.match(client, /window\.vividAuthUser/);
   assert.match(client, /International country list loaded/);
-  assert.match(client, /offline country list/);
+  assert.match(client, /countries and territories available offline/);
   assert.match(html, /vap-country-status/);
   assert.match(shell, /window\.vividAuthUser = user \|\| null/);
   assert.match(shell, /window\.vividAuthResolved = true/);
@@ -62,7 +62,7 @@ test("membership UI initialises pricing before Firebase auth and always exits lo
   assert.match(countriesApi, /annexare\/Countries/);
   assert.match(countriesApi, /countries\.length < 180/);
   assert.match(client, /unique\.length < 180/);
-  assert.match(client, /countries = unique\.sort/);
+  assert.match(client, /countries = ANIME_PREMIUM_COUNTRIES/);
   assert.match(client, /option\.textContent = .*country\.name.*country\.currency/);
   assert.match(client, /CurrencyFreaks Open Rates, blended daily reference rates/);
   assert.match(exchangeRateApi, /open-rates\.currencyfreaks\.com/);
