@@ -120,8 +120,16 @@ body.vivid-anime-premium-page{margin:0;min-height:100vh;background:var(--vap-bg)
 .vap-identity-card:hover .vap-identity-svg,.vap-identity-card:focus-visible .vap-identity-svg{transform:scale(1.035)}
 .vap-identity-card:active .vap-identity-art{transform:translateY(-3px) scale(.99)}
 .vap-identity-fallback{display:grid;place-items:center;width:100%;height:100%;border:1px solid rgba(208,185,255,.35);border-radius:35% 35% 20% 20%;background:linear-gradient(145deg,#473266,#17111f);color:#fff;font-size:1.4rem;font-weight:950;letter-spacing:.18em}
-@media(max-width:760px){.vap-identity-row{grid-auto-columns:clamp(150px,43vw,185px);gap:13px}.vap-identity-art{overflow:hidden;border-radius:18px;filter:drop-shadow(0 8px 14px rgba(0,0,0,.28))}.vap-identity-svg{display:none}.vap-identity-mobile-poster{display:block;width:100%;height:100%;object-fit:cover;border-radius:18px}.vap-identity-shade{inset:0;border-radius:18px;clip-path:none;background:linear-gradient(0deg,rgba(8,7,13,.78),transparent 58%)}.vap-identity-stamp{top:9px;right:9px}.vap-identity-copy strong{font-size:.74rem}}
+@media(max-width:760px){.vap-identity-row{grid-auto-columns:clamp(150px,43vw,185px);gap:13px}.vap-identity-art{overflow:hidden;border-radius:18px;filter:drop-shadow(0 8px 14px rgba(0,0,0,.28))}.vap-identity-svg{display:block;width:100%;height:100%}.vap-identity-mobile-poster{display:none}.vap-identity-shade{inset:0;border-radius:18px;clip-path:none;background:linear-gradient(0deg,rgba(8,7,13,.78),transparent 58%)}.vap-identity-stamp{top:9px;right:9px}.vap-identity-copy strong{font-size:.74rem}}
 @media(prefers-reduced-motion:reduce){.vap-identity-art,.vap-identity-svg{transition:none!important}}
 
 
 @media(max-width:640px){body.vivid-anime-premium-page{padding-bottom:calc(160px + env(safe-area-inset-bottom,0px))!important}}
+
+/* The silhouette treatment is the primary Premium card shape on every screen. */
+.vap-card-row .vap-identity-card,
+.vap-catalogue-grid .vap-identity-card{width:100%;min-width:0}
+.vap-catalogue-grid .vap-identity-art{aspect-ratio:3/4}
+.vap-card-row .vap-identity-art{aspect-ratio:3/4}
+.vap-identity-svg image{width:240px;height:320px}
+.vap-identity-card:focus-visible{outline:2px solid #d9caff;outline-offset:5px;border-radius:12px}
