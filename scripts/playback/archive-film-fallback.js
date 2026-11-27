@@ -13,7 +13,7 @@ function cleanText(value, max = 240) {
 function safeHttpUrl(value) {
   try { const url = new URL(String(value || "")); return url.protocol === "https:" ? url.href : ""; } catch { return ""; }
 }
-function acceptedLicense(value) {
+export function acceptedLicense(value) {
   const license = cleanText(value, 200);
   if (/\b(non.?commercial|no.?derivatives|all rights reserved|copyright restricted|rights status not evaluated|undetermined)\b/i.test(license)) return "";
   if (/public domain|cc0|cc by(?:-sa)?(?:\s|$)/i.test(license)) return license;
