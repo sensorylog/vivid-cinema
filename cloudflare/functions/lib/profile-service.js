@@ -137,7 +137,7 @@ export async function createAccountProfile(request, env) {
     if (!owner.exists || owner.data()?.isOwner !== true) {
       throw new AnimePremiumError(409, "owner-profile-required", "The main Vivid profile must be initialized before adding profiles.");
     }
-    const currentCount = limits.exists ? Math.max(1, Number(limits.data()?.profileCount) || 1) : profiles.size;
+    const currentCount = profiles.size;
     if (currentCount >= MAX_PROFILES) {
       throw new AnimePremiumError(409, "profile-limit-reached", "A Vivid account can have up to " + MAX_PROFILES + " profiles.");
     }
@@ -204,13 +204,11 @@ export async function deleteAccountProfile(request, env) {
   const limitRef = ownerRef.collection("profileManagement").doc("limits");
   await db.runTransaction(async transaction => {
     const current = await transaction.get(reference);
+    const profiles = await transaction.get(reference.parent);
     const limits = await transaction.get(limitRef);
     if (!current.exists) throw new AnimePremiumError(404, "profile-not-found", "This Vivid profile no longer exists.");
-    const currentCount = limits.exists
-      ? Math.max(1, Number(limits.data()?.profileCount) || 1)
-      : Math.max(1, (await transaction.get(reference.parent)).size);
     transaction.delete(reference);
-    transaction.set(limitRef, { profileCount: Math.max(1, currentCount - 1), updatedAt: Timestamp.fromMillis(Date.now()) });
+    transaction.set(limitRef, { profileCount: Math.max(1, profiles.size - 1), updatedAt: Timestamp.fromMillis(Date.now()) });
   });
   return { id: profileId, deleted: true };
 }
