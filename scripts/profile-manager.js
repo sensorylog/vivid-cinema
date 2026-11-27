@@ -36,6 +36,33 @@ export async function fetchProfiles() {
   };
 }
 
+export async function requestProfilePin(action, profileId, details = {}) {
+  const user = auth.currentUser;
+  if (!user) throw new Error("Sign in to manage profile security.");
+  const token = await user.getIdToken();
+  const response = await fetch("https://vivid-cinema-api.vercel.app/api/profile-pin", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Authorization: "Bearer " + token },
+    body: JSON.stringify({ action, profileId, ...details }),
+    cache: "no-store"
+  });
+  const result = await response.json().catch(() => ({}));
+  if (!response.ok || result.ok !== true) {
+    const error = new Error(result.message || "Profile security is temporarily unavailable.");
+    error.code = result.code || "profile-security-unavailable";
+    error.retryAfterMs = Number(result.retryAfterMs || 0);
+    throw error;
+  }
+  return result;
+}
+
+export const verifyProfilePin = (profileId, pin) => requestProfilePin("verify", profileId, { pin });
+export const setProfilePin = (profileId, pin, currentPin = "", openSession = false) =>
+  requestProfilePin("set", profileId, { pin, currentPin, openSession });
+export const removeProfilePin = (profileId, currentPin = "") =>
+  requestProfilePin("remove", profileId, { currentPin });
+export const resetProfilePin = profileId => requestProfilePin("reset", profileId);
+
 export async function createProfile(details) {
   const result = await profileRequest("/api/profiles", "POST", details);
   return normalizeProfile(result.profile.id, result.profile);
