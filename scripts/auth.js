@@ -68,7 +68,7 @@ function setPostAuthNotice(message){
 }
 function postAuthDestination(){
   const raw=new URLSearchParams(window.location.search).get("returnTo");
-  if(!raw)return "home.html";
+  if(!raw)return "profiles.html";
   try{
     const target=new URL(raw,window.location.origin);
     if(target.origin!==window.location.origin||!target.pathname.endsWith(".html"))return "home.html";
