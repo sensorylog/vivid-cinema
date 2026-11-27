@@ -79,6 +79,9 @@ test("Google account photo is adopted for the owner profile and can be replaced 
   assert.match(selector, /setProfilePin\(editingId, pin, currentPin, openSession\)/);
   assert.match(selector, /removeProfilePin\(editingId, currentPin\)/);
   assert.match(selector, /resetProfilePin\(resetProfileId\)/);
+  assert.match(selector, /selectProfile\(profile\.id\)/);
+  assert.match(selector, /selectProfile\(OWNER_PROFILE_ID\)/);
+  assert.match(selector, /finishProfileOpen\(profile, result\.customToken\)/);
 });
 
 test("profile deletion protects the owner and requires an explicit confirmation", () => {
