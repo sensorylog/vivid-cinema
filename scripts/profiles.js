@@ -168,6 +168,47 @@ export function clearActiveProfileId(uid) {
   try { localStorage.removeItem(activeProfileStorageKey(uid)); } catch {}
 }
 
+export function clearProfileLocalState(uid, profileId) {
+  const accountId = String(uid || "").trim();
+  const id = normalizeProfileId(profileId);
+  if (!accountId) return false;
+  const scopedOwner = accountId + "::" + id;
+  const localStores = [
+    { ownerKey: "vivid:library-owner:v1", keys: ["vivid:library:v2", "vivid:library-tombstones:v1"] },
+    { ownerKey: "vivid:progress-owner:v1", keys: ["vivid:progress:v1", "vivid:for-you:v1"] },
+    { ownerKey: "vivid:intelligence-owner:v1", keys: ["vivid:intelligence:v1", "vivid:session:v1", "vivid:taste:v1"] },
+    { ownerKey: "vivid:achievements-owner:v1", keys: ["vivid:achievements:v1"] },
+    { ownerKey: "vivid:anime-premium-preferences-owner:v1", keys: ["vivid:anime-premium-preferences:v1"] }
+  ];
+  try {
+    for (const store of localStores) {
+      if (localStorage.getItem(store.ownerKey) !== scopedOwner) continue;
+      for (const key of store.keys) localStorage.removeItem(key);
+      localStorage.removeItem(store.ownerKey);
+    }
+    const snapshotSuffix = ":user:" + scopedOwner;
+    for (let index = localStorage.length - 1; index >= 0; index -= 1) {
+      const key = localStorage.key(index);
+      if (key && (key.includes(snapshotSuffix) || key.startsWith("vivid:anime-premium-preferences-snapshot:" + scopedOwner))) {
+        localStorage.removeItem(key);
+      }
+    }
+    if (getActiveProfileId(accountId) === id) clearActiveProfileId(accountId);
+  } catch {}
+  try {
+    if (sessionStorage.getItem("vivid:tonight-owner:v1") === scopedOwner) {
+      sessionStorage.removeItem("vivid:tonight:v1");
+      sessionStorage.removeItem("vivid:tonight-owner:v1");
+    }
+    for (let index = sessionStorage.length - 1; index >= 0; index -= 1) {
+      const key = sessionStorage.key(index);
+      if (key && key.includes(snapshotSuffix)) sessionStorage.removeItem(key);
+    }
+  } catch {}
+  window.dispatchEvent(new CustomEvent("vivid:profile-deleted", { detail: { uid: accountId, profileId: id } }));
+  return true;
+}
+
 export function setActiveProfileId(uid, profileId) {
   const key = activeProfileStorageKey(uid);
   const id = normalizeProfileId(profileId);
