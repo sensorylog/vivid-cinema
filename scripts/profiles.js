@@ -1,3 +1,5 @@
+import { getCloudflareApiUrl } from "./cloudflare-api.js";
+
 import {
   MAX_PROFILES,
   OWNER_PROFILE_ID,
@@ -152,7 +154,7 @@ export async function listProfileSummaries(user = null) {
   const current = requireSignedInUser(user || auth.currentUser, auth);
   await ensureAppCheck();
   const token = await current.getIdToken();
-  const response = await fetch("/api/profiles", {
+  const response = await fetch(getCloudflareApiUrl("/api/profiles"), {
     headers: { Authorization: "Bearer " + token },
     cache: "no-store"
   });
