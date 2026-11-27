@@ -1,6 +1,6 @@
 // Bump this version whenever the precached app shell changes.
 const HLS_LIBRARY_URL = "https://cdn.jsdelivr.net/npm/hls.js@1.7.3/dist/hls.min.js";
-const CACHE_NAME = "vivid-cinema-shell-v373";
+const CACHE_NAME = "vivid-cinema-shell-v374";
 const APP_SHELL = [
   HLS_LIBRARY_URL,
   "./","./index.html","./home.html","./african-stories.html","./downloads.html","./my-downloads.html","./for-you.html",
