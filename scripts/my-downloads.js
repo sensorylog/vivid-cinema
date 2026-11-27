@@ -124,6 +124,10 @@ async function switchOwner(user) {
     await Promise.allSettled(activeJobs.map(job=>manager.pause(job.id)));
   }catch{}
   try{await manager?.persistence?.close?.();}catch{}
+  if(user?.uid){
+    try{await migrateLegacyOfflineJobs(user.uid,profileId,owner);}
+    catch(error){console.warn("Vivid could not migrate existing offline records to the owner profile:",error);}
+  }
   activeOwner=owner; byId("offline-owner").textContent=user?.uid?"Signed-in account":"Guest library";
   jobsNode.innerHTML=""; messageNode.textContent="Loading your download library…";
   try{
