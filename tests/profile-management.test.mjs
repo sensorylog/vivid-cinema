@@ -83,6 +83,7 @@ test("privileged profile writes require a live, PIN-bound active profile session
   assert.equal(service.match(/requireUnlockedProfile\(db, user, user\.profileId\)/g)?.length, 3);
   assert.match(service, /Only the Main Profile can create a Kids profile/);
   assert.match(service, /Only the Main Profile can change Kids Mode and parental controls/);
+  assert.match(service, /Restore the Main Profile PIN before managing profiles while Kids profiles exist/);
 });
 
 test("profile management API protects the owner profile and exposes only explicit methods", () => {
