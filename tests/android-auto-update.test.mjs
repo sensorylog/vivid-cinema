@@ -71,8 +71,8 @@ test("updater compares remote metadata and installs the cleanly named APK", () =
 test("Android update checks are cached across page navigation", () => {
   assert.match(updater, /window\.localStorage/);
   assert.match(updater, /writeAndroidUpdateState\(storage/);
-  assert.equal(ANDROID_UPDATE_SUCCESS_TTL_MS, 6 * 60 * 60 * 1000);
-  assert.equal(ANDROID_UPDATE_FAILURE_TTL_MS, 15 * 60 * 1000);
+  assert.equal(ANDROID_UPDATE_SUCCESS_TTL_MS, 15 * 60 * 1000);
+  assert.equal(ANDROID_UPDATE_FAILURE_TTL_MS, 5 * 60 * 1000);
 });
 
 test("Android package keeps the simple Vivid Cinema display name and shared launcher icon", () => {
@@ -98,7 +98,7 @@ test("downloads page resolves stable and legacy Android APK assets", () => {
   assert.match(downloads, /browser_download_url/);
 });
 
-test("successful Android update checks stay fresh for six hours", () => {
+test("successful Android update checks stay fresh for fifteen minutes", () => {
   const checkedAt = 1_000_000;
   assert.equal(isAndroidUpdateCheckFresh({ checkedAt, failed: false }, checkedAt + ANDROID_UPDATE_SUCCESS_TTL_MS - 1), true);
   assert.equal(isAndroidUpdateCheckFresh({ checkedAt, failed: false }, checkedAt + ANDROID_UPDATE_SUCCESS_TTL_MS), false);
