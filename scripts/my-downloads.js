@@ -91,7 +91,12 @@ async function switchOwner(user) {
   const owner=user?.uid?await offlineOwnerKey(user.uid,profileId):"guest";
   if(owner===activeOwner)return;
   const run=++generation; unsubscribe?.(); unsubscribe=null;
-  try{await playback?.stop();}catch{} try{await manager?.persistence?.close?.();}catch{}
+  try{await playback?.stop();}catch{}
+  try{
+    const activeJobs=(manager?.snapshot?.()||[]).filter(job=>["queued","downloading"].includes(job.status));
+    await Promise.allSettled(activeJobs.map(job=>manager.pause(job.id)));
+  }catch{}
+  try{await manager?.persistence?.close?.();}catch{}
   activeOwner=owner; byId("offline-owner").textContent=user?.uid?"Signed-in account":"Guest library";
   jobsNode.innerHTML=""; messageNode.textContent="Loading your download library…";
   try{
