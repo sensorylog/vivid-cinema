@@ -70,5 +70,5 @@ test("legacy migration is restartable, content-verified and never deletes source
 
 test("PIN secrets are not part of client profile metadata or migration payloads", () => {
   assert.doesNotMatch(manager, /pinHash|pinCode|profilePin|pinSecret/i);
-  assert.match(rules, /match \/users\/{userId}\/profiles\/{profileId}/);
+  assert.ok(rules.includes("match /users/{userId}/profiles/{profileId}"));
 });
