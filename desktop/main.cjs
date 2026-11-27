@@ -174,7 +174,7 @@ function markStartup(stage) {
 
 function normalizeDownloadOwner(value) {
   const owner = String(value || "").trim();
-  if (!owner || owner.length > 256 || /[\/\\\u0000-\u001f]/.test(owner)) {
+  if (!owner || owner.length > 256 || owner.includes("/") || owner.includes(String.fromCharCode(92)) || Array.from(owner).some(character => character.charCodeAt(0) < 32 || character.charCodeAt(0) === 127)) {
     throw new TypeError("A valid Vivid account/profile download owner is required.");
   }
   return owner;
