@@ -276,8 +276,8 @@ export default async function handler(req, res) {
       if (pinSnapshot.exists) {
         throw new ProfilePinError(423, "pin-required", "This profile is PIN protected. Enter its PIN to continue.");
       }
-      const session = await createProfileSession(auth, profileReference, claims.uid, profileId);
-      return res.status(200).json({ ok: true, ...session });
+      const customToken = await auth.createCustomToken(claims.uid, { profileId });
+      return res.status(200).json({ ok: true, customToken });
     }
 
     if (action === "validate") {
