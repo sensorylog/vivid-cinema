@@ -439,6 +439,7 @@ onAuthStateChanged(auth,async currentUser => {
     location.replace("login.html?returnTo=" + encodeURIComponent("profiles.html" + location.search));
     return;
   }
+  if (user?.uid === currentUser.uid && profiles.length) { user = currentUser; return; }
   user = currentUser;
   if (switchingProfile) return;
   $("manage-toggle").disabled = false;
