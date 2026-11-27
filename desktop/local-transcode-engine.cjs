@@ -191,6 +191,16 @@ class LocalTranscodeEngine {
       record.failed = code !== 0;
     });
 
+
+
+    try {
+      await Promise.all([
+        waitForFile(path.join(directory, "index.m3u8"), { timeoutMs: this.startupTimeoutMs, processRef: record }),
+        waitForFile(path.join(directory, "segment_00000.ts"), { timeoutMs: this.startupTimeoutMs, processRef: record })
+      ]);
+
+      // Do not run a second FFmpeg scan while the first playable video segment
+      // is being prepared. Subtitle extraction continues in the background.
     if (subtitle) {
       const subtitleTempPath = path.join(directory, "english.vtt.tmp");
       const subtitleFinalPath = path.join(directory, "english.vtt");
@@ -230,12 +240,6 @@ class LocalTranscodeEngine {
         });
       });
     }
-
-    try {
-      await Promise.all([
-        waitForFile(path.join(directory, "index.m3u8"), { timeoutMs: this.startupTimeoutMs, processRef: record }),
-        waitForFile(path.join(directory, "segment_00000.ts"), { timeoutMs: this.startupTimeoutMs, processRef: record })
-      ]);
       return {
         sessionId,
         url: this.origin + "/session/" + sessionId + "/index.m3u8",
