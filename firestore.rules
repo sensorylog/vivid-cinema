@@ -269,10 +269,10 @@ service cloud.firestore {
           && session.uid == userId
           && session.profileId == profileId
           && session.revoked == false
-          && session.expiresAt is timestamp
-          && session.expiresAt > request.time
-          && session.lastActivityAt is timestamp
-          && session.lastActivityAt > request.time - duration.value(30, 'm');
+          && session.get('expiresAt', null) is timestamp
+          && session.get('expiresAt', timestamp.value(1970, 1, 1)) > request.time
+          && session.get('lastActivityAt', null) is timestamp
+          && session.get('lastActivityAt', timestamp.value(1970, 1, 1)) > request.time - duration.value(30, 'm');
       }
 
       function hasCurrentPinSession(userId, profileId) {
@@ -284,7 +284,7 @@ service cloud.firestore {
         return hasProfileSession(userId, profileId)
           && session.keys().hasAll(['pinHash'])
           && pin.keys().hasAll(['pinHash'])
-          && session.pinHash == pin.pinHash;
+          && session.get('pinHash', null) == pin.get('pinHash', null);
       }
 
       function hasViewingProfile(userId, profileId) {
