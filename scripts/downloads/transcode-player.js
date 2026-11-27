@@ -3,6 +3,23 @@ export function createTranscodePlayer(video) {
   let track = null;
   let statusTimer = null;
   let statusRequest = 0;
+  let hlsLibraryPromise = null;
+
+  function prepare() {
+    if (window.Hls) return Promise.resolve(window.Hls);
+    if (hlsLibraryPromise) return hlsLibraryPromise;
+    hlsLibraryPromise = new Promise((resolve, reject) => {
+      const script = document.createElement("script");
+      script.async = true;
+      script.src = window.vividDownloads?.available
+        ? "/desktop/node_modules/hls.js/dist/hls.min.js"
+        : "https://cdn.jsdelivr.net/npm/hls.js@1.7.3/dist/hls.min.js";
+      script.onload = () => window.Hls ? resolve(window.Hls) : reject(new Error("HLS.js loaded without its playback API."));
+      script.onerror = () => { hlsLibraryPromise = null; reject(new Error("Could not load the local HLS playback runtime.")); };
+      document.head.appendChild(script);
+    });
+    return hlsLibraryPromise;
+  }
 
   function reset() {
     if (statusTimer !== null) {
@@ -73,8 +90,9 @@ export function createTranscodePlayer(video) {
     statusTimer = window.setInterval(poll, 1500);
   }
 
-  function load(session) {
+  async function load(session) {
     reset();
+    const Hls = await prepare();
     const sourceDuration = Number(session.sourceDuration ?? session.duration);
     if (Number.isFinite(sourceDuration) && sourceDuration > 0) {
       video.dataset.transcodeSourceDuration = String(sourceDuration);
@@ -93,25 +111,25 @@ export function createTranscodePlayer(video) {
       video.appendChild(track);
     }
 
-    if (window.Hls && window.Hls.isSupported()) {
-      hls = new window.Hls({
+    if (Hls && Hls.isSupported()) {
+      hls = new Hls({
         enableWorker: true,
         lowLatencyMode: false,
         startPosition: 0,
         backBufferLength: 90,
         maxBufferLength: 30
       });
-      hls.on(window.Hls.Events.LEVEL_UPDATED, (_event, data) => {
+      hls.on(Hls.Events.LEVEL_UPDATED, (_event, data) => {
         const duration = Number(data?.details?.totalduration);
         if (Number.isFinite(duration) && duration >= 0) {
           video.dataset.transcodeAvailableDuration = String(duration);
           video.dispatchEvent(new Event("durationchange"));
         }
       });
-      hls.on(window.Hls.Events.ERROR, (_event, data) => {
+      hls.on(Hls.Events.ERROR, (_event, data) => {
         if (!data?.fatal) return;
-        if (data.type === window.Hls.ErrorTypes.NETWORK_ERROR) hls.startLoad();
-        else if (data.type === window.Hls.ErrorTypes.MEDIA_ERROR) hls.recoverMediaError();
+        if (data.type === Hls.ErrorTypes.NETWORK_ERROR) hls.startLoad();
+        else if (data.type === Hls.ErrorTypes.MEDIA_ERROR) hls.recoverMediaError();
         else video.dispatchEvent(new Event("error"));
       });
       hls.loadSource(session.url);
@@ -128,5 +146,5 @@ export function createTranscodePlayer(video) {
     throw new Error("This Windows build cannot play the transcoded HLS stream. Please update Vivid Cinema.");
   }
 
-  return Object.freeze({ load, reset });
+  return Object.freeze({ load, reset, prepare });
 }
