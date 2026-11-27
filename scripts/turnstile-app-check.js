@@ -11,13 +11,31 @@ function loadTurnstile() {
 
   scriptPromise = new Promise((resolve, reject) => {
     const script = document.createElement("script");
+    let settled = false;
+    const finish = (error, turnstile) => {
+      if (settled) return;
+      settled = true;
+      window.clearTimeout(timeout);
+      script.onload = null;
+      script.onerror = null;
+      if (error) {
+        script.remove();
+        reject(error);
+      } else {
+        resolve(turnstile);
+      }
+    };
+    const timeout = window.setTimeout(
+      () => finish(new Error("Cloudflare browser verification took too long to load. Check your connection or content blocker, then retry.")),
+      12_000
+    );
     script.src = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
     script.async = true;
     script.defer = true;
     script.onload = () => window.turnstile?.render
-      ? resolve(window.turnstile)
-      : reject(new Error("Cloudflare browser verification did not initialize."));
-    script.onerror = () => reject(new Error("Cloudflare browser verification could not load."));
+      ? finish(null, window.turnstile)
+      : finish(new Error("Cloudflare browser verification did not initialize."));
+    script.onerror = () => finish(new Error("Cloudflare browser verification could not load. Check your connection or content blocker, then retry."));
     document.head.append(script);
   }).catch(error => {
     scriptPromise = null;
@@ -112,7 +130,7 @@ async function runManagedChallenge(siteKey) {
 
     let widgetId = null;
     let settled = false;
-    const timeout = window.setTimeout(() => finish(new Error("Browser verification timed out. Please try again.")), 90_000);
+    const timeout = window.setTimeout(() => finish(new Error("Browser verification timed out. Please retry.")), 20_000);
     function finish(error, token) {
       if (settled) return;
       settled = true;
