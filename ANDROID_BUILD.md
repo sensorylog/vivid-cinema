@@ -90,7 +90,7 @@ The workflow builds and verifies the APK, runs the Android emulator launch/resum
 - `Vivid-Cinema-Android-build-<build>.json`
 - `Vivid-Cinema-Android-SHA256.txt`
 
-The release is marked as not-latest so it cannot replace the Windows desktop release as GitHub's global latest release. The downloads page also queries the independent Android release channel and resolves the APK separately from Windows downloads.
+The release is marked as not-latest so it cannot replace the Windows desktop release as GitHub's global latest release. For older installed apps only, the optional compatibility mirror uses the legacy versioned filename `Vivid-Cinema-Android-1.0.0-build-<build>.apk`; this lets the old updater display the real Android v1.0.0 version while it discovers the migration APK. The downloads page and all post-v1 in-app checks use the independent Android release channel.
 
 ### In-app update behavior
 
