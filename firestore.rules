@@ -393,6 +393,7 @@ service cloud.firestore {
           'name','avatarUrl','avatarId','isKids','maturityLevel',
           'isOwner','schemaVersion'
         ])
+        && request.resource.data.id == profileId
         && request.resource.data.name is string
         && request.resource.data.name.size() >= 1
         && request.resource.data.name.size() <= 48
