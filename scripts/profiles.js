@@ -125,8 +125,9 @@ export async function ensureOwnerProfile(user = null) {
     avatarSource: safeAvatarUrl(current) ? "google" : "auto"
   });
   const timestamp = serverTimestamp();
+  const { avatarData, ...profileRecord } = profile;
   await setDoc(reference, {
-    ...profile,
+    ...profileRecord,
     createdAt: timestamp,
     updatedAt: timestamp
   });
