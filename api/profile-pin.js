@@ -199,7 +199,7 @@ async function revokeProfileSessions(profileReference) {
   }
 }
 
-async function createProfileSession(auth, profileReference, uid, profileId) {
+async function createProfileSession(auth, profileReference, uid, profileId, pinHash = "") {
   const sessionId = randomUUID();
   const now = Date.now();
   const expiresAt = Timestamp.fromMillis(now + SESSION_TTL_MS);
@@ -208,7 +208,8 @@ async function createProfileSession(auth, profileReference, uid, profileId) {
     profileId,
     createdAt: Timestamp.fromMillis(now),
     expiresAt,
-    revoked: false
+    revoked: false,
+    ...(pinHash ? { pinHash } : {})
   });
   const customToken = await auth.createCustomToken(uid, {
     profileId,
@@ -312,7 +313,7 @@ export default async function handler(req, res) {
         throw new ProfilePinError(401, "incorrect-pin", "That PIN is incorrect.");
       }
       await clearFailedPinAttempts(db, pinReference, record.pinHash);
-      const session = await createProfileSession(auth, profileReference, claims.uid, profileId);
+      const session = await createProfileSession(auth, profileReference, claims.uid, profileId, record.pinHash);
       return res.status(200).json({ ok: true, ...session });
     }
 
@@ -336,7 +337,7 @@ export default async function handler(req, res) {
       });
       await revokeProfileSessions(profileReference);
       let session = {};
-      if (body.openSession === true) session = await createProfileSession(auth, profileReference, claims.uid, profileId);
+      if (body.openSession === true) session = await createProfileSession(auth, profileReference, claims.uid, profileId, hashed.pinHash);
       return res.status(200).json({ ok: true, hasPin: true, ...session });
     }
 
