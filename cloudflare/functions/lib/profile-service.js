@@ -37,7 +37,7 @@ export function profileOptionsResponse(origin, env = {}) {
 
 export async function requireProfileUser(request, env) {
   const authorization = request.headers.get("Authorization") || "";
-  const match = authorization.match(/^Bearer\\s+(.+)$/i);
+  const match = authorization.match(/^Bearer\s+(.+)$/i);
   if (!match) throw new AnimePremiumError(401, "unauthenticated", "Sign in with your Vivid account to manage profiles.");
   const services = getPremiumServices(env);
   try {
@@ -128,10 +128,8 @@ export async function createAccountProfile(request, env) {
   const now = Timestamp.fromMillis(Date.now());
   let created;
   await db.runTransaction(async transaction => {
-    const [profiles, owner] = await Promise.all([
-      transaction.get(profilesRef),
-      transaction.get(profilesRef.doc(OWNER_PROFILE_ID))
-    ]);
+    const profiles = await transaction.get(profilesRef);
+    const owner = await transaction.get(profilesRef.doc(OWNER_PROFILE_ID));
     if (!owner.exists || owner.data()?.isOwner !== true) {
       throw new AnimePremiumError(409, "owner-profile-required", "The main Vivid profile must be initialized before adding profiles.");
     }
