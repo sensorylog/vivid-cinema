@@ -96,10 +96,15 @@ export async function syncAnimePreferencesForUser(user = null) {
   if (!user?.uid || String(auth?.currentUser?.uid || "") !== String(user.uid)) return getAnimeLibraryPreferences();
   await initializeProfileFoundation(user);
   const profileId = getActiveProfileId(user.uid);
+  const ownerScope = String(user.uid) + "::" + String(profileId);
   ensurePreferencesOwner(user.uid, profileId);
+  const isCurrentProfile = () => String(auth?.currentUser?.uid || "") === String(user.uid) &&
+    getActiveProfileId(user.uid) === profileId &&
+    localStorage.getItem(PREFERENCES_OWNER_KEY) === ownerScope;
   const { db, doc, getDocFromServer, setDoc } = await getPreferencesFirestore();
   const reference = doc(db, "users", user.uid, "profiles", profileId, "animePreferences", "default");
   const snapshot = await getDocFromServer(reference);
+  if (!isCurrentProfile()) return getAnimeLibraryPreferences();
   const local = getAnimeLibraryPreferences();
   if (snapshot.exists()) {
     const remote = snapshot.data() || {};
@@ -116,6 +121,7 @@ export async function syncAnimePreferencesForUser(user = null) {
       return merged;
     }
   }
+  if (!isCurrentProfile()) return getAnimeLibraryPreferences();
   await setDoc(reference, local, { merge: true });
   return local;
 }
