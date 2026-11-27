@@ -1,5 +1,5 @@
 import { switchLocalOwner } from "./local-owner.js";
-import { getActiveProfileId } from "./profiles.js";
+import { getActiveProfileId, initializeProfileFoundation } from "./profiles.js";
 
 const STORAGE_KEY="vivid:library:v2";
 const COLLECTIONS=["favorites","watchLater","history","completed"];
@@ -191,7 +191,7 @@ async function setRemoteItem(uid,collection,item,profileId=getActiveProfileId(ui
   const safe=cleanItem(item);
   const id=safe.media_type+":"+safe.id;
   await setDoc(doc(db,"users",uid,"profiles",profileId,collection,id),safe,{merge:true});
-  await deleteDoc(doc(db,"users",uid,"profiles",getActiveProfileId(uid),"libraryTombstones",tombstoneKey(collection,safe)));
+  await deleteDoc(doc(db,"users",uid,"profiles",profileId,"libraryTombstones",tombstoneKey(collection,safe)));
 }
 
 async function setRemoteTombstone(uid,tombstone,profileId=getActiveProfileId(uid)){
@@ -291,8 +291,11 @@ async function mapLimit(items,limit,worker){
   await Promise.all(workers);
 }
 
-async function performLibrarySyncForUser(user=null,profileId=getActiveProfileId(user?.uid)){
+async function performLibrarySyncForUser(user=null,profileId=null){
   if(!user?.uid)return readLocal();
+  await initializeProfileFoundation(user);
+  profileId=profileId||getActiveProfileId(user.uid);
+  if(getActiveProfileId(user.uid)!==profileId)throw new Error("The active profile changed before library sync could start.");
   const auth=await getFirebaseAuth();
   if(!auth?.currentUser)throw new Error("Authentication is unavailable during library sync.");
   if(String(auth.currentUser.uid)!==String(user.uid))throw new Error("The signed-in account changed during library sync. Please retry.");
