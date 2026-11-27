@@ -435,9 +435,8 @@ async function enforceProfileSelection(user) {
       redirectToProfiles();
       return;
     }
-    if (activeProfile.hasPin &&
-      (typeof tokenResult.claims.profileSessionId !== "string" ||
-        !await validateProfileSession(user, activeId))) {
+    if (typeof tokenResult.claims.profileSessionId !== "string" ||
+      !await validateProfileSession(user, activeId)) {
       redirectToProfiles();
       return;
     }
