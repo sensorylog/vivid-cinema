@@ -70,7 +70,7 @@ function normalizeAvatarUrl(value) {
 export function normalizeProfile(profileId, data = {}) {
   const id = normalizeProfileId(profileId);
   const name = typeof data.name === "string"
-    ? data.name.replace(/[\\u0000-\\u001f\\u007f]/g, "").trim().slice(0, 48)
+    ? data.name.replace(/[\u0000-\u001f\u007f]/g, "").trim().slice(0, 48)
     : "";
   const avatarUrl = normalizeAvatarUrl(data.avatarUrl);
   const isKids = data.isKids === true;
