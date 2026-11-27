@@ -3,6 +3,7 @@ export const OWNER_PROFILE_ID = "owner";
 export const MAX_PROFILES = 5;
 export const MAX_AVATAR_DATA_LENGTH = 180000;
 export const PROFILE_ID_PATTERN = /^[A-Za-z0-9_-]{1,64}$/;
+export const PROFILE_DATA_COLLECTIONS = Object.freeze(["favorites","watchLater","history","completed","progress","libraryTombstones","feedback","events","taste","animePreferences","achievements"]);
 
 export const PROFILE_AVATARS = Object.freeze([
   Object.freeze({ id: "aurora", label: "Aurora" }),
