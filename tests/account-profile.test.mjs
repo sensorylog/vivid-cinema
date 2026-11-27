@@ -118,7 +118,7 @@ test("account page and account runtime are network-first for installed PWA fresh
   assert.match(page, /scripts\/account\.js\?v=20261127-profile-foundation-1/);
   assert.match(worker, /vivid-cinema-shell-v\d+/);
   assert.match(worker, /auth-diagnostics\|account\|profiles\)\\\.html/);
-  assert.match(worker, /auth-diagnostics\|account\|account-bootstrap\|profile-manager\|profile-selector(?:-watchdog)?\|profiles\|cloudflare-ai\)\\\.js/);
+  assert.match(worker, /isAuthRuntime=.*profile-selector.*profiles.*cloudflare-ai/);
 });
 
 
