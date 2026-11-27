@@ -52,6 +52,9 @@ export async function compressProfileImage(file) {
   if (file.size > 12 * 1024 * 1024) throw new Error("Choose an image smaller than 12 MB.");
   const image = await createImageBitmap(file);
   try {
+    if (!image.width || !image.height || image.width * image.height > 40000000) {
+      throw new Error("Choose a photo with dimensions under 40 megapixels.");
+    }
     const scale = Math.min(1, 512 / Math.max(image.width, image.height));
     const width = Math.max(1, Math.round(image.width * scale));
     const height = Math.max(1, Math.round(image.height * scale));
