@@ -30,7 +30,7 @@ test("download buttons have safe latest-release fallbacks and wait for release l
   assert.match(script, /View the latest official Vivid Cinema portable build/);
   assert.match(script, /await releaseReady/);
   assert.match(script, /window\.location\.assign\(link\.href\)/);
-  assert.match(script, /Keep direct download URLs usable during GitHub API outages/);
+  assert.match(script, /Using official release pages/);
 });
 
 test("downloads page has responsive and keyboard-focus styles", () => {
