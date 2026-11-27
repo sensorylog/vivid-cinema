@@ -1,3 +1,26 @@
+import {
+  MAX_PROFILES,
+  OWNER_PROFILE_ID,
+  PROFILE_AVATARS,
+  PROFILE_AVATAR_IDS,
+  PROFILE_ID_PATTERN,
+  PROFILE_SCHEMA_VERSION,
+  normalizeAvatarUrl,
+  normalizeProfile,
+  normalizeProfileId
+} from "./profile-schema.js";
+export {
+  MAX_PROFILES,
+  OWNER_PROFILE_ID,
+  PROFILE_AVATARS,
+  PROFILE_AVATAR_IDS,
+  PROFILE_ID_PATTERN,
+  PROFILE_SCHEMA_VERSION,
+  normalizeAvatarUrl,
+  normalizeProfile,
+  normalizeProfileId
+} from "./profile-schema.js";
+
 let firebasePromise = null;
 let authObserverAttached = false;
 let lastObservedAuthUid = null;
@@ -28,9 +51,6 @@ async function getFirebase() {
   return firebasePromise;
 }
 
-export const PROFILE_SCHEMA_VERSION = 1;
-export const OWNER_PROFILE_ID = "owner";
-export const MAX_PROFILES = 5;
 export const PROFILE_DATA_COLLECTIONS = Object.freeze([
   "favorites",
   "watchLater",
@@ -46,56 +66,7 @@ export const PROFILE_DATA_COLLECTIONS = Object.freeze([
 ]);
 export const PROFILE_MIGRATION_ID = "account-data-to-owner-profile-v1";
 
-const PROFILE_ID_PATTERN = /^[A-Za-z0-9_-]{1,64}$/;
 const ACTIVE_PROFILE_PREFIX = "vivid:active-profile:v1:";
-
-export function normalizeProfileId(value) {
-  const id = String(value || "").trim();
-  if (!PROFILE_ID_PATTERN.test(id)) throw new TypeError("A valid profile ID is required.");
-  return id;
-}
-
-function normalizeAvatarUrl(value) {
-  if (typeof value !== "string" || !value.trim().toLowerCase().startsWith("https://")) return "";
-  try {
-    const url = new URL(value);
-    if (url.protocol !== "https:" || url.username || url.password) return "";
-    return url.href.slice(0, 2048);
-  } catch {
-    return "";
-  }
-}
-
-export function normalizeProfile(profileId, data = {}) {
-  const id = normalizeProfileId(profileId);
-  const name = typeof data.name === "string"
-    ? Array.from(data.name).filter(character => {
-      const code = character.charCodeAt(0);
-      return code >= 32 && code !== 127;
-    }).join("").trim().slice(0, 48)
-    : "";
-  const avatarUrl = normalizeAvatarUrl(data.avatarUrl);
-  const avatarDataPrefix = "data:image/webp;base64,";
-  const avatarDataPayload = typeof data.avatarData === "string" && data.avatarData.startsWith(avatarDataPrefix)
-    ? data.avatarData.slice(avatarDataPrefix.length)
-    : "";
-  const avatarData = avatarDataPayload.length > 0 &&
-    avatarDataPrefix.length + avatarDataPayload.length <= MAX_AVATAR_DATA_LENGTH &&
-    /^[A-Za-z0-9+/]+={0,2}$/.test(avatarDataPayload)
-    ? avatarDataPrefix + avatarDataPayload
-    : "";
-  const isKids = data.isKids === true;
-  return {
-    id,
-    name: name || (id === OWNER_PROFILE_ID ? "Main Profile" : "Vivid Profile"),
-    avatarUrl,
-    avatarId: typeof data.avatarId === "string" ? data.avatarId.slice(0, 80) : "",
-    isKids,
-    maturityLevel: isKids ? "kids" : "adult",
-    isOwner: id === OWNER_PROFILE_ID,
-    schemaVersion: PROFILE_SCHEMA_VERSION
-  };
-}
 
 export function profileCollectionPath(uid, profileId, collectionName) {
   const userId = String(uid || "").trim();
