@@ -62,7 +62,7 @@ test("profile session validation is rate-limited and refreshes idle activity", (
 test("Firestore denies direct client access to PIN secrets and requires a live session for PIN-locked profile data", () => {
   assert.match(rules, /match \/profileSecurity\/{securityId} \{\s*allow read, write: if false;/);
   assert.match(rules, /match \/profileSessions\/{sessionId} \{\s*allow read, write: if false;/);
-  assert.match(rules, /function hasProfileSession\([\s\S]*?data\.revoked == false[\s\S]*?data\.expiresAt > request\.time[\s\S]*?data\.lastActivityAt > request\.time - duration\.value\(30, 'm'\)/);
+  assert.match(rules, /function hasProfileSession\([\s\S]*?session\.revoked == false[\s\S]*?session\.expiresAt > request\.time[\s\S]*?session\.lastActivityAt > request\.time - duration\.value\(30, 'm'\)/);
   assert.match(rules, /function hasCurrentPinSession\([\s\S]*?data\.pinHash[\s\S]*?data\.pinHash/);
   assert.match(rules, /request\.auth\.token\.profileId == profileId/);
   assert.match(rules, /function hasLegacyOwnerProfileAccess/);
