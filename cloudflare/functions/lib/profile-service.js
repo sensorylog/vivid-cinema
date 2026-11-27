@@ -71,7 +71,7 @@ export async function requireUnlockedProfile(db, user, profileId) {
   }
   if (!pinSnapshot.exists) {
     if (profileId === OWNER_PROFILE_ID) {
-      const kidsProfiles = await profileReference.parent.where("isKids", "==", true).limit(1).get();
+      const kidsProfiles = await db.collection("users").doc(user.uid).collection("profiles").where("isKids", "==", true).limit(1).get();
       if (!kidsProfiles.empty) {
         throw new AnimePremiumError(409, "parent-pin-required", "Restore the Main Profile PIN before managing profiles while Kids profiles exist.");
       }
