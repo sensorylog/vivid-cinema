@@ -156,7 +156,6 @@ function getNextSource(source) {
 function getSourceLabel(source) {
   if (typeof source === "string" && source.startsWith("custom:")) return (getCustomPlaybackServer(source.slice(7))?.name || "Custom server") + " · external embed";
   if (source === "direct") return "Authorized direct stream · HLS/DASH";
-  if (source === "archive") return "Internet Archive · public-domain / CC catalogue";
   if (source === "archive") return "Internet Archive · declared public-domain / CC source";
   if (source === "vidsrc") return "VidSrc alternate source";
   if (source === "vidlink") return "VidLink alternate source";
