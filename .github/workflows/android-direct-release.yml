@@ -76,7 +76,7 @@ jobs:
           npm run check:syntax
 
       - name: Build the local web bundle
-        run: npm run build:web
+        run: npm run build:static
 
       - name: Generate Capacitor Android project
         run: npx cap add android
