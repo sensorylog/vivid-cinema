@@ -1,33 +1,34 @@
-# Archive Cinema fallback
+# Archive Cinema playback source
 
-Archive Cinema is a last-resort discovery source in Player 1 for movie pages. It stays hidden and makes no archive requests while Vivid's normal movie servers are available. Only after every available Vivid movie server has been tried and none can play the title does the archive option appear and search Internet Archive. It searches Internet Archive movie records, checks each candidate's metadata, and offers only records that have a browser-playable video file plus an explicit public-domain or commercial Creative Commons rights declaration.
+Internet Archive is available as a selectable source in Player 1 on movie watch pages. Viewers can choose it directly from the server picker, search the archive catalogue, inspect the original item and its rights declaration, and play a selected listing in the existing player. It also remains available as a last-resort discovery option after Vivid's normal movie sources have been exhausted.
 
 ## Flow
 
-1. Search the Internet Archive Advanced Search API for movie records matching the requested title.
-2. Fetch each candidate's metadata record.
-3. Reject candidates without a public-domain declaration or a supported commercial Creative Commons license.
-4. Reject non-commercial (NC), no-derivatives (ND), private, and non-video files.
-5. Open the selected item using the Internet Archive's own embedded player. Vivid does not proxy, mirror, download, or re-host the media.
+1. The viewer selects **Internet Archive** in the Player 1 server picker, or Vivid reveals the catalogue after its normal movie sources are exhausted.
+2. Search the Internet Archive Advanced Search API for movie records matching the requested title.
+3. Fetch each candidate's metadata record.
+4. Reject candidates without a public-domain declaration or a supported commercial Creative Commons license.
+5. Reject non-commercial (NC), no-derivatives (ND), private, and non-video files.
+6. Open the selected item using the Internet Archive's own embedded player. Vivid does not proxy, mirror, download, or re-host the media.
 
 Accepted declarations are Public Domain Mark, CC0, CC BY and CC BY-SA. The archive item details page is linked beside every result so viewers can inspect the source and rights statement.
 
 ## Important rights limitation
 
-Internet Archive says that rights information is often supplied by the uploader and that it cannot guarantee the accuracy of uploader-provided copyright information. Therefore this filter is a conservative metadata screen, not legal verification or a guarantee that a title is public domain. The UI discloses this limitation and links to the original item. Do not describe every returned title as verified public domain. Remove or disable any item if a rights holder disputes its status.
+Internet Archive says that rights information is often supplied by the uploader and that it cannot guarantee the accuracy of uploader-provided copyright information. Therefore this filter is a conservative metadata screen, not legal verification or a guarantee that a title is public domain. The UI discloses this limitation and links to the original item. Remove or disable any item if a rights holder disputes its status.
 
-Internet Archive's own guidance:
+Internet Archive guidance:
 - https://archivesupport.zendesk.com/hc/en-us/articles/360014759692-Rights
 - https://archivesupport.zendesk.com/hc/en-us/articles/360017808151-Movies-and-Videos-A-Basic-Guide
 
 ## Playback behavior
 
-- Available only as a last resort on movie watch pages after all configured Vivid movie servers have been attempted without success. It is not shown for ordinary successful playback, TV episodes, Free Anime or Premium Anime; their source restrictions remain unchanged.\n- No Internet Archive catalogue request is made until the fallback is revealed after movie-server exhaustion.
+- Available only on movie watch pages; never exposed to Free Anime or Premium Anime.
+- Catalogue requests begin only after the viewer selects Internet Archive or after Vivid's movie servers are exhausted.
 - Uses Player 1's existing iframe and the Archive's official embed URL.
 - Archive playback is user-selected and is not part of automatic server failover.
 - The archive player controls playback, subtitles, quality and progress. Vivid cannot inspect its cross-origin iframe internals.
-- Search is limited to 12 catalogue hits and checks metadata for up to 10 candidates per search. Searches time out after 15 seconds.
 
-## Next catalogue expansion
+## Library of Congress expansion
 
-After this last-resort fallback is stable, evaluate the Library of Congress National Screening Room as a separate, rights-aware historical-film catalogue. Integrate only titles whose item-level access and reuse terms permit the intended playback experience; keep it behind the same exhausted-Vivid-servers gate. Do not make it a default source for current releases or ordinary catalogue titles.
+The Library of Congress National Screening Room remains a separate planned source. Its API exposes heterogeneous item and resource records, and item-level rights/access conditions vary. Do not show it as a playable source until the integration can identify a real playable media resource and preserve the item's rights/access notices. See the official [National Screening Room rights and access guidance](https://www.loc.gov/collections/national-screening-room/about-this-collection/rights-and-access/) and [Library of Congress streaming API documentation](https://www.loc.gov/apis/micro-services/streaming-services/).
