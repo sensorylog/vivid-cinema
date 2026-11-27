@@ -25,7 +25,7 @@ async function load() {
     const results = await Promise.all(FREE_ANIME_PREVIEWS.map(async sample => {
       try {
         const details = await tmdbApi.tvDetails(sample.id);
-        return details?.id ? normalizeMedia(details, "tv") : { id: sample.id, title: sample.title };
+        return details?.id ? normalizeMedia(details, "tv") : { id: sample.id, title: sample.title, media_type: "tv" };
       } catch (error) {
         console.warn("Free anime preview unavailable:", sample.id, error);
         return null;
