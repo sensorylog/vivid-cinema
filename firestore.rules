@@ -257,24 +257,34 @@ service cloud.firestore {
       }
 
       function hasProfileSession(userId, profileId) {
-        return request.auth.token.keys().hasAll(['profileId','profileSessionId'])
+        let hasTokenSession = request.auth.token.keys().hasAll(['profileId','profileSessionId'])
           && request.auth.token.profileId == profileId
-          && request.auth.token.profileSessionId is string
-          && exists(/databases/$(database)/documents/users/$(userId)/profiles/$(profileId)/profileSessions/$(request.auth.token.profileSessionId))
-          && get(/databases/$(database)/documents/users/$(userId)/profiles/$(profileId)/profileSessions/$(request.auth.token.profileSessionId)).data.keys().hasAll(['uid','profileId','revoked','expiresAt','lastActivityAt','pinHash'])
-          && get(/databases/$(database)/documents/users/$(userId)/profiles/$(profileId)/profileSessions/$(request.auth.token.profileSessionId)).data.uid == userId
-          && get(/databases/$(database)/documents/users/$(userId)/profiles/$(profileId)/profileSessions/$(request.auth.token.profileSessionId)).data.profileId == profileId
-          && get(/databases/$(database)/documents/users/$(userId)/profiles/$(profileId)/profileSessions/$(request.auth.token.profileSessionId)).data.revoked == false
-          && get(/databases/$(database)/documents/users/$(userId)/profiles/$(profileId)/profileSessions/$(request.auth.token.profileSessionId)).data.expiresAt is timestamp
-          && get(/databases/$(database)/documents/users/$(userId)/profiles/$(profileId)/profileSessions/$(request.auth.token.profileSessionId)).data.expiresAt > request.time
-          && get(/databases/$(database)/documents/users/$(userId)/profiles/$(profileId)/profileSessions/$(request.auth.token.profileSessionId)).data.lastActivityAt is timestamp
-          && get(/databases/$(database)/documents/users/$(userId)/profiles/$(profileId)/profileSessions/$(request.auth.token.profileSessionId)).data.lastActivityAt > request.time - duration.value(30, 'm');
+          && request.auth.token.profileSessionId is string;
+        let sessionId = request.auth.token.profileSessionId is string ? request.auth.token.profileSessionId : 'invalid';
+        let sessionPath = /databases/$(database)/documents/users/$(userId)/profiles/$(profileId)/profileSessions/$(sessionId);
+        let sessionExists = hasTokenSession && exists(sessionPath);
+        let session = sessionExists ? get(sessionPath).data : {};
+        return sessionExists
+          && session.keys().hasAll(['uid','profileId','revoked','expiresAt','lastActivityAt','pinHash'])
+          && session.uid == userId
+          && session.profileId == profileId
+          && session.revoked == false
+          && session.expiresAt is timestamp
+          && session.expiresAt > request.time
+          && session.lastActivityAt is timestamp
+          && session.lastActivityAt > request.time - duration.value(30, 'm');
       }
 
       function hasCurrentPinSession(userId, profileId) {
+        let sessionId = request.auth.token.profileSessionId is string ? request.auth.token.profileSessionId : 'invalid';
+        let sessionPath = /databases/$(database)/documents/users/$(userId)/profiles/$(profileId)/profileSessions/$(sessionId);
+        let pinPath = /databases/$(database)/documents/users/$(userId)/profiles/$(profileId)/profileSecurity/pin;
+        let session = get(sessionPath).data;
+        let pin = get(pinPath).data;
         return hasProfileSession(userId, profileId)
-          && get(/databases/$(database)/documents/users/$(userId)/profiles/$(profileId)/profileSessions/$(request.auth.token.profileSessionId)).data.pinHash
-            == get(/databases/$(database)/documents/users/$(userId)/profiles/$(profileId)/profileSecurity/pin).data.pinHash;
+          && session.keys().hasAll(['pinHash'])
+          && pin.keys().hasAll(['pinHash'])
+          && session.pinHash == pin.pinHash;
       }
 
       function hasViewingProfile(userId, profileId) {
