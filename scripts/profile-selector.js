@@ -1,7 +1,6 @@
 import { auth } from "./firebase.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
 import { ensureOwnerProfile, initializeProfileFoundation, setActiveProfileId } from "./profiles.js";
-import { normalizeAvatarUrl } from "./profile-schema.js";
 import { fetchProfiles, createProfile, updateProfile, deleteProfile, compressProfileImage, PROFILE_AVATARS, MAX_PROFILES } from "./profile-manager.js";
 
 const $ = id => document.getElementById(id);
@@ -22,6 +21,7 @@ let editingId = null;
 let selectedAvatar = "aurora";
 let selectedAvatarData = "";
 let selectedAvatarUrl = "";
+let selectedAvatarSource = "collection";
 let manageMode = false;
 let saving = false;
 
@@ -148,6 +148,7 @@ function renderGallery() {
       selectedAvatar = avatar.id;
       selectedAvatarData = "";
       selectedAvatarUrl = "";
+      selectedAvatarSource = "collection";
       photoPreview.hidden = true;
       renderGallery();
     });
@@ -159,6 +160,7 @@ function openEditor(profile = null) {
   selectedAvatar = profile?.avatarId || "aurora";
   selectedAvatarData = profile?.avatarData || "";
   selectedAvatarUrl = profile?.avatarUrl || "";
+  selectedAvatarSource = profile?.avatarSource || (selectedAvatarData ? "upload" : selectedAvatarUrl ? "google" : "collection");
   nameInput.value = profile?.name || "";
   editorStatus.textContent = "";
   deleteButton.hidden = !profile || profile.isOwner;
@@ -189,12 +191,6 @@ async function refreshProfiles() {
   await initializeProfileFoundation(user);
   await ensureOwnerProfile(user);
   profiles = await fetchProfiles();
-  const owner = profiles.find(profile => profile.isOwner);
-  const googlePhoto = normalizeAvatarUrl(user.photoURL || user.providerData?.find(item => item.providerId === "google.com")?.photoURL || "");
-  if (owner && !owner.avatarUrl && googlePhoto) {
-    await updateProfile(owner.id, { name: owner.name, avatarId: owner.avatarId, avatarUrl: googlePhoto });
-    profiles = await fetchProfiles();
-  }
   if (!profiles.length) throw new Error("No profiles are available for this Vivid account.");
   renderProfiles();
   say("Choose a profile to continue.");
@@ -215,6 +211,7 @@ photoInput.addEventListener("change",async() => {
   try {
     selectedAvatarData = await compressProfileImage(file);
     selectedAvatarUrl = "";
+    selectedAvatarSource = "upload";
     photoPreview.replaceChildren();
     const img = document.createElement("img"); img.src = selectedAvatarData; img.alt = "";
     const label = document.createElement("span"); label.textContent = "Custom photo ready";
@@ -230,7 +227,7 @@ form.addEventListener("submit",async event => {
   if (!name || name.length > 48) { editorStatus.textContent = "Enter a profile name between 1 and 48 characters."; nameInput.focus(); return; }
   saving = true; saveButton.disabled = true; editorStatus.textContent = "Saving profile…";
   try {
-    const payload = { name, avatarId: selectedAvatar, avatarData: selectedAvatarData, avatarUrl: selectedAvatarUrl };
+    const payload = { name, avatarId: selectedAvatar, avatarData: selectedAvatarData, avatarUrl: selectedAvatarUrl, avatarSource: selectedAvatarSource };
     if (editingId) await updateProfile(editingId,payload);
     else await createProfile(payload);
     await refreshProfiles();
