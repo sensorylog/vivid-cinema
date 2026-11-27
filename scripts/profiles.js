@@ -75,6 +75,19 @@ export function activeProfileStorageKey(uid) {
   return ACTIVE_PROFILE_PREFIX + userId;
 }
 
+function withProfileTimeout(promise, milliseconds, message) {
+  let timeoutId;
+  const timeout = new Promise((_, reject) => {
+    timeoutId = window.setTimeout(() => {
+      const error = new Error(message);
+      error.code = "PROFILE_CHECK_UNAVAILABLE";
+      reject(error);
+    }, milliseconds);
+  });
+  return Promise.race([Promise.resolve().then(() => promise), timeout])
+    .finally(() => window.clearTimeout(timeoutId));
+}
+
 function requireSignedInUser(user, auth) {
   const current = auth.currentUser;
   if (!user?.uid || !current?.uid || String(user.uid) !== String(current.uid)) {
@@ -158,14 +171,19 @@ export async function listProfileSummaries(user = null) {
   const firebase = await getFirebase();
   const { auth } = firebase;
   const current = requireSignedInUser(user || auth.currentUser, auth);
-  const token = await current.getIdToken();
   const controller = new AbortController();
   const timeout = window.setTimeout(() => controller.abort(), 8_000);
   let response;
   try {
-    // This endpoint authenticates with the Firebase ID token. Requiring
-    // browser App Check here creates a circular dependency: the route guard
-    // can redirect a selected user before the profile page can recover.
+    // Bound token refresh as well as fetch: Safari can leave getIdToken()
+    // pending while auth silently refreshes, otherwise the selector spins forever.
+    const token = await withProfileTimeout(
+      current.getIdToken(),
+      8_000,
+      "Your Vivid sign-in is taking too long to refresh. Check your connection and retry."
+    );
+    // This endpoint authenticates with the Firebase ID token; it does not
+    // require browser App Check to list an already-authenticated household.
     response = await fetch(getCloudflareApiUrl("/api/profiles"), {
       headers: { Authorization: "Bearer " + token },
       cache: "no-store",
@@ -178,6 +196,7 @@ export async function listProfileSummaries(user = null) {
       unavailable.code = "PROFILE_CHECK_UNAVAILABLE";
       throw unavailable;
     }
+    if (error?.code === "PROFILE_CHECK_UNAVAILABLE") throw error;
     const unavailable = new Error("Profile verification is temporarily unavailable.");
     unavailable.code = "PROFILE_CHECK_UNAVAILABLE";
     unavailable.cause = error;
@@ -202,11 +221,15 @@ export async function listProfileSummaries(user = null) {
 export async function validateProfileSession(user, profileId) {
   const firebase = await getFirebase();
   const current = requireSignedInUser(user || firebase.auth.currentUser, firebase.auth);
-  const token = await current.getIdToken();
   const controller = new AbortController();
   const timeout = window.setTimeout(() => controller.abort(), 8_000);
   let response;
   try {
+    const token = await withProfileTimeout(
+      current.getIdToken(),
+      8_000,
+      "Your Vivid sign-in is taking too long to refresh. Check your connection and retry."
+    );
     response = await fetch("https://vivid-cinema-api.vercel.app/api/profile-pin", {
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: "Bearer " + token },
