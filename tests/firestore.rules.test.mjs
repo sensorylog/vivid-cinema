@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { initializeTestEnvironment, assertFails, assertSucceeds } from "@firebase/rules-unit-testing";
-import { doc, setDoc, getDoc, getDocs, collection, query, limit, serverTimestamp } from "firebase/firestore";
+import { doc, setDoc, getDoc, getDocs, collection, query, limit, serverTimestamp, Timestamp, deleteDoc } from "firebase/firestore";
 
 const rules = await readFile(new URL("../firestore.rules", import.meta.url), "utf8");
 const env = await initializeTestEnvironment({
@@ -185,6 +185,69 @@ test("owner profile bootstrap and profile-scoped library data are private to the
     poster_path: "/matrix.jpg", backdrop_path: "/matrix-bg.jpg", updatedAt: Date.now(),
     accountUid: "profile-bob"
   }));
+});
+
+test("profile PIN sessions are enforced by Firestore and cannot be forged by local state", async () => {
+  const owner = env.authenticatedContext("pin-owner").firestore();
+  const unpinnedProfile = doc(owner, "users/pin-owner/profiles/owner");
+  const pinnedProfile = doc(owner, "users/pin-owner/profiles/kid-1");
+  const favorite = doc(owner, "users/pin-owner/profiles/kid-1/favorites/movie:pin");
+  const pinRef = doc(owner, "users/pin-owner/profiles/kid-1/profileSecurity/pin");
+  const sessionRef = doc(owner, "users/pin-owner/profiles/kid-1/profileSessions/session-1");
+  const profileData = {
+    id: "kid-1", name: "Kids", avatarId: "aurora", avatarUrl: "",
+    avatarSource: "collection", isKids: false, maturityLevel: "all",
+    isOwner: false, schemaVersion: 1
+  };
+
+  await env.withSecurityRulesDisabled(async context => {
+    const admin = context.firestore();
+    await setDoc(doc(admin, "users/pin-owner/profiles/owner"), {
+      id: "owner", name: "Main Profile", avatarId: "aurora", avatarUrl: "",
+      avatarSource: "auto", isKids: false, maturityLevel: "all",
+      isOwner: true, schemaVersion: 1
+    });
+    await setDoc(doc(admin, "users/pin-owner/profiles/kid-1"), profileData);
+    await setDoc(doc(admin, "users/pin-owner/profiles/kid-1/favorites/movie:pin"), {
+      id: "movie:pin", title: "Private title", updatedAt: Date.now()
+    });
+    await setDoc(doc(admin, "users/pin-owner/profiles/kid-1/profileSecurity/pin"), {
+      pinHash: "server-only-hash", pinSalt: "server-only-salt", iterations: 310000
+    });
+    await setDoc(doc(admin, "users/pin-owner/profiles/kid-1/profileSessions/session-1"), {
+      uid: "pin-owner", profileId: "kid-1", revoked: false,
+      expiresAt: Timestamp.fromMillis(Date.now() + 60 * 60 * 1000)
+    });
+    await setDoc(doc(admin, "users/pin-owner/profiles/kid-1/profileSessions/expired"), {
+      uid: "pin-owner", profileId: "kid-1", revoked: false,
+      expiresAt: Timestamp.fromMillis(Date.now() - 60 * 1000)
+    });
+  });
+
+  await assertSucceeds(getDoc(unpinnedProfile));
+  await assertSucceeds(getDoc(pinnedProfile));
+  await assertFails(getDoc(favorite));
+  await assertFails(getDoc(pinRef));
+  await assertFails(getDoc(sessionRef));
+  await assertFails(setDoc(pinRef, { pinHash: "forged" }));
+  await assertFails(setDoc(sessionRef, { uid: "pin-owner", profileId: "kid-1", revoked: false }));
+
+  const unlocked = env.authenticatedContext("pin-owner", {
+    profileId: "kid-1", profileSessionId: "session-1"
+  }).firestore();
+  await assertSucceeds(getDoc(doc(unlocked, "users/pin-owner/profiles/kid-1/favorites/movie:pin")));
+  await assertFails(getDoc(doc(unlocked, "users/pin-owner/profiles/kid-1/profileSecurity/pin")));
+
+  const wrongProfile = env.authenticatedContext("pin-owner", {
+    profileId: "owner", profileSessionId: "session-1"
+  }).firestore();
+  await assertFails(getDoc(doc(wrongProfile, "users/pin-owner/profiles/kid-1/favorites/movie:pin")));
+
+  const expired = env.authenticatedContext("pin-owner", {
+    profileId: "kid-1", profileSessionId: "expired"
+  }).firestore();
+  await assertFails(getDoc(doc(expired, "users/pin-owner/profiles/kid-1/favorites/movie:pin")));
+  await assertFails(deleteDoc(pinnedProfile));
 });
 
 test("profile data cannot be written until its parent profile exists", async () => {
