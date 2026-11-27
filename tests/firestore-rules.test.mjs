@@ -11,7 +11,7 @@ import {
 let env;
 const rules = readFileSync("../firestore.rules", "utf8");
 const member = (uid, name = "Test Member", verified = true) =>
-  env.authenticatedContext(uid, { email_verified: verified, name }).firestore();
+  env.authenticatedContext(uid, { email_verified: verified, name, profileId: "owner" }).firestore();
 const moderator = (uid = "mod-1") =>
   env.authenticatedContext(uid, { email_verified: true, name: "Vivid Moderator", moderator: true }).firestore();
 
