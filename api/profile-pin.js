@@ -286,11 +286,15 @@ export default async function handler(req, res) {
       if (claims.profileId !== profileId || !PROFILE_ID_PATTERN.test(sessionId)) {
         throw new ProfilePinError(401, "profile-session-invalid", "Unlock this profile again to continue.");
       }
-      const sessionSnapshot = await profileReference.collection("profileSessions").doc(sessionId).get();
+      const [sessionSnapshot, pinSnapshot] = await Promise.all([
+        profileReference.collection("profileSessions").doc(sessionId).get(),
+        pinReference.get()
+      ]);
       const session = sessionSnapshot.data() || {};
       const expiresAt = Number(session.expiresAt?.toMillis?.() || 0);
+      const pinMatches = !pinSnapshot.exists || session.pinHash === pinSnapshot.data()?.pinHash;
       if (!sessionSnapshot.exists || session.uid !== claims.uid || session.profileId !== profileId ||
-          session.revoked === true || expiresAt <= Date.now()) {
+          session.revoked === true || expiresAt <= Date.now() || !pinMatches) {
         throw new ProfilePinError(401, "profile-session-expired", "Your profile session has expired. Unlock it again.");
       }
       return res.status(200).json({ ok: true, expiresAt });
