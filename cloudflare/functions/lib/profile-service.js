@@ -51,6 +51,7 @@ export async function requireProfileUser(request, env) {
 }
 
 const PROFILE_SESSION_ID_PATTERN = /^[A-Za-z0-9_-]{1,64}$/;
+const PROFILE_SESSION_IDLE_TIMEOUT_MS = 30 * 60 * 1000;
 
 export async function requireUnlockedProfile(db, user, profileId) {
   if (!user?.uid || user.profileId !== profileId) {
@@ -85,8 +86,10 @@ export async function requireUnlockedProfile(db, user, profileId) {
   const sessionSnapshot = await profileReference.collection("profileSessions").doc(sessionId).get();
   const session = sessionSnapshot.data() || {};
   const expiresAt = Number(session.expiresAt?.toMillis?.() || 0);
+  const lastActivityAt = Number(session.lastActivityAt?.toMillis?.() || 0);
   if (!sessionSnapshot.exists || session.uid !== user.uid || session.profileId !== profileId ||
       session.revoked === true || expiresAt <= Date.now() ||
+      lastActivityAt <= Date.now() - PROFILE_SESSION_IDLE_TIMEOUT_MS ||
       session.pinHash !== pinSnapshot.data()?.pinHash) {
     throw new AnimePremiumError(401, "profile-session-expired", "This profile unlock has expired. Enter its PIN again.");
   }
