@@ -85,7 +85,7 @@ Android direct-distribution releases now have their own version line and GitHub 
 
 Merging this workflow to `main` triggers the first Android v1.0.0 build and publication automatically, including the one-time compatibility bridge to `v1.0.47`. After that first release, use **Actions → Vivid Cinema Android Direct Release → Run workflow** for each new Android APK. Set `android_version` to the next patch version (for example `1.0.1`), and turn off `bridge_legacy_release` unless you intentionally need to mirror the APK to the current Windows release for older installations. That one-time bridge attaches the exact same Android APK to the current Windows release so already-installed older apps—which contain the previous updater and only know how to query the GitHub latest release—can discover and install Android v1. Once users have installed Android v1, their updater checks only the dedicated `android-v*` release channel. Keep the compatibility mirror disabled for subsequent Android releases unless you are deliberately supporting older updater clients.
 
-The workflow builds and verifies the APK, runs the Android emulator launch/resume smoke test, and publishes:
+The workflow builds and verifies the APK, then installs the previous published Android APK in the emulator and uses `adb install -r` to prove the new v1 APK upgrades it in place with the same package/signing identity. It then launches and resumes the upgraded app before publishing:
 - `Vivid-Cinema-Android.apk`
 - `Vivid-Cinema-Android-build-<build>.json`
 - `Vivid-Cinema-Android-SHA256.txt`
