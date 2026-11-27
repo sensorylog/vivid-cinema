@@ -6,7 +6,7 @@ const $ = id => document.getElementById(id);
 const articleId = new URLSearchParams(location.search).get("id") || "";
 const articleRoot = $("news-story-content");
 const notice = $("news-story-notice");
-function dateText(value) {
+function isoDate(value) {\n  try { const date = value?.toDate ? value.toDate() : value ? new Date(value) : null; return date && !Number.isNaN(date.getTime()) ? date.toISOString() : undefined; } catch { return undefined; }\n}\nfunction dateText(value) {
   const date = value?.toDate ? value.toDate() : value ? new Date(value) : null;
   return date && !Number.isNaN(date.getTime()) ? new Intl.DateTimeFormat(undefined,{dateStyle:"medium",timeStyle:"short"}).format(date) : "Publisher date unavailable";
 }
@@ -16,8 +16,8 @@ function renderArticle(article) {
   const canonical = new URL(location.href);
   canonical.hash = "";
   const imageUrl = /^https:\/\//i.test(article.imageUrl || "") ? article.imageUrl : undefined;
-  const published = article.publishedAt?.toDate ? article.publishedAt.toDate().toISOString() : article.publishedAt ? new Date(article.publishedAt).toISOString() : undefined;
-  const modified = article.updatedAt?.toDate ? article.updatedAt.toDate().toISOString() : article.updatedAt ? new Date(article.updatedAt).toISOString() : published;
+  const published = isoDate(article.publishedAt);
+  const modified = isoDate(article.updatedAt) || published;
   setPageSeo({
     title: headline + " | Vivid Cinema News",
     description,
