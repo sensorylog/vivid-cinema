@@ -290,6 +290,7 @@ pinForm.addEventListener("submit", async event => {
     const result = await verifyProfilePin(pendingProfile.id, pin);
     const profile = pendingProfile;
     pinDialog.close();
+    $("profile-pin-input").value = "";
     await finishProfileOpen(profile, result.customToken);
   } catch (error) {
     const wait = error.retryAfterMs > 0 ? " Try again in " + Math.ceil(error.retryAfterMs / 60000) + " minute(s)." : "";
@@ -304,6 +305,8 @@ pinForm.addEventListener("submit", async event => {
 function closePinDialog() {
   pinDialog.close();
   pendingProfile = null;
+  $("profile-pin-input").value = "";
+  $("profile-pin-status-message").textContent = "";
 }
 $("profile-pin-close").addEventListener("click", closePinDialog);
 $("profile-pin-cancel").addEventListener("click", closePinDialog);
@@ -362,6 +365,9 @@ pinSettingsForm.addEventListener("submit", async event => {
     $("profile-pin-status").textContent = updated?.hasPin ? "PIN enabled" : "No profile PIN";
     $("profile-pin-manage").textContent = updated?.hasPin ? "Change PIN" : "Set PIN";
     pinSettingsDialog.close();
+    $("profile-current-pin").value = "";
+    $("profile-new-pin").value = "";
+    $("profile-confirm-pin").value = "";
     $("profile-pin-settings-status").textContent = "";
   } catch (error) {
     $("profile-pin-settings-status").textContent = error.message || "Could not save this PIN.";
@@ -386,6 +392,9 @@ $("profile-pin-remove").addEventListener("click", async () => {
     $("profile-pin-status").textContent = "No profile PIN";
     $("profile-pin-manage").textContent = "Set PIN";
     pinSettingsDialog.close();
+    $("profile-current-pin").value = "";
+    $("profile-new-pin").value = "";
+    $("profile-confirm-pin").value = "";
   } catch (error) {
     $("profile-pin-settings-status").textContent = error.message || "Could not remove this PIN.";
   } finally {
@@ -393,8 +402,15 @@ $("profile-pin-remove").addEventListener("click", async () => {
     $("profile-pin-remove").disabled = false;
   }
 });
-$("profile-pin-settings-close").addEventListener("click", () => pinSettingsDialog.close());
-$("profile-pin-settings-cancel").addEventListener("click", () => pinSettingsDialog.close());
+function closePinSettingsDialog() {
+  pinSettingsDialog.close();
+  $("profile-current-pin").value = "";
+  $("profile-new-pin").value = "";
+  $("profile-confirm-pin").value = "";
+  $("profile-pin-settings-status").textContent = "";
+}
+$("profile-pin-settings-close").addEventListener("click", closePinSettingsDialog);
+$("profile-pin-settings-cancel").addEventListener("click", closePinSettingsDialog);
 $("editor-close").addEventListener("click",() => dialog.close());
 $("profile-cancel").addEventListener("click",() => dialog.close());
 dialog.addEventListener("click",event => { if(event.target === dialog) dialog.close(); });
