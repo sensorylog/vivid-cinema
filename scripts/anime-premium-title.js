@@ -370,7 +370,7 @@ async function loadTitle() {
   const getDetails = mediaType === "movie" ? tmdbApi.movieDetailsBasic : tmdbApi.tvDetailsBasic;
   const details = await getDetails(titleId);
   if (!details?.id) throw new Error("The anime title could not be found.");
-  if (!await isTitleAllowed({ ...details, id: titleId, media_type: mediaType })) { renderParentalBlock(document.getElementById("anime-premium-title-content"), details?.name || details?.title || "This title"); return; }
+  if (!await isTitleAllowed({ ...details, id: titleId, media_type: mediaType })) { renderParentalBlock(document.getElementById("vap-title-content"), details?.name || details?.title || "This title"); return; }
   if (!isAnimeMetadata(details)) throw new Error("This title is not listed as Japanese animation in the Vivid Anime Premium catalogue.");
 
   // Render the title as soon as its core metadata is available.
