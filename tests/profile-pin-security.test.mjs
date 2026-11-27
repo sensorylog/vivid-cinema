@@ -38,7 +38,7 @@ test("server PIN endpoint verifies Firebase identity and applies brute-force pro
   assert.match(pinApi, /consumeRateLimit\(db, claims\.uid, profileId\)/);
   assert.match(pinApi, /isRecentAccountAuth\(claims\)/);
   assert.match(pinApi, /auth\.createCustomToken\(uid/);
-  assert.match(pinApi, /action === "select"/);\n  assert.match(pinApi, /createProfileSession\(auth, profileReference, claims\.uid, profileId\)/);
+  assert.match(pinApi, /action === "select"/);\n  assert.match(pinApi, /auth\.createCustomToken\(claims\.uid, \{ profileId \}\)/);
   assert.match(pinApi, /pinSnapshot\.exists/);
 });
 
@@ -49,14 +49,14 @@ test("normal profile-session checks do not consume the PIN-attempt rate limit", 
   assert.match(pinApi, /expiresAt <= Date\.now\(\)/);
 });
 
-test("Firestore denies direct client access to PIN secrets and requires a live selected-profile session for all private profile data", () => {
+test("Firestore denies direct client access to PIN secrets and requires a live session for PIN-locked profile data", () => {
   assert.match(rules, /match \/profileSecurity\/{securityId} \{\s*allow read, write: if false;/);
   assert.match(rules, /match \/profileSessions\/{sessionId} \{\s*allow read, write: if false;/);
   assert.match(rules, /function hasProfileSession\([\s\S]*?data\.revoked == false[\s\S]*?data\.expiresAt > request\.time/);
   assert.match(rules, /request\.auth\.token\.profileId == profileId/);
   assert.match(rules, /function hasLegacyOwnerProfileAccess/);
   assert.match(rules, /request\.auth\.token\.profileId == 'owner'/);
-  assert.match(rules, /function hasViewingProfile\([\s\S]*?&& hasProfileSession\(userId, profileId\)/);
+  assert.match(rules, /!hasProfilePin\(userId, profileId\) \|\| hasProfileSession\(userId, profileId\)/);
 });
 
 test("profile chooser exposes PIN setup, unlock, and recovery without persisting the PIN in browser storage", () => {
