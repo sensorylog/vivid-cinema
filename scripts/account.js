@@ -479,10 +479,11 @@ async function deleteProfileDocuments(uid) {
   );
   const profileCollections = [
     "favorites","watchLater","history","completed","progress","libraryTombstones",
-    "feedback","events","taste","animePreferences","achievements","migrations"
+    "feedback","events","taste","animePreferences","achievements","migrations","profileManagement"
   ];
   for (const profile of profiles.docs) {
     for (const collectionName of profileCollections) {
+      if (collectionName === "profileManagement" && profile.id !== "owner") continue;
       const snapshot = await withTimeout(
         getDocsFromServer(collection(db, "users", uid, "profiles", profile.id, collectionName)),
         12000,
