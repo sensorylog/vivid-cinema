@@ -7,7 +7,7 @@ const read = path => readFile(new URL(path, import.meta.url), "utf8");
 
 test("profile PINs use salted PBKDF2 hashes and never store the raw four digits", () => {
   const record = hashProfilePin("4826");
-  assert.equal(record.iterations, 310000);
+  assert.equal(record.iterations, 600000);
   assert.equal(typeof record.pinSalt, "string");
   assert.equal(typeof record.pinHash, "string");
   assert.notEqual(record.pinHash, "4826");
@@ -44,6 +44,9 @@ test("profile PIN API enforces lockout, recent-auth recovery and server-issued s
   assert.match(api, /email_verified === true/);
   assert.match(api, /action === "reset"/);
   assert.match(api, /action === "validate"/);
+  assert.match(api, /SESSION_IDLE_TIMEOUT_MS = 30 \* 60 \* 1000/);
+  assert.match(api, /lastActivityAt: Timestamp\.fromMillis\(now\)/);
+  assert.match(service, /lastActivityAt <= Date\.now\(\) - PROFILE_SESSION_IDLE_TIMEOUT_MS/);
   assert.match(rules, /function hasProfilePin/);
   assert.match(rules, /function hasProfileSession/);
   assert.match(rules, /profileSessionId/);
