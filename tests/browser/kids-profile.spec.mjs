@@ -175,7 +175,9 @@ test("Kids policy blocks over-limit, unrated, genre-blocked and individually blo
       policy.isTitleAllowed({ id: 333, media_type: "movie", certification: "G" }),
       policy.isTitleAllowed({ id: 104, media_type: "movie" }),
       policy.isTitleAllowed({ id: 105, media_type: "tv", certification: "TV-PG" }),
-      policy.isTitleAllowed({ id: 106, media_type: "tv", certification: "TV-14" }),\n      policy.isTitleAllowed({ id: 107, media_type: "movie" }),\n      policy.isTitleAllowed({ id: 108, media_type: "movie" }),
+      policy.isTitleAllowed({ id: 106, media_type: "tv", certification: "TV-14" }),
+      policy.isTitleAllowed({ id: 107, media_type: "movie" }),
+      policy.isTitleAllowed({ id: 108, media_type: "movie" }),
       policy.isTitleAllowed({ id: 109, media_type: "movie" })
     ]);
     return checks;
