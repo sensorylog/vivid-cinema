@@ -285,7 +285,7 @@ export default async function handler(req, res) {
     const profileReference = await requireProfile(db, claims.uid, profileId);
     const pinReference = profileReference.collection("profileSecurity").doc("pin");
 
-    if (action !== "validate") await consumeRateLimit(db, claims.uid, profileId);
+    await consumeRateLimit(db, claims.uid, profileId);
 
     if (action === "select") {
       const profilesCollection = db.collection("users").doc(claims.uid).collection("profiles");
