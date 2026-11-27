@@ -32,15 +32,9 @@ const listeners = new Set();
 export function onAuthStateChanged(_auth, callback) {
   listeners.add(callback);
   if (_auth.__ready) callback(_auth.currentUser);
-  else {
-    // Model a browser callback arriving before persisted auth has restored.
-    // The selector must wait on authStateReady rather than treating this null
-    // snapshot as a real signed-out state.
-    callback(null);
-    _auth.authStateReady().then(() => {
-      if (listeners.has(callback)) callback(_auth.currentUser);
-    });
-  }
+  else _auth.authStateReady().then(() => {
+    if (listeners.has(callback)) callback(_auth.currentUser);
+  });
   return () => listeners.delete(callback);
 }
 export async function signInWithCustomToken(_auth, token) {
@@ -102,6 +96,23 @@ export async function removeProfilePin() { throw new Error("not used"); }
 export async function resetProfilePin() { return { ok: true }; }
 `;
 
+
+const firebaseFailureMock = `
+export const auth = {
+  currentUser: null,
+  authStateReady: () => Promise.reject(new Error("Firebase could not restore IndexedDB auth persistence."))
+};
+`;
+
+const authFailureSdkMock = `
+export function onAuthStateChanged(_auth, callback) {
+  callback(null);
+  return () => {};
+}
+export async function signOut() {}
+export async function signInWithCustomToken() { throw new Error("not used"); }
+`;
+
 test("profile selector waits for persisted Firebase auth before deciding to redirect", async ({ page }) => {
   await page.route("**/scripts/firebase.js*", route => route.fulfill({
     status: 200, contentType: "text/javascript", body: firebaseMock
@@ -137,3 +148,24 @@ test("profile selector waits for persisted Firebase auth before deciding to redi
   await page.waitForTimeout(1800);
   await expect(page).toHaveURL(/home\.html$/);
 });
+test("failed Firebase persistence initialization shows recovery instead of a login redirect", async ({ page }) => {
+  await page.route("**/scripts/firebase.js*", route => route.fulfill({
+    status: 200, contentType: "text/javascript", body: firebaseFailureMock
+  }));
+  await page.route("**/scripts/profiles.js*", route => route.fulfill({
+    status: 200, contentType: "text/javascript", body: profilesMock
+  }));
+  await page.route("**/scripts/profile-manager.js*", route => route.fulfill({
+    status: 200, contentType: "text/javascript", body: managerMock
+  }));
+  await page.route("https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js", route => route.fulfill({
+    status: 200, contentType: "text/javascript", body: authFailureSdkMock
+  }));
+
+  await page.goto("/profiles.html", { waitUntil: "domcontentloaded" });
+  await expect(page).toHaveURL(/profiles\\.html$/);
+  await expect(page.locator("#profile-grid .profile-load-retry")).toBeVisible();
+  await expect(page.locator("#profile-grid .profile-load-error")).toContainText("Firebase could not restore IndexedDB auth persistence");
+  await expect(page).not.toHaveURL(/login\\.html$/);
+});
+
