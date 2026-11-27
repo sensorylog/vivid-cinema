@@ -14,7 +14,7 @@
 <link rel="stylesheet" href="styles/vivid-liquid-glass.css?v=lg5">
 <link rel="stylesheet" href="styles/vivid-viewport.css?v=page-gutters-1">
 <link rel="stylesheet" href="styles/vivid-pwa.css">
-<link rel="stylesheet" href="styles/my-downloads.css?v=offline-cinema-redesign-2">
+<link rel="stylesheet" href="styles/my-downloads.css?v=offline-cinema-redesign-3">
 </head>
 <body data-vivid-page="downloads-library">
 <header class="vivid-topbar"><nav class="vivid-nav" aria-label="Primary"></nav></header>
@@ -82,6 +82,7 @@
   <section id="offline-player-section" class="offline-player-section" hidden aria-label="Offline video player">
     <div class="offline-player-heading"><h2 id="offline-player-title">Vivid Ultra Player</h2><div class="offline-player-heading-actions"><button id="offline-player-close" type="button">Close player</button></div></div>
     <video id="offline-player" controls playsinline preload="metadata" crossorigin="anonymous"></video>
+    <div id="offline-player-loading" class="offline-player-loading" role="status" aria-live="polite" hidden><span class="offline-player-loading-spinner" aria-hidden="true"></span><strong id="offline-player-loading-title">Opening your movie</strong><p id="offline-player-loading-copy">Preparing your saved video…</p></div>
     <div id="offline-subtitle-overlay" class="offline-subtitle-overlay" aria-live="off" aria-label="Subtitles"></div>
     <div id="offline-seek-feedback" class="offline-seek-feedback" aria-live="polite" hidden></div>
     <div id="offline-resume-prompt" class="offline-resume-prompt" hidden role="group" aria-label="Resume playback">
