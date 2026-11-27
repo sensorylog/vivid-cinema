@@ -269,7 +269,7 @@ pinForm.addEventListener("submit", async event => {
   event.preventDefault();
   if (pinSaving || !pendingProfile) return;
   const pin = $("profile-pin-input").value.trim();
-  if (!/^\\d{4}$/.test(pin)) {
+  if (!/^\d{4}$/.test(pin)) {
     $("profile-pin-status-message").textContent = "Enter all four digits.";
     $("profile-pin-input").focus();
     return;
@@ -329,11 +329,11 @@ pinSettingsForm.addEventListener("submit", async event => {
   const pin = $("profile-new-pin").value.trim();
   const confirm = $("profile-confirm-pin").value.trim();
   const currentPin = $("profile-current-pin").value.trim();
-  if (!/^\\d{4}$/.test(pin) || pin !== confirm) {
+  if (!/^\d{4}$/.test(pin) || pin !== confirm) {
     $("profile-pin-settings-status").textContent = pin !== confirm ? "The PIN entries do not match." : "Enter a four-digit PIN.";
     return;
   }
-  if (profile?.hasPin && !/^\\d{4}$/.test(currentPin)) {
+  if (profile?.hasPin && !/^\d{4}$/.test(currentPin)) {
     $("profile-pin-settings-status").textContent = "Enter the current four-digit PIN first.";
     return;
   }
@@ -364,7 +364,7 @@ pinSettingsForm.addEventListener("submit", async event => {
 $("profile-pin-remove").addEventListener("click", async () => {
   if (pinSaving || !editingId) return;
   const currentPin = $("profile-current-pin").value.trim();
-  if (!/^\\d{4}$/.test(currentPin)) {
+  if (!/^\d{4}$/.test(currentPin)) {
     $("profile-pin-settings-status").textContent = "Enter the current four-digit PIN to remove it.";
     return;
   }
