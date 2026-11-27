@@ -113,6 +113,7 @@ test("profile selector waits for persisted Firebase auth before deciding to redi
   await expect.poll(() => page.evaluate(() => document.documentElement.dataset.vividReady)).toBe("true");
   await expect(page.locator(".vivid-mobile-nav")).toHaveCount(0);
   await expect(page.locator("[data-vivid-back]")).toHaveCount(0);
+  await expect(page.locator(".profile-brand")).toHaveAttribute("href", "#profile-heading");
   await expect.poll(() => page.evaluate(() => typeof window.__releaseProfileAuth)).toBe("function");
 
   // Safari may not have restored Firebase's persisted user at module startup.
