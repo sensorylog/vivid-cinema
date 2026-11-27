@@ -46,17 +46,25 @@ function loadTurnstile() {
 
 async function getConfig() {
   if (!configPromise) {
+    const controller = new AbortController();
+    const timeout = window.setTimeout(() => controller.abort(), 8_000);
     configPromise = fetch(ENDPOINT, {
       method: "GET",
       credentials: "same-origin",
       cache: "no-store",
-      headers: { "Accept": "application/json" }
+      headers: { "Accept": "application/json" },
+      signal: controller.signal
     }).then(async response => {
       const payload = await response.json().catch(() => ({}));
       if (!response.ok || payload?.ok !== true || typeof payload.siteKey !== "string" || !payload.siteKey) {
         throw new Error(payload?.message || "Secure browser verification is not configured yet.");
       }
       return payload;
+    }).catch(error => {
+      if (error?.name === "AbortError") throw new Error("Secure browser verification settings took too long to load. Please retry.");
+      throw error;
+    }).finally(() => {
+      window.clearTimeout(timeout);
     }).catch(error => {
       configPromise = null;
       throw error;
@@ -163,14 +171,25 @@ async function runManagedChallenge(siteKey) {
 async function exchangeTurnstileProof() {
   const config = await getConfig();
   const turnstileToken = await runManagedChallenge(config.siteKey);
-  const response = await fetch(ENDPOINT, {
-    method: "POST",
-    mode: "same-origin",
-    credentials: "omit",
-    cache: "no-store",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ turnstileToken })
-  });
+  const controller = new AbortController();
+  const timeout = window.setTimeout(() => controller.abort(), 10_000);
+  let response;
+  try {
+    response = await fetch(ENDPOINT, {
+      method: "POST",
+      mode: "same-origin",
+      credentials: "omit",
+      cache: "no-store",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ turnstileToken }),
+      signal: controller.signal
+    });
+  } catch (error) {
+    if (error?.name === "AbortError") throw new Error("Secure browser verification could not be completed in time. Please retry.");
+    throw error;
+  } finally {
+    window.clearTimeout(timeout);
+  }
   const payload = await response.json().catch(() => ({}));
   if (
     !response.ok ||
