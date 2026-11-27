@@ -197,7 +197,7 @@ async function refreshProfiles() {
   profiles = await fetchProfiles();
   googlePhoto = normalizeAvatarUrl(user.photoURL || user.providerData?.find(item => item.providerId === "google.com")?.photoURL || "");
   const owner = profiles.find(profile => profile.isOwner);
-  if (owner && owner.avatarSource === "auto" && googlePhoto) {
+  if (owner && ["auto","google"].includes(owner.avatarSource) && googlePhoto && owner.avatarUrl !== googlePhoto) {
     await updateProfile(owner.id, {
       name: owner.name,
       avatarId: owner.avatarId,
