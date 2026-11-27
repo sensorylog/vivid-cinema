@@ -1,5 +1,5 @@
 import { VIVID_CONFIG } from "./config.js";
-import { clearActiveProfileId, getActiveProfileId, hasActiveProfileSelection, listProfileSummaries, validateProfileSession } from "./profiles.js";
+import { clearActiveProfileId, getActiveProfileId, setActiveProfileId, listProfileSummaries, validateProfileSession } from "./profiles.js";
 import { applyPerformanceProfile } from "./performance-profile.js";
 import { resolveAndroidBackAction } from "./android-navigation.js";
 import "./movie-quick-actions.js";
@@ -456,12 +456,6 @@ async function enforceProfileSelection(user) {
     if (page !== "profiles.html") window.location.replace("profiles.html");
   };
 
-  if (!hasActiveProfileSelection(user.uid)) {
-    redirectToProfiles();
-    return;
-  }
-
-  const activeId = getActiveProfileId(user.uid);
   let tokenResult;
   try {
     tokenResult = await user.getIdTokenResult();
@@ -471,10 +465,25 @@ async function enforceProfileSelection(user) {
     console.warn("Vivid could not refresh the active profile token:", error);
     return;
   }
-  if (tokenResult.claims.profileId !== activeId) {
+
+  // The Firebase custom-token claim is the server-issued source of truth.
+  // Browser storage is only a convenience and can be unavailable or evicted
+  // by Safari; never bounce a valid profile session back to the selector just
+  // because its local active-profile key is missing.
+  const claimedProfileId = typeof tokenResult.claims.profileId === "string"
+    ? tokenResult.claims.profileId
+    : "";
+  if (!/^[A-Za-z0-9_-]{1,64}$/.test(claimedProfileId)) {
+    clearActiveProfileId(user.uid);
     redirectToProfiles();
     return;
   }
+  const storedProfileId = getActiveProfileId(user.uid);
+  if (storedProfileId !== claimedProfileId) {
+    try { setActiveProfileId(user.uid, claimedProfileId); }
+    catch (error) { console.warn("Vivid could not persist the active profile locally:", error); }
+  }
+  const activeId = claimedProfileId;
 
   let activeProfile;
   try {
