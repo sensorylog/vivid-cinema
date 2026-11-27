@@ -170,11 +170,8 @@ export async function migrateLegacyProfileData(user = null) {
   const markerRef = doc(db, "users", current.uid, "profiles", OWNER_PROFILE_ID,
     "migrations", PROFILE_MIGRATION_ID);
   const marker = await getDocFromServer(markerRef);
-  if (marker.exists() && marker.data()?.status === "complete") {
-    return { migrated: false, alreadyComplete: true, collections: marker.data()?.collections || {} };
-  }
-
   const summary = {};
+  let migratedAny = false;
   for (const collectionName of PROFILE_DATA_COLLECTIONS) {
     const source = await getDocsFromServer(collection(db, "users", current.uid, collectionName));
     const destinationRef = collection(db, "users", current.uid, "profiles", OWNER_PROFILE_ID, collectionName);
@@ -192,6 +189,7 @@ export async function migrateLegacyProfileData(user = null) {
       }
     }
 
+    migratedAny = migratedAny || pending.length > 0;
     for (let offset = 0; offset < pending.length; offset += 350) {
       const batch = writeBatch(db);
       for (const item of pending.slice(offset, offset + 350)) {
@@ -216,18 +214,22 @@ export async function migrateLegacyProfileData(user = null) {
     collections: summary,
     completedAt: serverTimestamp()
   });
-  return { migrated: true, alreadyComplete: false, collections: summary };
+  return { migrated: migratedAny, alreadyComplete: marker.exists() && !migratedAny, collections: summary };
 }
 
 const profileInitialization = new Map();
+const initializedProfileAccounts = new Set();
 
 export function initializeProfileFoundation(user = null) {
   const uid = String(user?.uid || "");
   if (!uid) return Promise.reject(new Error("A signed-in Vivid account is required to initialize profiles."));
+  if (initializedProfileAccounts.has(uid)) return Promise.resolve({ migrated: false, alreadyComplete: true, collections: {} });
   if (profileInitialization.has(uid)) return profileInitialization.get(uid);
   const task = (async () => {
     await ensureOwnerProfile(user);
-    return migrateLegacyProfileData(user);
+    const result = await migrateLegacyProfileData(user);
+    initializedProfileAccounts.add(uid);
+    return result;
   })().finally(() => profileInitialization.delete(uid));
   profileInitialization.set(uid, task);
   return task;
