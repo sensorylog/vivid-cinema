@@ -1285,9 +1285,9 @@ function renderShell(params) {
     };
     persistDirectProgress = () => saveDirectProgress(false, true);
     directPlayer.addEventListener("playing", () => {
-      if (activeSource !== "direct") return;
+      if (!["direct", "commons", "loc"].includes(activeSource)) return;
       primaryHealthy = true;
-      rememberSuccessfulSource("direct");
+      if (activeSource === "direct") rememberSuccessfulSource("direct");
       clearFallbackTimer();
       const currentStatus = $("player-status");
       if (currentStatus) currentStatus.hidden = true;
@@ -1298,6 +1298,14 @@ function renderShell(params) {
     directPlayer.addEventListener("ended", () => saveDirectProgress(true));
     directPlayer.addEventListener("error", () => {
       if (activeSource === "direct") triggerFallback("direct_video_error");
+      else if (activeSource === "commons" || activeSource === "loc") {
+        const currentStatus = $("player-status");
+        if (currentStatus) {
+          currentStatus.textContent = "This archive video could not be played by this browser. Try another result or catalogue.";
+          currentStatus.classList.add("is-warning");
+          currentStatus.hidden = false;
+        }
+      }
     });
   }
 
