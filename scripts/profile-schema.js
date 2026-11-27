@@ -68,6 +68,7 @@ export function normalizeProfile(profileId, data = {}) {
     avatarId: PROFILE_AVATAR_IDS.has(String(data.avatarId || "")) ? String(data.avatarId) : "aurora",
     avatarUrl: normalizeAvatarUrl(data.avatarUrl),
     avatarData: normalizeAvatarData(data.avatarData),
+    avatarSource: ["google","collection","upload"].includes(data.avatarSource) ? data.avatarSource : (data.avatarData ? "upload" : data.avatarUrl ? "google" : "collection"),
     isKids,
     maturityLevel: isKids ? "kids" : "adult",
     isOwner: id === OWNER_PROFILE_ID,
