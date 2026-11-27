@@ -63,9 +63,9 @@ class DesktopDownloadEngine {
     this.downloadPath = path.join(app.getPath("downloads"), "Vivid Cinema");
     this.statePath = path.join(app.getPath("userData"), "vivid-downloads.json");
     fs.mkdirSync(this.downloadPath, { recursive: true });
-    // Browsing and playing completed downloads must not initialise WebTorrent
-    // or its provider adapters. Load those heavier runtimes only on demand.
-    this.client = null;
+    // Provider adapters stay lazy; keep the existing torrent client lifecycle
+    // unchanged so resume and download state recovery remain fully compatible.
+    this.createClient();
     this.ready = this.restore();
   }
 
@@ -364,8 +364,8 @@ class DesktopDownloadEngine {
         lastWarning: job.discovery.lastWarning,
         videoFiles: job.discovery.videoFiles || 0,
         deselectedFiles: job.discovery.deselectedFiles || 0,
-        dhtEnabled: Boolean(this.client?.dht),
-        dhtListening: Boolean(this.client?.dht && this.client.dht.listening)
+        dhtEnabled: Boolean(this.client.dht),
+        dhtListening: Boolean(this.client.dht && this.client.dht.listening)
       } : null,
       speed: torrent?.downloadSpeed || 0, downloaded: torrent?.downloaded || job.downloaded || 0,
       total: torrent?.length || job.total || fileSize || 0, peers: torrent?.numPeers || 0,
