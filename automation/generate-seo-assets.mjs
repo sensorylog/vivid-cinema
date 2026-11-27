@@ -20,8 +20,33 @@ const PUBLIC_PAGES = {
   },
   "anime.html": {
     path: "/anime.html",
-    title: "Discover Anime Series & Films | Vivid Cinema",
-    description: "Explore anime series and films, discover popular titles, browse by genre and find your next anime watch with Vivid Cinema."
+    title: "Free Anime Previews & Anime Series | Vivid Cinema",
+    description: "Explore anime series and films on Vivid Cinema. Start with selected free episode previews and discover the wider Anime Premium catalogue."
+  },
+  "free-movies.html": {
+    path: "/free-movies.html",
+    title: "Find Free Movies to Watch Online | Vivid Cinema",
+    description: "Discover movies online for free with Vivid Cinema. Browse films, watch trailers and check legitimate viewing options by provider and region."
+  },
+  "tv-shows.html": {
+    path: "/tv-shows.html",
+    title: "Discover TV Shows & Series Online | Vivid Cinema",
+    description: "Find TV shows and series to watch online. Explore genres, ratings, seasons, cast and viewing options with Vivid Cinema."
+  },
+  "anime-streaming.html": {
+    path: "/anime-streaming.html",
+    title: "Watch Anime Online & Explore Free Previews | Vivid Cinema",
+    description: "Discover anime series and films, start selected free episode previews and explore the Vivid Anime Premium catalogue."
+  },
+  "offline-downloads.html": {
+    path: "/offline-downloads.html",
+    title: "Download Movies & TV Shows for Offline Viewing | Vivid Cinema",
+    description: "Download supported movies and TV episodes in the Vivid Cinema Windows app and watch offline. Learn how offline downloads work."
+  },
+  "live.html": {
+    path: "/live.html",
+    title: "Free Live TV Online — Vivid Live Channel Guide",
+    description: "Explore public live TV channel listings in Vivid Cinema. Search channels by country and language and play compatible streams where available."
   },
   "anime-premium.html": {
     path: "/anime-premium.html",
@@ -137,7 +162,7 @@ const NOINDEX_PAGES = [
   "african-stories-admin.html", "african-stories-submit.html", "african-stories-watch.html",
   "anime-premium-admin.html", "anime-premium-library.html", "anime-premium-return.html",
   "donation-success.html", "african-stories.html",
-  "live.html", "search.html"
+  "search.html"
 ];
 
 function escapeAttribute(value) {
@@ -166,6 +191,20 @@ function setTitle(html, title) {
   return matcher.test(html)
     ? html.replace(matcher, "<title>" + title + "</title>")
     : insertBeforeHeadEnd(html, "<title>" + title + "</title>");
+}
+
+function injectDiscoveryLinks(html) {
+  if (html.includes('id="vivid-seo-discovery-links"')) return html;
+  const links = '<nav id="vivid-seo-discovery-links" class="vivid-seo-discovery-links" aria-label="Explore Vivid Cinema guides">' +
+    '<a href="/free-movies.html">Find free movies</a>' +
+    '<a href="/tv-shows.html">Discover TV shows</a>' +
+    '<a href="/anime-streaming.html">Watch anime</a>' +
+    '<a href="/live.html">Live TV guide</a>' +
+    '<a href="/offline-downloads.html">Offline movie downloads</a>' +
+    '</nav>';
+  const stylesheet = '<link rel="stylesheet" href="/styles/vivid-search-guide.css">';
+  if (!html.includes('vivid-search-guide.css')) html = html.replace(/<\\/head>/i, stylesheet + '</head>');
+  return html.replace(/<footer\\b/i, links + '<footer');
 }
 
 function addStructuredData(html, schema) {
@@ -205,6 +244,9 @@ export async function generateSeoAssets(directory, siteOrigin = process.env.VIVI
     html = setMeta(html, "name", "twitter:description", page.description);
     html = setMeta(html, "name", "twitter:image", image);
     html = setCanonical(html, canonical);
+    if (["index.html", "home.html", "discover.html", "anime.html", "live.html", "downloads.html"].includes(filename)) {
+      html = injectDiscoveryLinks(html);
+    }
 
     const schema = filename === "index.html"
       ? {
