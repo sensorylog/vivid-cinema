@@ -1,6 +1,6 @@
 // Bump this version whenever the precached app shell changes.
 const HLS_LIBRARY_URL = "https://cdn.jsdelivr.net/npm/hls.js@1.7.3/dist/hls.min.js";
-const CACHE_NAME = "vivid-cinema-shell-v365";
+const CACHE_NAME = "vivid-cinema-shell-v366";
 const APP_SHELL = [
   HLS_LIBRARY_URL,
   "./","./index.html","./home.html","./african-stories.html","./downloads.html","./my-downloads.html","./for-you.html",
@@ -21,7 +21,7 @@ const APP_SHELL = [
   "./styles/vivid-achievements.css?v=20261018-achievements-1","./scripts/achievements.js","./scripts/achievements-page.js?v=20261018-cinematic-1","./scripts/achievement-catalog.js","./scripts/app-shell.js","./scripts/movie-quick-actions.js","./styles/vivid-movie-quick-actions.css","./scripts/home-optional-resources.js",
   "./scripts/donate.js","./scripts/google-tag.js","./scripts/analytics.js","./scripts/vivid-pulse.js","./scripts/provider-region.js",
   "./scripts/search.js","./scripts/search-page.js","./scripts/intelligence.js","./scripts/intent-parser.js","./scripts/plot-search.js",
-  "./scripts/for-you.js","./scripts/vivid-recall-chat.js","./scripts/cloudflare-ai.js","./scripts/local-owner.js","./scripts/firebase.js","./scripts/turnstile-app-check.js?v=20261123-signup-only-1","./scripts/cloudflare-api.js",
+  "./scripts/for-you.js","./scripts/vivid-recall-chat.js","./scripts/cloudflare-ai.js","./scripts/local-owner.js","./scripts/profiles.js","./scripts/firebase.js","./scripts/turnstile-app-check.js?v=20261123-signup-only-1","./scripts/cloudflare-api.js",
   "./scripts/firebase.js?v=20261123-signup-only-1","./scripts/pwa.js","./scripts/atmosphere.js","./scripts/i18n.js","./scripts/routes.js",
   "./scripts/config.js","./scripts/utils.js","./scripts/content.js","./scripts/media.js","./scripts/tmdb.js",
   "./scripts/collection.js","./scripts/person.js","./scripts/recommendations.js","./scripts/release-alerts.js","./scripts/cinema-reminders.js",
