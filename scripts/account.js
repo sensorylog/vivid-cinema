@@ -404,15 +404,16 @@ syncButton?.addEventListener("click", async () => {
       error
     });
     const code = String(error?.code || "");
+    const stage = String(error?.syncStage || "cloud library access");
     const detail = code.includes("permission-denied")
-      ? "Firestore blocked a library operation. Your saved titles are safe on this device; retry after the cloud permissions are corrected."
+      ? "Cloud access was denied during " + stage + ". Your saved titles are safe on this device. Check the active profile session and deployed Firestore rules before retrying."
       : code.includes("unauthenticated") || code.includes("auth/")
         ? "Your sign-in session expired. Sign out and sign in again, then retry."
         : String(error?.message || "").includes("timed out")
           ? "The cloud library took too long to respond. Your saved titles remain on this device; check your connection and retry."
           : "Your saved titles remain on this device. " + (error?.message || "Check your connection and retry.");
     setSyncStatus("Sync paused", detail, "error");
-    setStatus("Cloud sync could not be completed (" + (code || "unknown error") + ").", "error");
+    setStatus("Cloud sync could not be completed (" + (code || "unknown error") + (error?.syncStage ? " · " + error.syncStage : "") + ").", "error");
   } finally {
     syncButton.disabled = false;
   }

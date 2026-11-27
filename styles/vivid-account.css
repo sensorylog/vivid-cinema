@@ -131,3 +131,6 @@
 .account-page .account-header h1{font-family:Georgia,"Times New Roman",serif;letter-spacing:-.045em}
 .account-page :where(.account-field input:focus,.account-field select:focus){border-color:rgba(199,255,85,.55);outline:2px solid rgba(199,255,85,.16);outline-offset:1px}
 .account-page :where(a:focus-visible,button:focus-visible){outline:2px solid #c7ff55;outline-offset:3px}
+
+/* Premium mobile sync layout: keep the retry action below the explanation. */
+@media(max-width:700px){.account-page .account-sync{align-items:center;flex-wrap:wrap;gap:11px}.account-page .account-sync>div{flex:1 1 calc(100% - 28px);min-width:0}.account-page .account-sync .vivid-button{flex:1 1 100%;width:100%;min-height:46px;margin:2px 0 0;white-space:normal}}

@@ -32,24 +32,7 @@ let pendingProfile = null;
 let switchingProfile = false;
 let pinSaving = false;
 
-const avatarVisuals = {
-  aurora:["bi-stars","linear-gradient(145deg,#536b9e,#18233e)"],
-  ember:["bi-fire","linear-gradient(145deg,#a85a42,#391b25)"],
-  nebula:["bi-moon-stars","linear-gradient(145deg,#7459a8,#211b46)"],
-  eclipse:["bi-circle-half","linear-gradient(145deg,#657080,#151a28)"],
-  nova:["bi-sun","linear-gradient(145deg,#c28b52,#523328)"],
-  prism:["bi-gem","linear-gradient(145deg,#528c9b,#26365f)"],
-  orbit:["bi-globe2","linear-gradient(145deg,#4c7e9a,#182c4d)"],
-  titan:["bi-shield-shaded","linear-gradient(145deg,#66748a,#222b3b)"],
-  ripple:["bi-water","linear-gradient(145deg,#4d92a0,#153d50)"],
-  halo:["bi-brightness-high","linear-gradient(145deg,#b28c58,#443321)"],
-  flux:["bi-lightning-charge","linear-gradient(145deg,#8a63b0,#31204c)"],
-  onyx:["bi-eye","linear-gradient(145deg,#626575,#171923)"],
-  solstice:["bi-flower1","linear-gradient(145deg,#b17a79,#4b293f)"],
-  comet:["bi-rocket-takeoff","linear-gradient(145deg,#6688b7,#263052)"],
-  vortex:["bi-tornado","linear-gradient(145deg,#637d91,#253241)"],
-  lumen:["bi-lightbulb","linear-gradient(145deg,#b4a46a,#49422a)"]
-};
+
 const destination = () => {
   let stored = "";
   try {
@@ -69,10 +52,11 @@ function say(message, error = false) {
   status.dataset.state = error ? "error" : "info";
 }
 function avatarNode(profile, large = false) {
-  const [icon, background] = avatarVisuals[profile.avatarId] || avatarVisuals.aurora;
+  const avatarIndex = Math.max(0, PROFILE_AVATARS.findIndex(avatar => avatar.id === profile.avatarId));
   const wrapper = document.createElement("span");
   wrapper.className = "profile-avatar";
-  wrapper.style.background = background;
+  wrapper.style.setProperty("--avatar-x", ((avatarIndex % 4) * 100 / 3) + "%");
+  wrapper.style.setProperty("--avatar-y", (Math.floor(avatarIndex / 4) * 100 / 3) + "%");
   if (profile.avatarData || profile.avatarUrl) {
     const image = document.createElement("img");
     image.src = profile.avatarData || profile.avatarUrl;
@@ -80,15 +64,13 @@ function avatarNode(profile, large = false) {
     image.referrerPolicy = "no-referrer";
     image.addEventListener("error", () => {
       image.remove();
-      const glyph = document.createElement("i");
-      glyph.className = "bi " + icon;
-      wrapper.append(glyph);
+      wrapper.classList.add("profile-avatar-art");
+      wrapper.setAttribute("aria-hidden", "true");
     }, { once:true });
     wrapper.append(image);
   } else {
-    const glyph = document.createElement("i");
-    glyph.className = "bi " + icon;
-    wrapper.append(glyph);
+    wrapper.classList.add("profile-avatar-art");
+    wrapper.setAttribute("aria-hidden", "true");
   }
   return wrapper;
 }
@@ -161,17 +143,16 @@ function renderGallery() {
   );
   const tabStopIndex = selectedIndex >= 0 ? selectedIndex : 0;
   PROFILE_AVATARS.forEach((avatar, index) => {
-    const [icon, background] = avatarVisuals[avatar.id] || avatarVisuals.aurora;
     const button = document.createElement("button");
     button.type = "button";
     button.className = "avatar-choice";
     button.dataset.avatarId = avatar.id;
     button.tabIndex = index === tabStopIndex ? 0 : -1;
-    button.style.setProperty("--avatar-bg",background);
+    button.style.setProperty("--avatar-x", ((index % 4) * 100 / 3) + "%");
+    button.style.setProperty("--avatar-y", (Math.floor(index / 4) * 100 / 3) + "%");
     button.setAttribute("role","radio");
     button.setAttribute("aria-checked",String(selectedAvatarSource === "collection" && selectedAvatar === avatar.id));
     button.setAttribute("aria-label",avatar.label);
-    button.innerHTML = '<i class="bi ' + icon + '" aria-hidden="true"></i>';
     button.addEventListener("click",() => selectCollectionAvatar(avatar.id, true));
     button.addEventListener("keydown", event => {
       let nextIndex = index;
