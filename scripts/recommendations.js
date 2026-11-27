@@ -152,6 +152,10 @@ function progressSyncStatus(status, uid, contentId) {
 
 async function setRemoteProgress(uid, contentId, item, profileId=getActiveProfileId(uid)) {
   try {
+    const auth = await getFirebaseAuth();
+    if (!auth?.currentUser || String(auth.currentUser.uid) !== String(uid)) throw new Error("Playback progress account changed before sync.");
+    await initializeProfileFoundation(auth.currentUser);
+    if (getActiveProfileId(uid) !== profileId) throw new Error("Playback progress profile changed before sync.");
     const { db, doc, setDoc } = await getFirebase();
     await setDoc(
       doc(db, "users", uid, "profiles", profileId, "progress", contentId),
@@ -166,6 +170,10 @@ async function setRemoteProgress(uid, contentId, item, profileId=getActiveProfil
 }
 
 async function deleteRemoteProgress(uid, contentId, profileId=getActiveProfileId(uid)) {
+  const auth = await getFirebaseAuth();
+  if (!auth?.currentUser || String(auth.currentUser.uid) !== String(uid)) throw new Error("Playback progress account changed before deletion.");
+  await initializeProfileFoundation(auth.currentUser);
+  if (getActiveProfileId(uid) !== profileId) throw new Error("Playback progress profile changed before deletion.");
   const { db, doc, deleteDoc } = await getFirebase();
   await deleteDoc(doc(db, "users", uid, "profiles", profileId, "progress", contentId));
 }
