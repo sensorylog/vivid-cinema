@@ -83,7 +83,11 @@ function cleanProfileInput(profileId, body, existing = {}) {
   if (!name || name.length > 48) throw new AnimePremiumError(400, "invalid-profile-name", "Profile names must contain 1–48 characters.");
   const avatarId = body.avatarId == null ? (existing.avatarId || "aurora") : String(body.avatarId);
   if (!AVATAR_IDS.has(String(avatarId || ""))) throw new AnimePremiumError(400, "invalid-avatar", "Choose an avatar from the Vivid collection.");
-  const avatarSource = body.avatarSource == null ? String(existing.avatarSource || "") : String(body.avatarSource);
+  const avatarSource = body.avatarSource == null
+    ? (["auto","google","collection","upload"].includes(existing.avatarSource)
+      ? existing.avatarSource
+      : existing.avatarData ? "upload" : existing.avatarUrl ? "google" : profileId === OWNER_PROFILE_ID ? "auto" : "collection")
+    : String(body.avatarSource);
   const allowedSources = new Set(["auto","google","collection","upload"]);
   if (avatarSource && !allowedSources.has(avatarSource)) throw new AnimePremiumError(400, "invalid-avatar-source", "Choose a valid profile photo source.");
   const source = avatarSource || (profileId === OWNER_PROFILE_ID ? "auto" : "collection");
