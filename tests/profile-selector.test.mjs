@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
 const read = path => readFile(new URL(path, import.meta.url), "utf8");
-const [page, selector, manager, auth, worker, account, profiles, shell] = await Promise.all([
+const [page, selector, manager, auth, worker, account, profiles, shell, styles] = await Promise.all([
   read("../profiles.html"),
   read("../scripts/profile-selector.js"),
   read("../scripts/profile-manager.js"),
@@ -11,7 +11,8 @@ const [page, selector, manager, auth, worker, account, profiles, shell] = await 
   read("../service-worker.js"),
   read("../account.html"),
   read("../scripts/profiles.js"),
-  read("../scripts/app-shell.js")
+  read("../scripts/app-shell.js"),
+  read("../styles/vivid-profile-selector.css")
 ]);
 
 test("successful sign-in opens the Who's Watching profile selector by default", () => {
@@ -98,5 +99,13 @@ test("profile selector assets are network refreshed and accessible from the acco
   assert.match(worker, /profile-selector/);
   assert.match(worker, /profiles\.html/);
   assert.match(account, /href="profiles\.html"/);
+  assert.match(styles, /grid-template-columns:repeat\(auto-fit/);
+  assert.match(styles, /:focus-visible/);
+  assert.match(styles, /prefers-reduced-motion:reduce/);
+  assert.match(selector, /button\.tabIndex = index === tabStopIndex \? 0 : -1/);
+  assert.match(selector, /ArrowRight/);
+  assert.match(selector, /ArrowLeft/);
+  assert.match(selector, /event\.key === "Home"/);
+  assert.match(selector, /event\.key === "End"/);
 });
 
