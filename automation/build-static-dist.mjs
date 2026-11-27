@@ -1,6 +1,7 @@
 import { cp, mkdir, readdir, readFile, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { generateSeoAssets } from "./generate-seo-assets.mjs";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const output = path.join(root, "dist");
@@ -102,4 +103,5 @@ if (process.env.VIVID_ANDROID_BUILD) {
   await writeFile(workerPath, updatedWorker, "utf8");
 }
 await addNativeEnhancements(output);
-console.log("Prepared static site in dist/ with native-only Capacitor polish.");
+const seoResult = await generateSeoAssets(output);
+console.log("Prepared static site in dist/ with native-only Capacitor polish and SEO for " + seoResult.indexedPages + " public pages.");
