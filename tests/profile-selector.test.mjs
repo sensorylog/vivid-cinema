@@ -73,3 +73,16 @@ test("profile selector assets are network refreshed and accessible from the acco
   assert.match(worker, /profiles\.html/);
   assert.match(account, /href="profiles\.html"/);
 });
+
+
+test("profile manager supports Kids designation and persistent avatar choices", () => {
+  assert.match(page, /id="profile-is-kids"/);
+  assert.match(page, /profile-kids-option/);
+  assert.match(selector, /profile\.isKids \? "Kids profile"/);
+  assert.match(selector, /\$("profile-is-kids")\.checked/);
+  assert.match(selector, /isKids: \$("profile-is-kids")\.checked/);
+  assert.match(selector, /selectedAvatarSource = "google"/);
+  assert.match(selector, /selectedAvatarSource = "upload"/);
+  assert.match(selector, /selectedAvatarSource = "collection"/);
+  assert.match(selector, /owner\.avatarSource === "auto"/);
+});
