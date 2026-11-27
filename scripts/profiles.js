@@ -75,11 +75,14 @@ export function normalizeProfile(profileId, data = {}) {
     }).join("").trim().slice(0, 48)
     : "";
   const avatarUrl = normalizeAvatarUrl(data.avatarUrl);
-  const avatarData = typeof data.avatarData === "string" &&
-    data.avatarData.startsWith("data:image/webp;base64,") &&
-    data.avatarData.length <= MAX_AVATAR_DATA_LENGTH &&
-    /^data:image\\/webp;base64,[A-Za-z0-9+/]+={0,2}$/.test(data.avatarData)
-    ? data.avatarData
+  const avatarDataPrefix = "data:image/webp;base64,";
+  const avatarDataPayload = typeof data.avatarData === "string" && data.avatarData.startsWith(avatarDataPrefix)
+    ? data.avatarData.slice(avatarDataPrefix.length)
+    : "";
+  const avatarData = avatarDataPayload.length > 0 &&
+    avatarDataPrefix.length + avatarDataPayload.length <= MAX_AVATAR_DATA_LENGTH &&
+    /^[A-Za-z0-9+/]+={0,2}$/.test(avatarDataPayload)
+    ? avatarDataPrefix + avatarDataPayload
     : "";
   const isKids = data.isKids === true;
   return {
