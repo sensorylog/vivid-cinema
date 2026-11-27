@@ -25,7 +25,7 @@ APK output: `android/app/build/outputs/apk/debug/app-debug.apk`.
 
 ## GitHub Actions
 
-Every pull request runs the **Android APK Build** workflow because the APK bundles the shared application, not just a small Android-only folder. The workflow runs Android-specific regression tests, generates and signs the Capacitor project, verifies the package and launcher icon, then installs and launches the APK in an Android 15 emulator. The emulator smoke test backgrounds and resumes the app and checks for a fatal process crash. A successful PR run uploads the `vivid-cinema-android-apk` artifact; it does not publish a preview APK. Pull-request builds run with read-only repository permissions; release write access is isolated to a separate publisher job that only runs for trusted main/release events. A push to `main` builds and publishes the stable `Vivid-Cinema-Android.apk` asset to the matching GitHub release. You can also run the workflow manually from GitHub Actions. The current development-signed APK is for testing and early distribution, not a Play Store release.
+The legacy **Android APK Build** workflow is retained but disabled; it previously published Android assets into Windows desktop releases and is no longer the release path. Direct Android releases are built by **Vivid Cinema Android Direct Release**, a manual workflow that creates independent `android-v*` releases, verifies the APK, and runs an Android 15 emulator launch/resume smoke test before publishing. Pull requests still exercise Android source contracts through the main quality suite. Direct APKs are development-signed for sideload distribution and are not Google Play releases.
 
 ## Android experience and compatibility
 
