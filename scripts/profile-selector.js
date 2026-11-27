@@ -1,6 +1,6 @@
 import { auth } from "./firebase.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
-import { ensureOwnerProfile, initializeProfileFoundation, setActiveProfileId } from "./profiles.js";
+import { initializeProfileFoundation, setActiveProfileId } from "./profiles.js";
 import { fetchProfiles, createProfile, updateProfile, deleteProfile, compressProfileImage, PROFILE_AVATARS, MAX_PROFILES } from "./profile-manager.js";
 
 const $ = id => document.getElementById(id);
@@ -185,15 +185,12 @@ function openEditor(profile = null) {
 async function chooseProfile(profile) {
   try {
     say("Opening " + profile.name + "…");
-    const current = await fetchProfiles();
-    if (!current.some(item => item.id === profile.id)) throw new Error("This profile is no longer available. Refresh and choose another.");
     setActiveProfileId(user.uid, profile.id);
     location.replace(destination());
   } catch (error) { say(error.message || "Could not open this profile.",true); }
 }
 async function refreshProfiles() {
   await initializeProfileFoundation(user);
-  await ensureOwnerProfile(user);
   profiles = await fetchProfiles();
   googlePhoto = normalizeAvatarUrl(user.photoURL || user.providerData?.find(item => item.providerId === "google.com")?.photoURL || "");
   const owner = profiles.find(profile => profile.isOwner);
