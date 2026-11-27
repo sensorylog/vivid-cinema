@@ -852,8 +852,8 @@ async function loadWatchRecommendations(params) {
     }
   }
 
-  if (details?.recommendations?.results) details.recommendations.results = await filterAllowedTitles(details.recommendations.results);
-  if (details?.similar?.results) details.similar.results = await filterAllowedTitles(details.similar.results);
+  if (details?.recommendations?.results) details.recommendations.results = await filterAllowedTitles(details.recommendations.results.map(item => ({ ...item, media_type: params.type })));
+  if (details?.similar?.results) details.similar.results = await filterAllowedTitles(details.similar.results.map(item => ({ ...item, media_type: params.type })));
   if (rail.isConnected) rail.innerHTML = recommendationCards();
 }
 

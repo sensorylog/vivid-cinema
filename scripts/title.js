@@ -539,8 +539,8 @@ async function init() {
         const preferredCountry = getProviderCountry();
         const certification = type === "tv" ? (certificationData?.results?.find(item=>item.iso_3166_1===preferredCountry&&item.rating)?.rating || certificationData?.results?.find(item=>item.iso_3166_1==="US"&&item.rating)?.rating || "") : (certificationData?.results?.find(item=>item.iso_3166_1===preferredCountry)?.release_dates?.find(item=>item.certification)?.certification || certificationData?.results?.find(item=>item.iso_3166_1==="US")?.release_dates?.find(item=>item.certification)?.certification || "");
         if (!await isTitleAllowed({ ...enriched, id, media_type: type }, { certification })) { renderParentalBlock($("title-content"), enriched?.name || enriched?.title || "This title"); return; }
-        if (enriched.recommendations?.results) enriched.recommendations.results = await filterAllowedTitles(enriched.recommendations.results);
-        if (enriched.similar?.results) enriched.similar.results = await filterAllowedTitles(enriched.similar.results);
+        if (enriched.recommendations?.results) enriched.recommendations.results = await filterAllowedTitles(enriched.recommendations.results.map(item => ({ ...item, media_type: type })));
+        if (enriched.similar?.results) enriched.similar.results = await filterAllowedTitles(enriched.similar.results.map(item => ({ ...item, media_type: type })));
         const ratingDetails = type === "tv"
           ? { rating: getCertification(enriched, preferredCountry), note: "" }
           : getMovieRatingDetails(enriched, preferredCountry, certificationData);
