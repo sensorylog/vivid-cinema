@@ -218,3 +218,17 @@ export async function migrateLegacyProfileData(user = null) {
   });
   return { migrated: true, alreadyComplete: false, collections: summary };
 }
+
+const profileInitialization = new Map();
+
+export function initializeProfileFoundation(user = null) {
+  const uid = String(user?.uid || "");
+  if (!uid) return Promise.reject(new Error("A signed-in Vivid account is required to initialize profiles."));
+  if (profileInitialization.has(uid)) return profileInitialization.get(uid);
+  const task = (async () => {
+    await ensureOwnerProfile(user);
+    return migrateLegacyProfileData(user);
+  })().finally(() => profileInitialization.delete(uid));
+  profileInitialization.set(uid, task);
+  return task;
+}
