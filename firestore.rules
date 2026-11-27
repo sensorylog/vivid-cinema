@@ -44,7 +44,7 @@ service cloud.firestore {
 
     function validLibraryData() {
       return request.resource.data.keys().hasOnly([
-        'id','media_type','title','year','poster_path','backdrop_path','updatedAt',
+        'id','media_type','title','year','poster_path','backdrop_path','genre_ids','adult','certification','updatedAt',
         'startedAt','lastWatchedAt','watchedSeconds','completion','completedAt','isAnime'
       ])
       && request.resource.data.id is string
@@ -58,6 +58,9 @@ service cloud.firestore {
       && request.resource.data.poster_path.size() <= 500
       && request.resource.data.backdrop_path is string
       && request.resource.data.backdrop_path.size() <= 500
+      && (!request.resource.data.keys().hasAny(['genre_ids']) || (request.resource.data.genre_ids is list && request.resource.data.genre_ids.size() <= 20 && request.resource.data.genre_ids.hasOnly([12,14,16,18,27,28,35,36,37,53,80,99,878,9648,10402,10749,10751,10752,10770,10759,10762,10763,10764,10765,10766,10767,10768])))
+      && (!request.resource.data.keys().hasAny(['adult']) || request.resource.data.adult is bool)
+      && (!request.resource.data.keys().hasAny(['certification']) || (request.resource.data.certification is string && request.resource.data.certification.size() <= 16))
       && (!request.resource.data.keys().hasAny(['updatedAt']) || (request.resource.data.updatedAt is number && request.resource.data.updatedAt >= 0))
       && (!request.resource.data.keys().hasAny(['startedAt']) || (request.resource.data.startedAt is number && request.resource.data.startedAt >= 0))
       && (!request.resource.data.keys().hasAny(['lastWatchedAt']) || (request.resource.data.lastWatchedAt is number && request.resource.data.lastWatchedAt >= 0))
