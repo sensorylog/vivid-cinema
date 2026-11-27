@@ -14,7 +14,8 @@ const PROFILE_DELETE_COLLECTIONS = Object.freeze([
   "profileSecurity",
   "profileSessions",
   "parentalControls",
-  "profilePreferences"
+  "profilePreferences",
+  "profileManagement"
 ]);
 const AVATAR_IDS = new Set(PROFILE_AVATARS.map(item => item.id));
 
@@ -126,20 +127,25 @@ export async function createAccountProfile(request, env) {
   if (!name) throw new AnimePremiumError(400, "invalid-profile-name", "Enter a name for this profile.");
   const profilesRef = db.collection("users").doc(user.uid).collection("profiles");
   const now = Timestamp.fromMillis(Date.now());
+  const ownerRef = profilesRef.doc(OWNER_PROFILE_ID);
+  const limitRef = ownerRef.collection("profileManagement").doc("limits");
   let created;
   await db.runTransaction(async transaction => {
     const profiles = await transaction.get(profilesRef);
-    const owner = await transaction.get(profilesRef.doc(OWNER_PROFILE_ID));
+    const owner = await transaction.get(ownerRef);
+    const limits = await transaction.get(limitRef);
     if (!owner.exists || owner.data()?.isOwner !== true) {
       throw new AnimePremiumError(409, "owner-profile-required", "The main Vivid profile must be initialized before adding profiles.");
     }
-    if (profiles.size >= MAX_PROFILES) {
+    const currentCount = limits.exists ? Math.max(1, Number(limits.data()?.profileCount) || 1) : profiles.size;
+    if (currentCount >= MAX_PROFILES) {
       throw new AnimePremiumError(409, "profile-limit-reached", "A Vivid account can have up to " + MAX_PROFILES + " profiles.");
     }
     const reference = profilesRef.doc();
     const normalized = cleanProfileInput(reference.id, body);
     created = { ...normalized, createdAt: now, updatedAt: now };
     transaction.create(reference, created);
+    transaction.set(limitRef, { profileCount: currentCount + 1, updatedAt: now });
   });
   return serializeProfile(created.id, created);
 }
@@ -194,6 +200,17 @@ export async function deleteAccountProfile(request, env) {
   for (const collectionName of PROFILE_DELETE_COLLECTIONS) {
     await deleteProfileCollection(db, reference.collection(collectionName));
   }
-  await reference.delete();
+  const ownerRef = reference.parent.doc(OWNER_PROFILE_ID);
+  const limitRef = ownerRef.collection("profileManagement").doc("limits");
+  await db.runTransaction(async transaction => {
+    const current = await transaction.get(reference);
+    const limits = await transaction.get(limitRef);
+    if (!current.exists) throw new AnimePremiumError(404, "profile-not-found", "This Vivid profile no longer exists.");
+    const currentCount = limits.exists
+      ? Math.max(1, Number(limits.data()?.profileCount) || 1)
+      : Math.max(1, (await transaction.get(reference.parent)).size);
+    transaction.delete(reference);
+    transaction.set(limitRef, { profileCount: Math.max(1, currentCount - 1), updatedAt: Timestamp.fromMillis(Date.now()) });
+  });
   return { id: profileId, deleted: true };
 }
