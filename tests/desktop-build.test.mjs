@@ -251,7 +251,7 @@ test("Windows app checks for updates and offers download plus restart-to-install
   assert.ok(libraryBootstrap.includes("https://cdn.jsdelivr.net/npm/hls.js@1.7.3/dist/hls.min.js"));
 });
 
-test("Windows workflow builds on demand or on release tags", () => {
+test("Windows workflow is manual-only during the multi-phase integration", () => {
   const file = path.join(root, ".github", "workflows", "windows-desktop.yml");
   assert.ok(fs.existsSync(file));
   const workflow = fs.readFileSync(file, "utf8");
@@ -304,7 +304,6 @@ test("Windows workflow builds on demand or on release tags", () => {
   assert.match(workflow, /if: github.event_name == 'workflow_dispatch'/);
   assert.match(workflow, /windows-latest/);
   assert.match(workflow, /run: npm run desktop:dist/);
-  assert.match(workflow, /icons\/\*\*/);
   assert.match(workflow, /Vivid-Cinema-Setup/);
   assert.match(workflow, /Vivid-Cinema-Portable/);
   assert.match(workflow, /Vivid-Cinema-Portable-\$version\.exe/);
