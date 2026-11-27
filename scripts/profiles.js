@@ -47,7 +47,6 @@ export const PROFILE_DATA_COLLECTIONS = Object.freeze([
 export const PROFILE_MIGRATION_ID = "account-data-to-owner-profile-v1";
 
 const PROFILE_ID_PATTERN = /^[A-Za-z0-9_-]{1,64}$/;
-const AVATAR_URL_PATTERN = /^https:\/\//i;
 const ACTIVE_PROFILE_PREFIX = "vivid:active-profile:v1:";
 
 export function normalizeProfileId(value) {
@@ -57,7 +56,7 @@ export function normalizeProfileId(value) {
 }
 
 function normalizeAvatarUrl(value) {
-  if (typeof value !== "string" || !AVATAR_URL_PATTERN.test(value)) return "";
+  if (typeof value !== "string" || !value.trim().toLowerCase().startsWith("https://")) return "";
   try {
     const url = new URL(value);
     if (url.protocol !== "https:" || url.username || url.password) return "";
@@ -70,7 +69,10 @@ function normalizeAvatarUrl(value) {
 export function normalizeProfile(profileId, data = {}) {
   const id = normalizeProfileId(profileId);
   const name = typeof data.name === "string"
-    ? data.name.replace(/[\u0000-\u001f\u007f]/g, "").trim().slice(0, 48)
+    ? Array.from(data.name).filter(character => {
+      const code = character.charCodeAt(0);
+      return code >= 32 && code !== 127;
+    }).join("").trim().slice(0, 48)
     : "";
   const avatarUrl = normalizeAvatarUrl(data.avatarUrl);
   const isKids = data.isKids === true;
