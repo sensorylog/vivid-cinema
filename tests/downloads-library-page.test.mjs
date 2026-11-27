@@ -71,7 +71,7 @@ test("desktop torrent diagnostics expose tracker, DHT, peer and warning events",
   assert.match(engine, /torrent\.on\("noPeers"/);
   assert.match(engine, /torrent\.on\("warning"/);
   assert.match(engine, /client\.on\("error"/);
-  assert.match(engine, /dhtListening: Boolean\(this\.client\.dht && this\.client\.dht\.listening\)/);
+  assert.match(engine, /dhtListening: Boolean\(this\.client\?\.dht && this\.client\.dht\.listening\)/);
   assert.doesNotMatch(desktop, /discoveryDetail|discovery\.lastWarning|lastNoPeerSource/);
   assert.match(engine, /lastWarning/);
 });
