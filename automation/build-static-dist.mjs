@@ -104,4 +104,4 @@ if (process.env.VIVID_ANDROID_BUILD) {
 }
 await addNativeEnhancements(output);
 const seoResult = await generateSeoAssets(output);
-console.log("Prepared static site in dist/ with native-only Capacitor polish and SEO for " + seoResult.indexedPages + " public pages.");
+console.log("Prepared static site in dist/ with native-only Capacitor polish and SEO for " + seoResult.indexedPages + " static pages and " + seoResult.mediaPages + " movie/TV title URLs.");
