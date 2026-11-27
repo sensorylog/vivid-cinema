@@ -41,12 +41,23 @@ export function normalizeProfileId(value) {
   return id;
 }
 
+function normalizeAvatarUrl(value) {
+  if (typeof value !== "string" || !AVATAR_URL_PATTERN.test(value)) return "";
+  try {
+    const url = new URL(value);
+    if (url.protocol !== "https:" || url.username || url.password) return "";
+    return url.href.slice(0, 2048);
+  } catch {
+    return "";
+  }
+}
+
 export function normalizeProfile(profileId, data = {}) {
   const id = normalizeProfileId(profileId);
-  const name = typeof data.name === "string" ? data.name.trim().slice(0, 48) : "";
-  const avatarUrl = typeof data.avatarUrl === "string" && AVATAR_URL_PATTERN.test(data.avatarUrl)
-    ? data.avatarUrl.slice(0, 2048)
+  const name = typeof data.name === "string"
+    ? data.name.replace(/[\\u0000-\\u001f\\u007f]/g, "").trim().slice(0, 48)
     : "";
+  const avatarUrl = normalizeAvatarUrl(data.avatarUrl);
   const isKids = data.isKids === true;
   return {
     id,
@@ -98,14 +109,7 @@ function sameData(left, right) {
 }
 
 function safeAvatarUrl(user) {
-  const candidate = String(user?.photoURL || "").trim();
-  if (!candidate) return "";
-  try {
-    const url = new URL(candidate);
-    return url.protocol === "https:" ? url.href.slice(0, 2048) : "";
-  } catch {
-    return "";
-  }
+  return normalizeAvatarUrl(String(user?.photoURL || "").trim());
 }
 
 export async function ensureOwnerProfile(user = null) {
