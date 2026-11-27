@@ -251,25 +251,34 @@ export async function validateProfileSession(user, profileId) {
 }
 
 export function getActiveProfileId(uid) {
+  const key = activeProfileStorageKey(uid);
   try {
-    const id = localStorage.getItem(activeProfileStorageKey(uid)) || OWNER_PROFILE_ID;
+    const id = localStorage.getItem(key) || sessionStorage.getItem(key) || OWNER_PROFILE_ID;
     return normalizeProfileId(id);
   } catch {
-    return OWNER_PROFILE_ID;
+    try { return normalizeProfileId(sessionStorage.getItem(key) || OWNER_PROFILE_ID); }
+    catch { return OWNER_PROFILE_ID; }
   }
 }
 
 export function hasActiveProfileSelection(uid) {
+  const key = activeProfileStorageKey(uid);
   try {
-    const value = localStorage.getItem(activeProfileStorageKey(uid));
+    const value = localStorage.getItem(key) || sessionStorage.getItem(key);
     return Boolean(value && PROFILE_ID_PATTERN.test(value));
   } catch {
-    return false;
+    try {
+      const value = sessionStorage.getItem(key);
+      return Boolean(value && PROFILE_ID_PATTERN.test(value));
+    } catch { return false; }
   }
 }
 
 export function clearActiveProfileId(uid) {
-  try { localStorage.removeItem(activeProfileStorageKey(uid)); } catch {}
+  let key;
+  try { key = activeProfileStorageKey(uid); } catch { return; }
+  try { localStorage.removeItem(key); } catch {}
+  try { sessionStorage.removeItem(key); } catch {}
 }
 
 export function clearProfileLocalState(uid, profileId) {
@@ -316,7 +325,10 @@ export function clearProfileLocalState(uid, profileId) {
 export function setActiveProfileId(uid, profileId) {
   const key = activeProfileStorageKey(uid);
   const id = normalizeProfileId(profileId);
-  localStorage.setItem(key, id);
+  // Keep both stores in sync. Safari/private browsing or storage quota errors
+  // must not prevent the server-issued profile token from opening the app.
+  try { localStorage.setItem(key, id); } catch {}
+  try { sessionStorage.setItem(key, id); } catch {}
   window.dispatchEvent(new CustomEvent("vivid:profile-changed", {
     detail: { uid: String(uid), profileId: id }
   }));
