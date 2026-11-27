@@ -467,7 +467,14 @@ function showProfileGateNotice() {
 
 function rememberProfileReturnRoute() {
   const page = location.pathname.split("/").filter(Boolean).pop() || "home.html";
-  if (["profiles.html", "auth.html", "login.html", "forgot-password.html", "auth-diagnostics.html", "verify-email.html", "anime-premium-return.html"].includes(page)) return;
+  const isProfileSelector = document.body?.classList.contains("profile-selector-page") ||
+    document.body?.dataset?.vividPage === "profiles" ||
+    ["profiles", "profiles.html"].includes(page);
+  if (isProfileSelector) {
+    document.getElementById("vivid-profile-gate-notice")?.remove();
+    return;
+  }
+  if (["auth.html", "login.html", "forgot-password.html", "auth-diagnostics.html", "verify-email.html", "anime-premium-return.html"].includes(page)) return;
   try { sessionStorage.setItem(PROFILE_RETURN_TO_KEY, currentRoute()); } catch {}
 }
 
