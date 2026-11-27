@@ -168,10 +168,10 @@ export async function updateAccountProfile(request, env) {
   return serializeProfile(profileId, updated);
 }
 
-async function deleteProfileCollection(reference) {
+async function deleteProfileCollection(db, reference) {
   const snapshot = await reference.get();
   for (let offset = 0; offset < snapshot.docs.length; offset += 400) {
-    const batch = reference.firestore.batch();
+    const batch = db.batch();
     snapshot.docs.slice(offset, offset + 400).forEach(item => batch.delete(item.ref));
     await batch.commit();
   }
@@ -192,7 +192,7 @@ export async function deleteAccountProfile(request, env) {
   if (!snapshot.exists) throw new AnimePremiumError(404, "profile-not-found", "This Vivid profile no longer exists.");
   if (snapshot.data()?.isOwner === true) throw new AnimePremiumError(403, "owner-profile-protected", "The main profile cannot be deleted.");
   for (const collectionName of PROFILE_DELETE_COLLECTIONS) {
-    await deleteProfileCollection(reference.collection(collectionName));
+    await deleteProfileCollection(db, reference.collection(collectionName));
   }
   await reference.delete();
   return { id: profileId, deleted: true };
