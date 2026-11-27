@@ -205,29 +205,45 @@ function openEditor(profile = null) {
   dialog.showModal();
   nameInput.focus();
 }
-async function finishProfileOpen(profile, customToken) {
+async function signInWithVerifiedProfileSession(customToken, expectedProfileId, expectedAccountId) {
   if (typeof customToken !== "string" || !customToken) {
     throw new Error("The profile could not be securely selected. Please try again.");
   }
+  const credential = await signInWithCustomToken(auth, customToken);
+  const selectedUser = credential.user;
+  if (!selectedUser?.uid || selectedUser.uid !== expectedAccountId) {
+    throw new Error("The selected profile belongs to a different account. Please sign in again.");
+  }
+  await withProfileTimeout(
+    selectedUser.getIdToken(true),
+    10_000,
+    "Vivid could not refresh the selected profile session. Please retry."
+  );
+  const tokenResult = await withProfileTimeout(
+    selectedUser.getIdTokenResult(),
+    8_000,
+    "Vivid could not verify the selected profile. Please retry."
+  );
+  if (tokenResult.claims.profileId !== expectedProfileId ||
+      typeof tokenResult.claims.profileSessionId !== "string" ||
+      !tokenResult.claims.profileSessionId) {
+    throw new Error("The secure profile session was not confirmed. Your profile was not opened; please try again.");
+  }
+  return selectedUser;
+}
 
-  // Persist the destination profile before Firebase emits the custom-token
-  // auth-state event. The shared app-shell guard runs from that event and
-  // must never observe the previous (or missing) profile selection.
+async function finishProfileOpen(profile, customToken) {
   const accountId = user.uid;
-  const hadPreviousSelection = Boolean(accountId && localStorage.getItem("vivid:active-profile:v1:" + accountId));
-  const previousProfileId = getActiveProfileId(accountId);
-  setActiveProfileId(accountId, profile.id);
   switchingProfile = true;
   try {
-    const credential = await signInWithCustomToken(auth, customToken);
-    user = credential.user;
-  } catch (error) {
-    if (hadPreviousSelection) setActiveProfileId(accountId, previousProfileId);
-    else clearActiveProfileId(accountId);
-    throw error;
+    const selectedUser = await signInWithVerifiedProfileSession(customToken, profile.id, accountId);
+    user = selectedUser;
+    // Persist only after Firebase confirms the server-issued profile claim.
+    setActiveProfileId(accountId, profile.id);
   } finally {
     switchingProfile = false;
   }
+  try { sessionStorage.removeItem("vivid:profile-gate-redirected:v1:" + accountId); } catch {}
   location.replace(destination());
 }
 function startProfileMigration() {
@@ -238,7 +254,7 @@ function startProfileMigration() {
     const migrationSession = await selectProfile(OWNER_PROFILE_ID);
     switchingProfile = true;
     try {
-      user = (await signInWithCustomToken(auth, migrationSession.customToken)).user;
+      user = await signInWithVerifiedProfileSession(migrationSession.customToken, OWNER_PROFILE_ID, migrationUser.uid);
     } finally {
       switchingProfile = false;
     }
