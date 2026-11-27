@@ -142,6 +142,7 @@ test("profile selector waits for persisted Firebase auth before deciding to redi
   await expect(page).toHaveURL(/profiles\.html$/);
   await page.evaluate(() => window.__releaseProfileAuth());
 
+  console.log("Profile selector after auth restore:", await page.locator("#profile-grid").innerText(), "| status:", await page.locator("#profile-status").innerText());
   await expect(page.getByRole("button", { name: "Choose Main Profile" })).toBeVisible();
   await page.getByRole("button", { name: "Choose Main Profile" }).click();
   await expect(page).toHaveURL(/home\.html$/);
