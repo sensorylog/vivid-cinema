@@ -46,7 +46,7 @@ export async function deleteProfile(profileId) {
 }
 
 export async function compressProfileImage(file) {
-  if (!(file instanceof Blob) || !/^image\\/(?:jpeg|png|webp|avif)$/i.test(file.type)) {
+  if (!(file instanceof Blob) || !["image/jpeg", "image/png", "image/webp", "image/avif"].includes(String(file.type || "").toLowerCase())) {
     throw new Error("Choose a JPEG, PNG, WebP or AVIF image.");
   }
   if (file.size > 12 * 1024 * 1024) throw new Error("Choose an image smaller than 12 MB.");
