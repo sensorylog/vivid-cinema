@@ -10,6 +10,8 @@ const shell = readFileSync(new URL("../scripts/app-shell.js", import.meta.url), 
 const rules = readFileSync(new URL("../firestore.rules", import.meta.url), "utf8");
 const page = readFileSync(new URL("../profiles.html", import.meta.url), "utf8");
 const profileService = readFileSync(new URL("../cloudflare/functions/lib/profile-service.js", import.meta.url), "utf8");
+const cloudflareApi = readFileSync(new URL("../scripts/cloudflare-api.js", import.meta.url), "utf8");
+const cloudflareService = readFileSync(new URL("../cloudflare/functions/lib/anime-premium-service.js", import.meta.url), "utf8");
 
 test("profile PINs are stored as salted PBKDF2 hashes, never plaintext", () => {
   const first = hashProfilePin("4826");
@@ -64,6 +66,33 @@ test("Firestore denies direct client access to PIN secrets and requires a live s
   assert.match(rules, /function hasLegacyOwnerProfileAccess/);
   assert.match(rules, /request\.auth\.token\.profileId == 'owner'/);
   assert.match(rules, /!hasProfilePin\(userId, profileId\) \|\| hasCurrentPinSession\(userId, profileId\)/);
+});
+
+test("profile APIs resolve to the hosted Pages origin from Android and Electron local runtimes", async () => {
+  const { getCloudflareApiUrl } = await import("../scripts/cloudflare-api.js");
+  const originalWindow = globalThis.window;
+  try {
+    globalThis.window = {
+      location: { origin: "http://localhost:34871" },
+      vividDownloads: { available: true }
+    };
+    assert.equal(getCloudflareApiUrl("/api/profiles"), "https://vivid-cinema.pages.dev/api/profiles");
+    globalThis.window = {
+      location: { origin: "https://android.vivid-cinema.pages.dev" },
+      Capacitor: { isNativePlatform: () => true, getPlatform: () => "android" }
+    };
+    assert.equal(getCloudflareApiUrl("/api/profiles"), "https://vivid-cinema.pages.dev/api/profiles");
+    globalThis.window = { location: { origin: "https://vivid-cinema.pages.dev" } };
+    assert.equal(getCloudflareApiUrl("/api/profiles"), "https://vivid-cinema.pages.dev/api/profiles");
+  } finally {
+    if (originalWindow === undefined) delete globalThis.window;
+    else globalThis.window = originalWindow;
+  }
+  assert.match(manager, /getCloudflareApiUrl\(path\)/);
+  assert.match(readFileSync(new URL("../scripts/profiles.js", import.meta.url), "utf8"), /getCloudflareApiUrl\("\/api\/profiles"\)/);
+  assert.match(cloudflareApi, /vividDownloads\?\.available === true/);
+  assert.match(cloudflareService, /parsed\.protocol === "http:" && parsed\.hostname === "localhost"/);
+  assert.match(pinApi, /parsed\.protocol === "http:" && parsed\.hostname === "localhost"/);
 });
 
 test("profile listing exposes only a PIN-enabled flag and never returns the stored PIN hash", () => {
