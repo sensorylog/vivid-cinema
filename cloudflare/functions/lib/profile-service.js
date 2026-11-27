@@ -158,10 +158,10 @@ export async function updateAccountProfile(request, env) {
     const snapshot = await transaction.get(reference);
     if (!snapshot.exists) throw new AnimePremiumError(404, "profile-not-found", "This Vivid profile no longer exists.");
     const existing = snapshot.data() || {};
-    const normalized = cleanProfileInput(profileId, body, existing);
-    if (existing.isOwner === true && normalized.isKids) {
+    if (existing.isOwner === true && body.isKids === true) {
       throw new AnimePremiumError(400, "owner-cannot-be-kids", "The main account profile cannot be changed into a Kids profile.");
     }
+    const normalized = cleanProfileInput(profileId, body, existing);
     updated = { ...normalized, createdAt: existing.createdAt || now, updatedAt: now };
     transaction.set(reference, updated);
   });
