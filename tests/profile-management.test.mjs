@@ -40,6 +40,9 @@ test("profile normalization validates identity, Kids type, HTTPS photos and comp
   assert.equal(profile.avatarId, "nebula");
   assert.equal(profile.avatarUrl, "https://lh3.googleusercontent.com/photo");
   assert.equal(profile.avatarData, data);
+  assert.equal(profile.avatarSource, "upload");
+  assert.equal(normalizeProfile("owner", { name: "Main", avatarUrl: "https://example.com/photo.png" }).avatarSource, "google");
+  assert.equal(normalizeProfile("owner", { name: "Main", avatarSource: "collection" }).avatarSource, "collection");
   assert.equal(profile.isKids, true);
   assert.equal(profile.maturityLevel, "kids");
   assert.equal(profile.isOwner, false);
@@ -54,6 +57,8 @@ test("profile APIs authenticate Firebase users, rate limit changes and enforce p
   assert.match(service, /verifyFirebaseIdToken/);
   assert.match(service, /getPremiumServices\(env\)/);
   assert.match(service, /enforceRateLimit\(db, user\.uid, "profiles-create"/);
+  assert.match(service, /invalid-avatar-source/);
+  assert.match(service, /avatarSource/);
   assert.match(service, /transaction\.get\(profilesRef\)/);
   assert.match(service, /profiles\.size >= MAX_PROFILES/);
   assert.match(service, /owner-profile-required/);
@@ -71,6 +76,7 @@ test("profile management API protects the owner profile and exposes only explici
   assert.match(service, /A Vivid account can have up to/);
   assert.match(service, /Access-Control-Allow-Methods/);
   assert.ok(rules.includes("match /users/{userId}/profiles/{profileId}"));
+  assert.match(rules, /avatarSource.*google.*collection.*upload/s);
 });
 
 test("profile metadata never stores PIN material in the public profile document schema", () => {
