@@ -64,7 +64,11 @@ export async function requireUnlockedProfile(db, user, profileId) {
   if (!profileSnapshot.exists) {
     throw new AnimePremiumError(404, "profile-not-found", "This Vivid profile no longer exists.");
   }
-  if (!pinSnapshot.exists) return profileSnapshot.data() || {};
+  const profileData = profileSnapshot.data() || {};
+  if (profileId === OWNER_PROFILE_ID && profileData.isOwner !== true) {
+    throw new AnimePremiumError(409, "owner-profile-required", "The main Vivid profile must be initialized before managing profiles.");
+  }
+  if (!pinSnapshot.exists) return profileData;
 
   const sessionId = String(user.profileSessionId || "");
   if (!PROFILE_SESSION_ID_PATTERN.test(sessionId)) {
@@ -78,7 +82,7 @@ export async function requireUnlockedProfile(db, user, profileId) {
       session.pinHash !== pinSnapshot.data()?.pinHash) {
     throw new AnimePremiumError(401, "profile-session-expired", "This profile unlock has expired. Enter its PIN again.");
   }
-  return profileSnapshot.data() || {};
+  return profileData;
 }
 
 export function profileErrorResponse(error, origin, env) {
@@ -192,6 +196,9 @@ export async function createAccountProfile(request, env) {
   const activeProfile = await requireUnlockedProfile(db, user, user.profileId);
   if (activeProfile.isKids === true) {
     throw new AnimePremiumError(403, "parent-authorization-required", "Kids profiles cannot create additional viewing profiles. Verify with an adult profile first.");
+  }
+  if (body.isKids === true && user.profileId !== OWNER_PROFILE_ID) {
+    throw new AnimePremiumError(403, "parent-authorization-required", "Only the Main Profile can create a Kids profile.");
   }
   const name = typeof body.name === "string" ? body.name.trim() : "";
   if (!name) throw new AnimePremiumError(400, "invalid-profile-name", "Enter a name for this profile.");
