@@ -200,3 +200,16 @@ test("Account creation, sign-in and the synced library keep their Firebase SDK p
   assert.match(library, /getDocsFromServer/);
   assert.match(library, /setDoc\(doc\(db,\s*"users",\s*uid/);
 });
+
+
+test("Turnstile script loading and verification cannot leave App Check pending forever", async () => {
+  const provider = await readFile(new URL("../scripts/turnstile-app-check.js", import.meta.url), "utf8");
+  const loaderStart = provider.indexOf("function loadTurnstile()");
+  const loaderEnd = provider.indexOf("async function getConfig()", loaderStart);
+  const loader = provider.slice(loaderStart, loaderEnd);
+  assert.match(loader, /12_000/);
+  assert.match(loader, /window\.clearTimeout\(timeout\)/);
+  assert.match(loader, /script\.remove\(\)/);
+  assert.ok(loader.indexOf("window.setTimeout") < loader.indexOf("document.head.append(script)"));
+  assert.match(provider, /20_000/);
+});
