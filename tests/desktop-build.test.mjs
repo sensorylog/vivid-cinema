@@ -8,10 +8,10 @@ const pkg = JSON.parse(fs.readFileSync(path.join(root, "package.json"), "utf8"))
 
 
 test("Windows offline engine partitions state and files by account/profile owner", () => {
-  const main = readFileSync(new URL("../desktop/main.cjs", import.meta.url), "utf8");
-  const preload = readFileSync(new URL("../desktop/preload.cjs", import.meta.url), "utf8");
-  const engine = readFileSync(new URL("../desktop/download-engine.cjs", import.meta.url), "utf8");
-  const offline = readFileSync(new URL("../scripts/downloads/desktop-offline.js", import.meta.url), "utf8");
+  const main = fs.readFileSync(new URL("../desktop/main.cjs", import.meta.url), "utf8");
+  const preload = fs.readFileSync(new URL("../desktop/preload.cjs", import.meta.url), "utf8");
+  const engine = fs.readFileSync(new URL("../desktop/download-engine.cjs", import.meta.url), "utf8");
+  const offline = fs.readFileSync(new URL("../scripts/downloads/desktop-offline.js", import.meta.url), "utf8");
   assert.match(main, /vivid-download-set-owner/);
   assert.match(main, /resolveLegacyDownloadStorage/);
   assert.match(preload, /setOwner: ownerId => ipcRenderer\.invoke/);
