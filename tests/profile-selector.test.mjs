@@ -53,6 +53,7 @@ test("profile gate redirects only once per account session and clears after a va
   assert.match(shell, /showProfileGateNotice\(\)/);
   assert.match(shell, /clearProfileGateRedirect\(user\.uid\)/);
   assert.match(shell, /clearProfileGateRedirect\(previousUid\)/);
+  assert.match(shell, /clearAllProfileGateRedirects\(\)/);
 });
 
 test("profile selector does not expose protected global navigation before a profile is chosen", () => {
