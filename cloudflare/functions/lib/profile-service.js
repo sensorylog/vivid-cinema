@@ -80,7 +80,7 @@ export async function readProfileBody(request) {
 function cleanProfileInput(profileId, body, existing = {}) {
   const name = typeof body.name === "string" ? body.name.trim() : String(existing.name || "").trim();
   if (!name || name.length > 48) throw new AnimePremiumError(400, "invalid-profile-name", "Profile names must contain 1–48 characters.");
-  const avatarId = body.avatarId == null ? existing.avatarId : String(body.avatarId);
+  const avatarId = body.avatarId == null ? (existing.avatarId || "aurora") : String(body.avatarId);
   if (!AVATAR_IDS.has(String(avatarId || ""))) throw new AnimePremiumError(400, "invalid-avatar", "Choose an avatar from the Vivid collection.");
   const avatarUrl = body.avatarUrl == null ? String(existing.avatarUrl || "") : String(body.avatarUrl);
   const avatarData = body.avatarData == null ? String(existing.avatarData || "") : String(body.avatarData);
