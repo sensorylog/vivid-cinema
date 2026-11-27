@@ -21,6 +21,8 @@ test("Windows offline engine partitions state and files by account/profile owner
   assert.match(engine, /vivid-downloads/);
   assert.match(offline, /engine\.setOwner\(owner\)/);
   assert.match(offline, /vivid:profile-changed/);
+  assert.match(offline, /document\.body\.inert = true/);
+  assert.match(offline, /document\.body\.inert = false/);
 });
 
 test("desktop packaging is opt-in and preserves existing scripts", () => {
