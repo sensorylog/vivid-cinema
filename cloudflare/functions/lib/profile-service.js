@@ -83,19 +83,22 @@ function cleanProfileInput(profileId, body, existing = {}) {
   if (!name || name.length > 48) throw new AnimePremiumError(400, "invalid-profile-name", "Profile names must contain 1–48 characters.");
   const avatarId = body.avatarId == null ? (existing.avatarId || "aurora") : String(body.avatarId);
   if (!AVATAR_IDS.has(String(avatarId || ""))) throw new AnimePremiumError(400, "invalid-avatar", "Choose an avatar from the Vivid collection.");
-  const avatarUrl = body.avatarUrl == null ? String(existing.avatarUrl || "") : String(body.avatarUrl);
-  const avatarData = body.avatarData == null ? String(existing.avatarData || "") : String(body.avatarData);
-  const avatarSource = body.avatarSource == null ? String(existing.avatarSource || (avatarData ? "upload" : avatarUrl ? "google" : "collection")) : String(body.avatarSource);
+  const avatarSource = body.avatarSource == null ? String(existing.avatarSource || "") : String(body.avatarSource);
+  const allowedSources = new Set(["auto","google","collection","upload"]);
+  if (avatarSource && !allowedSources.has(avatarSource)) throw new AnimePremiumError(400, "invalid-avatar-source", "Choose a valid profile photo source.");
+  const source = avatarSource || (profileId === OWNER_PROFILE_ID ? "auto" : "collection");
+  if (source === "auto" && profileId !== OWNER_PROFILE_ID) throw new AnimePremiumError(400, "invalid-avatar-source", "Automatic Google photos are only available for the account owner.");
+  const requestedUrl = body.avatarUrl == null ? String(existing.avatarUrl || "") : String(body.avatarUrl);
+  const requestedData = body.avatarData == null ? String(existing.avatarData || "") : String(body.avatarData);
+  const avatarUrl = source === "google" || source === "auto" ? requestedUrl : "";
+  const avatarData = source === "upload" ? requestedData : "";
   const isKids = body.isKids == null ? existing.isKids === true : body.isKids === true;
-  const normalized = normalizeProfile(profileId, { name, avatarId, avatarUrl, avatarData, avatarSource, isKids });
+  const normalized = normalizeProfile(profileId, { name, avatarId, avatarUrl, avatarData, avatarSource: source, isKids });
   if (!normalized.name || normalized.avatarId !== avatarId) {
     throw new AnimePremiumError(400, "invalid-profile", "The profile details are not valid.");
   }
   if (avatarUrl && !normalized.avatarUrl) throw new AnimePremiumError(400, "invalid-avatar-url", "Profile photo URLs must use secure HTTPS.");
-  if (avatarData && !normalized.avatarData) throw new AnimePremiumError(400, "invalid-avatar-image", "Upload a valid compressed WebP image.");
-  if (normalized.avatarSource !== avatarSource || (avatarSource === "upload" && !avatarData) || (avatarSource === "google" && !avatarUrl)) {
-    throw new AnimePremiumError(400, "invalid-avatar-source", "Choose a valid Vivid avatar or photo.");
-  }
+  if (source === "upload" && (!requestedData || !normalized.avatarData)) throw new AnimePremiumError(400, "invalid-avatar-image", "Upload a valid compressed WebP image.");
   return normalized;
 }
 
