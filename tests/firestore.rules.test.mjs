@@ -229,6 +229,10 @@ test("profile PIN sessions are enforced by Firestore and cannot be forged by loc
       lastActivityAt: Timestamp.fromMillis(Date.now() - 31 * 60 * 1000),
       expiresAt: Timestamp.fromMillis(Date.now() + 60 * 60 * 1000)
     });
+    await setDoc(doc(admin, "users/pin-owner/profiles/kid-1/profileSessions/missing-activity"), {
+      uid: "pin-owner", profileId: "kid-1", revoked: false, pinHash: "server-only-hash",
+      expiresAt: Timestamp.fromMillis(Date.now() + 60 * 60 * 1000)
+    });
   });
 
   await assertSucceeds(getDoc(unpinnedProfile));
@@ -264,6 +268,10 @@ test("profile PIN sessions are enforced by Firestore and cannot be forged by loc
     profileId: "kid-1", profileSessionId: "idle-expired"
   }).firestore();
   await assertFails(getDoc(doc(idleExpired, "users/pin-owner/profiles/kid-1/favorites/movie:pin")));
+  const missingActivity = env.authenticatedContext("pin-owner", {
+    profileId: "kid-1", profileSessionId: "missing-activity"
+  }).firestore();
+  await assertFails(getDoc(doc(missingActivity, "users/pin-owner/profiles/kid-1/favorites/movie:pin")));
   await assertFails(deleteDoc(pinnedProfile));
 });
 
