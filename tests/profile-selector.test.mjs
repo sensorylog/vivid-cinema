@@ -13,7 +13,8 @@ const [page, selector, manager, auth, worker, account] = await Promise.all([
 ]);
 
 test("successful sign-in opens the Who's Watching profile selector by default", () => {
-  assert.match(auth, /if\(!raw\)return "profiles\.html";/);
+  assert.match(auth, /return "profiles\.html";/);
+  assert.match(auth, /vivid:profile-return-to:v1/);
   assert.match(page, /Who's watching\?/);
   assert.match(page, /id="profile-grid"/);
   assert.match(selector, /setActiveProfileId\(user\.uid, profile\.id\)/);
@@ -23,7 +24,7 @@ test("profile selector initializes the owner migration before loading profile ch
   assert.match(selector, /initializeProfileFoundation\(user\)/);
   assert.match(selector, /ensureOwnerProfile\(user\)/);
   assert.match(selector, /fetchProfiles\(\)/);
-  assert.match(selector, /profile\.id === profile\.id/);
+  assert.match(selector, /current\.some\(item => item\.id === profile\.id\)/);
   assert.match(selector, /location\.replace\(destination\(\)\)/);
 });
 
