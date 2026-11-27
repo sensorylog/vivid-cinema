@@ -32,24 +32,7 @@ let pendingProfile = null;
 let switchingProfile = false;
 let pinSaving = false;
 
-const avatarVisuals = {
-  aurora:["bi-stars","linear-gradient(145deg,#536b9e,#18233e)"],
-  ember:["bi-fire","linear-gradient(145deg,#a85a42,#391b25)"],
-  nebula:["bi-moon-stars","linear-gradient(145deg,#7459a8,#211b46)"],
-  eclipse:["bi-circle-half","linear-gradient(145deg,#657080,#151a28)"],
-  nova:["bi-sun","linear-gradient(145deg,#c28b52,#523328)"],
-  prism:["bi-gem","linear-gradient(145deg,#528c9b,#26365f)"],
-  orbit:["bi-globe2","linear-gradient(145deg,#4c7e9a,#182c4d)"],
-  titan:["bi-shield-shaded","linear-gradient(145deg,#66748a,#222b3b)"],
-  ripple:["bi-water","linear-gradient(145deg,#4d92a0,#153d50)"],
-  halo:["bi-brightness-high","linear-gradient(145deg,#b28c58,#443321)"],
-  flux:["bi-lightning-charge","linear-gradient(145deg,#8a63b0,#31204c)"],
-  onyx:["bi-eye","linear-gradient(145deg,#626575,#171923)"],
-  solstice:["bi-flower1","linear-gradient(145deg,#b17a79,#4b293f)"],
-  comet:["bi-rocket-takeoff","linear-gradient(145deg,#6688b7,#263052)"],
-  vortex:["bi-tornado","linear-gradient(145deg,#637d91,#253241)"],
-  lumen:["bi-lightbulb","linear-gradient(145deg,#b4a46a,#49422a)"]
-};
+
 const destination = () => {
   let stored = "";
   try {
