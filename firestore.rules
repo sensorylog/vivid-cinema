@@ -270,14 +270,14 @@ service cloud.firestore {
           && request.auth.token.keys().hasAll(['profileId'])
           && request.auth.token.profileId == profileId
           && exists(/databases/$(database)/documents/users/$(userId)/profiles/$(profileId))
-          && hasProfileSession(userId, profileId);
+          && (!hasProfilePin(userId, profileId) || hasProfileSession(userId, profileId));
       }
 
       function hasLegacyOwnerProfileAccess(userId) {
         return isOwner(userId)
           && request.auth.token.keys().hasAll(['profileId'])
           && request.auth.token.profileId == 'owner'
-          && hasProfileSession(userId, 'owner');
+          && (!hasProfilePin(userId, 'owner') || hasProfileSession(userId, 'owner'));
       }
 
     match /users/{userId} {
