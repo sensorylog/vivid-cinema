@@ -113,7 +113,7 @@ export async function ensureOwnerProfile(user = null) {
       throw new Error("The owner profile has an unsupported or invalid profile record.");
     }
     const normalized = normalizeProfile(OWNER_PROFILE_ID, existing);
-    const policyKeys = ["movieRatingLimit","tvRatingLimit","blockedGenreIds","blockedTitles","allowUnrated"];
+    const policyKeys = ["isKids","maturityLevel","movieRatingLimit","tvRatingLimit","blockedGenreIds","blockedTitles","allowUnrated"];
     const updates = Object.fromEntries(policyKeys.filter(key => JSON.stringify(existing[key]) !== JSON.stringify(normalized[key])).map(key => [key, normalized[key]]));
     const googlePhoto = safeAvatarUrl(current);
     if (googlePhoto && !existing.avatarUrl && !["collection","upload"].includes(existing.avatarSource)) {
