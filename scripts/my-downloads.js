@@ -21,7 +21,7 @@ async function loadHlsRuntime() {
 if (window.vividDownloads?.available) {
   // Start the Windows library immediately. HLS.js is only needed if a file
   // requires compatibility transcoding, never to render the saved library.
-  void import("./downloads/desktop-offline.js?windows-offline-hls-v6").catch(error => {
+  void import("./downloads/desktop-offline.js?windows-offline-hls-v7").catch(error => {
     console.error("Vivid offline library could not start:", error);
     const message = document.getElementById("offline-message");
     if (message) message.textContent = "Your offline library could not be opened. " + (error?.message || "Please restart Vivid Cinema.");
