@@ -242,6 +242,12 @@ test("profile library access is bound to the selected signed profile, including 
     email_verified: true, name: "Owner", profileId: "owner", profileSessionId: "owner-session"
   }).firestore();
   await assertSucceeds(getDoc(doc(ownerUnlocked, "users/profile-scope/favorites/movie:legacy")));
+  await env.withSecurityRulesDisabled(async context => {
+    await setDoc(doc(context.firestore(), "users/profile-scope/profiles/owner/profileSecurity/pin"), {
+      pinHash: "rotated-pin-hash", pinSalt: "rotated-salt", iterations: 310000
+    });
+  });
+  await assertFails(getDoc(doc(ownerUnlocked, "users/profile-scope/favorites/movie:legacy")));
 });
 
 test("discovery queue is private and publication is coupled to an article write", async () => {
