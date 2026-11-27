@@ -110,7 +110,7 @@ test("profile deletion protects the owner and requires an explicit confirmation"
 });
 
 test("profile selector assets are network refreshed and accessible from the account hub", () => {
-  assert.match(worker, /vivid-cinema-shell-v376/);
+  assert.match(worker, /vivid-cinema-shell-v377/);
   assert.match(worker, /profile-selector/);
   assert.match(worker, /profiles\.html/);
   assert.match(account, /href="profiles\.html"/);
