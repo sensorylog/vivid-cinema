@@ -139,7 +139,7 @@ export async function listAccountProfiles(request, env) {
     ]);
     const avatarData = avatarSnapshot?.data()?.data || data.avatarData || "";
     const profile = serializeProfile(item.id, { ...data, avatarData });
-    return { ...profile, hasPin: Boolean(pinSnapshot.exists && pinSnapshot.data()?.pinHash) };
+    return { ...profile, hasPin: pinSnapshot.exists };
   }));
   return {
     profiles: profiles
