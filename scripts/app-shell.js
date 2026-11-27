@@ -433,6 +433,14 @@ function clearAllProfileGateRedirects() {
 }
 
 function showProfileGateNotice() {
+  // The profile selector is the recovery destination itself. Never cover its
+  // profile cards with the protected-page gate, even if a rewritten route or
+  // stale auth callback makes the pathname check ambiguous.
+  if (document.body?.classList.contains("profile-selector-page") ||
+      document.body?.dataset?.vividPage === "profiles") {
+    document.getElementById("vivid-profile-gate-notice")?.remove();
+    return;
+  }
   if (document.getElementById("vivid-profile-gate-notice")) return;
   const notice = document.createElement("div");
   notice.id = "vivid-profile-gate-notice";
