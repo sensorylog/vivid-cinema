@@ -117,7 +117,12 @@ export async function buildMediaSitemapEntries(fetchImpl, apiKey, origin = DEFAU
     } catch { return []; }
   }));
   const unique = new Map();
-  for (const item of pages.flat()) {\n    const key = item.type + ":" + item.id;\n    const existing = unique.get(key);\n    if (!existing) unique.set(key, item);\n    else if (!existing.image && item.image) existing.image = item.image;\n  }
+  for (const item of pages.flat()) {
+    const key = item.type + ":" + item.id;
+    const existing = unique.get(key);
+    if (!existing) unique.set(key, item);
+    else if (!existing.image && item.image) existing.image = item.image;
+  }
   return [...unique.values()].map(item => ({
     url: origin + "/title.html?id=" + encodeURIComponent(item.id) + "&type=" + item.type,
     title: item.title,
