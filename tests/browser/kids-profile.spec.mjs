@@ -100,6 +100,25 @@ test("a parent can create a Kids profile with explicit viewing limits and blocke
   await expect(page.getByRole("button", { name: "Edit Kids Room" })).toBeVisible();
 });
 
+test("Vivid avatar choices support roving keyboard navigation", async ({ page }) => {
+  await mockProfileRuntime(page);
+  await page.goto("/profiles.html", { waitUntil: "domcontentloaded" });
+  await page.getByRole("button", { name: "Manage profiles" }).click();
+  await page.getByRole("button", { name: "Add profile" }).click();
+
+  const radios = page.locator("#avatar-gallery [role=radio]");
+  await expect(radios.nth(0)).toHaveAttribute("tabindex", "0");
+  await expect(radios.nth(1)).toHaveAttribute("tabindex", "-1");
+  await radios.nth(0).focus();
+  await page.keyboard.press("ArrowRight");
+  await expect(radios.nth(1)).toHaveAttribute("aria-checked", "true");
+  await expect(radios.nth(1)).toBeFocused();
+
+  await page.keyboard.press("End");
+  await expect(radios.last()).toHaveAttribute("aria-checked", "true");
+  await expect(radios.last()).toBeFocused();
+});
+
 test("leaving an active Kids profile requires the Main Profile PIN and only then switches profiles", async ({ page }) => {
   await page.addInitScript(() => {
     window.__profileClaims = { profileId: "kid-1", isKids: true };
