@@ -44,7 +44,12 @@ const avatarVisuals = {
   lumen:["bi-lightbulb","linear-gradient(145deg,#b4a46a,#49422a)"]
 };
 const destination = () => {
-  const raw = new URLSearchParams(location.search).get("returnTo") || "home.html";
+  let stored = "";
+  try {
+    stored = sessionStorage.getItem("vivid:profile-return-to:v1") || "";
+    sessionStorage.removeItem("vivid:profile-return-to:v1");
+  } catch {}
+  const raw = stored || new URLSearchParams(location.search).get("returnTo") || "home.html";
   try {
     const url = new URL(raw, location.origin);
     if (url.origin !== location.origin || !url.pathname.endsWith(".html") ||
