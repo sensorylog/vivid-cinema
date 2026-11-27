@@ -17,11 +17,16 @@ async function loadHlsRuntime() {
   });
 }
 
-await loadHlsRuntime();
-
 if (window.vividDownloads?.available) {
-  void import("./downloads/desktop-offline.js?windows-offline-hls-v3");
+  // Start the Windows library immediately. HLS.js is only needed if a file
+  // requires compatibility transcoding, never to render the saved library.
+  void import("./downloads/desktop-offline.js?windows-offline-hls-v4").catch(error => {
+    console.error("Vivid offline library could not start:", error);
+    const message = document.getElementById("offline-message");
+    if (message) message.textContent = "Your offline library could not be opened. " + (error?.message || "Please restart Vivid Cinema.");
+  });
 } else {
+  await loadHlsRuntime();
 const byId = id => document.getElementById(id);
 const jobsNode = byId("offline-jobs");
 const messageNode = byId("offline-message");
