@@ -455,37 +455,77 @@ async function enforceProfileSelection(user) {
     rememberProfileReturnRoute();
     if (page !== "profiles.html") window.location.replace("profiles.html");
   };
+
   if (!hasActiveProfileSelection(user.uid)) {
     redirectToProfiles();
     return;
   }
+
+  const activeId = getActiveProfileId(user.uid);
+  let tokenResult;
   try {
-    const { profiles } = await listProfileSummaries(user);
-    const activeId = getActiveProfileId(user.uid);
-    const activeProfile = profiles.find(profile => profile.id === activeId);
-    if (!activeProfile) {
+    tokenResult = await user.getIdTokenResult();
+  } catch (error) {
+    // A temporary token refresh failure must not send a signed-in viewer into
+    // a selector loop. The next navigation/auth event can retry validation.
+    console.warn("Vivid could not refresh the active profile token:", error);
+    return;
+  }
+  if (tokenResult.claims.profileId !== activeId) {
+    redirectToProfiles();
+    return;
+  }
+
+  let activeProfile;
+  try {
+    const summary = await listProfileSummaries(user);
+    activeProfile = summary.profiles.find(profile => profile.id === activeId);
+  } catch (error) {
+    if (error?.code === "PROFILE_SESSION_REJECTED") {
       clearActiveProfileId(user.uid);
       redirectToProfiles();
       return;
     }
-    const tokenResult = await user.getIdTokenResult();
-    if (tokenResult.claims.profileId !== activeId) {
+    // Network/App Check/edge failures are not evidence of a bad profile.
+    // Keep the already-authenticated route instead of bouncing between pages.
+    console.warn("Vivid profile verification is temporarily unavailable; preserving the selected route:", error);
+    if (typeof tokenResult.claims.profileSessionId === "string") {
+      try {
+        if (!await validateProfileSession(user, activeId)) {
+          redirectToProfiles();
+          return;
+        }
+        bindProfileActivity(user, activeId);
+      } catch (validationError) {
+        console.warn("Vivid could not refresh profile-session verification:", validationError);
+      }
+    }
+    return;
+  }
+
+  if (!activeProfile) {
+    clearActiveProfileId(user.uid);
+    redirectToProfiles();
+    return;
+  }
+  if (activeProfile.hasPin) {
+    if (typeof tokenResult.claims.profileSessionId !== "string") {
       redirectToProfiles();
       return;
     }
-    if (activeProfile.hasPin) {
-      if (typeof tokenResult.claims.profileSessionId !== "string" ||
-          !await validateProfileSession(user, activeId)) {
+    try {
+      if (!await validateProfileSession(user, activeId)) {
         redirectToProfiles();
         return;
       }
-      bindProfileActivity(user, activeId);
+    } catch (error) {
+      // A transient verification outage must not invalidate a token that was
+      // issued only after the server-side PIN flow completed.
+      console.warn("Vivid could not refresh profile-session verification:", error);
     }
-    if (page === "auth.html") window.location.replace("home.html");
-  } catch (error) {
-    console.warn("Vivid could not validate the active viewing profile:", error);
-    redirectToProfiles();
+    bindProfileActivity(user, activeId);
   }
+  if (page === "auth.html") window.location.replace("home.html");
 }
 
 function syncAccountNavigation() {

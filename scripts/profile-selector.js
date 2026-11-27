@@ -209,14 +209,25 @@ async function finishProfileOpen(profile, customToken) {
   if (typeof customToken !== "string" || !customToken) {
     throw new Error("The profile could not be securely selected. Please try again.");
   }
+
+  // Persist the destination profile before Firebase emits the custom-token
+  // auth-state event. The shared app-shell guard runs from that event and
+  // must never observe the previous (or missing) profile selection.
+  const accountId = user.uid;
+  const hadPreviousSelection = Boolean(accountId && localStorage.getItem("vivid:active-profile:v1:" + accountId));
+  const previousProfileId = getActiveProfileId(accountId);
+  setActiveProfileId(accountId, profile.id);
   switchingProfile = true;
   try {
     const credential = await signInWithCustomToken(auth, customToken);
     user = credential.user;
+  } catch (error) {
+    if (hadPreviousSelection) setActiveProfileId(accountId, previousProfileId);
+    else clearActiveProfileId(accountId);
+    throw error;
   } finally {
     switchingProfile = false;
   }
-  setActiveProfileId(user.uid, profile.id);
   location.replace(destination());
 }
 function startProfileMigration() {
