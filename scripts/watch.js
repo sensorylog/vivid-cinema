@@ -1621,10 +1621,10 @@ async function load() {
   }
   media = normalizeMedia({ id: currentParams.id, overview: "", title: currentParams.type === "tv" ? "Loading episode…" : "Loading movie…", poster_path: "", backdrop_path: "" }, currentParams.type);
   renderShell(currentParams);
-  if (isWatchRoomCinemaMode && watchRoomScreeningValidated) roomOpenPlayerWindow?.();
   try {
     details = currentParams.type === "tv" ? await tmdbApi.tvDetails(currentParams.id) : await tmdbApi.movieDetails(currentParams.id);
     if (!await isTitleAllowed({ ...details, id: currentParams.id, media_type: currentParams.type })) { renderParentalBlock($("watch-content"), details?.name || details?.title || "This title"); return; }
+    if (isWatchRoomCinemaMode && watchRoomScreeningValidated) roomOpenPlayerWindow?.();
     media = normalizeMedia(details, currentParams.type);
     if (isLikelyAnime() && !isAnimePlayback()) {
       const query = new URLSearchParams({ id: String(currentParams.id), type: currentParams.type });
