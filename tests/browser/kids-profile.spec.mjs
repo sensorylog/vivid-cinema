@@ -32,6 +32,7 @@ export async function initializeProfileFoundation() {}
 export function getActiveProfileId() { return window.__activeProfileId || "owner"; }
 export function setActiveProfileId(_uid, id) { window.__activeProfileId = id; }
 export function clearActiveProfileId() { window.__activeProfileId = ""; }
+export async function withProfileTimeout(promise) { return await promise; }
 export async function validateProfileSession(_user, profileId) { return profileId !== "kid-1" || window.__profileSessionValid === true; }
 export async function listProfileSummaries() {
   return { profiles: [window.__parentalPolicy || {}] };
