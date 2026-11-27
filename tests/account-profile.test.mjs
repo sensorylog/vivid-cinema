@@ -138,10 +138,9 @@ test("account page includes a visible bootstrap diagnostic and account deletion 
   assert.match(script, /reauthenticateForDeletion\(user\)/);
   assert.match(script, /https:\/\/vivid-cinema-api\.vercel\.app\/api\/delete-account/);
   assert.match(script, /deletionResult\.ok !== true/);
-  assert.match(script, /ACCOUNT_PRIVATE_COLLECTIONS/);
-  assert.match(script, /async function deleteProfileDocuments\(uid\)/);
-  assert.match(script, /"users", uid, "profiles", profile\.id, collectionName/);
-  assert.match(script, /await deleteProfileDocuments\(user\.uid\)/);
+  assert.match(script, /method: "POST"/);
+  assert.match(script, /body: JSON\.stringify\(\{ confirm: true \}\)/);
+  assert.match(script, /for \(const storage of \[window\.localStorage, window\.sessionStorage\]\)/);
 });
 
 test("release-state records can be deleted by their owner but not created or updated by clients", () => {
