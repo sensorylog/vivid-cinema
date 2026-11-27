@@ -5,6 +5,7 @@ const MOVIE_AGE = Object.freeze({ G: 0, PG: 7, "PG-13": 13, R: 17, "NC-17": 18 }
 const TV_AGE = Object.freeze({ "TV-Y": 0, "TV-Y7": 7, "TV-G": 0, "TV-PG": 10, "TV-14": 14, "TV-MA": 17 });
 const certificationCache = new Map();
 const titleMetadataCache = new Map();
+const PROFILE_CACHE_TTL_MS = 15000;
 let currentProfile = null;
 let currentUid = "";
 let loadedAt = 0;
@@ -57,7 +58,7 @@ async function getActiveProfile() {
     currentProfile &&
     currentUid === user.uid &&
     currentProfile.id === profileId &&
-    Date.now() - loadedAt < 60000
+    Date.now() - loadedAt < PROFILE_CACHE_TTL_MS
   ) return currentProfile;
 
   const cacheKey = "vivid:parental-policy:v1:" + user.uid + ":" + profileId;
@@ -71,21 +72,24 @@ async function getActiveProfile() {
     try { cached = JSON.parse(localStorage.getItem(cacheKey) || "null"); } catch {}
 
     // A Kids token always fails closed, even when policy services are offline.
-    if (token.claims.isKids === true) {
-      currentProfile = cached?.isKids === true ? cached : {
+    if (token.claims.isKids === true || (cached?.id === profileId && cached.isKids === true)) {
+      // A stale or unavailable policy must never become more permissive than
+      // the live policy. Use the strictest built-in limits and retain cached
+      // custom blocks so an outage can only reduce access, never expand it.
+      const cachedGenres = Array.isArray(cached?.blockedGenreIds)
+        ? cached.blockedGenreIds.map(Number).filter(Number.isInteger)
+        : [];
+      const cachedTitles = Array.isArray(cached?.blockedTitles) ? cached.blockedTitles : [];
+      currentProfile = {
         id: profileId,
         isKids: true,
-        movieRatingLimit: "PG",
-        tvRatingLimit: "TV-PG",
-        blockedGenreIds: [27, 53, 80, 10752],
-        blockedTitles: [],
+        movieRatingLimit: "G",
+        tvRatingLimit: "TV-Y",
+        blockedGenreIds: [...new Set([...cachedGenres, 27, 53, 80, 10752])],
+        blockedTitles: cachedTitles,
         allowUnrated: false
       };
-    } else if (token.claims.isKids === false) {
-      currentProfile = { id: profileId, isKids: false };
-    } else if (cached?.id === profileId) {
-      currentProfile = cached;
-    } else if (profileId === "owner") {
+    } else if (token.claims.isKids === false || profileId === "owner") {
       currentProfile = { id: profileId, isKids: false };
     } else {
       throw error;
