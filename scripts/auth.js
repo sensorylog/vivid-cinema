@@ -27,7 +27,7 @@ async function sendVividVerificationEmail() {
       Authorization: "Bearer " + token,
       "Content-Type": "application/json"
     },
-    body: JSON.stringify(["anime-premium.html", "anime-premium-membership.html"].includes(postAuthDestination()) ? { returnTo: postAuthDestination() } : {}),
+    body: JSON.stringify(["anime-premium.html", "anime-premium-membership.html"].includes(requestedPostAuthDestination()) ? { returnTo: requestedPostAuthDestination() } : {}),
     credentials: "omit",
     cache: "no-store"
   });
@@ -66,21 +66,28 @@ function showMessage(text,good=false){if(!errorEl)return;errorEl.textContent=tex
 function setPostAuthNotice(message){
   try{sessionStorage.setItem("vivid:auth-success",message);}catch{}
 }
-function postAuthDestination(){
+function requestedPostAuthDestination(){
   const raw=new URLSearchParams(window.location.search).get("returnTo");
-  if(!raw)return "profiles.html";
+  if(!raw)return "";
   try{
     const target=new URL(raw,window.location.origin);
-    if(target.origin!==window.location.origin||!target.pathname.endsWith(".html"))return "home.html";
-    if(["/auth.html","/login.html","/forgot-password.html"].includes(target.pathname))return "home.html";
-    return target.pathname.replace(/^\//,"")+target.search+target.hash;
-  }catch{return "home.html";}
+    if(target.origin!==window.location.origin||!target.pathname.endsWith(".html"))return "";
+    if(["/auth.html","/login.html","/forgot-password.html","/profiles.html"].includes(target.pathname))return "";
+    return target.pathname.replace(/^\\//,"")+target.search+target.hash;
+  }catch{return "";}
+}
+function postAuthDestination(){
+  const requested=requestedPostAuthDestination();
+  if(requested){
+    try{sessionStorage.setItem("vivid:profile-return-to:v1",requested);}catch{}
+  }
+  return "profiles.html";
 }
 function preservePostAuthDestination(){
   const requested=new URLSearchParams(window.location.search).get("returnTo");
   if(!requested)return;
-  const destination=postAuthDestination();
-  if(destination==="home.html")return;
+  const destination=requestedPostAuthDestination();
+  if(!destination)return;
   document.querySelectorAll(".auth-switch a").forEach(link=>{
     try{
       const target=new URL(link.href,window.location.href);
