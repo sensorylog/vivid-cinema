@@ -43,7 +43,7 @@ test("profile normalization validates identity, Kids type, HTTPS photos and comp
   assert.equal(profile.avatarSource, "upload");
   assert.equal(normalizeProfile("owner", { name: "Main", avatarUrl: "https://example.com/photo.png" }).avatarSource, "google");
   assert.equal(normalizeProfile("owner", { name: "Main", avatarSource: "collection" }).avatarSource, "collection");
-  assert.equal(normalizeProfile("owner", { name: "Main" }).avatarSource, "default");
+  assert.equal(normalizeProfile("owner", { name: "Main" }).avatarSource, "auto");
   assert.equal(profile.isKids, true);
   assert.equal(profile.maturityLevel, "kids");
   assert.equal(profile.isOwner, false);
@@ -77,7 +77,7 @@ test("profile management API protects the owner profile and exposes only explici
   assert.match(service, /A Vivid account can have up to/);
   assert.match(service, /Access-Control-Allow-Methods/);
   assert.ok(rules.includes("match /users/{userId}/profiles/{profileId}"));
-  assert.match(rules, /avatarSource.*google.*collection.*upload.*default/s);
+  assert.match(rules, /avatarSource.*auto.*google.*collection.*upload/s);
   assert.equal(rules.split("match /users/{userId}/profiles/{profileId}").length - 1, 1);
   assert.equal(rules.split("match /{document=**}").length - 1, 1);
   assert.ok(rules.includes("avatarData.matches('^data:image/webp;base64,[A-Za-z0-9+/]+={0,2}$')"));
