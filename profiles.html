@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#08090b">
+<meta name="description" content="Choose and manage your Vivid Cinema profiles.">
+<title>Who's Watching? · Vivid Cinema</title>
+<link rel="icon" href="icons/vivid-icon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="styles/vivid-foundation.css">
+<link rel="stylesheet" href="styles/vivid-system.css">
+<link rel="stylesheet" href="styles/vivid-shell.css">
+<link rel="stylesheet" href="styles/vivid-atmosphere.css">
+<link rel="stylesheet" href="styles/vivid-liquid-glass.css?v=lg5">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.9.1/font/bootstrap-icons.css">
+<link rel="stylesheet" href="styles/vivid-profile-selector.css?v=phase4-1">
+</head>
+<body class="vivid-atmosphere profile-selector-page" data-vivid-page="profiles">
+<main class="profile-stage">
+  <a class="profile-brand" href="home.html" aria-label="Vivid Cinema home"><img src="icons/vivid-icon.svg" alt=""><span>Vivid<span>Cinema</span></span></a>
+  <div class="profile-stage-heading">
+    <span class="profile-eyebrow">YOUR VIVID HOUSEHOLD</span>
+    <h1 id="profile-heading">Who's watching?</h1>
+    <p id="profile-subheading">Choose your space. Your cinema journey stays yours.</p>
+  </div>
+  <section id="profile-grid" class="profile-grid" aria-label="Choose a profile" aria-live="polite">
+    <div class="profile-loading"><span></span><p>Preparing your profiles…</p></div>
+  </section>
+  <div class="profile-stage-footer"><span id="profile-count">Your Vivid account</span><div class="profile-footer-actions"><button id="manage-toggle" type="button" class="profile-manage-toggle">Manage profiles</button><button id="profile-signout" type="button" class="profile-signout">Sign out</button></div></div>
+  <p id="profile-status" class="profile-status" role="status" aria-live="polite"></p>
+</main>
+<dialog id="profile-editor" class="profile-editor">
+  <form id="profile-form" method="dialog" novalidate>
+    <div class="profile-editor-heading"><div><span class="profile-eyebrow">PROFILE IDENTITY</span><h2 id="editor-title">Create a profile</h2></div><button type="button" id="editor-close" class="profile-icon-button" aria-label="Close"><i class="bi bi-x-lg"></i></button></div>
+    <label class="profile-field"><span>Profile name</span><input id="profile-name" name="name" type="text" maxlength="48" autocomplete="off" placeholder="Give this profile a name" required></label>
+    <div class="profile-avatar-heading"><span>Choose an avatar</span><small>Original Vivid collection</small></div>
+    <div id="avatar-gallery" class="avatar-gallery" role="radiogroup" aria-label="Vivid avatars"></div>
+    <div class="profile-upload-row"><div><strong>Use a photo</strong><small>Upload a custom profile picture</small></div><label class="profile-upload-button" for="profile-photo"><i class="bi bi-camera"></i> Choose photo</label><input id="profile-photo" type="file" accept="image/jpeg,image/png,image/webp,image/avif" hidden></div>
+    <div id="profile-photo-preview" class="profile-photo-preview" hidden></div>
+    <button id="profile-use-google" type="button" class="profile-google-photo" hidden>Use my Google account photo</button>
+    <section class="profile-kids-panel" aria-labelledby="profile-kids-heading"><label class="profile-kids-toggle"><input id="profile-is-kids" type="checkbox"><span><strong id="profile-kids-heading">Kids profile</strong><small>Child-safe viewing with parent-protected exit.</small></span></label><div id="profile-kids-settings" class="profile-kids-settings" hidden><label class="profile-field"><span>Maximum movie rating</span><select id="profile-movie-rating"><option>G</option><option>PG</option><option>PG-13</option><option>R</option><option>NC-17</option></select></label><label class="profile-field"><span>Maximum TV rating</span><select id="profile-tv-rating"><option>TV-Y</option><option>TV-Y7</option><option>TV-G</option><option>TV-PG</option><option>TV-14</option><option>TV-MA</option></select></label><label class="profile-field"><span>Blocked genres</span><select id="profile-blocked-genres" multiple size="5"><option value="28">Action</option><option value="12">Adventure</option><option value="16">Animation</option><option value="35">Comedy</option><option value="80">Crime</option><option value="99">Documentary</option><option value="18">Drama</option><option value="10751">Family</option><option value="14">Fantasy</option><option value="36">History</option><option value="27">Horror</option><option value="10402">Music</option><option value="9648">Mystery</option><option value="10749">Romance</option><option value="878">Science fiction</option><option value="10770">TV movie</option><option value="53">Thriller</option><option value="10752">War</option><option value="37">Western</option></select><small>Use Ctrl/Command to select multiple genres.</small></label><label class="profile-field"><span>Blocked titles (TMDB IDs)</span><input id="profile-blocked-titles" type="text" maxlength="1800" placeholder="movie:123, tv:456"><small>Enter IDs separated by commas.</small></label><p class="profile-kids-note">Unrated and unknown-rated titles are always blocked in Kids mode.</p></div></section>
+    <div class="profile-security-row"><div><strong id="profile-pin-status">No profile PIN</strong><small>A PIN adds a private lock to this profile.</small></div><button id="profile-pin-manage" type="button" class="profile-pin-manage">Set PIN</button></div>
+    <p id="editor-status" class="profile-editor-status" role="status" aria-live="polite"></p>
+    <div class="profile-editor-actions"><button id="profile-delete" type="button" class="profile-delete" hidden>Delete profile</button><span></span><button id="profile-cancel" type="button" class="profile-cancel">Cancel</button><button id="profile-save" type="submit" class="profile-save">Save profile</button></div>
+  </form>
+</dialog>
+<dialog id="profile-pin-dialog" class="profile-editor profile-pin-dialog">
+  <form id="profile-pin-form" method="dialog" novalidate>
+    <div class="profile-editor-heading"><div><span class="profile-eyebrow">PROFILE SECURITY</span><h2>Enter your PIN</h2></div><button type="button" id="profile-pin-close" class="profile-icon-button" aria-label="Close"><i class="bi bi-x-lg"></i></button></div>
+    <p id="profile-pin-description" class="profile-pin-description">Enter the four-digit PIN to open this profile.</p>
+    <label class="profile-field"><span>4-digit profile PIN</span><input id="profile-pin-input" type="password" inputmode="numeric" autocomplete="one-time-code" maxlength="4" pattern="[0-9]{4}" placeholder="••••" required></label>
+    <p id="profile-pin-status-message" class="profile-editor-status" role="status" aria-live="polite"></p>
+    <div class="profile-editor-actions"><button id="profile-pin-forgot" type="button" class="profile-cancel">Forgot PIN?</button><span></span><button id="profile-pin-cancel" type="button" class="profile-cancel">Back</button><button id="profile-pin-unlock" type="submit" class="profile-save">Unlock profile</button></div>
+  </form>
+</dialog>
+<dialog id="profile-pin-settings" class="profile-editor profile-pin-dialog">
+  <form id="profile-pin-settings-form" method="dialog" novalidate>
+    <div class="profile-editor-heading"><div><span class="profile-eyebrow">PROFILE SECURITY</span><h2 id="profile-pin-settings-title">Set a profile PIN</h2></div><button type="button" id="profile-pin-settings-close" class="profile-icon-button" aria-label="Close"><i class="bi bi-x-lg"></i></button></div>
+    <label id="profile-current-pin-row" class="profile-field" hidden><span>Current PIN</span><input id="profile-current-pin" type="password" inputmode="numeric" autocomplete="off" maxlength="4" pattern="[0-9]{4}"></label>
+    <label class="profile-field"><span>New 4-digit PIN</span><input id="profile-new-pin" type="password" inputmode="numeric" autocomplete="new-password" maxlength="4" pattern="[0-9]{4}" required></label>
+    <label class="profile-field"><span>Confirm new PIN</span><input id="profile-confirm-pin" type="password" inputmode="numeric" autocomplete="new-password" maxlength="4" pattern="[0-9]{4}" required></label>
+    <p id="profile-pin-settings-status" class="profile-editor-status" role="status" aria-live="polite"></p>
+    <div class="profile-editor-actions"><button id="profile-pin-remove" type="button" class="profile-delete" hidden>Remove PIN</button><span></span><button id="profile-pin-settings-cancel" type="button" class="profile-cancel">Cancel</button><button id="profile-pin-settings-save" type="submit" class="profile-save">Save PIN</button></div>
+  </form>
+</dialog>
+<script type="module" src="scripts/app-shell.js"></script>
+<script type="module" src="scripts/profile-selector.js?v=phase4-1"></script>
+<script type="module" src="scripts/atmosphere.js"></script>
+</body>
+</html>

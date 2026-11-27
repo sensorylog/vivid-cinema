@@ -3,6 +3,7 @@ import { tmdbApi } from "./tmdb.js";
 import { getImageUrl, normalizeResults } from "./media.js";
 import { escapeHtml } from "./utils.js";
 import { isAnimeMetadata } from "./anime-eligibility.js";
+import { filterAllowedTitles } from "./parental-controls.js";
 
 const $ = id => document.getElementById(id);
 const state = { type: "all", sort: "popularity.desc", year: "", query: "", page: 1, totalPages: 1, request: 0 };
@@ -120,7 +121,7 @@ async function searchAnime(query, page = 1) {
     (!state.year || yearOf(item) === state.year)
   );
   return {
-    items: raw.flatMap(item => normalizeResults([item], item.media_type)),
+    items: await filterAllowedTitles(raw.flatMap(item => normalizeResults([item], item.media_type))),
     totalPages: Math.min(500, Number(response.total_pages || 1))
   };
 }

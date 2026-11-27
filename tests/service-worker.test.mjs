@@ -53,6 +53,7 @@ test("Retired Watch Rooms clients stay out of the shell while legacy API routes 
   assert.ok(!source.includes('"./scripts/watch-room-api.js"'));
   assert.ok(!source.includes('"./scripts/watch-room-playback.js"'));
   assert.ok(source.includes('"./scripts/cloudflare-api.js"'), "Cloudflare API origin helper remains precached");
+  assert.ok(source.includes('"./scripts/library-page.js"'), "library parental filtering remains available offline");
 });
 test("Retired Watch Rooms API adapter is not cached but cannot be served from a stale cache", () => {
   assert.ok(!source.includes('"./scripts/watch-room-api.js"'));
@@ -207,7 +208,7 @@ test("app shell includes current versioned assets without dropping existing cach
 
   // Preserve older entries until all runtime consumers have been verified;
   // pruning query-versioned assets is a separate cleanup, not required here.
-  assert.ok(source.includes(JSON.stringify("./scripts/firebase.js?v=20261123-signup-only-1")));
+  assert.ok(source.includes(JSON.stringify("./scripts/firebase.js?v=20261127-profile-flow-1")));
 });
 test("service worker precaches Hls.js and serves the exact CORS library offline", () => {
   assert.ok(source.includes('const HLS_LIBRARY_URL = "https://cdn.jsdelivr.net/npm/hls.js@1.7.3/dist/hls.min.js"'));

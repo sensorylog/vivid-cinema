@@ -12,6 +12,7 @@ import { recordBehavior, startIntelligenceSync } from "./intelligence.js";
 import { playDirectStream, resolveDirectStream, stopDirectStream } from "./playback/player-engine.js";
 import { buildCustomEmbedUrl, getCustomPlaybackServer } from "./playback/playback-servers.js";
 import { mountWatchRoomPlayerLayout } from "./watch-room-player-layout.js";
+import { isTitleAllowed, filterAllowedTitles, renderParentalBlock } from "./parental-controls.js";
 import { buildVidapiEmbedUrl, buildVidsrcEmbedUrl, buildVidlinkEmbedUrl, buildVidplusEmbedUrl, buildVidkingEmbedUrl, buildEmbedWaveUrl, buildVidFastUrl, buildEzVidApiUrl, buildEmbedApiStreamUrl, buildMoviesApiUrl } from "./playback/playback-urls.js";
 
 const $ = (id) => document.getElementById(id);
@@ -851,6 +852,8 @@ async function loadWatchRecommendations(params) {
     }
   }
 
+  if (details?.recommendations?.results) details.recommendations.results = await filterAllowedTitles(details.recommendations.results.map(item => ({ ...item, media_type: params.type })));
+  if (details?.similar?.results) details.similar.results = await filterAllowedTitles(details.similar.results.map(item => ({ ...item, media_type: params.type })));
   if (rail.isConnected) rail.innerHTML = recommendationCards();
 }
 
@@ -1618,9 +1621,10 @@ async function load() {
   }
   media = normalizeMedia({ id: currentParams.id, overview: "", title: currentParams.type === "tv" ? "Loading episode…" : "Loading movie…", poster_path: "", backdrop_path: "" }, currentParams.type);
   renderShell(currentParams);
-  if (isWatchRoomCinemaMode && watchRoomScreeningValidated) roomOpenPlayerWindow?.();
   try {
     details = currentParams.type === "tv" ? await tmdbApi.tvDetails(currentParams.id) : await tmdbApi.movieDetails(currentParams.id);
+    if (!await isTitleAllowed({ ...details, id: currentParams.id, media_type: currentParams.type })) { renderParentalBlock($("watch-content"), details?.name || details?.title || "This title"); return; }
+    if (isWatchRoomCinemaMode && watchRoomScreeningValidated) roomOpenPlayerWindow?.();
     media = normalizeMedia(details, currentParams.type);
     if (isLikelyAnime() && !isAnimePlayback()) {
       const query = new URLSearchParams({ id: String(currentParams.id), type: currentParams.type });
@@ -1718,3 +1722,12 @@ document.addEventListener("DOMContentLoaded", () => {
     content.innerHTML = '<section class="vivid-watch-error"><i class="bi bi-exclamation-circle" aria-hidden="true"></i><h1>Watch page could not load.</h1><p>Something interrupted this title’s playback page. Please try again.</p><a class="vivid-button vivid-button--secondary" href="home.html">Browse titles</a></section>';
   });
 });
+
+
+// A profile switch invalidates the current playback context. Leave the player
+// immediately so no later progress/completion callback can write into the new profile.
+if (typeof window !== "undefined") {
+  window.addEventListener("vivid:profile-changed", () => {
+    try { window.location.replace("home.html"); } catch {}
+  });
+}

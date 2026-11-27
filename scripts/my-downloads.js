@@ -2,6 +2,8 @@ import { DownloadManager } from "./downloads/download-manager.js";
 import { createIndexedDBPersistence } from "./downloads/indexeddb-persistence.js";
 import { createBrowserDownloadAdapter } from "./downloads/browser-direct-adapter.js";
 import { createOfflinePlaybackController } from "./downloads/offline-playback.js";
+import { getActiveProfileId, initializeProfileFoundation } from "./profiles.js";
+import { isTitleAllowed, filterAllowedTitles } from "./parental-controls.js";
 
 async function loadHlsRuntime() {
   if (window.Hls) return;
@@ -20,7 +22,7 @@ async function loadHlsRuntime() {
 if (window.vividDownloads?.available) {
   // Start the Windows library immediately. HLS.js is only needed if a file
   // requires compatibility transcoding, never to render the saved library.
-  void import("./downloads/desktop-offline.js?windows-offline-hls-v4").catch(error => {
+  void import("./downloads/desktop-offline.js?windows-offline-hls-v7").catch(error => {
     console.error("Vivid offline library could not start:", error);
     const message = document.getElementById("offline-message");
     if (message) message.textContent = "Your offline library could not be opened. " + (error?.message || "Please restart Vivid Cinema.");
@@ -32,8 +34,16 @@ const jobsNode = byId("offline-jobs");
 const messageNode = byId("offline-message");
 const playerSection = byId("offline-player-section");
 const video = byId("offline-player");
-let manager = null, playback = null, activeAdapter = null, unsubscribe = null, activeOwner = null, generation = 0;
+let manager = null, playback = null, activeAdapter = null, unsubscribe = null, activeOwner = null, generation = 0, currentAuth = null, renderSequence = 0;
 
+async function offlineOwnerKey(uid, profileId) {
+  const source = String(uid) + "::" + String(profileId);
+  if (!globalThis.crypto?.subtle || typeof TextEncoder !== "function") {
+    throw new Error("Secure profile-scoped offline storage is unavailable in this browser.");
+  }
+  const digest = await globalThis.crypto.subtle.digest("SHA-256", new TextEncoder().encode(source));
+  return "profile-" + Array.from(new Uint8Array(digest), byte => byte.toString(16).padStart(2, "0")).join("");
+}
 function escapeHtml(value) {
   return String(value ?? "").replace(/[&<>"']/g, char => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[char]);
 }
@@ -54,7 +64,13 @@ function statusLabel(job) {
   if(job.status==="cancelled")return "Cancelled";
   return "Download failed";
 }
-function render(jobs) {
+async function render(jobs) {
+  const request=++renderSequence;
+  const policyItems=jobs.map(job=>({...job.media,id:job.media?.id,media_type:job.media?.media_type,__offlineJobId:String(job.id)}));
+  const allowedItems=await filterAllowedTitles(policyItems);
+  if(request!==renderSequence)return;
+  const allowedIds=new Set(allowedItems.map(item=>String(item.__offlineJobId)));
+  jobs=jobs.filter(job=>allowedIds.has(String(job.id)));
   const completed=jobs.filter(job=>job.status==="completed").length, active=jobs.filter(job=>["queued","downloading"].includes(job.status)).length;
   byId("offline-total").textContent=String(jobs.length); byId("offline-completed").textContent=String(completed); byId("offline-active").textContent=String(active);
   if(!jobs.length){jobsNode.innerHTML='<div class="offline-empty"><strong>No downloads yet</strong><p>Vivid does not currently have an authorized direct-download source connected.</p></div>';messageNode.textContent="Your download queue is empty.";return;}
@@ -73,10 +89,52 @@ function render(jobs) {
       (job.error?'<div class="offline-job-error">'+escapeHtml(job.error)+'</div>':"")+'</div><div class="offline-job-actions">'+actions.join("")+'</div></article>';
   }).join("");
 }
+async function migrateLegacyOfflineJobs(uid, profileId, scopedOwner) {
+  if (!uid || profileId !== "owner") return;
+  const markerKey = "vivid:offline-profile-migration:v1:" + String(uid);
+  if (localStorage.getItem(markerKey) === "1") return;
+  const legacy = createIndexedDBPersistence({ ownerId: String(uid) });
+  const scoped = createIndexedDBPersistence({ ownerId: scopedOwner });
+  try {
+    const [legacyJobs, scopedJobs] = await Promise.all([legacy.load(), scoped.load()]);
+    const merged = new Map(scopedJobs.map(job => [String(job.id), job]));
+    for (const job of legacyJobs) {
+      const id = String(job?.id || "");
+      if (!id) continue;
+      const current = merged.get(id);
+      if (!current || Number(job.updatedAt || 0) > Number(current.updatedAt || 0)) merged.set(id, job);
+    }
+    const next = [...merged.values()];
+    if (next.length) await scoped.save(next);
+    const verified = await scoped.load();
+    const verifiedIds = new Set(verified.map(job => String(job.id)));
+    if (next.some(job => !verifiedIds.has(String(job.id)))) {
+      throw new Error("Existing offline downloads could not be verified in the owner profile.");
+    }
+    localStorage.setItem(markerKey, "1");
+  } finally {
+    await Promise.allSettled([legacy.close(), scoped.close()]);
+  }
+}
 async function switchOwner(user) {
-  const owner=user?.uid?String(user.uid):"guest"; if(owner===activeOwner)return;
+  if(user?.uid){
+    try{await initializeProfileFoundation(user);}
+    catch(error){console.warn("Vivid profile migration is unavailable while opening offline metadata:",error);}
+  }
+  const profileId=user?.uid?getActiveProfileId(user.uid):"guest";
+  const owner=user?.uid?await offlineOwnerKey(user.uid,profileId):"guest";
+  if(owner===activeOwner)return;
   const run=++generation; unsubscribe?.(); unsubscribe=null;
-  try{await playback?.stop();}catch{} try{await manager?.persistence?.close?.();}catch{}
+  try{await playback?.stop();}catch{}
+  try{
+    const activeJobs=(manager?.snapshot?.()||[]).filter(job=>["queued","downloading"].includes(job.status));
+    await Promise.allSettled(activeJobs.map(job=>manager.pause(job.id)));
+  }catch{}
+  try{await manager?.persistence?.close?.();}catch{}
+  if(user?.uid){
+    try{await migrateLegacyOfflineJobs(user.uid,profileId,owner);}
+    catch(error){console.warn("Vivid could not migrate existing offline records to the owner profile:",error);}
+  }
   activeOwner=owner; byId("offline-owner").textContent=user?.uid?"Signed-in account":"Guest library";
   jobsNode.innerHTML=""; messageNode.textContent="Loading your download library…";
   try{
@@ -104,6 +162,8 @@ jobsNode.addEventListener("click",async event=>{
   const button=event.target.closest("button[data-action]"); if(!button||!manager)return;
   const {action,id}=button.dataset; button.disabled=true;
   try{
+    const targetJob=manager.snapshot().find(item=>item.id===id);
+    if(targetJob&&(action==="play"||action==="export")){const media=targetJob.media||{};if(!await isTitleAllowed({...media,id:media.id,media_type:media.media_type}))throw new Error("This title is restricted by the active Kids profile.");}
     if(action==="pause")await manager.pause(id);
     if(action==="retry")await manager.retry(id);
     if(action==="cancel")await manager.cancel(id);
@@ -132,8 +192,12 @@ byId("offline-player-close").addEventListener("click",async()=>{await playback?.
 async function start(){
   try{
     const [{auth},{onAuthStateChanged}]=await Promise.all([import("./firebase.js"),import("https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js")]);
+    currentAuth=auth;
     if(typeof auth.authStateReady==="function")await auth.authStateReady();
-    onAuthStateChanged(auth,user=>{void switchOwner(user);});
+    onAuthStateChanged(auth,user=>{void switchOwner(user).catch(error=>setMessage(error?.message||"Could not open this profile’s offline library."));});
+    window.addEventListener("vivid:profile-changed",event=>{
+      if(currentAuth?.currentUser?.uid===String(event.detail?.uid||""))void switchOwner(currentAuth.currentUser).catch(error=>setMessage(error?.message||"Could not switch the offline library."));
+    });
   }catch(error){console.warn("Vivid download library is using guest storage:",error);await switchOwner(null);}
 }
 void start();

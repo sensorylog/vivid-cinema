@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { switchLocalOwner } from "../scripts/local-owner.js";
+import { seedLegacyOwnerProfileSnapshot, switchLocalOwner } from "../scripts/local-owner.js";
 
 function memoryStorage(initial = {}) {
   const values = new Map(Object.entries(initial));
@@ -97,4 +97,39 @@ test("a missing owner marker cannot make guest state overwrite an existing accou
   assert.equal(storage.getItem("library"), '{"favorites":["A"]}');
   assert.equal(storage.getItem("progress"), '{"movie:9":{"progress":80}}');
   assert.equal(storage.getItem("library:guest"), '{"favorites":["guest"]}');
+});
+
+test("first owner profile scope preserves existing account-wide local data", () => {
+  const storage = memoryStorage({
+    owner: "user-a",
+    library: '{"favorites":["existing"]}',
+    progress: '{"movie:1":{"progress":35}}'
+  });
+  const seeded = seedLegacyOwnerProfileSnapshot({
+    storage, ownerKey: "owner", activeKeys: ["library", "progress"],
+    previousOwner: "user-a", targetOwner: "user-a::owner",
+    emptyValues: { library: "{}", progress: "{}" }
+  });
+  assert.equal(seeded, true);
+  setup(storage, "user-a::owner");
+  assert.equal(storage.getItem("library"), '{"favorites":["existing"]}');
+  assert.equal(storage.getItem("progress"), '{"movie:1":{"progress":35}}');
+});
+
+test("existing profile snapshots are never seeded with another profile's local data", () => {
+  const storage = memoryStorage({
+    owner: "user-a",
+    library: '{"favorites":["adult"]}',
+    progress: '{"movie:1":{"progress":35}}',
+    "library:user:user-a::kids": '{"favorites":["kids"]}'
+  });
+  const seeded = seedLegacyOwnerProfileSnapshot({
+    storage, ownerKey: "owner", activeKeys: ["library", "progress"],
+    previousOwner: "user-a", targetOwner: "user-a::kids",
+    emptyValues: { library: "{}", progress: "{}" }
+  });
+  assert.equal(seeded, false);
+  setup(storage, "user-a::kids");
+  assert.equal(storage.getItem("library"), '{"favorites":["kids"]}');
+  assert.equal(storage.getItem("progress"), "{}");
 });

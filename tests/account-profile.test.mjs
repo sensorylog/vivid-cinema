@@ -42,10 +42,10 @@ test("profile controls retain visible keyboard focus and reduced-motion support"
   assert.match(page, /aria-live="polite"/);
 });
 
-test("cloud library sync reads authoritative server data rather than cache-only snapshots", () => {
+test("cloud library sync reads profile-scoped authoritative server data", () => {
   const library = readFileSync(new URL("../scripts/library.js", import.meta.url), "utf8");
-  assert.match(library, /getDocsFromServer\(firestoreCollection\(db,\s*"users",\s*uid,\s*collection\)\)/);
-  assert.match(library, /getDocsFromServer\(firestoreCollection\(db,\s*"users",\s*uid,\s*"libraryTombstones"\)\)/);
+  assert.ok(library.includes('getDocsFromServer(firestoreCollection(db,"users",uid,"profiles",profileId,collection))'));
+  assert.ok(library.includes('getDocsFromServer(firestoreCollection(db,"users",uid,"profiles",profileId,"libraryTombstones"))'));
 });
 
 test("library sync propagates Firestore failures so the account UI cannot report false success", () => {
@@ -59,9 +59,9 @@ test("library sync propagates Firestore failures so the account UI cannot report
   assert.match(syncBody, /Do not replace local data until all required cloud operations have been[\s\S]*?acknowledged/);
 });
 
-test("library sync reconciles deletions and avoids rewriting every unchanged remote item", () => {
+test("library sync reconciles profile-scoped deletions and avoids rewriting unchanged items", () => {
   const library = readFileSync(new URL("../scripts/library.js", import.meta.url), "utf8");
-  assert.match(library, /deleteDoc\(doc\(db,\s*"users",\s*user\.uid,\s*tombstone\.collection,\s*contentId\)\)/);
+  assert.ok(library.includes('deleteDoc(doc(db,"users",user.uid,"profiles",profileId,tombstone.collection,contentId))'));
   assert.match(library, /if\(!remote \|\| Number\(item\.updatedAt\|\|0\)>Number\(remote\.updatedAt\|\|0\)\)/);
   assert.match(library, /await mapLimit\(writes,8/);
 });
@@ -77,13 +77,12 @@ test("library mutations retry through one deduplicated sync path and preserve pe
   assert.match(library, /void startLibrarySync\(\)/);
 });
 
-test("sync repeats when a library mutation arrives mid-sync and aborts safely on account changes", () => {
+test("library sync repeats after mutations and aborts on profile changes", () => {
   const library = readFileSync(new URL("../scripts/library.js", import.meta.url), "utf8");
-  assert.match(library, /do\{\s*syncedRevision=localMutationRevision;\s*result=await performLibrarySyncForUser\(user\);\s*\}while\(syncedRevision!==localMutationRevision\)/);
-  assert.match(library, /The signed-in account changed during library sync/);
+  assert.ok(library.includes("result=await performLibrarySyncForUser(user,profileId);"));
+  assert.ok(library.includes("The active account or profile changed during library sync"));
   assert.match(library, /const activeAuth=await getFirebaseAuth\(\)/);
 });
-
 
 test("shared navigation resolves the account destination from Firebase auth state", async () => {
   const shell = readFileSync(new URL("../scripts/app-shell.js", import.meta.url), "utf8");
@@ -116,10 +115,10 @@ test("account logout gives immediate feedback and handles a stalled sign-out", (
 
 test("account page and account runtime are network-first for installed PWA freshness", () => {
   const worker = readFileSync(new URL("../service-worker.js", import.meta.url), "utf8");
-  assert.match(page, /scripts\/account\.js\?v=20261016-account-runtime-2/);
+  assert.match(page, /scripts\/account\.js\?v=20261127-profile-foundation-1/);
   assert.match(worker, /vivid-cinema-shell-v\d+/);
-  assert.match(worker, /auth-diagnostics\|account\)\\\.html/);
-  assert.match(worker, /auth-diagnostics\|account\|account-bootstrap\|cloudflare-ai\)\\\.js/);
+  assert.match(worker, /auth-diagnostics\|account\|profiles\)\\\.html/);
+  assert.match(worker, /auth-diagnostics\|account\|account-bootstrap\|profile-manager\|profile-selector\|profiles\|cloudflare-ai\)\\\.js/);
 });
 
 
@@ -136,8 +135,12 @@ test("account page includes a visible bootstrap diagnostic and account deletion 
   assert.match(script, /async function permanentlyDeleteAccount\(\)/);
   assert.match(script, /reauthenticateWithCredential/);
   assert.match(script, /reauthenticateWithPopup/);
-  assert.match(script, /deleteUser\(user\)/);
-  assert.match(script, /ACCOUNT_PRIVATE_COLLECTIONS/);
+  assert.match(script, /reauthenticateForDeletion\(user\)/);
+  assert.match(script, /https:\/\/vivid-cinema-api\.vercel\.app\/api\/delete-account/);
+  assert.match(script, /deletionResult\.ok !== true/);
+  assert.match(script, /method: "POST"/);
+  assert.match(script, /body: JSON\.stringify\(\{ confirm: true \}\)/);
+  assert.match(script, /for \(const storage of \[window\.localStorage, window\.sessionStorage\]\)/);
 });
 
 test("release-state records can be deleted by their owner but not created or updated by clients", () => {

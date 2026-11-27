@@ -160,6 +160,9 @@ function createLocalServer(root) {
 let localServer;
 let localOrigin;
 let downloadEngine;
+let downloadEngineOwner = null;
+let activeDownloadOwner = "guest";
+let downloadOwnerSwitchQueue = Promise.resolve();
 let transcodeEngine;
 let transcodeEngineStartPromise = null;
 let autoUpdater = null;
@@ -169,12 +172,72 @@ function markStartup(stage) {
   console.info("[Vivid startup] " + stage + ": " + Math.round(performance.now() - startupStartedAt) + "ms");
 }
 
+function normalizeDownloadOwner(value) {
+  const owner = String(value || "").trim();
+  if (!owner || owner.length > 256 || owner.includes("/") || owner.includes(String.fromCharCode(92)) || Array.from(owner).some(character => character.charCodeAt(0) < 32 || character.charCodeAt(0) === 127)) {
+    throw new TypeError("A valid Vivid account/profile download owner is required.");
+  }
+  return owner;
+}
+
+function resolveLegacyDownloadStorage(ownerId) {
+  const markerPath = path.join(app.getPath("userData"), "vivid-downloads-profile-owner.json");
+  let marker = null;
+  try { marker = JSON.parse(fs.readFileSync(markerPath, "utf8")); } catch {}
+  if (!marker?.ownerId && ownerId !== "guest" && ownerId.endsWith("::owner")) {
+    fs.mkdirSync(path.dirname(markerPath), { recursive: true });
+    const temporary = markerPath + ".tmp";
+    fs.writeFileSync(temporary, JSON.stringify({ version: 1, ownerId }), "utf8");
+    fs.renameSync(temporary, markerPath);
+    marker = { ownerId };
+  }
+  // The first signed-in profile claims the existing global offline library.
+  // After that, every other profile (including guest) gets a separate folder.
+  return !marker?.ownerId ? ownerId === "guest" : String(marker.ownerId) === ownerId;
+}
+
 function ensureDownloadEngine() {
   if (!downloadEngine) {
     const { DesktopDownloadEngine } = require("./download-engine.cjs");
-    downloadEngine = new DesktopDownloadEngine({ app, BrowserWindow, dialog, shell, deferTorrentClient: true });
+    downloadEngine = new DesktopDownloadEngine({
+      app, BrowserWindow, dialog, shell, deferTorrentClient: true,
+      ownerId: activeDownloadOwner,
+      legacyStorage: resolveLegacyDownloadStorage(activeDownloadOwner)
+    });
+    downloadEngineOwner = activeDownloadOwner;
+  }
+  if (downloadEngineOwner !== activeDownloadOwner) {
+    throw new Error("The active Vivid profile changed. Reopen the offline library and retry.");
   }
   return downloadEngine;
+}
+
+function setDownloadOwner(value) {
+  const nextOwner = normalizeDownloadOwner(value);
+  const task = downloadOwnerSwitchQueue.catch(() => {}).then(async () => {
+    if (nextOwner === activeDownloadOwner && downloadEngineOwner === nextOwner && downloadEngine) {
+      await downloadEngine.ready;
+      return { ownerId: nextOwner };
+    }
+    const previousOwner = activeDownloadOwner;
+    const previousEngine = downloadEngine;
+    // Change the active key before awaiting shutdown so concurrent IPC calls
+    // cannot keep using the outgoing profile's engine.
+    activeDownloadOwner = nextOwner;
+    try {
+      if (previousEngine) await previousEngine.shutdown();
+    } catch (error) {
+      activeDownloadOwner = previousOwner;
+      throw error;
+    }
+    downloadEngine = null;
+    downloadEngineOwner = null;
+    const engine = ensureDownloadEngine();
+    await engine.ready;
+    return { ownerId: nextOwner };
+  });
+  downloadOwnerSwitchQueue = task.catch(() => {});
+  return task;
 }
 
 async function ensureTranscodeEngine() {
@@ -328,6 +391,10 @@ function configureOfflineMediaProtocol() {
 }
 function configureDownloadEngine() {
   // Register IPC endpoints at startup; construct the download runtime on first use.
+  ipcMain.handle("vivid-download-set-owner", async (event, ownerId) => {
+    if (!isTrustedDownloadSender(event)) throw new Error("Untrusted download owner request");
+    return setDownloadOwner(ownerId);
+  });
   ipcMain.handle("vivid-download-search", (event, query) => {
     if (!isTrustedDownloadSender(event)) throw new Error("Untrusted download request");
     return ensureDownloadEngine().search(query);

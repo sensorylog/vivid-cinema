@@ -4,6 +4,7 @@ import { getImageUrl, getMediaUrl, normalizeResults, sortMediaItems } from "./me
 import { escapeHtml, getErrorMessage } from "./utils.js";
 import { getRoute } from "./routes.js";
 import { rankSearchResults } from "./search.js";
+import { filterAllowedTitles } from "./parental-controls.js";
 
 const $ = (id) => document.getElementById(id);
 const route = getRoute();
@@ -409,6 +410,7 @@ async function fetchDiscovery() {
         ? tmdbApi.discoverMovies(discoverParams("movie"))
         : tmdbApi.discoverTv(discoverParams("tv")));
       items = sortMediaItems(normalizeResults(data.results || [], state.type), state.sort);
+      items = await filterAllowedTitles(items);
       if (state.mood) items = rankByMood(items);
       totalPages = Number(data.total_pages || 1);
     }

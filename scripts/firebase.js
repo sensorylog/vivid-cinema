@@ -2,7 +2,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/fireba
 import { initializeAuth, browserLocalPersistence, indexedDBLocalPersistence, inMemoryPersistence, browserPopupRedirectResolver } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
 import { getFirestore } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
 import { initializeAppCheck, CustomProvider } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app-check.js";
-import { getTurnstileAppCheckToken } from "./turnstile-app-check.js?v=20261123-signup-only-1";
+import { getTurnstileAppCheckToken } from "./turnstile-app-check.js?v=20261127-profile-flow-1";
 
 const LOCAL_HOSTS = new Set(["localhost", "127.0.0.1", "::1"]);
 

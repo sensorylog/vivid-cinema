@@ -5,10 +5,12 @@ import { escapeHtml } from "./utils.js";
 import { getAnimeLibrarySnapshot, removeAnimeFromWatchlist, unmarkAnimeCompleted, removeAnimeFavorite, saveAnimeLibraryPreferences, syncAnimePreferencesForUser } from "./anime-library.js";
 import { syncLibraryForUser } from "./library.js";
 import { syncPlaybackProgressForUser } from "./recommendations.js";
+import { filterAllowedTitles } from "./parental-controls.js";
 
 const $ = id => document.getElementById(id);
 let currentUser = null;
 let membershipChecked = false;
+let renderRevision = 0;
 
 function showGate(title, copy, href, label) {
   $("vap-library-gate-title").textContent = title;
@@ -54,25 +56,42 @@ function renderSection(id, items, section, empty) {
   target.innerHTML = items.length ? items.map(item => card(item, section)).join("") : '<p class="vap-library-empty">' + empty + '</p>';
 }
 
-function render() {
-  const data = getAnimeLibrarySnapshot();
-  const total = data.watchlist.length + data.favorites.length + data.completed.length;
-  $("vap-library-stats").innerHTML = [
-    ["IN PROGRESS", data.continueWatching.length],
-    ["WATCHLIST", data.watchlist.length],
-    ["COMPLETED", data.completed.length],
-    ["HISTORY", data.history.length]
-  ].map(([label, value]) => '<div class="vap-library-stat"><b>' + value + '</b><span>' + label + '</span></div>').join("");
-  renderSection("vap-library-continue", data.continueWatching, "continue", "Start an episode in Premium and your progress will appear here.");
-  renderSection("vap-library-watchlist", data.watchlist, "watchlist", "Save anime from its title page and it will appear here.");
-  renderSection("vap-library-completed", data.completed, "completed", "Mark a title as completed from its Premium title page.");
-  renderSection("vap-library-favorites", data.favorites, "favorites", "Your favourite anime titles will appear here.");
-  renderSection("vap-library-history", data.history, "history", "Your watched anime will appear here once you start playback.");
-  renderSection("vap-library-episodes", data.completedEpisodes, "episodes", "Completed episode progress will appear here.");
-  $("vap-pref-track").value = data.preferences.track;
-  $("vap-pref-autoplay").checked = data.preferences.autoplayNextEpisode;
-  $("vap-pref-language").value = data.preferences.subtitleLanguage;
-  $("vap-pref-player").value = data.preferences.preferredPlayer;
+async function render() {
+  const revision = ++renderRevision;
+  const userId = currentUser?.uid || "";
+  try {
+    const source = getAnimeLibrarySnapshot();
+    const [continueWatching, watchlist, completed, favorites, history, completedEpisodes] = await Promise.all([
+      filterAllowedTitles(source.continueWatching || []),
+      filterAllowedTitles(source.watchlist || []),
+      filterAllowedTitles(source.completed || []),
+      filterAllowedTitles(source.favorites || []),
+      filterAllowedTitles(source.history || []),
+      filterAllowedTitles(source.completedEpisodes || [])
+    ]);
+    if (revision !== renderRevision || (userId && currentUser?.uid !== userId)) return;
+    const data = { ...source, continueWatching, watchlist, completed, favorites, history, completedEpisodes };
+    $("vap-library-stats").innerHTML = [
+      ["IN PROGRESS", data.continueWatching.length],
+      ["WATCHLIST", data.watchlist.length],
+      ["COMPLETED", data.completed.length],
+      ["HISTORY", data.history.length]
+    ].map(([label, value]) => '<div class="vap-library-stat"><b>' + value + '</b><span>' + label + '</span></div>').join("");
+    renderSection("vap-library-continue", data.continueWatching, "continue", "Start an episode in Premium and your progress will appear here.");
+    renderSection("vap-library-watchlist", data.watchlist, "watchlist", "Save anime from its title page and it will appear here.");
+    renderSection("vap-library-completed", data.completed, "completed", "Mark a title as completed from its Premium title page.");
+    renderSection("vap-library-favorites", data.favorites, "favorites", "Your favourite anime titles will appear here.");
+    renderSection("vap-library-history", data.history, "history", "Your watched anime will appear here once you start playback.");
+    renderSection("vap-library-episodes", data.completedEpisodes, "episodes", "Completed episode progress will appear here.");
+    $("vap-pref-track").value = data.preferences.track;
+    $("vap-pref-autoplay").checked = data.preferences.autoplayNextEpisode;
+    $("vap-pref-language").value = data.preferences.subtitleLanguage;
+    $("vap-pref-player").value = data.preferences.preferredPlayer;
+  } catch (error) {
+    if (revision !== renderRevision) return;
+    console.warn("Vivid Anime Premium library viewing limits could not be verified:", error);
+    showGate("Viewing settings unavailable", "We could not verify this profile’s viewing limits. Reload the page and try again before opening saved titles.", "anime-premium.html", "Back to Premium");
+  }
 }
 
 async function verifyMembership(user) {
@@ -100,7 +119,7 @@ async function openLibrary(user) {
     $("vap-library-content").hidden = false;
     await Promise.allSettled([syncLibraryForUser(user), syncPlaybackProgressForUser(user), syncAnimePreferencesForUser(user)]);
     if (currentUser?.uid !== user.uid) return;
-    render();
+    await render();
   } catch (error) {
     console.warn("Vivid Anime Premium library could not load:", error);
     showGate("Your library could not be loaded", "Vivid could not verify your membership or sync your private library. Check your connection and try again.", "anime-premium.html", "Back to Premium");
@@ -115,7 +134,7 @@ document.addEventListener("click", event => {
   if (button.hasAttribute("data-remove-watchlist")) removeAnimeFromWatchlist(id, type);
   else if (button.hasAttribute("data-uncomplete")) unmarkAnimeCompleted(id, type);
   else removeAnimeFavorite(id, type);
-  render();
+  void render();
 });
 
 for (const id of ["vap-pref-track", "vap-pref-player", "vap-pref-language", "vap-pref-autoplay"]) {
@@ -130,13 +149,14 @@ for (const id of ["vap-pref-track", "vap-pref-player", "vap-pref-language", "vap
   });
 }
 
-window.addEventListener("vivid:library-changed", render);
-window.addEventListener("vivid:progress-changed", render);
-window.addEventListener("vivid:anime-preferences-changed", render);
+window.addEventListener("vivid:library-changed", () => { void render(); });
+window.addEventListener("vivid:progress-changed", () => { void render(); });
+window.addEventListener("vivid:anime-preferences-changed", () => { void render(); });
 
 onAuthStateChanged(auth, user => {
   currentUser = user && !user.isAnonymous ? user : null;
   if (!currentUser) {
+    renderRevision += 1;
     showGate("Sign in to see your anime", "Use your existing Vivid account to open your private Premium library.", "auth.html?returnTo=anime-premium-library.html", "Sign in to Vivid");
     return;
   }

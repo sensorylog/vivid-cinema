@@ -16,6 +16,15 @@ test("browser library remains available separately from the native Electron mana
   const script = await readFile(new URL("../scripts/my-downloads.js", import.meta.url), "utf8");
   const desktop = await readFile(new URL("../scripts/downloads/desktop-offline.js", import.meta.url), "utf8");
   assert.match(script, /createIndexedDBPersistence\(\{ownerId:owner\}\)/);
+  assert.match(script, /async function offlineOwnerKey\(uid, profileId\)/);
+  assert.match(script, /async function migrateLegacyOfflineJobs\(uid, profileId, scopedOwner\)/);
+  assert.match(script, /vivid:offline-profile-migration:v1:/);
+  assert.match(script, /Existing offline downloads could not be verified/);
+  assert.match(script, /migrateLegacyOfflineJobs\(user\.uid,profileId,owner\)/);
+  assert.match(script, /crypto\.subtle\.digest\("SHA-256"/);
+  assert.match(script, /getActiveProfileId\(user\.uid\)/);
+  assert.match(desktop, /engine\.setOwner\(owner\)/);
+  assert.match(desktop, /vivid:profile-changed/);
   assert.match(script, /createBrowserDownloadAdapter/);
   assert.match(script, /createOfflinePlaybackController/);
   assert.match(script, /window\.vividDownloads\?\.available/);
@@ -161,9 +170,9 @@ test("Windows player runtime and stylesheet have cache-busting URLs", async () =
   const script = await readFile(new URL("../scripts/my-downloads.js", import.meta.url), "utf8");
   const worker = await readFile(new URL("../service-worker.js", import.meta.url), "utf8");
   assert.match(page, /my-downloads\.css\?v=offline-cinema-redesign-3/);
-  assert.match(script, /desktop-offline\.js\?windows-offline-hls-v4/);
+  assert.match(script, /desktop-offline\.js\?windows-offline-hls-v7/);
   assert.match(worker, /vivid-cinema-shell-v\d+/);
-  assert.match(worker, /desktop-offline\.js\?windows-offline-hls-v4/);
+  assert.match(worker, /desktop-offline\.js\?windows-offline-hls-v7/);
   assert.match(worker, /my-downloads\.css\?v=offline-cinema-redesign-3/);
 });
 
@@ -230,7 +239,7 @@ test("Windows offline library renders before loading the optional HLS compatibil
   const bootstrap = await readFile(new URL("../scripts/my-downloads.js", import.meta.url), "utf8");
   const desktop = await readFile(new URL("../scripts/downloads/desktop-offline.js", import.meta.url), "utf8");
   const transcode = await readFile(new URL("../scripts/downloads/transcode-player.js", import.meta.url), "utf8");
-  assert.match(bootstrap, /if \(window\.vividDownloads\?\.available\) \{[\s\S]*?import\("\.\/downloads\/desktop-offline\.js\?windows-offline-hls-v4"\)/);
+  assert.match(bootstrap, /if \(window\.vividDownloads\?\.available\) \{[\s\S]*?import\("\.\/downloads\/desktop-offline\.js\?windows-offline-hls-v7"\)/);
   assert.match(bootstrap, /\} else \{\s*await loadHlsRuntime\(\)/);
   assert.match(transcode, /function prepare\(\)/);
   assert.match(transcode, /async function load\(session\)/);

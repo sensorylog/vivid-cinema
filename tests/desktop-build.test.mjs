@@ -6,6 +6,25 @@ import vm from "node:vm";
 const root = process.cwd();
 const pkg = JSON.parse(fs.readFileSync(path.join(root, "package.json"), "utf8"));
 
+
+test("Windows offline engine partitions state and files by account/profile owner", () => {
+  const main = fs.readFileSync(new URL("../desktop/main.cjs", import.meta.url), "utf8");
+  const preload = fs.readFileSync(new URL("../desktop/preload.cjs", import.meta.url), "utf8");
+  const engine = fs.readFileSync(new URL("../desktop/download-engine.cjs", import.meta.url), "utf8");
+  const offline = fs.readFileSync(new URL("../scripts/downloads/desktop-offline.js", import.meta.url), "utf8");
+  assert.match(main, /vivid-download-set-owner/);
+  assert.match(main, /resolveLegacyDownloadStorage/);
+  assert.match(main, /ownerId\.endsWith\("::owner"\)/);
+  assert.match(preload, /setOwner: ownerId => ipcRenderer\.invoke/);
+  assert.match(engine, /createHash\("sha256"\)/);
+  assert.match(engine, /ownerHash/);
+  assert.match(engine, /vivid-downloads/);
+  assert.match(offline, /engine\.setOwner\(owner\)/);
+  assert.match(offline, /vivid:profile-changed/);
+  assert.match(offline, /document\.body\.inert = true/);
+  assert.match(offline, /document\.body\.inert = false/);
+});
+
 test("desktop packaging is opt-in and preserves existing scripts", () => {
   assert.equal(pkg.scripts["desktop:start"], "electron desktop/main.cjs");
   assert.match(pkg.scripts["desktop:dist"], /make-windows-icon\.cjs/);
@@ -232,7 +251,7 @@ test("Windows app checks for updates and offers download plus restart-to-install
   assert.ok(libraryBootstrap.includes("https://cdn.jsdelivr.net/npm/hls.js@1.7.3/dist/hls.min.js"));
 });
 
-test("Windows workflow builds on demand or on release tags", () => {
+test("Windows workflow is manual-only during the multi-phase integration", () => {
   const file = path.join(root, ".github", "workflows", "windows-desktop.yml");
   assert.ok(fs.existsSync(file));
   const workflow = fs.readFileSync(file, "utf8");
@@ -280,10 +299,11 @@ test("Windows workflow builds on demand or on release tags", () => {
   assert.match(workflow, /gh release view \$tag --json isDraft,assets/);
   assert.match(workflow, /Vivid-Cinema-Setup-\$version\.exe\.blockmap/);
   assert.match(workflow, /latest\.yml/);
-  assert.match(workflow, /pull_request/);
+  assert.match(workflow, /workflow_dispatch/);
+  assert.doesNotMatch(workflow, /pull_request/);
+  assert.match(workflow, /if: github.event_name == 'workflow_dispatch'/);
   assert.match(workflow, /windows-latest/);
   assert.match(workflow, /run: npm run desktop:dist/);
-  assert.match(workflow, /icons\/\*\*/);
   assert.match(workflow, /Vivid-Cinema-Setup/);
   assert.match(workflow, /Vivid-Cinema-Portable/);
   assert.match(workflow, /Vivid-Cinema-Portable-\$version\.exe/);
@@ -535,10 +555,10 @@ test("Windows runtime is current, hardened, and the offline shell cache is inval
   assert.doesNotMatch(preload, /\bBuffer\b|\bsetImmediate\b|\bclearImmediate\b|require\(["'](?:events|timers|url)["']\)/);
   const serviceWorker = fs.readFileSync(path.join(root, "service-worker.js"), "utf8");
   assert.match(serviceWorker, /CACHE_NAME = "vivid-cinema-shell-v\d+"/);
-  assert.ok(serviceWorker.includes("./scripts/downloads/desktop-offline.js?windows-offline-hls-v4"));
-  assert.ok(serviceWorker.includes("./scripts/downloads/transcode-player.js?windows-offline-hls-v5"));
+  assert.ok(serviceWorker.includes("./scripts/downloads/desktop-offline.js?windows-offline-hls-v7"));
+  assert.ok(serviceWorker.includes("./scripts/downloads/transcode-player.js?windows-offline-hls-v7"));
   const offlineRenderer = fs.readFileSync(path.join(root, "scripts", "downloads", "desktop-offline.js"), "utf8");
-  assert.ok(offlineRenderer.includes("./transcode-player.js?windows-offline-hls-v5"));
+  assert.ok(offlineRenderer.includes("./transcode-player.js?windows-offline-hls-v7"));
   const myDownloads = fs.readFileSync(path.join(root, "scripts", "my-downloads.js"), "utf8");
-  assert.ok(myDownloads.includes('import("./downloads/desktop-offline.js?windows-offline-hls-v4")'));
+  assert.ok(myDownloads.includes('import("./downloads/desktop-offline.js?windows-offline-hls-v7")'));
 });

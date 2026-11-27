@@ -1,4 +1,5 @@
-import { switchLocalOwner } from "./local-owner.js";
+import { seedLegacyOwnerProfileSnapshot, switchLocalOwner } from "./local-owner.js";
+import { getActiveProfileId, initializeProfileFoundation } from "./profiles.js";
 
 const STORAGE_KEY="vivid:library:v2";
 const COLLECTIONS=["favorites","watchLater","history","completed"];
@@ -6,13 +7,25 @@ const emptyLibrary=()=>({favorites:[],watchLater:[],history:[],completed:[]});
 const TOMBSTONE_STORAGE_KEY="vivid:library-tombstones:v1";
 const LOCAL_OWNER_KEY="vivid:library-owner:v1";
 let localMutationRevision=0;
-function ensureLocalOwner(uid){
+function ensureLocalOwner(uid, requestedProfileId = null){
+  const profileId = uid ? (requestedProfileId || getActiveProfileId(uid)) : "guest";
+  const scopedOwner = uid ? String(uid) + "::" + String(profileId) : null;
+  if(uid){
+    seedLegacyOwnerProfileSnapshot({
+      storage:localStorage,
+      ownerKey:LOCAL_OWNER_KEY,
+      activeKeys:[STORAGE_KEY,TOMBSTONE_STORAGE_KEY],
+      previousOwner:String(uid),
+      targetOwner:scopedOwner,
+      emptyValues:{[STORAGE_KEY]:JSON.stringify(emptyLibrary()),[TOMBSTONE_STORAGE_KEY]:"{}"}
+    });
+  }
   try{
     const result=switchLocalOwner({
       storage:localStorage,
       ownerKey:LOCAL_OWNER_KEY,
       activeKeys:[STORAGE_KEY,TOMBSTONE_STORAGE_KEY],
-      uid,
+      uid: scopedOwner,
       emptyValues:{
         [STORAGE_KEY]:JSON.stringify(emptyLibrary()),
         [TOMBSTONE_STORAGE_KEY]:"{}"
@@ -125,6 +138,8 @@ export function clearLibraryCollection(collection){
 }
 
 export function cleanItem(item){
+  const sourceGenres = Array.isArray(item.genre_ids) ? item.genre_ids : Array.isArray(item.genres) ? item.genres.map(genre=>genre?.id) : [];
+  const genreIds = [...new Set(sourceGenres.map(Number).filter(id=>Number.isInteger(id)&&id>0&&id<=200000))].slice(0,20);
   return {
     id:String(item.id),
     media_type:item.media_type||item.mediaType||"movie",
@@ -132,6 +147,9 @@ export function cleanItem(item){
     year:String(item.year??""),
     poster_path:item.poster_path||"",
     backdrop_path:item.backdrop_path||"",
+    ...(genreIds.length?{genre_ids:genreIds}:{}),
+    ...(typeof item.adult==="boolean"?{adult:item.adult}:{}),
+    ...(typeof item.certification==="string"?{certification:item.certification.slice(0,16)}:{}),
     updatedAt:Number(item.updatedAt)||Date.now(),
     ...(item.startedAt?{startedAt:Number(item.startedAt)}:{}),
     ...(item.lastWatchedAt?{lastWatchedAt:Number(item.lastWatchedAt)}:{}),
@@ -183,24 +201,24 @@ async function getFirebaseAuth(){
   }
 }
 
-async function setRemoteItem(uid,collection,item){
+async function setRemoteItem(uid,collection,item,profileId=getActiveProfileId(uid)){
   const {db,doc,setDoc,deleteDoc}=await getFirebase();
   const safe=cleanItem(item);
   const id=safe.media_type+":"+safe.id;
-  await setDoc(doc(db,"users",uid,collection,id),safe,{merge:true});
-  await deleteDoc(doc(db,"users",uid,"libraryTombstones",tombstoneKey(collection,safe)));
+  await setDoc(doc(db,"users",uid,"profiles",profileId,collection,id),safe,{merge:true});
+  await deleteDoc(doc(db,"users",uid,"profiles",profileId,"libraryTombstones",tombstoneKey(collection,safe)));
 }
 
-async function setRemoteTombstone(uid,tombstone){
+async function setRemoteTombstone(uid,tombstone,profileId=getActiveProfileId(uid)){
   const {db,doc,setDoc}=await getFirebase();
   await setDoc(
-    doc(db,"users",uid,"libraryTombstones",String(tombstone.collection)+":"+String(tombstone.contentId)),
+    doc(db,"users",uid,"profiles",profileId,"libraryTombstones",String(tombstone.collection)+":"+String(tombstone.contentId)),
     cleanTombstone(tombstone),
     {merge:true}
   );
 }
 
-async function deleteRemoteItem(uid,collection,item,deletedAt){
+async function deleteRemoteItem(uid,collection,item,deletedAt,profileId=getActiveProfileId(uid)){
   const {db,doc,deleteDoc}=await getFirebase();
   const safe=cleanItem(item);
   const id=safe.media_type+":"+safe.id;
@@ -208,8 +226,8 @@ async function deleteRemoteItem(uid,collection,item,deletedAt){
     collection,
     contentId:id,
     deletedAt
-  });
-  await deleteDoc(doc(db,"users",uid,collection,id));
+  },profileId);
+  await deleteDoc(doc(db,"users",uid,"profiles",profileId,collection,id));
 }
 
 async function withLibraryTimeout(promise,ms,message){
@@ -224,20 +242,20 @@ async function withLibraryTimeout(promise,ms,message){
   }
 }
 
-async function fetchRemote(uid,collection){
+async function fetchRemote(uid,collection,profileId=getActiveProfileId(uid)){
   const {db,firestoreCollection,getDocsFromServer}=await getFirebase();
   const snapshot=await withLibraryTimeout(
-    getDocsFromServer(firestoreCollection(db,"users",uid,collection)),
+    getDocsFromServer(firestoreCollection(db,"users",uid,"profiles",profileId,collection)),
     12000,
     "Cloud library read timed out for "+collection+"."
   );
   return snapshot.docs.map(item=>item.data());
 }
 
-async function fetchTombstones(uid){
+async function fetchTombstones(uid,profileId=getActiveProfileId(uid)){
   const {db,firestoreCollection,getDocsFromServer}=await getFirebase();
   const snapshot=await withLibraryTimeout(
-    getDocsFromServer(firestoreCollection(db,"users",uid,"libraryTombstones")),
+    getDocsFromServer(firestoreCollection(db,"users",uid,"profiles",profileId,"libraryTombstones")),
     12000,
     "Cloud library deletion sync timed out."
   );
@@ -288,8 +306,11 @@ async function mapLimit(items,limit,worker){
   await Promise.all(workers);
 }
 
-async function performLibrarySyncForUser(user=null){
+async function performLibrarySyncForUser(user=null,profileId=null){
   if(!user?.uid)return readLocal();
+  await initializeProfileFoundation(user);
+  profileId=profileId||getActiveProfileId(user.uid);
+  if(getActiveProfileId(user.uid)!==profileId)throw new Error("The active profile changed before library sync could start.");
   const auth=await getFirebaseAuth();
   if(!auth?.currentUser)throw new Error("Authentication is unavailable during library sync.");
   if(String(auth.currentUser.uid)!==String(user.uid))throw new Error("The signed-in account changed during library sync. Please retry.");
@@ -300,14 +321,14 @@ async function performLibrarySyncForUser(user=null){
   const firebase = await getFirebase();
   await firebase.ensureAppCheck();
 
-  ensureLocalOwner(user.uid);
+  ensureLocalOwner(user.uid,profileId);
   const local=readLocal();
 
   // Server-only reads are intentional: a cache-only/offline response must never
   // be reported to the user as a successful cloud sync.
   const [remoteCollections,remoteTombstones]=await Promise.all([
-    Promise.all(COLLECTIONS.map(key=>fetchRemote(user.uid,key))),
-    fetchTombstones(user.uid)
+    Promise.all(COLLECTIONS.map(key=>fetchRemote(user.uid,key,profileId))),
+    fetchTombstones(user.uid,profileId)
   ]);
   const tombstones=mergeTombstones(remoteTombstones);
   const merged=emptyLibrary();
@@ -331,14 +352,14 @@ async function performLibrarySyncForUser(user=null){
   await mapLimit(tombstoneEntries,8,async([key,tombstone])=>{
     const remote=remoteTombstoneMap.get(key);
     if(!remote || Number(remote.deletedAt||0)<Number(tombstone.deletedAt||0)){
-      await setRemoteTombstone(user.uid,tombstone);
+      await setRemoteTombstone(user.uid,tombstone,profileId);
     }
     if(!COLLECTIONS.includes(tombstone.collection))return;
     const contentId=String(tombstone.contentId);
     if(!/^(movie|tv):[0-9]+$/.test(contentId))return;
     const {db,doc,deleteDoc}=await getFirebase();
     // A delete of a missing document is safe and idempotent.
-    await deleteDoc(doc(db,"users",user.uid,tombstone.collection,contentId));
+    await deleteDoc(doc(db,"users",user.uid,"profiles",profileId,tombstone.collection,contentId));
   });
 
   const remoteByCollection=Object.fromEntries(COLLECTIONS.map((key,index)=>[
@@ -357,7 +378,7 @@ async function performLibrarySyncForUser(user=null){
     }
   });
   await mapLimit(writes,8,async({collection,item})=>{
-    await setRemoteItem(user.uid,collection,item);
+    await setRemoteItem(user.uid,collection,item,profileId);
   });
 
   // A tombstone defeated by a newer active item can now be removed remotely.
@@ -369,14 +390,14 @@ async function performLibrarySyncForUser(user=null){
     const winning=merged[item.collection]?.find(entry=>itemKey(entry)===String(item.contentId));
     if(!winning || Number(winning.updatedAt||0)<=Number(item.deletedAt||0))return;
     const {db,doc,deleteDoc}=await getFirebase();
-    await deleteDoc(doc(db,"users",user.uid,"libraryTombstones",String(item.collection)+":"+String(item.contentId)));
+    await deleteDoc(doc(db,"users",user.uid,"profiles",profileId,"libraryTombstones",String(item.collection)+":"+String(item.contentId)));
   });
 
   // Do not let a sync started for a previous account overwrite the current
   // account's local snapshot if authentication changed while requests were in flight.
   const activeAuth=await getFirebaseAuth();
   if(!activeAuth?.currentUser)throw new Error("Authentication is unavailable during library sync.");
-  if(String(activeAuth.currentUser.uid)!==String(user.uid))throw new Error("The signed-in account changed during library sync. Please retry.");
+  if(String(activeAuth.currentUser.uid)!==String(user.uid) || getActiveProfileId(user.uid)!==profileId)throw new Error("The active account or profile changed during library sync. Please retry.");
 
   // Do not replace local data until all required cloud operations have been
   // acknowledged. Any error propagates so the UI can truthfully offer retry.
@@ -397,7 +418,9 @@ let syncQueue=Promise.resolve();
 export function syncLibraryForUser(user=null){
   if(!user?.uid)return Promise.resolve(readLocal());
   const uid=String(user.uid);
-  if(syncInFlight.has(uid))return syncInFlight.get(uid);
+  const profileId=getActiveProfileId(uid);
+  const syncKey=uid+"::"+profileId;
+  if(syncInFlight.has(syncKey))return syncInFlight.get(syncKey);
 
   // Serialize different accounts, and repeat a pass if local mutations arrive
   // while a snapshot is being reconciled so a fast click cannot be missed.
@@ -406,11 +429,11 @@ export function syncLibraryForUser(user=null){
     let syncedRevision;
     do{
       syncedRevision=localMutationRevision;
-      result=await performLibrarySyncForUser(user);
+      result=await performLibrarySyncForUser(user,profileId);
     }while(syncedRevision!==localMutationRevision);
     return result;
-  }).finally(()=>syncInFlight.delete(uid));
-  syncInFlight.set(uid,task);
+  }).finally(()=>syncInFlight.delete(syncKey));
+  syncInFlight.set(syncKey,task);
   syncQueue=task.catch(()=>{});
   return task;
 }
@@ -459,6 +482,15 @@ export async function startLibrarySync(){
 
 if(typeof window!=="undefined"){
   void startLibrarySync();
+  window.addEventListener("vivid:profile-changed",event=>{
+    const uid=String(event.detail?.uid||"");
+    if(!uid)return;
+    ensureLocalOwner(uid,event.detail?.profileId||null);
+    void getFirebaseAuth().then(auth=>{
+      if(auth?.currentUser?.uid===uid)return syncLibraryForUser(auth.currentUser);
+      return null;
+    }).catch(error=>console.warn("Vivid profile library sync unavailable:",error));
+  });
   window.addEventListener("online",()=>{
     void getFirebaseAuth().then(auth=>{
       if(auth?.currentUser)return syncLibraryForUser(auth.currentUser);

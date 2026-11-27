@@ -7,10 +7,10 @@ permissions:
   contents: write
 
 jobs:
-  # Verify Windows builds on PRs and main pushes. Release publication remains
-  # separately gated by the version/tag checks in this workflow.
+  # Manual-only Windows packaging. Keep release builds paused during PR implementation.
+  # Publication remains separately gated by the version/tag checks below.
   windows-build:
-    if: github.event_name == 'pull_request' || github.event_name == 'push'
+    if: github.event_name == 'workflow_dispatch'
     runs-on: windows-latest
     timeout-minutes: 30
     steps:

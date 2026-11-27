@@ -83,6 +83,7 @@ export function allowedOrigin(origin, env = {}) {
   if (DEFAULT_ALLOWED_ORIGINS.includes(origin) || extra.includes(origin)) return true;
   try {
     const parsed = new URL(origin);
+    if (parsed.hostname === "localhost" && ["http:", "https:", "capacitor:"].includes(parsed.protocol)) return true;
     return parsed.protocol === "https:" &&
       (parsed.hostname === "vivid-cinema.pages.dev" || parsed.hostname.endsWith(".vivid-cinema.pages.dev"));
   } catch {

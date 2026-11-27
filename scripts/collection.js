@@ -3,6 +3,7 @@ import { getHomeSectionPage, HOME_SECTION_META } from "./content.js";
 import { getImageUrl, getMediaUrl, normalizeResults } from "./media.js";
 import { getRoute, buildDiscoverUrl } from "./routes.js";
 import { escapeHtml, getErrorMessage } from "./utils.js";
+import { filterAllowedTitles } from "./parental-controls.js";
 
 const $ = (id) => document.getElementById(id);
 const route = getRoute();
@@ -82,7 +83,7 @@ async function loadPage(reset=false){
       }
     }
     if(id!==state.requestId)return;
-    let incoming=sort(data.items||[]);
+    let incoming=await filterAllowedTitles(sort(data.items||[]));
     if(reset)state.items=incoming;else state.items=[...state.items,...incoming.filter(item=>!state.items.some(x=>x.content_id===item.content_id))];
     state.page=data.page;state.totalPages=data.totalPages;
     $("collection-grid").innerHTML=state.items.map(card).join("");

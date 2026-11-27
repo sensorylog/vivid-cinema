@@ -75,3 +75,30 @@ export function switchLocalOwner({
   storage.setItem(ownerKey, targetOwner);
   return { changed: true, previousOwner: currentOwner, owner: targetOwner, firstClaim: false };
 }
+
+/**
+ * Seed a first profile-scoped snapshot from the previous account-wide local
+ * namespace. Never seed when any target-profile snapshot already exists: a
+ * partial profile snapshot must not inherit another profile's missing stores.
+ */
+export function seedLegacyOwnerProfileSnapshot({
+  storage,
+  ownerKey,
+  activeKeys,
+  previousOwner,
+  targetOwner,
+  emptyValues = {},
+  snapshotKey = ownerSnapshotKey
+}) {
+  if (!storage || !ownerKey || !Array.isArray(activeKeys) || !activeKeys.length ||
+      !previousOwner || !targetOwner || storage.getItem(ownerKey) !== String(previousOwner)) {
+    return false;
+  }
+  const hasTargetSnapshot = activeKeys.some(key => storage.getItem(snapshotKey(key, targetOwner)) != null);
+  if (hasTargetSnapshot) return false;
+  for (const key of activeKeys) {
+    const active = storage.getItem(key);
+    storage.setItem(snapshotKey(key, targetOwner), active == null ? String(emptyValues[key] ?? "{}") : active);
+  }
+  return true;
+}

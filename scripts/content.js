@@ -1,6 +1,7 @@
 import { tmdbApi } from "./tmdb.js";
 import { normalizeResults, normalizeUpcomingResults } from "./media.js";
 import { getProviderCountry } from "./provider-region.js";
+import { filterAllowedTitles } from "./parental-controls.js";
 
 async function providerDiscover(providerId, type, page = 1, region = getProviderCountry()) {
   const params = { page, with_watch_monetization_types: "flatrate", with_watch_providers: (Array.isArray(providerId) ? providerId : [providerId]).map(String).join("|"), sort_by: "popularity.desc", "vote_count.gte": "20", watch_region: region };
@@ -405,9 +406,7 @@ export async function getCuratedPage(key, page = 1, filters = {}) {
     .map((result, index) => ({ result, type: types[index] }))
     .filter(({ result }) => result.status === "fulfilled");
   if (!successful.length) throw (results.find(result => result.status === "rejected")?.reason || new Error("Curated discovery unavailable."));
-  const items = successful.flatMap(({ result, type }) =>
-    normalizeResults(result.value?.results || [], type)
-  );
+  const items = await filterAllowedTitles(successful.flatMap(({ result, type }) => normalizeResults(result.value?.results || [], type)));
   return {
     items,
     page,
@@ -442,14 +441,14 @@ export async function getAnimePage(page = 1, filters = {}) {
   const results = await Promise.allSettled(requests);
   const successful = results.filter(result => result.status === "fulfilled").map(result => result.value);
   if (!successful.length) throw (results.find(result => result.status === "rejected")?.reason || new Error("Anime catalogue unavailable."));
-  const items = successful.flatMap(({ data, type: mediaType }) => normalizeResults(data?.results || [], mediaType))
-    .sort((a,b) => Number(b.raw?.popularity || 0) - Number(a.raw?.popularity || 0) || Number(b.vote_average || 0) - Number(a.vote_average || 0));
+  const items = await filterAllowedTitles(successful.flatMap(({ data, type: mediaType }) => normalizeResults(data?.results || [], mediaType))
+    .sort((a,b) => Number(b.raw?.popularity || 0) - Number(a.raw?.popularity || 0) || Number(b.vote_average || 0) - Number(a.vote_average || 0)));
   return { items, page, totalPages: Math.min(500, Math.max(...successful.map(({data}) => Number(data?.total_pages || 1)), 1)), partial: successful.length < requests.length };
 }
 
 export async function getFeaturedMovies(limit = 8) {
   const data = await tmdbApi.trending("movie", "week");
-  return normalizeResults(data.results || [], "movie").filter((item) => item.backdrop_path).slice(0, limit);
+  return filterAllowedTitles(normalizeResults(data.results || [], "movie").filter((item) => item.backdrop_path).slice(0, limit));
 }
 
 async function loadHomeKey(key, page) {
@@ -477,13 +476,16 @@ export async function getHomeSections(keys = Object.keys(HOME_LOADERS), page = 1
       ? normalizeHome(key, requests[index].value)
       : { items: [], page, totalPages: 1, failed: true };
   });
+  for (const key of selected) if (output[key] && !output[key].failed) output[key].items = await filterAllowedTitles(output[key].items);
   output.hasPartialFailure = requests.some((result) => result.status === "rejected");
   return output;
 }
 
 export async function getHomeSectionPage(key, page = 1) {
   if (!HOME_LOADERS[key]) throw new Error("Unknown home section: " + key);
-  return normalizeHome(key, await loadHomeKey(key, page));
+  const normalized = normalizeHome(key, await loadHomeKey(key, page));
+  normalized.items = await filterAllowedTitles(normalized.items);
+  return normalized;
 }
 
 export function mergeSearchCatalogueResults(groups = []) {

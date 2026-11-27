@@ -4,6 +4,7 @@ import { normalizeResults } from "./media.js";
 import { parseIntent } from "./intent-parser.js";
 import { getTasteProfile } from "./intelligence.js";
 import { getProviderCountry } from "./provider-region.js";
+import { filterAllowedTitles } from "./parental-controls.js";
 
 const RECENT_KEY_PREFIX = "vivid:search:recent:v2:";
 const LEGACY_RECENT_KEY = "vivid:search:recent:v1";
@@ -414,7 +415,7 @@ export async function rankSearchResults(items, query, options = {}) {
   return ranked.slice(0, Number(options.limit || 8));
 }
 
-export async function searchIntelligently(query, options = {}) {
+async function searchIntelligentlyRaw(query, options = {}) {
   const q = normalizeQuery(query);
   if (!q) return { items: [], intent: getSearchIntent(""), recent: getRecentSearches() };
   const page = Math.max(1, Math.min(500, Number(options.page || 1)));
@@ -653,4 +654,10 @@ export async function searchIntelligently(query, options = {}) {
     },
     recent: getRecentSearches()
   };
+}
+
+
+export async function searchIntelligently(query, options = {}) {
+  const result = await searchIntelligentlyRaw(query, options);
+  return { ...result, items: await filterAllowedTitles(result.items || []) };
 }

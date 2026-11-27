@@ -1,4 +1,5 @@
 import { VIVID_CONFIG } from "./config.js";
+import { clearActiveProfileId, getActiveProfileId, hasActiveProfileSelection, listProfileSummaries, validateProfileSession } from "./profiles.js";
 import { applyPerformanceProfile } from "./performance-profile.js";
 import { resolveAndroidBackAction } from "./android-navigation.js";
 import "./movie-quick-actions.js";
@@ -9,6 +10,10 @@ applyPerformanceProfile();
 
 const MOBILE_BREAKPOINT = 768;
 let initialized = false;
+let profileActivityBound = false;
+let profileActivityUid = "";
+let profileActivityProfileId = "";
+let profileActivityPingAt = 0;
 
 const NAV_STACK_KEY = "vivid:navigation-stack:v1";
 
@@ -399,6 +404,90 @@ function syncNavigation() {
   syncMobileNavigation();
 }
 
+const PROFILE_SESSION_UID_KEY = "vivid:profile-session-uid:v1";
+const PROFILE_RETURN_TO_KEY = "vivid:profile-return-to:v1";
+
+function rememberProfileReturnRoute() {
+  const page = location.pathname.split("/").filter(Boolean).pop() || "home.html";
+  if (["profiles.html", "auth.html", "login.html", "forgot-password.html", "auth-diagnostics.html", "verify-email.html", "anime-premium-return.html"].includes(page)) return;
+  try { sessionStorage.setItem(PROFILE_RETURN_TO_KEY, currentRoute()); } catch {}
+}
+
+function bindProfileActivity(user, profileId) {
+  if (!user?.uid || (profileActivityBound && profileActivityUid === user.uid && profileActivityProfileId === profileId)) return;
+  profileActivityBound = true;
+  profileActivityUid = user.uid;
+  profileActivityProfileId = profileId;
+  profileActivityPingAt = Date.now();
+
+  const ping = async () => {
+    const currentUser = window.vividAuthUser;
+    if (document.visibilityState === "hidden" || !currentUser?.uid || currentUser.uid !== user.uid) return;
+    const now = Date.now();
+    if (now - profileActivityPingAt < 5 * 60 * 1000) return;
+    profileActivityPingAt = now;
+    try {
+      const tokenResult = await currentUser.getIdTokenResult();
+      if (tokenResult.claims.profileId !== profileId || typeof tokenResult.claims.profileSessionId !== "string") return;
+      if (!await validateProfileSession(currentUser, profileId)) {
+        rememberProfileReturnRoute();
+        window.location.replace("profiles.html");
+      }
+    } catch (error) {
+      console.warn("Vivid could not refresh the active profile session:", error);
+    }
+  };
+  const handler = () => { void ping(); };
+  ["pointerdown", "keydown", "touchstart", "scroll"].forEach(eventName => {
+    document.addEventListener(eventName, handler, { passive: true });
+  });
+  document.addEventListener("timeupdate", handler, true);
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState !== "hidden") handler();
+  });
+}
+
+async function enforceProfileSelection(user) {
+  if (!user?.uid) return;
+  const page = location.pathname.split("/").filter(Boolean).pop() || "home.html";
+  if (["profiles.html", "auth.html", "login.html", "forgot-password.html", "auth-diagnostics.html", "verify-email.html", "anime-premium-return.html"].includes(page)) return;
+  const redirectToProfiles = () => {
+    rememberProfileReturnRoute();
+    if (page !== "profiles.html") window.location.replace("profiles.html");
+  };
+  if (!hasActiveProfileSelection(user.uid)) {
+    redirectToProfiles();
+    return;
+  }
+  try {
+    const { profiles } = await listProfileSummaries(user);
+    const activeId = getActiveProfileId(user.uid);
+    const activeProfile = profiles.find(profile => profile.id === activeId);
+    if (!activeProfile) {
+      clearActiveProfileId(user.uid);
+      redirectToProfiles();
+      return;
+    }
+    const tokenResult = await user.getIdTokenResult();
+    if (tokenResult.claims.profileId !== activeId) {
+      redirectToProfiles();
+      return;
+    }
+    if (activeProfile.hasPin) {
+      if (typeof tokenResult.claims.profileSessionId !== "string" ||
+          !await validateProfileSession(user, activeId)) {
+        redirectToProfiles();
+        return;
+      }
+      bindProfileActivity(user, activeId);
+    }
+    if (page === "auth.html") window.location.replace("home.html");
+  } catch (error) {
+    console.warn("Vivid could not validate the active viewing profile:", error);
+    redirectToProfiles();
+  }
+}
+
 function syncAccountNavigation() {
   // The shared shell rebuilds the header on every page, so account routing must
   // follow Firebase's restored session instead of a hard-coded sign-up URL.
@@ -413,6 +502,15 @@ function syncAccountNavigation() {
       if (typeof auth.authStateReady === "function") await auth.authStateReady();
 
       onAuthStateChanged(auth, (user) => {
+        let previousUid = "";
+        try { previousUid = localStorage.getItem(PROFILE_SESSION_UID_KEY) || ""; } catch {}
+        if (previousUid && previousUid !== String(user?.uid || "")) clearActiveProfileId(previousUid);
+        if (user?.uid) {
+          try { localStorage.setItem(PROFILE_SESSION_UID_KEY, String(user.uid)); } catch {}
+        } else {
+          if (previousUid) clearActiveProfileId(previousUid);
+          try { localStorage.removeItem(PROFILE_SESSION_UID_KEY); } catch {}
+        }
         const destination = user ? "account.html" : "auth.html";
         document.querySelectorAll("#auth-link, [data-vivid-nav-auth], .vivid-nav-account, .vivid-nav-action").forEach((link) => {
           link.href = destination;
@@ -423,6 +521,7 @@ function syncAccountNavigation() {
         window.vividAuthUser = user || null;
         window.vividAuthResolved = true;
         window.dispatchEvent(new CustomEvent("vivid:auth-ready", { detail: user || null }));
+        if (user) void enforceProfileSelection(user);
       });
     } catch (error) {
       console.warn("Vivid account navigation could not resolve the auth session:", error);

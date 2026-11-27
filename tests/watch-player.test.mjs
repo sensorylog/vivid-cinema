@@ -235,3 +235,5 @@ test("open movie catalogues are selectable sources and never appear for anime", 
   assert.match(source, /button\.hidden = isAnimePlayback\(\) \? source !== "vidapi"/);
   assert.match(source, /directPlayer\.src = directUrl/);
 });
+
+test("profile changes leave active playback before the new profile loads", async () => { const source = await readFile(new URL("../scripts/watch.js", import.meta.url), "utf8"); assert.match(source, /vivid:profile-changed/); assert.match(source, /window\.location\.replace\("home\.html"\)/); });

@@ -1,6 +1,7 @@
 import { getLocalLibrary, upsertLibraryItem, removeLibraryItem } from "./library.js";
 import { getAllPlaybackProgress } from "./recommendations.js";
 import { auth } from "./firebase.js";
+import { getActiveProfileId, initializeProfileFoundation } from "./profiles.js";
 
 const PREFERENCES_KEY = "vivid:anime-premium-preferences:v1";
 const PREFERENCES_OWNER_KEY = "vivid:anime-premium-preferences-owner:v1";
@@ -14,6 +15,8 @@ function normalizeItem(item = {}) {
   if (!/^\d+$/.test(id) || !MEDIA_TYPES.has(mediaType)) {
     throw new TypeError("Anime library items require a numeric TMDB ID and movie or tv media type.");
   }
+  const sourceGenres = Array.isArray(item.genre_ids) ? item.genre_ids : Array.isArray(item.genres) ? item.genres.map(genre => genre?.id) : [];
+  const genreIds = [...new Set(sourceGenres.map(Number).filter(value => Number.isInteger(value) && value > 0 && value <= 200000))].slice(0, 20);
   return {
     id,
     media_type: mediaType,
@@ -21,15 +24,22 @@ function normalizeItem(item = {}) {
     year: String(item.year || "").slice(0, 10),
     poster_path: String(item.poster_path || "").slice(0, 500),
     backdrop_path: String(item.backdrop_path || "").slice(0, 500),
+    ...(genreIds.length ? { genre_ids: genreIds } : {}),
+    ...(typeof item.adult === "boolean" ? { adult: item.adult } : {}),
+    ...(typeof item.certification === "string" ? { certification: item.certification.slice(0, 16) } : {}),
     isAnime: true
   };
 }
 
-function ensurePreferencesOwner(uid) {
-  const nextOwner = String(uid || "guest");
+function ensurePreferencesOwner(uid, requestedProfileId = null) {
+  const profileId = uid ? (requestedProfileId || getActiveProfileId(uid)) : "guest";
+  const nextOwner = uid ? String(uid) + "::" + String(profileId) : "guest";
   const currentOwner = localStorage.getItem(PREFERENCES_OWNER_KEY) || "guest";
   if (currentOwner === nextOwner) return;
   const current = localStorage.getItem(PREFERENCES_KEY);
+  if (uid && currentOwner === String(uid) && !localStorage.getItem(PREFERENCES_SNAPSHOT_PREFIX + nextOwner) && current) {
+    localStorage.setItem(PREFERENCES_SNAPSHOT_PREFIX + nextOwner, current);
+  }
   if (current) localStorage.setItem(PREFERENCES_SNAPSHOT_PREFIX + currentOwner, current);
   const saved = localStorage.getItem(PREFERENCES_SNAPSHOT_PREFIX + nextOwner);
   localStorage.setItem(PREFERENCES_KEY, saved || JSON.stringify({
@@ -89,10 +99,17 @@ async function getPreferencesFirestore() {
 
 export async function syncAnimePreferencesForUser(user = null) {
   if (!user?.uid || String(auth?.currentUser?.uid || "") !== String(user.uid)) return getAnimeLibraryPreferences();
-  ensurePreferencesOwner(user.uid);
+  await initializeProfileFoundation(user);
+  const profileId = getActiveProfileId(user.uid);
+  const ownerScope = String(user.uid) + "::" + String(profileId);
+  ensurePreferencesOwner(user.uid, profileId);
+  const isCurrentProfile = () => String(auth?.currentUser?.uid || "") === String(user.uid) &&
+    getActiveProfileId(user.uid) === profileId &&
+    localStorage.getItem(PREFERENCES_OWNER_KEY) === ownerScope;
   const { db, doc, getDocFromServer, setDoc } = await getPreferencesFirestore();
-  const reference = doc(db, "users", user.uid, "animePreferences", "default");
+  const reference = doc(db, "users", user.uid, "profiles", profileId, "animePreferences", "default");
   const snapshot = await getDocFromServer(reference);
+  if (!isCurrentProfile()) return getAnimeLibraryPreferences();
   const local = getAnimeLibraryPreferences();
   if (snapshot.exists()) {
     const remote = snapshot.data() || {};
@@ -109,6 +126,7 @@ export async function syncAnimePreferencesForUser(user = null) {
       return merged;
     }
   }
+  if (!isCurrentProfile()) return getAnimeLibraryPreferences();
   await setDoc(reference, local, { merge: true });
   return local;
 }
@@ -169,4 +187,15 @@ export function addAnimeFavorite(item) {
 
 export function removeAnimeFavorite(id, mediaType = "tv") {
   return removeLibraryItem("favorites", String(id), mediaType);
+}
+
+if (typeof window !== "undefined") {
+  window.addEventListener("vivid:profile-changed", event => {
+    const uid = String(event.detail?.uid || "");
+    if (!uid || String(auth?.currentUser?.uid || "") !== uid) return;
+    ensurePreferencesOwner(uid, event.detail?.profileId || null);
+    void syncAnimePreferencesForUser(auth.currentUser).catch(error => {
+      console.warn("Vivid profile anime preferences sync unavailable:", error);
+    });
+  });
 }

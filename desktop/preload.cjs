@@ -3,6 +3,7 @@ const { ipcRenderer, contextBridge } = require("electron");
 
 contextBridge.exposeInMainWorld("vividDownloads", Object.freeze({
   available: true,
+  setOwner: ownerId => ipcRenderer.invoke("vivid-download-set-owner", ownerId),
   search: query => ipcRenderer.invoke("vivid-download-search", query),
   start: (result, media) => ipcRenderer.invoke("vivid-download-start", result, media),
   list: () => ipcRenderer.invoke("vivid-download-list"),

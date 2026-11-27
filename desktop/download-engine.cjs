@@ -50,19 +50,26 @@ function selectVideoPayload(torrent) {
 }
 
 class DesktopDownloadEngine {
-  constructor({ app, BrowserWindow, dialog, shell, deferTorrentClient = false }) {
+  constructor({ app, BrowserWindow, dialog, shell, deferTorrentClient = false, ownerId = "guest", legacyStorage = false }) {
     Object.assign(this, { app, BrowserWindow, dialog, shell });
     // Do not set uploadLimit: 0: WebTorrent applies it to all outgoing peer traffic,
     // including handshakes and piece requests needed to download. Disable payload
     // uploads per torrent instead, while leaving protocol traffic unrestricted.
+    this.ownerId = String(ownerId || "guest").trim().slice(0, 256) || "guest";
+    this.legacyStorage = Boolean(legacyStorage);
+    const ownerHash = crypto.createHash("sha256").update(this.ownerId).digest("hex").slice(0, 32);
     this.clientError = null;
     this.deferTorrentClient = Boolean(deferTorrentClient);
     this.jobs = new Map();
     this.searchResults = new Map();
     this.playbackPositions = new Map();
     this.persistQueue = Promise.resolve();
-    this.downloadPath = path.join(app.getPath("downloads"), "Vivid Cinema");
-    this.statePath = path.join(app.getPath("userData"), "vivid-downloads.json");
+    this.downloadPath = this.legacyStorage
+      ? path.join(app.getPath("downloads"), "Vivid Cinema")
+      : path.join(app.getPath("downloads"), "Vivid Cinema", ownerHash);
+    this.statePath = this.legacyStorage
+      ? path.join(app.getPath("userData"), "vivid-downloads.json")
+      : path.join(app.getPath("userData"), "vivid-downloads", ownerHash + ".json");
     fs.mkdirSync(this.downloadPath, { recursive: true });
     // The Windows library only needs the download index to display and play
     // completed files. Defer WebTorrent itself until a search/start/resume action.
@@ -116,7 +123,7 @@ class DesktopDownloadEngine {
       error: job.error || null, progress: job.progress || 0, downloaded: job.downloaded || 0, total: job.total || 0,
       needsRescan: Boolean(job.needsRescan), createdAt: job.createdAt, updatedAt: Date.now()
     }));
-    const state = JSON.stringify({ version: 1, downloadPath: this.downloadPath, jobs: rows, playbackPositions: Object.fromEntries(this.playbackPositions) }, null, 2);
+    const state = JSON.stringify({ version: 2, ownerId: this.ownerId, downloadPath: this.downloadPath, jobs: rows, playbackPositions: Object.fromEntries(this.playbackPositions) }, null, 2);
     this.persistQueue = this.persistQueue.catch(() => {}).then(async () => {
       await fsp.mkdir(path.dirname(this.statePath), { recursive: true });
       const temporary = this.statePath + ".tmp";
@@ -129,6 +136,12 @@ class DesktopDownloadEngine {
   async restore() {
     try {
       const state = JSON.parse(await fsp.readFile(this.statePath, "utf8"));
+      if (state.ownerId && String(state.ownerId) !== this.ownerId) {
+        throw new Error("Download metadata belongs to a different Vivid profile.");
+      }
+      if (!this.legacyStorage && !state.ownerId) {
+        throw new Error("Unscoped legacy download metadata cannot be opened in a profile-specific library.");
+      }
       if (state.playbackPositions && typeof state.playbackPositions === "object") {
         for (const [key, value] of Object.entries(state.playbackPositions)) {
           if (typeof key === "string" && Number.isFinite(Number(value)) && Number(value) >= 0) this.playbackPositions.set(key, Number(value));

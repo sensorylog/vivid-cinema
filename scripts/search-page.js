@@ -1,4 +1,5 @@
 import { searchIntelligently, getRecentSearches, getRecentSearchOwner, rememberSearch, clearRecentSearches } from "./search.js";
+import { filterAllowedTitles } from "./parental-controls.js";
 
 const input = document.getElementById("search-page-input");
 const clear = document.getElementById("search-page-clear");
@@ -128,7 +129,8 @@ async function runSearch(value, { append = false } = {}) {
     const result = await searchIntelligently(query, { limit: PAGE_SIZE, page: requestedPage });
     if (query !== currentQuery) return;
     if (!append) rememberSearch(query, searchOwnerAtStart);
-    const pageItems = result.items || [];
+    const pageItems = await filterAllowedTitles(result.items || []);
+    if (query !== currentQuery) return;
     currentSearchNotes = result.intent?.filters?.unsupported || [];
     currentSimilarityTarget = result.intent?.similarityTarget || null;
     currentPersonTarget = result.intent?.personTarget || null;

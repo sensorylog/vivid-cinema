@@ -20,7 +20,7 @@ test("signup and resend use the authenticated external verification API", () => 
   assert.doesNotMatch(auth, /firebase-functions\.js|httpsCallable|getFunctions/);
   assert.doesNotMatch(auth, /sendEmailVerification/);
   assert.match(auth, /Verify My Email/);
-  assert.match(auth, /JSON\.stringify\(\["anime-premium\.html", "anime-premium-membership\.html"\]\.includes\(postAuthDestination\(\)\) \? \{ returnTo: postAuthDestination\(\) \} : \{\}\)/);
+  assert.match(auth, /JSON\.stringify\(\["anime-premium\.html", "anime-premium-membership\.html"\]\.includes\(requestedPostAuthDestination\(\)\) \? \{ returnTo: requestedPostAuthDestination\(\) \} : \{\}\)/);
 });
 
 test("Google redirect recovery only runs when a redirect was explicitly started", () => {
@@ -83,7 +83,7 @@ test("verification page is precached and loads its handler", () => {
   assert.match(worker, /"\.\/verify-email\.html"/);
   assert.match(worker, /"\.\/scripts\/verify-email\.js"/);
   assert.match(worker, /const CACHE_NAME = "vivid-cinema-shell-v\d+"/);
-  assert.ok(worker.includes("./scripts/auth.js?v=20261123-signup-only-1"));
+  assert.ok(worker.includes("./scripts/auth.js?v=20261127-profile-flow-1"));
 });
 
 
@@ -105,10 +105,10 @@ test("auth-related Firebase modules use one SDK version and fresh cache keys", a
   assert.ok(versions.length >= 9, "expected to inspect all shared Firebase SDK imports");
   assert.ok(versions.every((version) => version === "12.19.0"), "Firebase SDK imports must be version-aligned");
   assert.ok(auth.includes('from "./firebase.js"'), "auth must import the shared Firebase initializer");
-  assert.ok(worker.includes("./scripts/firebase.js?v=20261123-signup-only-1"));
-  assert.ok(worker.includes("./scripts/auth.js?v=20261123-signup-only-1"));
-  assert.ok(loginPage.includes("scripts/auth.js?v=20261123-signup-only-1"));
-  assert.ok(signupPage.includes("scripts/auth.js?v=20261123-signup-only-1"));
+  assert.ok(worker.includes("./scripts/firebase.js?v=20261127-profile-flow-1"));
+  assert.ok(worker.includes("./scripts/auth.js?v=20261127-profile-flow-1"));
+  assert.ok(loginPage.includes("scripts/auth.js?v=20261127-profile-flow-1"));
+  assert.ok(signupPage.includes("scripts/auth.js?v=20261127-profile-flow-1"));
   assert.match(worker, /isAuthDocument\|\|isAuthRuntime\|\|isWatchRoomRuntime\)\{event\.respondWith\(networkFirst\(request\)\);return;/);
   assert.match(worker, /isAuthRuntime=.*auth\|firebase\|nav-auth/);
   assert.match(navAuth, /firebasejs\/12\.19\.0\/firebase-auth\.js/);

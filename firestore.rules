@@ -44,7 +44,7 @@ service cloud.firestore {
 
     function validLibraryData() {
       return request.resource.data.keys().hasOnly([
-        'id','media_type','title','year','poster_path','backdrop_path','updatedAt',
+        'id','media_type','title','year','poster_path','backdrop_path','genre_ids','adult','certification','updatedAt',
         'startedAt','lastWatchedAt','watchedSeconds','completion','completedAt','isAnime'
       ])
       && request.resource.data.id is string
@@ -58,6 +58,9 @@ service cloud.firestore {
       && request.resource.data.poster_path.size() <= 500
       && request.resource.data.backdrop_path is string
       && request.resource.data.backdrop_path.size() <= 500
+      && (!request.resource.data.keys().hasAny(['genre_ids']) || (request.resource.data.genre_ids is list && request.resource.data.genre_ids.size() <= 20 && request.resource.data.genre_ids.hasOnly([12,14,16,18,27,28,35,36,37,53,80,99,878,9648,10402,10749,10751,10752,10770,10759,10762,10763,10764,10765,10766,10767,10768])))
+      && (!request.resource.data.keys().hasAny(['adult']) || request.resource.data.adult is bool)
+      && (!request.resource.data.keys().hasAny(['certification']) || (request.resource.data.certification is string && request.resource.data.certification.size() <= 16))
       && (!request.resource.data.keys().hasAny(['updatedAt']) || (request.resource.data.updatedAt is number && request.resource.data.updatedAt >= 0))
       && (!request.resource.data.keys().hasAny(['startedAt']) || (request.resource.data.startedAt is number && request.resource.data.startedAt >= 0))
       && (!request.resource.data.keys().hasAny(['lastWatchedAt']) || (request.resource.data.lastWatchedAt is number && request.resource.data.lastWatchedAt >= 0))
@@ -151,7 +154,7 @@ service cloud.firestore {
 
     function validTasteData() {
       return request.resource.data.keys().hasOnly([
-        'version','genres','languages','countries','actors','directors','media','decades','updatedAt'
+        'version','genres','languages','countries','actors','directors','media','decades','updatedAt','onboarding'
       ])
       && request.resource.data.version is number
       && request.resource.data.version >= 1
@@ -163,7 +166,14 @@ service cloud.firestore {
       && request.resource.data.directors is map && request.resource.data.directors.keys().size() <= 100
       && request.resource.data.media is map && request.resource.data.media.keys().size() <= 100
       && request.resource.data.decades is map && request.resource.data.decades.keys().size() <= 100
-      && request.resource.data.updatedAt is number;
+      && request.resource.data.updatedAt is number
+      && (!request.resource.data.keys().hasAny(['onboarding']) ||
+        (request.resource.data.onboarding is map
+          && request.resource.data.onboarding.keys().hasOnly(['shownAt','completed','dismissed','completedAt'])
+          && (!request.resource.data.onboarding.keys().hasAny(['shownAt']) || request.resource.data.onboarding.shownAt is number)
+          && (!request.resource.data.onboarding.keys().hasAny(['completedAt']) || request.resource.data.onboarding.completedAt is number)
+          && (!request.resource.data.onboarding.keys().hasAny(['completed']) || request.resource.data.onboarding.completed is bool)
+          && (!request.resource.data.onboarding.keys().hasAny(['dismissed']) || request.resource.data.onboarding.dismissed is bool)));
     }
 
     function validPushSubscription() {
@@ -242,6 +252,56 @@ service cloud.firestore {
       && (!request.resource.data.keys().hasAny(['updatedAt']) || request.resource.data.updatedAt is timestamp);
     }
 
+    function hasProfilePin(userId, profileId) {
+        return exists(/databases/$(database)/documents/users/$(userId)/profiles/$(profileId)/profileSecurity/pin);
+      }
+
+      function hasProfileSession(userId, profileId) {
+        let hasTokenSession = request.auth.token.keys().hasAll(['profileId','profileSessionId'])
+          && request.auth.token.profileId == profileId
+          && request.auth.token.profileSessionId is string;
+        let sessionId = request.auth.token.profileSessionId is string ? request.auth.token.profileSessionId : 'invalid';
+        let sessionPath = /databases/$(database)/documents/users/$(userId)/profiles/$(profileId)/profileSessions/$(sessionId);
+        let sessionExists = hasTokenSession && exists(sessionPath);
+        let session = sessionExists ? get(sessionPath).data : {};
+        return sessionExists
+          && session.keys().hasAll(['uid','profileId','revoked','expiresAt','lastActivityAt','pinHash'])
+          && session.uid == userId
+          && session.profileId == profileId
+          && session.revoked == false
+          && session.get('expiresAt', null) is timestamp
+          && session.get('expiresAt', timestamp.date(1970, 1, 1)) > request.time
+          && session.get('lastActivityAt', null) is timestamp
+          && session.get('lastActivityAt', timestamp.date(1970, 1, 1)) > request.time - duration.value(30, 'm');
+      }
+
+      function hasCurrentPinSession(userId, profileId) {
+        let sessionId = request.auth.token.profileSessionId is string ? request.auth.token.profileSessionId : 'invalid';
+        let sessionPath = /databases/$(database)/documents/users/$(userId)/profiles/$(profileId)/profileSessions/$(sessionId);
+        let pinPath = /databases/$(database)/documents/users/$(userId)/profiles/$(profileId)/profileSecurity/pin;
+        let session = get(sessionPath).data;
+        let pin = get(pinPath).data;
+        return hasProfileSession(userId, profileId)
+          && session.keys().hasAll(['pinHash'])
+          && pin.keys().hasAll(['pinHash'])
+          && session.get('pinHash', null) == pin.get('pinHash', null);
+      }
+
+      function hasViewingProfile(userId, profileId) {
+        return isOwner(userId)
+          && request.auth.token.keys().hasAll(['profileId'])
+          && request.auth.token.profileId == profileId
+          && exists(/databases/$(database)/documents/users/$(userId)/profiles/$(profileId))
+          && (!hasProfilePin(userId, profileId) || hasCurrentPinSession(userId, profileId));
+      }
+
+      function hasLegacyOwnerProfileAccess(userId) {
+        return isOwner(userId)
+          && request.auth.token.keys().hasAll(['profileId'])
+          && request.auth.token.profileId == 'owner'
+          && (!hasProfilePin(userId, 'owner') || hasCurrentPinSession(userId, 'owner'));
+      }
+
     match /users/{userId} {
       allow get: if isOwner(userId);
       allow list: if false;
@@ -264,8 +324,8 @@ service cloud.firestore {
       match /achievements/{achievementId} {
         // Personal milestone records only; the app evaluates progress locally.
         // These records are not trusted as competitive proof or transferable rewards.
-        allow read: if isOwner(userId);
-        allow create, update: if isOwner(userId)
+        allow read: if hasLegacyOwnerProfileAccess(userId);
+        allow create, update: if hasLegacyOwnerProfileAccess(userId)
           && achievementId in [
             'first-favorite','favorites-5','favorites-10','favorites-25',
             'queue-first','queue-5','queue-10',
@@ -279,7 +339,7 @@ service cloud.firestore {
           && request.resource.data.unlockedAt is number
           && request.resource.data.unlockedAt >= 0
           && request.resource.data.schemaVersion == 1;
-        allow delete: if isOwner(userId);
+        allow delete: if false;
       }
 
       match /pushSubscriptions/{subscriptionId} {
@@ -310,69 +370,205 @@ service cloud.firestore {
       }
 
       match /favorites/{contentId} {
-        allow read: if isOwner(userId);
-        allow create, update: if isOwner(userId) && validContentId(contentId) && validLibraryData();
-        allow delete: if isOwner(userId);
+        allow read: if hasLegacyOwnerProfileAccess(userId);
+        allow create, update: if hasLegacyOwnerProfileAccess(userId) && validContentId(contentId) && validLibraryData();
+        allow delete: if hasLegacyOwnerProfileAccess(userId);
       }
 
       match /watchLater/{contentId} {
-        allow read: if isOwner(userId);
-        allow create, update: if isOwner(userId) && validContentId(contentId) && validLibraryData();
-        allow delete: if isOwner(userId);
+        allow read: if hasLegacyOwnerProfileAccess(userId);
+        allow create, update: if hasLegacyOwnerProfileAccess(userId) && validContentId(contentId) && validLibraryData();
+        allow delete: if hasLegacyOwnerProfileAccess(userId);
       }
 
       match /history/{contentId} {
-        allow read: if isOwner(userId);
-        allow create, update: if isOwner(userId) && validContentId(contentId) && validLibraryData();
-        allow delete: if isOwner(userId);
+        allow read: if hasLegacyOwnerProfileAccess(userId);
+        allow create, update: if hasLegacyOwnerProfileAccess(userId) && validContentId(contentId) && validLibraryData();
+        allow delete: if hasLegacyOwnerProfileAccess(userId);
       }
 
       match /completed/{contentId} {
-        allow read: if isOwner(userId);
-        allow create, update: if isOwner(userId) && validContentId(contentId) && validLibraryData();
-        allow delete: if isOwner(userId);
+        allow read: if hasLegacyOwnerProfileAccess(userId);
+        allow create, update: if hasLegacyOwnerProfileAccess(userId) && validContentId(contentId) && validLibraryData();
+        allow delete: if hasLegacyOwnerProfileAccess(userId);
       }
 
       match /progress/{contentId} {
-        allow read: if isOwner(userId);
-        allow create, update: if isOwner(userId) && validProgressId(contentId) && validProgressData();
-        allow delete: if isOwner(userId);
+        allow read: if hasLegacyOwnerProfileAccess(userId);
+        allow create, update: if hasLegacyOwnerProfileAccess(userId) && validProgressId(contentId) && validProgressData();
+        allow delete: if hasLegacyOwnerProfileAccess(userId);
       }
 
       match /animePreferences/{preferenceId} {
-        allow read: if isOwner(userId);
-        allow create, update: if isOwner(userId) && preferenceId == "default" && validAnimePreferences();
-        allow delete: if isOwner(userId);
+        allow read: if hasLegacyOwnerProfileAccess(userId);
+        allow create, update: if hasLegacyOwnerProfileAccess(userId) && preferenceId == "default" && validAnimePreferences();
+        allow delete: if hasLegacyOwnerProfileAccess(userId);
       }
 
       match /libraryTombstones/{tombstoneId} {
-        allow read: if isOwner(userId);
-        allow create, update: if isOwner(userId) && validTombstoneData();
-        allow delete: if isOwner(userId);
+        allow read: if hasLegacyOwnerProfileAccess(userId);
+        allow create, update: if hasLegacyOwnerProfileAccess(userId) && validTombstoneData();
+        allow delete: if hasLegacyOwnerProfileAccess(userId);
       }
 
       match /feedback/{contentId} {
-        allow read: if isOwner(userId);
-        allow create, update: if isOwner(userId) && validFeedbackData();
-        allow delete: if isOwner(userId);
+        allow read: if hasLegacyOwnerProfileAccess(userId);
+        allow create, update: if hasLegacyOwnerProfileAccess(userId) && validFeedbackData();
+        allow delete: if hasLegacyOwnerProfileAccess(userId);
       }
 
       match /events/{eventId} {
         // Behavior events are append-only, but owners may delete their own
         // events for privacy requests and bounded-retention cleanup.
-        allow read: if isOwner(userId);
-        allow create: if isOwner(userId) && validEventData();
+        allow read: if hasLegacyOwnerProfileAccess(userId);
+        allow create: if hasLegacyOwnerProfileAccess(userId) && validEventData();
         allow update: if false;
-        allow delete: if isOwner(userId);
+        allow delete: if hasLegacyOwnerProfileAccess(userId);
       }
 
       match /taste/{tasteId} {
-        allow read: if isOwner(userId);
-        allow create, update: if isOwner(userId) && tasteId == "profile" && validTasteData();
-        allow delete: if isOwner(userId);
+        allow read: if hasLegacyOwnerProfileAccess(userId);
+        allow create, update: if hasLegacyOwnerProfileAccess(userId) && tasteId == "profile" && validTasteData();
+        allow delete: if hasLegacyOwnerProfileAccess(userId);
       }
     }
 
+
+      // Viewing profiles are private to the signed-in account. Only the
+      // permanent owner profile can be bootstrapped by a client; additional
+      // profiles are created later through the trusted profile API.
+      function validViewingProfile(profileId) {
+        return request.resource.data.keys().hasOnly([
+          'id','name','avatarUrl','avatarSource','avatarId','isKids','maturityLevel',
+          'movieRatingLimit','tvRatingLimit','blockedGenreIds','blockedTitles','allowUnrated',
+          'isOwner','schemaVersion','createdAt','updatedAt'
+        ])
+        && request.resource.data.keys().hasAll([
+          'name','avatarUrl','avatarId','isKids','maturityLevel','movieRatingLimit','tvRatingLimit',
+          'blockedGenreIds','blockedTitles','allowUnrated','isOwner','schemaVersion'
+        ])
+        && request.resource.data.id == profileId
+        && request.resource.data.name is string
+        && request.resource.data.name.size() >= 1
+        && request.resource.data.name.size() <= 48
+        && request.resource.data.avatarUrl is string
+        && request.resource.data.avatarUrl.size() <= 2048
+        && (request.resource.data.avatarUrl == '' || request.resource.data.avatarUrl.matches('^https://.*'))
+        && (!request.resource.data.keys().hasAny(['avatarSource']) ||
+          request.resource.data.avatarSource in ['auto','google','collection','upload'])
+        && request.resource.data.avatarId is string
+        && request.resource.data.avatarId.size() <= 80
+        && request.resource.data.isKids is bool
+        && request.resource.data.maturityLevel in ['adult','kids']
+        && request.resource.data.maturityLevel == (request.resource.data.isKids ? 'kids' : 'adult')
+        && request.resource.data.movieRatingLimit in ['G','PG','PG-13','R','NC-17']
+        && request.resource.data.tvRatingLimit in ['TV-Y','TV-Y7','TV-G','TV-PG','TV-14','TV-MA']
+        && request.resource.data.blockedGenreIds is list
+        && request.resource.data.blockedGenreIds.size() <= 30
+        && request.resource.data.blockedGenreIds.hasOnly([12,14,16,18,27,28,35,36,37,53,80,99,878,9648,10402,10749,10751,10752,10770])
+        && request.resource.data.blockedTitles is list
+        && request.resource.data.blockedTitles.size() <= 100
+        && request.resource.data.allowUnrated is bool
+        && request.resource.data.isOwner == (profileId == 'owner')
+        && (!request.resource.data.isOwner || (request.resource.data.isKids == false
+          && request.resource.data.movieRatingLimit == 'NC-17'
+          && request.resource.data.tvRatingLimit == 'TV-MA'
+          && request.resource.data.blockedGenreIds.size() == 0
+          && request.resource.data.blockedTitles.size() == 0
+          && request.resource.data.allowUnrated == true))
+        && request.resource.data.schemaVersion == 1
+        && (!request.resource.data.keys().hasAny(['createdAt']) || request.resource.data.createdAt is timestamp)
+        && (!request.resource.data.keys().hasAny(['updatedAt']) || request.resource.data.updatedAt is timestamp);
+      }
+
+      match /users/{userId}/profiles/{profileId} {
+        allow get, list: if isOwner(userId);
+        allow create: if isOwner(userId) && profileId == 'owner' && validViewingProfile(profileId);
+        allow update: if isOwner(userId) && profileId == 'owner'
+          && resource.data.isOwner == true && validViewingProfile(profileId);
+        allow delete: if false;
+
+        // Avatar bytes are read and written only by the authenticated profile API.
+        match /avatar/{avatarId} {
+          allow read, write: if false;
+        }
+
+        match /profileSecurity/{securityId} {
+          allow read, write: if false;
+        }
+
+        match /profileSessions/{sessionId} {
+          allow read, write: if false;
+        }
+
+        match /migrations/{migrationId} {
+          allow get, list: if hasViewingProfile(userId, profileId);
+          allow create, update: if hasViewingProfile(userId, profileId)
+            && migrationId == 'account-data-to-owner-profile-v1'
+            && request.resource.data.keys().hasOnly([
+              'migrationId','status','schemaVersion','collections','completedAt'
+            ])
+            && request.resource.data.migrationId == migrationId
+            && request.resource.data.status in ['started','complete']
+            && request.resource.data.schemaVersion == 1
+            && request.resource.data.collections is map
+            && request.resource.data.collections.keys().hasOnly([
+              'favorites','watchLater','history','completed','progress',
+              'libraryTombstones','feedback','events','taste','animePreferences','achievements'
+            ]);
+          allow delete: if hasViewingProfile(userId, profileId);
+        }
+
+        // The profile counter is server-managed. Owners may read/delete it during
+        // account deletion, but cannot create or alter it from a client.
+        match /profileManagement/{documentId} {
+          allow get, list, delete: if isOwner(userId) && profileId == 'owner';
+          allow create, update: if false;
+        }
+
+        match /{profileCollection}/{documentId} {
+          allow read: if hasViewingProfile(userId, profileId)
+            && profileCollection in [
+              'favorites','watchLater','history','completed','progress',
+              'libraryTombstones','feedback','events','taste','animePreferences','achievements'
+            ];
+          allow create, update: if hasViewingProfile(userId, profileId)
+            && (
+              (profileCollection in ['favorites','watchLater','history','completed']
+                && validContentId(documentId) && validLibraryData())
+              || (profileCollection == 'progress'
+                && validProgressId(documentId) && validProgressData())
+              || (profileCollection == 'libraryTombstones'
+                && validTombstoneData())
+              || (profileCollection == 'feedback'
+                && validFeedbackData())
+              || (profileCollection == 'events'
+                && validEventData())
+              || (profileCollection == 'taste'
+                && documentId == 'profile' && validTasteData())
+              || (profileCollection == 'animePreferences'
+                && documentId == 'default' && validAnimePreferences())
+              || (profileCollection == 'achievements'
+                && documentId in [
+                  'first-favorite','favorites-5','favorites-10','favorites-25',
+                  'queue-first','queue-5','queue-10',
+                  'history-first','history-5','history-10',
+                  'completion-first','completion-5','whole-picture',
+                  'feature-focus','series-scout','library-25'
+                ]
+                && request.resource.data.keys().hasOnly(['id','unlockedAt','schemaVersion'])
+                && request.resource.data.id == documentId
+                && request.resource.data.unlockedAt is number
+                && request.resource.data.unlockedAt >= 0
+                && request.resource.data.schemaVersion == 1)
+            );
+          allow delete: if hasViewingProfile(userId, profileId)
+            && profileCollection in [
+              'favorites','watchLater','history','completed','progress',
+              'libraryTombstones','feedback','events','taste','animePreferences','achievements'
+            ];
+        }
+      }
 
     // Public editorial content is written only by trusted ingestion/editor tooling.
     function verifiedMember() {

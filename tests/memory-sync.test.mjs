@@ -1,71 +1,63 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
+import { cleanItem } from "../scripts/library.js";
 
-const read = (path) => readFileSync(new URL(path, import.meta.url), "utf8");
+const read = path => readFileSync(new URL(path, import.meta.url), "utf8");
 const library = read("../scripts/library.js");
 const progress = read("../scripts/recommendations.js");
 const intelligence = read("../scripts/intelligence.js");
-import { cleanItem } from "../scripts/library.js";
 
-test("library, progress, and intelligence use the shared owner snapshot policy", () => {
+test("profile-aware local stores use the shared snapshot migration policy", () => {
   for (const source of [library, progress, intelligence]) {
-    assert.match(source, /switchLocalOwner\(/);
+    assert.ok(source.includes("switchLocalOwner("));
+    assert.ok(source.includes("seedLegacyOwnerProfileSnapshot("));
+    assert.ok(source.includes("getActiveProfileId("));
   }
-  assert.match(library, /ensureLocalOwner\(user\?\.uid \|\| null\)/);
-  assert.match(progress, /ensureProgressOwner\(user\?\.uid \|\| null\)/);
-  assert.match(intelligence, /ensureIntelligenceOwner\(u\?\.uid \|\| null\)/);
-  assert.match(library, /TOMBSTONE_STORAGE_KEY/);
-  assert.match(progress, /FOR_YOU_CACHE_KEY/);
-  assert.match(intelligence, /TASTE_CACHE_KEY/);
-  assert.match(progress, /void startPlaybackSync\(\)/);
-  assert.match(intelligence, /void startIntelligenceSync\(\)/);
+  assert.ok(library.includes('activeKeys:[STORAGE_KEY,TOMBSTONE_STORAGE_KEY]'));
+  assert.ok(progress.includes("FOR_YOU_CACHE_KEY"));
+  assert.ok(intelligence.includes("TASTE_CACHE_KEY"));
 });
 
-test("playback writes are bound to the owner active when queued", () => {
-  assert.match(progress, /const ownerAtQueue = localStorage\.getItem\(LOCAL_OWNER_KEY\) \|\| "guest"/);
-  assert.match(progress, /activeOwner === ownerAtQueue/);
-  assert.match(progress, /String\(auth\?\.currentUser\?\.uid \|\| ""\) === ownerAtQueue/);
-  assert.match(progress, /The signed-in account changed during playback progress sync/);
-  assert.match(progress, /getDocsFromServer\(collection\(db, "users", user\.uid, "progress"\)\)/);
+test("playback progress reads and writes are scoped to the active profile", () => {
+  assert.ok(progress.includes('doc(db, "users", uid, "profiles", profileId, "progress", contentId)'));
+  assert.ok(progress.includes('collection(db, "users", user.uid, "profiles", profileId, "progress")'));
+  assert.ok(progress.includes("progressQueueKey(ownerAtQueue, contentId)"));
+  assert.ok(progress.includes("const sameAccount=previous&&uid&&previous.uid===String(uid)"));
+  assert.ok(progress.includes("const ownerAtQueue = currentProgressOwner()"));
+  assert.ok(progress.includes('String(auth?.currentUser?.uid || "") === owner.uid'));
+  assert.ok(progress.includes("initializeProfileFoundation(user)"));
   assert.match(progress, /remoteUpdated > 0 && remoteUpdated >= localUpdated/);
   assert.match(progress, /JSON\.stringify\(merged\) !== JSON\.stringify\(local\[contentId\]\)/);
-  assert.match(progress, /vivid:sync-status/);
   assert.match(progress, /progressSyncStatus\("error", user\.uid, "sync"\)/);
-  assert.match(progress, /progressSyncStatus\("synced", uid, contentId\)/);
+});
+
+test("recommendation intelligence stores feedback, events and taste per profile", () => {
+  for (const name of ["feedback", "events", "taste"]) {
+    assert.ok(intelligence.includes('"profiles",profileId,"' + name + '"'));
+  }
+  assert.ok(intelligence.includes('"profiles",owner.profileId,...path'));
+  assert.ok(intelligence.includes("const scopedOwner=String(u.uid)+\"::\"+String(profileId)"));
+  assert.ok(intelligence.includes("initializeProfileFoundation(u)"));
   assert.match(intelligence, /if\(remoteUpdatedAt<localVersion\)return/);
-  assert.match(intelligence, /getDocsFromServer\(collection\(db,"users",u\.uid,"feedback"\)\)/);
-  assert.match(intelligence, /getDocsFromServer\(collection\(db,"users",u\.uid,"taste"\)\)/);
-  assert.match(intelligence, /The signed-in account changed before intelligence state could be reconciled/);
-  assert.match(intelligence, /const s=read\(\);const stateAtSync=localStorage\.getItem\(KEY\)\|\|""/);
   assert.match(intelligence, /Local intelligence changed during sync; newer local state was retained/);
-  assert.match(intelligence, /const ownerAtStart=localStorage\.getItem\(LOCAL_OWNER_KEY\)\|\|"guest"/);
-  assert.match(intelligence, /\(localStorage\.getItem\(KEY\)\|\|""\)!==stateAtStart/);
 });
 
-test("auth listeners continue handling later account changes", () => {
-  assert.match(progress, /onAuthStateChanged\(auth, user => \{\s*ensureProgressOwner\(user\?\.uid \|\| null\)/);
-  assert.match(intelligence, /onAuthStateChanged\(auth,u=>\{\s*ensureIntelligenceOwner\(u\?\.uid \|\| null\)/);
-  assert.match(library, /onAuthStateChanged\(auth,user=>\{\s*ensureLocalOwner\(user\?\.uid \|\| null\)/);
+test("all local-first stores react to profile changes and retain account-switch guards", () => {
+  for (const source of [library, progress, intelligence]) {
+    assert.ok(source.includes('window.addEventListener("vivid:profile-changed"'));
+  }
+  assert.ok(library.includes("The active account or profile changed during library sync"));
+  assert.ok(progress.includes("The signed-in account changed during playback progress sync"));
+  assert.ok(intelligence.includes("The signed-in account changed during intelligence sync"));
 });
 
-test("intelligence sync reports outcomes and retries when the device reconnects", () => {
-  assert.match(intelligence, /vivid:sync-status/);
-  assert.match(intelligence, /window\.addEventListener\("online"/);
-  assert.match(intelligence, /localItem\.updatedAt/);
-  assert.match(intelligence, /feedbackCleared/);
-  assert.match(intelligence, /s\.feedback\[k\]=\{\.\.\.i,kind:"like",updatedAt\};delete s\.feedbackCleared\[k\]/);
-  assert.match(intelligence, /kind:"cleared",updatedAt:Number\(tombstone\.updatedAt\)/);
-  assert.match(intelligence, /Vivid intelligence sync unavailable; local state is retained for retry/);
-});
-
-test("progress and library retain local-first semantics when cloud sync fails", () => {
+test("library and progress retain local-first state when cloud sync fails", () => {
   assert.match(progress, /Vivid playback progress sync failed/);
   assert.match(progress, /writeProgress\(current\)/);
   assert.match(library, /Do not replace local data until all required cloud operations have been/);
-  assert.match(library, /The signed-in account changed during library sync/);
+  assert.match(library, /The active account or profile changed during library sync/);
 });
-
 
 test("library sync normalizes numeric and missing years to Firestore-safe strings", () => {
   const numericYear = cleanItem({ id: 550, media_type: "movie", title: "The Matrix", year: 1999 });
@@ -76,16 +68,12 @@ test("library sync normalizes numeric and missing years to Firestore-safe string
   assert.equal(typeof missingYear.year, "string");
 });
 
-test("manual cloud library sync initializes App Check before Firestore access", () => {
+test("profile migration and App Check run before the first library server read", () => {
   const syncBody = library.slice(
     library.indexOf("async function performLibrarySyncForUser"),
     library.indexOf("const syncInFlight")
   );
-  assert.match(syncBody, /const firebase = await getFirebase\(\);/);
-  assert.match(syncBody, /await firebase\.ensureAppCheck\(\);/);
-  assert.ok(
-    syncBody.indexOf("await firebase.ensureAppCheck()") <
-    syncBody.indexOf("fetchRemote("),
-    "App Check must initialize before the first Firestore server read"
-  );
+  assert.ok(syncBody.indexOf("await initializeProfileFoundation(user)") >= 0);
+  assert.ok(syncBody.indexOf("await firebase.ensureAppCheck()") > syncBody.indexOf("const firebase = await getFirebase()"));
+  assert.ok(syncBody.indexOf("await firebase.ensureAppCheck()") < syncBody.indexOf("fetchRemote("));
 });

@@ -17,6 +17,7 @@ import {
 } from "./intelligence.js";
 import { parseIntent, intentHasFilters } from "./intent-parser.js";
 import { isPlotDescriptionQuery } from "./plot-search.js";
+import { filterAllowedTitles } from "./parental-controls.js";
 
 const $ = id => document.getElementById(id);
 let activeType = "all";
@@ -198,7 +199,7 @@ function renderItems(items) {
 
 async function loadSecondarySections(expectedRequestId = requestId) {
   const thisSecondaryRequest = ++secondaryRequestId;
-  const continueItems = getContinueWatching(4);
+  const continueItems = await filterAllowedTitles(getContinueWatching(4));
   $("continue-section").hidden = !continueItems.length;
   $("continue-grid").innerHTML = continueItems.map(item => {
     const title = item.title || item.name || "Continue watching";
@@ -214,7 +215,7 @@ async function loadSecondarySections(expectedRequestId = requestId) {
   try {
     const nextBecauseItems = await getBecauseYouLiked(6);
     if (expectedRequestId !== requestId || thisSecondaryRequest !== secondaryRequestId) return;
-    becauseItems = nextBecauseItems;
+    becauseItems = await filterAllowedTitles(nextBecauseItems);
     $("because-section").hidden = !becauseItems.length;
     $("because-grid").innerHTML = becauseItems.map((item, index) => cardMarkup(item, index, true)).join("");
   } catch {
@@ -264,6 +265,8 @@ async function loadRecommendations({ refresh = false } = {}) {
         }));
       }
     }
+    if (thisRequest !== requestId) return;
+    items = await filterAllowedTitles(items);
     if (thisRequest !== requestId) return;
     renderItems(items);
     if (!items.length) {
