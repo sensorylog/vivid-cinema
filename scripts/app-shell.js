@@ -442,7 +442,7 @@ async function enforceProfileSelection(user) {
     if (page === "auth.html") window.location.replace("home.html");
   } catch (error) {
     console.warn("Vivid could not validate the active viewing profile:", error);
-    if (!hasActiveProfileSelection(user.uid)) redirectToProfiles();
+    redirectToProfiles();
   }
 }
 
