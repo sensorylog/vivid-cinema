@@ -234,6 +234,7 @@ test("profile library access is bound to the selected signed profile, including 
     });
     await setDoc(doc(admin, "users/profile-scope/profiles/owner/profileSessions/owner-session"), {
       uid: "profile-scope", profileId: "owner", revoked: false, pinHash: "server-only",
+      lastActivityAt: Timestamp.fromMillis(Date.now()),
       expiresAt: Timestamp.fromMillis(Date.now() + 60 * 60 * 1000)
     });
   });
