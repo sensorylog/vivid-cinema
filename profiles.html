@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#08090b">
+<meta name="description" content="Choose and manage your Vivid Cinema profiles.">
+<title>Who's Watching? · Vivid Cinema</title>
+<link rel="icon" href="icons/vivid-icon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="styles/vivid-foundation.css">
+<link rel="stylesheet" href="styles/vivid-system.css">
+<link rel="stylesheet" href="styles/vivid-shell.css">
+<link rel="stylesheet" href="styles/vivid-atmosphere.css">
+<link rel="stylesheet" href="styles/vivid-liquid-glass.css?v=lg5">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.9.1/font/bootstrap-icons.css">
+<link rel="stylesheet" href="styles/vivid-profile-selector.css?v=phase2-1">
+</head>
+<body class="vivid-atmosphere profile-selector-page" data-vivid-page="profiles">
+<main class="profile-stage">
+  <a class="profile-brand" href="home.html" aria-label="Vivid Cinema home"><img src="icons/vivid-icon.svg" alt=""><span>Vivid<span>Cinema</span></span></a>
+  <div class="profile-stage-heading">
+    <span class="profile-eyebrow">YOUR VIVID HOUSEHOLD</span>
+    <h1 id="profile-heading">Who's watching?</h1>
+    <p id="profile-subheading">Choose your space. Your cinema journey stays yours.</p>
+  </div>
+  <section id="profile-grid" class="profile-grid" aria-label="Choose a profile" aria-live="polite">
+    <div class="profile-loading"><span></span><p>Preparing your profiles…</p></div>
+  </section>
+  <div class="profile-stage-footer"><span id="profile-count">Your Vivid account</span><button id="manage-toggle" type="button" class="profile-manage-toggle">Manage profiles</button></div>
+  <p id="profile-status" class="profile-status" role="status" aria-live="polite"></p>
+</main>
+<dialog id="profile-editor" class="profile-editor">
+  <form id="profile-form" method="dialog" novalidate>
+    <div class="profile-editor-heading"><div><span class="profile-eyebrow">PROFILE IDENTITY</span><h2 id="editor-title">Create a profile</h2></div><button type="button" id="editor-close" class="profile-icon-button" aria-label="Close"><i class="bi bi-x-lg"></i></button></div>
+    <label class="profile-field"><span>Profile name</span><input id="profile-name" name="name" type="text" maxlength="48" autocomplete="off" placeholder="Give this profile a name" required></label>
+    <div class="profile-avatar-heading"><span>Choose an avatar</span><small>Original Vivid collection</small></div>
+    <div id="avatar-gallery" class="avatar-gallery" role="radiogroup" aria-label="Vivid avatars"></div>
+    <div class="profile-upload-row"><div><strong>Use a photo</strong><small>Upload a custom profile picture</small></div><label class="profile-upload-button" for="profile-photo"><i class="bi bi-camera"></i> Choose photo</label><input id="profile-photo" type="file" accept="image/jpeg,image/png,image/webp,image/avif" hidden></div>
+    <div id="profile-photo-preview" class="profile-photo-preview" hidden></div>
+    <p id="editor-status" class="profile-editor-status" role="status" aria-live="polite"></p>
+    <div class="profile-editor-actions"><button id="profile-delete" type="button" class="profile-delete" hidden>Delete profile</button><span></span><button id="profile-cancel" type="button" class="profile-cancel">Cancel</button><button id="profile-save" type="submit" class="profile-save">Save profile</button></div>
+  </form>
+</dialog>
+<script type="module" src="scripts/app-shell.js"></script>
+<script type="module" src="scripts/profile-selector.js?v=phase2-1"></script>
+<script type="module" src="scripts/atmosphere.js"></script>
+</body>
+</html>
