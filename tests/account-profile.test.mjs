@@ -42,10 +42,10 @@ test("profile controls retain visible keyboard focus and reduced-motion support"
   assert.match(page, /aria-live="polite"/);
 });
 
-test("cloud library sync reads authoritative server data rather than cache-only snapshots", () => {
+test("cloud library sync reads profile-scoped authoritative server data", () => {
   const library = readFileSync(new URL("../scripts/library.js", import.meta.url), "utf8");
-  assert.match(library, //getDocsFromServer\\\(firestoreCollection\\\(db,\\s\*"users",\\s\*uid,\\s\*"profiles",\\s\*profileId,\\s\*collection\\\)\\\)/g/);
-  assert.match(library, //getDocsFromServer\\\(firestoreCollection\\\(db,\\s\*"users",\\s\*uid,\\s\*"profiles",\\s\*profileId,\\s\*"libraryTombstones"\\\)\\\)/g/);
+  assert.ok(library.includes('getDocsFromServer(firestoreCollection(db,"users",uid,"profiles",profileId,collection))'));
+  assert.ok(library.includes('getDocsFromServer(firestoreCollection(db,"users",uid,"profiles",profileId,"libraryTombstones"))'));
 });
 
 test("library sync propagates Firestore failures so the account UI cannot report false success", () => {
