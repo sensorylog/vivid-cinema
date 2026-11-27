@@ -408,7 +408,7 @@ service cloud.firestore {
           && exists(/databases/$(database)/documents/users/$(userId)/profiles/$(profileId));
       }
 
-      match /profiles/{profileId} {
+    match /users/{userId}/profiles/{profileId} {
         allow get, list: if isOwner(userId);
         allow create: if isOwner(userId) && profileId == 'owner' && validViewingProfile(profileId);
         allow update: if isOwner(userId) && profileId == 'owner'
