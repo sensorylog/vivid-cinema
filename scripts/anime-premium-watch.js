@@ -607,3 +607,11 @@ window.addEventListener("pagehide", () => {
 bindControls();
 bindAuth();
 loadWatchPage().catch(renderError);
+
+
+// A profile switch invalidates the current premium-anime playback context.
+if (typeof window !== "undefined") {
+  window.addEventListener("vivid:profile-changed", () => {
+    try { window.location.replace("home.html"); } catch {}
+  });
+}
