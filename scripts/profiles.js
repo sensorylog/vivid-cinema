@@ -262,6 +262,10 @@ export function initializeProfileFoundation(user = null) {
   const task = (async () => {
     await ensureOwnerProfile(user);
     const result = await migrateLegacyProfileData(user);
+    const { auth } = await getFirebase();
+    if (String(auth.currentUser?.uid || "") !== uid) {
+      throw new Error("The signed-in account changed during profile initialization. Please retry.");
+    }
     initializedProfileAccounts.add(uid);
     return result;
   })().finally(() => profileInitialization.delete(uid));
