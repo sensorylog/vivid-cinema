@@ -77,7 +77,7 @@ export function normalizeProfile(profileId, data = {}) {
     movieRatingLimit: MOVIE_RATING_LIMITS.includes(data.movieRatingLimit) ? data.movieRatingLimit : (isKids ? "PG" : "NC-17"),
     tvRatingLimit: TV_RATING_LIMITS.includes(data.tvRatingLimit) ? data.tvRatingLimit : (isKids ? "TV-PG" : "TV-MA"),
     blockedGenreIds: [...new Set((Array.isArray(data.blockedGenreIds) ? data.blockedGenreIds : (isKids ? DEFAULT_KIDS_BLOCKED_GENRES : [])).map(Number).filter(id => Number.isInteger(id) && id > 0 && id < 100000))].slice(0,30),
-    blockedTitles: [...new Set((Array.isArray(data.blockedTitles) ? data.blockedTitles : []).map(value => String(value || "").trim().toLowerCase()).filter(value => /^(movie|tv):[1-9][0-9]{0,11}$/.test(value))].slice(0,100),
+    blockedTitles: [...new Set((Array.isArray(data.blockedTitles) ? data.blockedTitles : []).map(value => String(value || "").trim().toLowerCase()).filter(value => /^(movie|tv):[1-9][0-9]{0,11}$/.test(value)))].slice(0,100),
     allowUnrated: isKids ? false : data.allowUnrated !== false,
     isOwner: id === OWNER_PROFILE_ID,
     schemaVersion: PROFILE_SCHEMA_VERSION
