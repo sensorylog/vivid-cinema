@@ -249,6 +249,37 @@ service cloud.firestore {
       && (!request.resource.data.keys().hasAny(['updatedAt']) || request.resource.data.updatedAt is timestamp);
     }
 
+    function hasProfilePin(userId, profileId) {
+        return exists(/databases/$(database)/documents/users/$(userId)/profiles/$(profileId)/profileSecurity/pin);
+      }
+
+      function hasProfileSession(userId, profileId) {
+        return request.auth.token.keys().hasAll(['profileId','profileSessionId'])
+          && request.auth.token.profileId == profileId
+          && request.auth.token.profileSessionId is string
+          && exists(/databases/$(database)/documents/users/$(userId)/profiles/$(profileId)/profileSessions/$(request.auth.token.profileSessionId))
+          && get(/databases/$(database)/documents/users/$(userId)/profiles/$(profileId)/profileSessions/$(request.auth.token.profileSessionId)).data.uid == userId
+          && get(/databases/$(database)/documents/users/$(userId)/profiles/$(profileId)/profileSessions/$(request.auth.token.profileSessionId)).data.profileId == profileId
+          && get(/databases/$(database)/documents/users/$(userId)/profiles/$(profileId)/profileSessions/$(request.auth.token.profileSessionId)).data.revoked == false
+          && get(/databases/$(database)/documents/users/$(userId)/profiles/$(profileId)/profileSessions/$(request.auth.token.profileSessionId)).data.expiresAt is timestamp
+          && get(/databases/$(database)/documents/users/$(userId)/profiles/$(profileId)/profileSessions/$(request.auth.token.profileSessionId)).data.expiresAt > request.time;
+      }
+
+      function hasViewingProfile(userId, profileId) {
+        return isOwner(userId)
+          && request.auth.token.keys().hasAll(['profileId'])
+          && request.auth.token.profileId == profileId
+          && exists(/databases/$(database)/documents/users/$(userId)/profiles/$(profileId))
+          && (!hasProfilePin(userId, profileId) || hasProfileSession(userId, profileId));
+      }
+
+      function hasLegacyOwnerProfileAccess(userId) {
+        return isOwner(userId)
+          && request.auth.token.keys().hasAll(['profileId'])
+          && request.auth.token.profileId == 'owner'
+          && (!hasProfilePin(userId, 'owner') || hasProfileSession(userId, 'owner'));
+      }
+
     match /users/{userId} {
       allow get: if isOwner(userId);
       allow list: if false;
@@ -271,8 +302,8 @@ service cloud.firestore {
       match /achievements/{achievementId} {
         // Personal milestone records only; the app evaluates progress locally.
         // These records are not trusted as competitive proof or transferable rewards.
-        allow read: if isOwner(userId);
-        allow create, update: if isOwner(userId)
+        allow read: if hasLegacyOwnerProfileAccess(userId);
+        allow create, update: if hasLegacyOwnerProfileAccess(userId)
           && achievementId in [
             'first-favorite','favorites-5','favorites-10','favorites-25',
             'queue-first','queue-5','queue-10',
@@ -317,66 +348,66 @@ service cloud.firestore {
       }
 
       match /favorites/{contentId} {
-        allow read: if isOwner(userId);
-        allow create, update: if isOwner(userId) && validContentId(contentId) && validLibraryData();
-        allow delete: if isOwner(userId);
+        allow read: if hasLegacyOwnerProfileAccess(userId);
+        allow create, update: if hasLegacyOwnerProfileAccess(userId) && validContentId(contentId) && validLibraryData();
+        allow delete: if hasLegacyOwnerProfileAccess(userId);
       }
 
       match /watchLater/{contentId} {
-        allow read: if isOwner(userId);
-        allow create, update: if isOwner(userId) && validContentId(contentId) && validLibraryData();
-        allow delete: if isOwner(userId);
+        allow read: if hasLegacyOwnerProfileAccess(userId);
+        allow create, update: if hasLegacyOwnerProfileAccess(userId) && validContentId(contentId) && validLibraryData();
+        allow delete: if hasLegacyOwnerProfileAccess(userId);
       }
 
       match /history/{contentId} {
-        allow read: if isOwner(userId);
-        allow create, update: if isOwner(userId) && validContentId(contentId) && validLibraryData();
-        allow delete: if isOwner(userId);
+        allow read: if hasLegacyOwnerProfileAccess(userId);
+        allow create, update: if hasLegacyOwnerProfileAccess(userId) && validContentId(contentId) && validLibraryData();
+        allow delete: if hasLegacyOwnerProfileAccess(userId);
       }
 
       match /completed/{contentId} {
-        allow read: if isOwner(userId);
-        allow create, update: if isOwner(userId) && validContentId(contentId) && validLibraryData();
-        allow delete: if isOwner(userId);
+        allow read: if hasLegacyOwnerProfileAccess(userId);
+        allow create, update: if hasLegacyOwnerProfileAccess(userId) && validContentId(contentId) && validLibraryData();
+        allow delete: if hasLegacyOwnerProfileAccess(userId);
       }
 
       match /progress/{contentId} {
-        allow read: if isOwner(userId);
-        allow create, update: if isOwner(userId) && validProgressId(contentId) && validProgressData();
-        allow delete: if isOwner(userId);
+        allow read: if hasLegacyOwnerProfileAccess(userId);
+        allow create, update: if hasLegacyOwnerProfileAccess(userId) && validProgressId(contentId) && validProgressData();
+        allow delete: if hasLegacyOwnerProfileAccess(userId);
       }
 
       match /animePreferences/{preferenceId} {
-        allow read: if isOwner(userId);
-        allow create, update: if isOwner(userId) && preferenceId == "default" && validAnimePreferences();
-        allow delete: if isOwner(userId);
+        allow read: if hasLegacyOwnerProfileAccess(userId);
+        allow create, update: if hasLegacyOwnerProfileAccess(userId) && preferenceId == "default" && validAnimePreferences();
+        allow delete: if hasLegacyOwnerProfileAccess(userId);
       }
 
       match /libraryTombstones/{tombstoneId} {
-        allow read: if isOwner(userId);
-        allow create, update: if isOwner(userId) && validTombstoneData();
-        allow delete: if isOwner(userId);
+        allow read: if hasLegacyOwnerProfileAccess(userId);
+        allow create, update: if hasLegacyOwnerProfileAccess(userId) && validTombstoneData();
+        allow delete: if hasLegacyOwnerProfileAccess(userId);
       }
 
       match /feedback/{contentId} {
-        allow read: if isOwner(userId);
-        allow create, update: if isOwner(userId) && validFeedbackData();
-        allow delete: if isOwner(userId);
+        allow read: if hasLegacyOwnerProfileAccess(userId);
+        allow create, update: if hasLegacyOwnerProfileAccess(userId) && validFeedbackData();
+        allow delete: if hasLegacyOwnerProfileAccess(userId);
       }
 
       match /events/{eventId} {
         // Behavior events are append-only, but owners may delete their own
         // events for privacy requests and bounded-retention cleanup.
-        allow read: if isOwner(userId);
-        allow create: if isOwner(userId) && validEventData();
+        allow read: if hasLegacyOwnerProfileAccess(userId);
+        allow create: if hasLegacyOwnerProfileAccess(userId) && validEventData();
         allow update: if false;
-        allow delete: if isOwner(userId);
+        allow delete: if hasLegacyOwnerProfileAccess(userId);
       }
 
       match /taste/{tasteId} {
-        allow read: if isOwner(userId);
-        allow create, update: if isOwner(userId) && tasteId == "profile" && validTasteData();
-        allow delete: if isOwner(userId);
+        allow read: if hasLegacyOwnerProfileAccess(userId);
+        allow create, update: if hasLegacyOwnerProfileAccess(userId) && tasteId == "profile" && validTasteData();
+        allow delete: if hasLegacyOwnerProfileAccess(userId);
       }
     }
 
@@ -413,29 +444,7 @@ service cloud.firestore {
         && (!request.resource.data.keys().hasAny(['updatedAt']) || request.resource.data.updatedAt is timestamp);
       }
 
-      function hasProfilePin(userId, profileId) {
-        return exists(/databases/$(database)/documents/users/$(userId)/profiles/$(profileId)/profileSecurity/pin);
-      }
-
-      function hasProfileSession(userId, profileId) {
-        return request.auth.token.keys().hasAll(['profileId','profileSessionId'])
-          && request.auth.token.profileId == profileId
-          && request.auth.token.profileSessionId is string
-          && exists(/databases/$(database)/documents/users/$(userId)/profiles/$(profileId)/profileSessions/$(request.auth.token.profileSessionId))
-          && get(/databases/$(database)/documents/users/$(userId)/profiles/$(profileId)/profileSessions/$(request.auth.token.profileSessionId)).data.uid == userId
-          && get(/databases/$(database)/documents/users/$(userId)/profiles/$(profileId)/profileSessions/$(request.auth.token.profileSessionId)).data.profileId == profileId
-          && get(/databases/$(database)/documents/users/$(userId)/profiles/$(profileId)/profileSessions/$(request.auth.token.profileSessionId)).data.revoked == false
-          && get(/databases/$(database)/documents/users/$(userId)/profiles/$(profileId)/profileSessions/$(request.auth.token.profileSessionId)).data.expiresAt is timestamp
-          && get(/databases/$(database)/documents/users/$(userId)/profiles/$(profileId)/profileSessions/$(request.auth.token.profileSessionId)).data.expiresAt > request.time;
-      }
-
-      function hasViewingProfile(userId, profileId) {
-        return isOwner(userId)
-          && exists(/databases/$(database)/documents/users/$(userId)/profiles/$(profileId))
-          && (!hasProfilePin(userId, profileId) || hasProfileSession(userId, profileId));
-      }
-
-    match /users/{userId}/profiles/{profileId} {
+      match /users/{userId}/profiles/{profileId} {
         allow get, list: if isOwner(userId);
         allow create: if isOwner(userId) && profileId == 'owner' && validViewingProfile(profileId);
         allow update: if isOwner(userId) && profileId == 'owner'
