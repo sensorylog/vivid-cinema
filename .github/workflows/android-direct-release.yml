@@ -188,7 +188,9 @@ jobs:
             -f "tag_name=$tag" \
             -f "name=Vivid Cinema Android $ANDROID_VERSION_INPUT" \
             -f "body=Fresh Vivid Cinema Android direct-distribution release. This Android version and update feed are independent of Windows desktop releases. Existing sideloaded installations can update in place because this APK retains the established Android application ID and signing identity." \
-            -f "draft=false" -f "prerelease=false" -f "make_latest=false" >/dev/null
+            -f "draft=true" -f "prerelease=false" -f "make_latest=false" > "$RUNNER_TEMP/android-release.json"
+          release_id="$(jq -r '.id' "$RUNNER_TEMP/android-release.json")"
+          test -n "$release_id"
           gh release upload "$tag" \
             release-output/Vivid-Cinema-Android.apk \
             "release-output/Vivid-Cinema-Android-build-$VIVID_ANDROID_BUILD.json" \
@@ -196,6 +198,8 @@ jobs:
             --repo "$GITHUB_REPOSITORY"
           gh release view "$tag" --repo "$GITHUB_REPOSITORY" --json assets --jq '.assets[].name' | grep -Fx "Vivid-Cinema-Android.apk"
           gh release view "$tag" --repo "$GITHUB_REPOSITORY" --json assets --jq '.assets[].name' | grep -Fx "Vivid-Cinema-Android-build-$VIVID_ANDROID_BUILD.json"
+          gh api "repos/$GITHUB_REPOSITORY/releases/$release_id" --method PATCH -f "draft=false" -f "make_latest=false" >/dev/null
+          gh release view "$tag" --repo "$GITHUB_REPOSITORY" --json isDraft --jq '.isDraft' | grep -Fx "false"
 
           # One-time bridge: the currently installed legacy updater only queries
           # the GitHub latest release endpoint (the Windows release). Attach the
