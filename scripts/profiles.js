@@ -3,6 +3,7 @@ import {
   OWNER_PROFILE_ID,
   PROFILE_AVATARS,
   PROFILE_AVATAR_IDS,
+  PROFILE_DATA_COLLECTIONS,
   PROFILE_ID_PATTERN,
   PROFILE_SCHEMA_VERSION,
   normalizeAvatarUrl,
@@ -14,6 +15,7 @@ export {
   OWNER_PROFILE_ID,
   PROFILE_AVATARS,
   PROFILE_AVATAR_IDS,
+  PROFILE_DATA_COLLECTIONS,
   PROFILE_ID_PATTERN,
   PROFILE_SCHEMA_VERSION,
   normalizeAvatarUrl,
@@ -51,19 +53,6 @@ async function getFirebase() {
   return firebasePromise;
 }
 
-export const PROFILE_DATA_COLLECTIONS = Object.freeze([
-  "favorites",
-  "watchLater",
-  "history",
-  "completed",
-  "progress",
-  "libraryTombstones",
-  "feedback",
-  "events",
-  "taste",
-  "animePreferences",
-  "achievements"
-]);
 export const PROFILE_MIGRATION_ID = "account-data-to-owner-profile-v1";
 
 const ACTIVE_PROFILE_PREFIX = "vivid:active-profile:v1:";
