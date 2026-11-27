@@ -39,10 +39,11 @@ function allowedOrigins() {
   return new Set([...DEFAULT_ALLOWED_ORIGINS, ...configured]);
 }
 
-function isAllowedOrigin(origin) {
+export function isAllowedOrigin(origin) {
   if (allowedOrigins().has(origin)) return true;
   try {
     const parsed = new URL(origin);
+    if (parsed.protocol === "https:" && parsed.hostname.endsWith(".vivid-cinema.pages.dev")) return true;
     return parsed.protocol === "http:" && parsed.hostname === "localhost";
   } catch {
     return false;
