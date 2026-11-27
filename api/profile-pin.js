@@ -5,8 +5,12 @@ import { pbkdf2Sync, randomBytes, randomUUID, timingSafeEqual } from "node:crypt
 
 const DEFAULT_ALLOWED_ORIGINS = [
   "https://vivid-cinema.pages.dev",
+  "https://android.vivid-cinema.pages.dev",
   "https://vivid-cinema.web.app",
-  "https://vivid-cinema.firebaseapp.com"
+  "https://vivid-cinema.firebaseapp.com",
+  "https://localhost",
+  "capacitor://localhost",
+  "http://localhost"
 ];
 const PIN_ITERATIONS = 310000;
 const PIN_BYTES = 32;
