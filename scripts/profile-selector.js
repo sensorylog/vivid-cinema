@@ -31,6 +31,8 @@ let saving = false;
 let pendingProfile = null;
 let switchingProfile = false;
 let pinSaving = false;
+let profileMigrationState = "ready";
+let profileMigrationPromise = null;
 
 
 const destination = () => {
@@ -217,7 +219,54 @@ async function finishProfileOpen(profile, customToken) {
   setActiveProfileId(user.uid, profile.id);
   location.replace(destination());
 }
+function startProfileMigration() {
+  if (profileMigrationState === "pending" && profileMigrationPromise) return profileMigrationPromise;
+  const migrationUser = user;
+  profileMigrationState = "pending";
+  profileMigrationPromise = (async () => {
+    const migrationSession = await selectProfile(OWNER_PROFILE_ID);
+    switchingProfile = true;
+    try {
+      user = (await signInWithCustomToken(auth, migrationSession.customToken)).user;
+    } finally {
+      switchingProfile = false;
+    }
+    await initializeProfileFoundation(user);
+  })().then(async () => {
+    if (user?.uid !== migrationUser?.uid) return;
+    const latest = await fetchProfiles();
+    if (!latest.migrationComplete) throw new Error("Your profile library setup has not been confirmed yet. Please retry.");
+    profiles = latest.profiles;
+    renderProfiles();
+    profileMigrationState = "ready";
+    profileMigrationPromise = null;
+    say("Choose a profile to continue.");
+  }).catch(error => {
+    profileMigrationState = "failed";
+    profileMigrationPromise = null;
+    say("Your profiles are loaded, but library setup needs another try. Tap a profile to retry. " + (error.message || ""), true);
+    throw error;
+  });
+  profileMigrationPromise.catch(() => {});
+  return profileMigrationPromise;
+}
+async function ensureProfileMigration() {
+  if (profileMigrationState === "ready") return;
+  if (profileMigrationState === "pending" && profileMigrationPromise) {
+    try { await profileMigrationPromise; } catch {}
+  }
+  if (profileMigrationState === "failed") {
+    say("Retrying your secure library setup…");
+    await startProfileMigration();
+  }
+}
 async function chooseProfile(profile) {
+  try {
+    await ensureProfileMigration();
+  } catch (error) {
+    say("Vivid couldn't finish the library setup. Check your connection and tap a profile to retry. " + (error.message || ""), true);
+    return;
+  }
   if (profile.hasPin) {
     pendingProfile = profile;
     $("profile-pin-input").value = "";
@@ -234,23 +283,25 @@ async function chooseProfile(profile) {
   } catch (error) { say(error.message || "Could not open this profile.",true); }
 }
 async function refreshProfiles() {
-  await ensureOwnerProfile(user);
+  // The authenticated Cloudflare API can list existing profiles without
+  // starting a browser App Check challenge. Do that first so a stalled
+  // third-party verification script cannot hide the household UI.
   let result = await fetchProfiles();
-  if (!result.migrationComplete) {
-    const migrationSession = await selectProfile(OWNER_PROFILE_ID);
-    switchingProfile = true;
-    try {
-      user = (await signInWithCustomToken(auth, migrationSession.customToken)).user;
-    } finally {
-      switchingProfile = false;
-    }
-    await initializeProfileFoundation(user);
+  if (!result.profiles.some(profile => profile.isOwner)) {
+    await ensureOwnerProfile(user);
     result = await fetchProfiles();
   }
   profiles = result.profiles;
   if (!profiles.length) throw new Error("No profiles are available for this Vivid account.");
   renderProfiles();
-  say("Choose a profile to continue.");
+  if (result.migrationComplete) {
+    profileMigrationState = "ready";
+    profileMigrationPromise = null;
+    say("Choose a profile to continue.");
+    return;
+  }
+  say("Your profiles are ready. Finishing your library setup…");
+  void startProfileMigration();
 }
 $("profile-signout").addEventListener("click",async() => {
   const button = $("profile-signout");

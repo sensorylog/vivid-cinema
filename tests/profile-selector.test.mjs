@@ -30,12 +30,27 @@ test("successful sign-in opens the Who's Watching profile selector by default", 
   assert.match(selector, /signInWithCustomToken\(auth, customToken\)/);
 });
 
-test("profile selector initializes the owner migration before loading profile choices", () => {
+test("profile selector renders existing profiles before starting owner-scoped library migration", () => {
+  const refreshStart = selector.indexOf("async function refreshProfiles()");
+  const fetchStart = selector.indexOf("let result = await fetchProfiles();", refreshStart);
+  const ownerEnsure = selector.indexOf("await ensureOwnerProfile(user);", refreshStart);
+  const render = selector.indexOf("renderProfiles();", refreshStart);
+  const migration = selector.indexOf("void startProfileMigration();", refreshStart);
+  assert.ok(refreshStart >= 0 && fetchStart > refreshStart);
+  assert.ok(ownerEnsure > fetchStart, "existing profile list must be checked before creating an owner record");
+  assert.ok(render > fetchStart && migration > render, "profiles must render before background migration begins");
+  assert.match(selector, /await selectProfile\(OWNER_PROFILE_ID\)/);
   assert.match(selector, /initializeProfileFoundation\(user\)/);
+  assert.match(selector, /await ensureProfileMigration\(\)/);
   assert.match(profiles, /await ensureOwnerProfile\(user\)/);
-  assert.match(selector, /fetchProfiles\(\)/);
-  assert.match(selector, /if \(!result\.migrationComplete\)/);
   assert.match(selector, /location\.replace\(destination\(\)\)/);
+});
+
+test("profile service requests have a bounded network wait", () => {
+  assert.match(manager, /new AbortController\(\)/);
+  assert.match(manager, /controller\.abort\(\)/);
+  assert.match(manager, /15_000/);
+  assert.match(manager, /profile service took too long to respond/);
 });
 
 test("profile manager uses authenticated same-origin APIs and handles create, update and delete", () => {
@@ -95,7 +110,7 @@ test("profile deletion protects the owner and requires an explicit confirmation"
 });
 
 test("profile selector assets are network refreshed and accessible from the account hub", () => {
-  assert.match(worker, /vivid-cinema-shell-v375/);
+  assert.match(worker, /vivid-cinema-shell-v376/);
   assert.match(worker, /profile-selector/);
   assert.match(worker, /profiles\.html/);
   assert.match(account, /href="profiles\.html"/);

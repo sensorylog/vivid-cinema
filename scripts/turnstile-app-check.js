@@ -11,13 +11,31 @@ function loadTurnstile() {
 
   scriptPromise = new Promise((resolve, reject) => {
     const script = document.createElement("script");
+    let settled = false;
+    const finish = (error, turnstile) => {
+      if (settled) return;
+      settled = true;
+      window.clearTimeout(timeout);
+      script.onload = null;
+      script.onerror = null;
+      if (error) {
+        script.remove();
+        reject(error);
+      } else {
+        resolve(turnstile);
+      }
+    };
+    const timeout = window.setTimeout(
+      () => finish(new Error("Cloudflare browser verification took too long to load. Check your connection or content blocker, then retry.")),
+      12_000
+    );
     script.src = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
     script.async = true;
     script.defer = true;
     script.onload = () => window.turnstile?.render
-      ? resolve(window.turnstile)
-      : reject(new Error("Cloudflare browser verification did not initialize."));
-    script.onerror = () => reject(new Error("Cloudflare browser verification could not load."));
+      ? finish(null, window.turnstile)
+      : finish(new Error("Cloudflare browser verification did not initialize."));
+    script.onerror = () => finish(new Error("Cloudflare browser verification could not load. Check your connection or content blocker, then retry."));
     document.head.append(script);
   }).catch(error => {
     scriptPromise = null;
@@ -28,17 +46,25 @@ function loadTurnstile() {
 
 async function getConfig() {
   if (!configPromise) {
+    const controller = new AbortController();
+    const timeout = window.setTimeout(() => controller.abort(), 8_000);
     configPromise = fetch(ENDPOINT, {
       method: "GET",
       credentials: "same-origin",
       cache: "no-store",
-      headers: { "Accept": "application/json" }
+      headers: { "Accept": "application/json" },
+      signal: controller.signal
     }).then(async response => {
       const payload = await response.json().catch(() => ({}));
       if (!response.ok || payload?.ok !== true || typeof payload.siteKey !== "string" || !payload.siteKey) {
         throw new Error(payload?.message || "Secure browser verification is not configured yet.");
       }
       return payload;
+    }).catch(error => {
+      if (error?.name === "AbortError") throw new Error("Secure browser verification settings took too long to load. Please retry.");
+      throw error;
+    }).finally(() => {
+      window.clearTimeout(timeout);
     }).catch(error => {
       configPromise = null;
       throw error;
@@ -112,7 +138,7 @@ async function runManagedChallenge(siteKey) {
 
     let widgetId = null;
     let settled = false;
-    const timeout = window.setTimeout(() => finish(new Error("Browser verification timed out. Please try again.")), 90_000);
+    const timeout = window.setTimeout(() => finish(new Error("Browser verification timed out. Please retry.")), 20_000);
     function finish(error, token) {
       if (settled) return;
       settled = true;
@@ -145,14 +171,25 @@ async function runManagedChallenge(siteKey) {
 async function exchangeTurnstileProof() {
   const config = await getConfig();
   const turnstileToken = await runManagedChallenge(config.siteKey);
-  const response = await fetch(ENDPOINT, {
-    method: "POST",
-    mode: "same-origin",
-    credentials: "omit",
-    cache: "no-store",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ turnstileToken })
-  });
+  const controller = new AbortController();
+  const timeout = window.setTimeout(() => controller.abort(), 10_000);
+  let response;
+  try {
+    response = await fetch(ENDPOINT, {
+      method: "POST",
+      mode: "same-origin",
+      credentials: "omit",
+      cache: "no-store",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ turnstileToken }),
+      signal: controller.signal
+    });
+  } catch (error) {
+    if (error?.name === "AbortError") throw new Error("Secure browser verification could not be completed in time. Please retry.");
+    throw error;
+  } finally {
+    window.clearTimeout(timeout);
+  }
   const payload = await response.json().catch(() => ({}));
   if (
     !response.ok ||

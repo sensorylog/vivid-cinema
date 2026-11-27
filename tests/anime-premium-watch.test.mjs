@@ -101,7 +101,7 @@ test("Playback sessions expire and account changes stop embedded playback", () =
 });
 
 test("Watch page assets are cached and syntax-checked", () => {
-  assert.match(sw, /vivid-cinema-shell-v375/);
+  assert.match(sw, /vivid-cinema-shell-v376/);
   assert.match(sw, /anime-premium-watch\.html/);
   assert.match(sw, /anime-premium-providers\.js/);
   assert.match(syntax, /scripts\/anime-premium-watch\.js/);
