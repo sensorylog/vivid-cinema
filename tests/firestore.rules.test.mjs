@@ -160,11 +160,12 @@ test("owner profile bootstrap and profile-scoped library data are private to the
   const alice = env.authenticatedContext("profile-alice").firestore();
   const bob = env.authenticatedContext("profile-bob").firestore();
   const ownerProfile = {
-    id: "owner", name: "Alice", avatarUrl: "https://example.com/avatar.png",
+    id: "owner", name: "Alice", avatarUrl: "",
     avatarId: "", isKids: false, maturityLevel: "adult", isOwner: true, schemaVersion: 1
   };
   await assertSucceeds(setDoc(doc(alice, "users/profile-alice/profiles/owner"), ownerProfile));
   await assertSucceeds(getDoc(doc(alice, "users/profile-alice/profiles/owner")));
+  await assertSucceeds(setDoc(doc(alice, "users/profile-alice/profiles/owner"), { ...ownerProfile, avatarUrl: "https://example.com/avatar.png" }));
   await assertFails(getDoc(doc(bob, "users/profile-alice/profiles/owner")));
   await assertFails(setDoc(doc(alice, "users/profile-alice/profiles/owner"), {
     ...ownerProfile, pinHash: "must-not-be-client-readable"
