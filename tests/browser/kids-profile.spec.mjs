@@ -162,7 +162,7 @@ test("Kids policy blocks over-limit, unrated, genre-blocked and individually blo
   });
   await page.route("**/scripts/firebase.js", route => route.fulfill({ status: 200, contentType: "text/javascript", body: authMock }));
   await page.route("**/scripts/profiles.js", route => route.fulfill({ status: 200, contentType: "text/javascript", body: profilesMock }));
-  await page.route("**/scripts/tmdb.js", route => route.fulfill({ status: 200, contentType: "text/javascript", body: "export const tmdbApi = {};" }));
+  await page.route("**/scripts/tmdb.js", route => route.fulfill({ status: 200, contentType: "text/javascript", body: `export const tmdbApi = {\n    movieDetails: async id => ({ id, adult: false, genre_ids: Number(id) === 107 ? [27] : [35] }),\n    tvDetails: async id => ({ id, adult: false, genre_ids: [35] }),\n    movieReleaseDates: async () => ({ results: [{ iso_3166_1: "US", release_dates: [{ certification: "G" }] }] }),\n    tvContentRatings: async () => ({ results: [{ iso_3166_1: "US", rating: "TV-G" }] })\n  }` }));
   await page.route("**/scripts/provider-region.js", route => route.fulfill({ status: 200, contentType: "text/javascript", body: "export function getProviderCountry() { return 'US'; }" }));
 
   await page.goto("/home.html", { waitUntil: "domcontentloaded" });
@@ -175,9 +175,9 @@ test("Kids policy blocks over-limit, unrated, genre-blocked and individually blo
       policy.isTitleAllowed({ id: 333, media_type: "movie", certification: "G" }),
       policy.isTitleAllowed({ id: 104, media_type: "movie" }),
       policy.isTitleAllowed({ id: 105, media_type: "tv", certification: "TV-PG" }),
-      policy.isTitleAllowed({ id: 106, media_type: "tv", certification: "TV-14" })
+      policy.isTitleAllowed({ id: 106, media_type: "tv", certification: "TV-14" }),\n      policy.isTitleAllowed({ id: 107, media_type: "movie" }),\n      policy.isTitleAllowed({ id: 108, media_type: "movie" })
     ]);
     return checks;
   });
-  expect(results).toEqual([true, false, false, false, false, true, false]);
+  expect(results).toEqual([true, false, false, false, false, true, false, false, true]);
 });
