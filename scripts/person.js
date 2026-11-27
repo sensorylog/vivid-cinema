@@ -169,8 +169,8 @@ async function init() {
   try {
     const person = await tmdbApi.personDetails(id);
     if (!person?.id || !person?.name) throw new Error("This person profile is unavailable.");
-    if (person.credits?.cast) person.credits.cast = await filterAllowedTitles(person.credits.cast);
-    if (person.credits?.crew) person.credits.crew = await filterAllowedTitles(person.credits.crew);
+    if (person.combined_credits?.cast) person.combined_credits.cast = await filterAllowedTitles(person.combined_credits.cast);
+    if (person.combined_credits?.crew) person.combined_credits.crew = await filterAllowedTitles(person.combined_credits.crew);
     render(person);
   } catch (error) {
     $("person-content").innerHTML = '<section class="vivid-title-error"><i class="bi bi-exclamation-circle"></i><h1>We couldn’t load this profile.</h1><p>' + escapeHtml(getErrorMessage(error)) + '</p><a class="vivid-button vivid-button--secondary" href="home.html">Back to browse</a></section>';
