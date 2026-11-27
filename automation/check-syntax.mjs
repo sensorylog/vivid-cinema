@@ -70,6 +70,7 @@ const files = [
   "scripts/config.js",
   "scripts/routes.js",
   "scripts/utils.js",
+  "scripts/profile-schema.js",
   "scripts/profiles.js",
   "scripts/local-owner.js",
   "scripts/library.js",
