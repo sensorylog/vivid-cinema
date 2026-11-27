@@ -84,4 +84,6 @@ test("Popunder uses a best-effort 24-hour browser tag-load cap and stays off exc
   assert.ok(advertising.includes("vivid:popunder:last-script-load"));
   assert.ok(advertising.includes("Fail closed when storage is unavailable"));
   assert.ok(advertising.includes("if (!config.eligiblePages.includes(page) || EXCLUDED_PAGES.has(page)) return;"));
+  assert.match(advertising, /function loadPopunder\(page\) \{[\s\S]*?if \(window\.vividDownloads\?\.available\) return;/);
+  assert.match(advertising, /function loadSocialBar\(\)[\s\S]*?function loadPopunder\(page\)/, "other ad placements remain independently enabled");
 });
