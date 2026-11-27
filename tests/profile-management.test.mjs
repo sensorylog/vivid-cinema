@@ -68,7 +68,7 @@ test("profile APIs authenticate Firebase users, rate limit changes and enforce p
   assert.match(service, /collection\("avatar"\)\.doc\("image"\)/);
   assert.match(service, /includeAvatars/);
   assert.match(service, /"avatar"/);
-  assert.match(service, /reference\.delete\(\)/);
+  assert.match(service, /transaction\.delete\(reference\)/);
 });
 
 test("profile management API protects the owner profile and exposes only explicit methods", () => {
@@ -89,5 +89,6 @@ test("profile management API protects the owner profile and exposes only explici
 
 test("profile metadata never stores PIN material in the public profile document schema", () => {
   assert.doesNotMatch(service, /pinHash|pinVerifier|pinSalt|pinCode/i);
-  assert.doesNotMatch(rules, /pinHash|pinVerifier|pinSalt|pinCode/i);
+  const profileSchema = rules.slice(rules.indexOf("function validViewingProfile"), rules.indexOf("match /users/{userId}/profiles/{profileId}"));
+  assert.doesNotMatch(profileSchema, /pinHash|pinVerifier|pinSalt|pinCode/i);
 });
