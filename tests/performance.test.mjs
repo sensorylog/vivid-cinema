@@ -40,7 +40,9 @@ test("offline progress updates patch only the matching download row", async () =
   assert.match(source,/data-job-id=/);
   assert.ok(source.includes("function updateJobProgress(job)"));
   assert.ok(source.includes("else updateJobProgress(jobs[index])"));
-  assert.ok(source.includes("if(changed)render()"));
+  assert.ok(source.includes("function patchPosterArtwork(media,poster)"));
+  assert.ok(source.includes("patchPosterArtwork(media,poster)"));
+  assert.ok(!source.includes("if(changed)render()"), "poster enrichment must not rebuild the scrolling download grid");
 });
 
 test("watch page disables expensive ambient blur animation and overlay", async () => {
