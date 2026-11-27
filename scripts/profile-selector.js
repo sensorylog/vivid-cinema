@@ -1,8 +1,8 @@
 import { auth } from "./firebase.js";
 import { onAuthStateChanged, signOut, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
-import { clearActiveProfileId, ensureOwnerProfile, initializeProfileFoundation, getActiveProfileId, setActiveProfileId } from "./profiles.js";
+import { clearActiveProfileId, ensureOwnerProfile, initializeProfileFoundation, getActiveProfileId, setActiveProfileId, OWNER_PROFILE_ID } from "./profiles.js";
 import { normalizeAvatarUrl } from "./profile-schema.js";
-import { fetchProfiles, createProfile, updateProfile, deleteProfile, compressProfileImage, verifyProfilePin, setProfilePin, removeProfilePin, resetProfilePin, PROFILE_AVATARS, MAX_PROFILES } from "./profile-manager.js";
+import { fetchProfiles, createProfile, updateProfile, deleteProfile, compressProfileImage, selectProfile, verifyProfilePin, setProfilePin, removeProfilePin, resetProfilePin, PROFILE_AVATARS, MAX_PROFILES } from "./profile-manager.js";
 
 const $ = id => document.getElementById(id);
 const grid = $("profile-grid");
@@ -194,15 +194,16 @@ function openEditor(profile = null) {
   dialog.showModal();
   nameInput.focus();
 }
-async function finishProfileOpen(profile, customToken = "") {
-  if (customToken) {
-    switchingProfile = true;
-    try {
-      const credential = await signInWithCustomToken(auth, customToken);
-      user = credential.user;
-    } finally {
-      switchingProfile = false;
-    }
+async function finishProfileOpen(profile, customToken) {
+  if (typeof customToken !== "string" || !customToken) {
+    throw new Error("The profile could not be securely selected. Please try again.");
+  }
+  switchingProfile = true;
+  try {
+    const credential = await signInWithCustomToken(auth, customToken);
+    user = credential.user;
+  } finally {
+    switchingProfile = false;
   }
   setActiveProfileId(user.uid, profile.id);
   location.replace(destination());
@@ -218,14 +219,22 @@ async function chooseProfile(profile) {
     return;
   }
   try {
-    say("Opening " + profile.name + "…");
-    await finishProfileOpen(profile);
+    say("Securing " + profile.name + "…");
+    const result = await selectProfile(profile.id);
+    await finishProfileOpen(profile, result.customToken);
   } catch (error) { say(error.message || "Could not open this profile.",true); }
 }
 async function refreshProfiles() {
   await ensureOwnerProfile(user);
   let result = await fetchProfiles();
   if (!result.migrationComplete) {
+    const migrationSession = await selectProfile(OWNER_PROFILE_ID);
+    switchingProfile = true;
+    try {
+      user = (await signInWithCustomToken(auth, migrationSession.customToken)).user;
+    } finally {
+      switchingProfile = false;
+    }
     await initializeProfileFoundation(user);
     result = await fetchProfiles();
   }
