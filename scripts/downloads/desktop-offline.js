@@ -4,7 +4,7 @@ import { describeLoadedMedia, probePlaybackCapabilities } from "./media-capabili
 import { inspectMediaUrl } from "./media-inspector.js";
 import { choosePreferredTrack, clearSubtitleOverlay, parseSubtitleFile, renderSubtitleAtTime } from "./subtitle-engine.js";
 import { getPlaybackPreferences, playbackProfileKey, savePlaybackPreferences } from "./playback-preferences.js";
-import { createTranscodePlayer } from "./transcode-player.js?windows-offline-hls-v4";
+import { createTranscodePlayer } from "./transcode-player.js?windows-offline-hls-v5";
 
 if (window.vividDownloads?.available) {
 document.body.classList.add("vivid-desktop-offline-library");
@@ -133,7 +133,8 @@ let librarySort="recent";
 function posterMarkup(media){
   const poster=String(media?.poster_path||"");
   const safePoster=/^\/[A-Za-z0-9_./-]+\.(?:jpg|jpeg|png|webp)$/i.test(poster)&&!poster.split("/").includes("..");
-  return '<div class="offline-poster" aria-hidden="true"><span>VIVID</span>'+(safePoster?'<img loading="lazy" decoding="async" src="https://image.tmdb.org/t/p/w342'+escapeHtml(poster)+'" alt="">':"")+'</div>';
+  const posterKey=media?.media_type&&media?.id?String(media.media_type)+":"+String(media.id):"";
+  return '<div class="offline-poster" data-poster-key="'+escapeHtml(posterKey)+'" aria-hidden="true"><span>VIVID</span>'+(safePoster?'<img loading="lazy" decoding="async" width="342" height="513" src="https://image.tmdb.org/t/p/w342'+escapeHtml(poster)+'" alt="">':"")+'</div>';
 }
 function errorMarkup(job){
   if(job.status!=="failed"||!job.error)return "";
@@ -388,6 +389,18 @@ async function searchTitle(media){
   catch(error){setMessage(error?.message||"Search is unavailable. Check your connection and try again.");}
 }
 const posterLookups=new Set();
+function patchPosterArtwork(media,poster){
+  const key=String(media?.media_type||"")+":"+String(media?.id||"");
+  if(!/^(?:movie|tv):[A-Za-z0-9_-]{1,80}$/.test(key))return;
+  for(const node of document.querySelectorAll('.offline-poster[data-poster-key="'+key+'"]')){
+    if(node.querySelector("img"))continue;
+    const image=document.createElement("img");
+    image.loading="lazy";image.decoding="async";image.width=342;image.height=513;image.alt="";
+    image.addEventListener("error",()=>image.remove(),{once:true});
+    image.src="https://image.tmdb.org/t/p/w342"+poster;
+    node.appendChild(image);
+  }
+}
 async function hydratePosterArtwork(){
   const queue=jobs.filter(job=>{
     const media=job.media||{};
@@ -397,7 +410,6 @@ async function hydratePosterArtwork(){
     posterLookups.add(key);
     return true;
   });
-  let changed=false;
   const worker=async()=>{
     while(queue.length){
       const job=queue.shift(),media=job.media||{};
@@ -409,17 +421,16 @@ async function hydratePosterArtwork(){
         if(/^\/[A-Za-z0-9_./-]+\.(?:jpg|jpeg|png|webp)$/i.test(poster)&&!poster.split("/").includes("..")){
           for(const candidate of jobs){
             const candidateMedia=candidate.media||{};
-            if(candidateMedia.media_type===media.media_type&&String(candidateMedia.id||"")===String(media.id||"")){
-              candidateMedia.poster_path=poster;
-              changed=true;
-            }
+            if(candidateMedia.media_type===media.media_type&&String(candidateMedia.id||"")===String(media.id||""))candidateMedia.poster_path=poster;
           }
+          // Patch existing poster nodes. Rebuilding the entire library grid here
+          // reset lazy images and visibly jumped while users were scrolling.
+          patchPosterArtwork(media,poster);
         }
       }catch{}
     }
   };
   await Promise.all([worker(),worker()]);
-  if(changed)render();
 }
 let progressRenderTimer=0;
 function scheduleProgressRender(){
@@ -440,6 +451,17 @@ async function refresh(){
 }
 const player = byId("offline-player");
 const transcodePlayer = createTranscodePlayer(player);
+let playbackRequest=0;
+let playbackCleanupPromise=Promise.resolve();
+let nativeFallbackTimer=0;
+let nativeFallbackPromise=null;
+let nativeFallbackRequest=0;
+function setPlayerLoading(loading,title="Opening your movie",copy="Preparing your saved video…"){
+  const overlay=byId("offline-player-loading");
+  if(!overlay)return;
+  overlay.hidden=!loading;
+  if(loading){byId("offline-player-loading-title").textContent=title;byId("offline-player-loading-copy").textContent=copy;}
+}
 let audioContext = null;
 let audioSource = null;
 let audioGain = null;
@@ -1156,7 +1178,15 @@ function describePlaybackError(){
   if(code===3||code===4){setMessage("This video format is not supported by the built-in player. Try another copy encoded as MP4 (H.264 video and AAC audio).");return;}
   setMessage("Vivid could not start this video. Check the file and try again.");
 }
-player.addEventListener("error",describePlaybackError);
+player.addEventListener("error",()=>{
+  if(player.dataset.nativeAttempt==="true"){
+    const job=jobs.find(item=>item.id===player.dataset.jobId);
+    if(job)void startCompatibilityPlayback(job,Number(player.dataset.fileIndex)||0,playbackRequest);
+    else describePlaybackError();
+    return;
+  }
+  describePlaybackError();
+});
 player.addEventListener("waiting",()=>{
   if(!player.paused)setMessage("Buffering your saved video…");
 });
@@ -1164,8 +1194,17 @@ player.addEventListener("stalled",()=>{
   if(!player.paused)setMessage("The local media stream has paused while reading data. Checking playback…");
 });
 player.addEventListener("playing",()=>{
+  setPlayerLoading(false);
   const status=byId("offline-message").textContent;
-  if(/buffering|local media stream has paused/i.test(status))setMessage("Your movie is playing offline.");
+  if(/buffering|local media stream has paused|opening your movie/i.test(status))setMessage("Your movie is playing offline.");
+});
+player.addEventListener("canplay",()=>{
+  if(player.dataset.nativeAttempt==="true"){
+    if(nativeFallbackTimer)window.clearTimeout(nativeFallbackTimer);
+    nativeFallbackTimer=0;
+    setPlayerLoading(false);
+    setMessage("Your movie is ready to watch offline.");
+  }
 });
 player.addEventListener("transcodestatuschange",()=>{
   if(player.dataset.transcodeFailed==="true"){
@@ -1205,6 +1244,7 @@ player.addEventListener("ended",()=>{
   syncPlayerControls();
 });
 window.addEventListener("pagehide",()=>{
+  playbackRequest++;
   if(player.dataset.jobId&&player.currentTime>0)void engine.setPlaybackPosition(player.dataset.jobId,Number(player.dataset.fileIndex)||0,player.currentTime).catch(()=>{});
   void releaseLocalMedia();
 });
@@ -1224,34 +1264,44 @@ window.addEventListener("keydown",event=>{
   if(key==="arrowdown"){event.preventDefault();player.volume=Math.max(0,player.volume-0.05);byId("offline-volume").value=String(player.volume);}
 });
 async function releaseLocalMedia(){
+  if(nativeFallbackTimer)window.clearTimeout(nativeFallbackTimer);
+  nativeFallbackTimer=0;
   const sessionId=player.dataset.transcodeSessionId;
   const token=player.dataset.localMediaToken;
   player.dataset.transcodeSessionId="";
   player.dataset.transcodeCodecs="";
+  player.dataset.nativeAttempt="false";
+  player.dataset.transcodePreparing="false";
   delete player.dataset.pendingResumePosition;
   player.dataset.localMediaToken="";
   player.dataset.jobId="";
   player.dataset.fileIndex="0";
+  player.pause();
+  player.removeAttribute("src");
+  player.load();
   if(sessionId){
     transcodePlayer.reset();
     try{await engine.stopTranscode(sessionId);}catch{}
   }
-  if(token){
-    player.pause();
-    player.removeAttribute("src");
-    player.load();
-    try{await engine.releaseLocalFile(token);}catch{}
-  }
+  if(token){try{await engine.releaseLocalFile(token);}catch{}}
 }
 async function playLocalFile(){
+  const request=++playbackRequest;
+  playbackCleanupPromise=releaseLocalMedia();
+  const section=byId("offline-player-section");
+  section.hidden=false;section.classList.remove("controls-hidden");
+  byId("offline-player-title").textContent="Opening local video";
+  setPlayerLoading(true,"Opening local video","Checking the file and preparing playback…");
+  await playbackCleanupPromise.catch(()=>{});
+  if(request!==playbackRequest)return;
   const file=await engine.openLocalTranscode();
-  if(!file)return;
-  await releaseLocalMedia();
+  if(!file){setPlayerLoading(false);return;}
+  if(request!==playbackRequest){void engine.stopTranscode(file.sessionId);return;}
   resetSeekPreviewSource();clearExternalSubtitle();chapterTrack=null;chapterCues=[];
   activePreferenceKey="local:"+file.fileName+":"+file.fileSize;applyPlaybackPreferences();
   player.dataset.frameRate="";byId("offline-frame-back").disabled=true;byId("offline-frame-forward").disabled=true;player.dataset.jobId="";player.dataset.fileIndex="0";
   player.dataset.mediaFilename=file.fileName;player.dataset.localMediaToken="";player.dataset.transcodeSessionId=file.sessionId;player.dataset.transcodeCodecs=JSON.stringify(file.codecs||{});
-  try{transcodePlayer.load(file);}catch(error){await releaseLocalMedia();throw error;}
+  try{await transcodePlayer.load(file);}catch(error){await releaseLocalMedia();setPlayerLoading(false);throw error;}
   lastPositionSave=0;resumePosition=0;
   byId("offline-player-title").textContent=file.fileName;
   byId("offline-resume-prompt").hidden=true;byId("offline-next-episode").hidden=true;
@@ -1259,7 +1309,7 @@ async function playLocalFile(){
   player.controls=false;byId("offline-custom-controls").hidden=false;
   playerSection.classList.remove("controls-hidden");playerSection.hidden=false;
   playerSection.scrollIntoView({behavior:"smooth",block:"start"});
-  try{await player.play();setMessage("Opened "+file.fileName+" with Vivid compatibility playback.");}catch{setMessage("Your video is ready. Press Play in the Vivid player to begin.");}
+  try{await player.play();setMessage("Opened "+file.fileName+" with Vivid compatibility playback.");}catch{setPlayerLoading(false);setMessage("Your video is ready. Press Play in the Vivid player to begin.");}
   syncPlayerControls();
 }
 byId("offline-open-local-file").addEventListener("click",async event=>{
@@ -1267,23 +1317,101 @@ byId("offline-open-local-file").addEventListener("click",async event=>{
   try{await playLocalFile();}catch(error){setMessage(error?.message||"Could not open that video file.");}
   finally{button.disabled=false;}
 });
+async function startCompatibilityPlayback(job,fileIndex,request){
+  if(request!==playbackRequest)return;
+  if(nativeFallbackRequest===request&&nativeFallbackPromise)return nativeFallbackPromise;
+  if(player.dataset.nativeAttempt!=="true"&&player.dataset.transcodePreparing!=="true")return;
+  if(nativeFallbackTimer)window.clearTimeout(nativeFallbackTimer);
+  nativeFallbackTimer=0;
+  player.dataset.nativeAttempt="false";
+  player.dataset.transcodePreparing="true";
+  setPlayerLoading(true,"Preparing compatibility playback","This video needs format conversion. Vivid is preparing the first playable segment…");
+  setMessage("Preparing this video for the Vivid compatibility player…");
+  player.pause();player.removeAttribute("src");player.load();
+  const task=(async()=>{
+    let media=null;
+    try{
+      // Finish retiring any previous FFmpeg session before starting another.
+      await playbackCleanupPromise.catch(()=>{});
+      if(request!==playbackRequest)return;
+      // Load HLS.js while FFmpeg prepares the first segment.
+      const hlsReady=transcodePlayer.prepare().catch(()=>null);
+      media=await engine.openDownloadTranscode(job.id,fileIndex);
+      await hlsReady;
+      if(!media)throw new Error("The saved video file is not available.");
+      if(request!==playbackRequest){void engine.stopTranscode(media.sessionId);return;}
+      player.dataset.transcodeSessionId=media.sessionId;
+      player.dataset.transcodeCodecs=JSON.stringify(media.codecs||{});
+      player.dataset.mediaFilename=media.fileName||job.title||"Saved media";
+      await transcodePlayer.load(media);
+      if(request!==playbackRequest){void engine.stopTranscode(media.sessionId);return;}
+      player.dataset.transcodePreparing="false";
+      if(player.muted&&player.volume>0)player.muted=false;
+      try{await player.play();}
+      catch(error){
+        if(error?.name==="NotAllowedError"){
+          setPlayerLoading(false);
+          setMessage("Your movie is ready. Press Play in the Vivid player to begin.");
+        }else throw error;
+      }
+      syncPlayerControls();
+    }catch(error){
+      if(media?.sessionId)void engine.stopTranscode(media.sessionId);
+      if(request===playbackRequest){
+        player.dataset.transcodePreparing="false";
+        setPlayerLoading(false);
+        setMessage("Vivid could not prepare this video for playback. "+(error?.message||"Try another copy of the file."));
+      }
+    }
+  })();
+  nativeFallbackRequest=request;
+  nativeFallbackPromise=task.finally(()=>{
+    if(nativeFallbackRequest===request){nativeFallbackPromise=null;nativeFallbackRequest=0;}
+  });
+  return nativeFallbackPromise;
+}
 async function play(job,fileIndex=0){
+  const request=++playbackRequest;
+  nativeFallbackPromise=null;nativeFallbackRequest=0;
   const file=Array.isArray(job.files)?job.files[fileIndex]:null;
-  const media=await engine.openDownloadTranscode(job.id,fileIndex);
-  if(!media) throw new Error("The saved video file is not available.");
-  await releaseLocalMedia();
   const playerTitle=file&&job.files.length>1?job.title+" — "+file.name:job.title;
-  byId("offline-player-title").textContent=playerTitle;
-  syncNextEpisode(job);
-  byId("offline-resume-prompt").hidden=true;
-  resumePosition=0;
+  playbackCleanupPromise=releaseLocalMedia();
+  clearExternalSubtitle();activePreferenceKey=playbackProfileKey(job,fileIndex);applyPlaybackPreferences();resetSeekPreviewSource();
+  player.dataset.frameRate="";byId("offline-frame-back").disabled=true;byId("offline-frame-forward").disabled=true;
+  player.dataset.jobId=job.id;player.dataset.fileIndex=String(fileIndex);player.dataset.localMediaToken="";player.dataset.transcodeSessionId="";player.dataset.transcodeCodecs="";player.dataset.nativeAttempt="true";player.dataset.transcodePreparing="false";player.dataset.mediaFilename=file?.name||job.title||"Saved media";
+  byId("offline-player-title").textContent=playerTitle;syncNextEpisode(job);byId("offline-resume-prompt").hidden=true;resumePosition=0;
   const section=byId("offline-player-section");
-  player.pause();clearExternalSubtitle();activePreferenceKey=playbackProfileKey(job,fileIndex);applyPlaybackPreferences();resetSeekPreviewSource();player.dataset.frameRate="";byId("offline-frame-back").disabled=true;byId("offline-frame-forward").disabled=true;player.dataset.jobId=job.id;player.dataset.fileIndex=String(fileIndex);player.dataset.localMediaToken="";player.dataset.transcodeSessionId=media.sessionId;player.dataset.transcodeCodecs=JSON.stringify(media.codecs||{});player.dataset.mediaFilename=media.fileName||file?.name||job.title||"Saved media";try{transcodePlayer.load(media);}catch(error){await releaseLocalMedia();throw error;}if(player.muted&&player.volume>0)player.muted=false;lastPositionSave=0;byId("offline-player-section").dataset.subtitleSize="medium";byId("offline-subtitle-size").value="medium";
-  player.controls=false;
-  byId("offline-custom-controls").hidden=false;
-  section.classList.remove("controls-hidden");
-  section.hidden=false;section.scrollIntoView({behavior:"smooth",block:"start"});
-  try{await player.play();}catch{setMessage("Your movie is ready. Press Play in the Vivid player to begin.");}
+  player.controls=false;byId("offline-custom-controls").hidden=false;
+  section.classList.remove("controls-hidden");section.hidden=false;
+  section.scrollIntoView({behavior:"auto",block:"start"});
+  setPlayerLoading(true,"Opening your movie","Opening the saved file directly. Compatibility conversion is only used if this format needs it.");
+  setMessage("Opening "+playerTitle+" from your offline library…");
+  void playbackCleanupPromise.catch(()=>{});
+  lastPositionSave=0;section.dataset.subtitleSize="medium";byId("offline-subtitle-size").value="medium";
+  try{
+    const mediaUrl=await engine.mediaUrl(job.id,fileIndex);
+    if(request!==playbackRequest)return;
+    if(typeof mediaUrl!=="string"||!mediaUrl.startsWith("vivid-media://download/"))throw new Error("The saved video file is not available.");
+    player.preload="auto";player.src=mediaUrl;player.load();
+    nativeFallbackTimer=window.setTimeout(()=>{
+      if(request===playbackRequest&&player.dataset.nativeAttempt==="true"&&player.readyState<3)void startCompatibilityPlayback(job,fileIndex,request);
+    },7000);
+    try{await player.play();}
+    catch(error){
+      if(request!==playbackRequest)return;
+      if(error?.name==="NotAllowedError"){
+        setPlayerLoading(false);
+        setMessage("Your movie is ready. Press Play in the Vivid player to begin.");
+      }else if(error?.name==="NotSupportedError"||player.error){
+        await startCompatibilityPlayback(job,fileIndex,request);
+      }else{
+        setPlayerLoading(false);
+        setMessage("Your movie is ready. Press Play in the Vivid player to begin.");
+      }
+    }
+  }catch(error){
+    if(request===playbackRequest){setPlayerLoading(false);setMessage(error?.message||"Could not open this saved video.");}
+  }
   syncPlayerControls();
 }
 byId("desktop-search-form").addEventListener("submit",async event=>{
@@ -1341,6 +1469,7 @@ byId("offline-jobs").addEventListener("click",async event=>{
   finally{button.disabled=false;}
 });
 byId("offline-player-close").addEventListener("click",async()=>{
+  playbackRequest++;
   if(controlsHideTimer)clearTimeout(controlsHideTimer);
   if(currentFullscreenElement()===playerSection){
     const exit=document.exitFullscreen||document.webkitExitFullscreen;

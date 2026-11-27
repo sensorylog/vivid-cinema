@@ -166,7 +166,7 @@ class LocalTranscodeEngine {
       ]),
       ...(canCopyAudio ? ["-c:a", "copy"] : ["-c:a", "aac", "-b:a", "160k", "-ac", "2", "-ar", "48000"]),
       "-max_muxing_queue_size", "1024",
-      "-f", "hls", "-hls_time", "4", "-hls_list_size", "0",
+      "-f", "hls", "-hls_time", "2", "-hls_list_size", "0",
       "-hls_flags", "independent_segments+temp_file",
       "-hls_segment_filename", segmentPattern,
       playlistPath
@@ -191,6 +191,16 @@ class LocalTranscodeEngine {
       record.failed = code !== 0;
     });
 
+
+
+    try {
+      await Promise.all([
+        waitForFile(path.join(directory, "index.m3u8"), { timeoutMs: this.startupTimeoutMs, processRef: record }),
+        waitForFile(path.join(directory, "segment_00000.ts"), { timeoutMs: this.startupTimeoutMs, processRef: record })
+      ]);
+
+      // Do not run a second FFmpeg scan while the first playable video segment
+      // is being prepared. Subtitle extraction continues in the background.
     if (subtitle) {
       const subtitleTempPath = path.join(directory, "english.vtt.tmp");
       const subtitleFinalPath = path.join(directory, "english.vtt");
@@ -230,12 +240,6 @@ class LocalTranscodeEngine {
         });
       });
     }
-
-    try {
-      await Promise.all([
-        waitForFile(path.join(directory, "index.m3u8"), { timeoutMs: this.startupTimeoutMs, processRef: record }),
-        waitForFile(path.join(directory, "segment_00000.ts"), { timeoutMs: this.startupTimeoutMs, processRef: record })
-      ]);
       return {
         sessionId,
         url: this.origin + "/session/" + sessionId + "/index.m3u8",

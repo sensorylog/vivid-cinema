@@ -71,7 +71,7 @@ test("desktop torrent diagnostics expose tracker, DHT, peer and warning events",
   assert.match(engine, /torrent\.on\("noPeers"/);
   assert.match(engine, /torrent\.on\("warning"/);
   assert.match(engine, /client\.on\("error"/);
-  assert.match(engine, /dhtListening: Boolean\(this\.client\.dht && this\.client\.dht\.listening\)/);
+  assert.match(engine, /dhtListening: Boolean\(this\.client\?\.dht && this\.client\.dht\.listening\)/);
   assert.doesNotMatch(desktop, /discoveryDetail|discovery\.lastWarning|lastNoPeerSource/);
   assert.match(engine, /lastWarning/);
 });
@@ -160,11 +160,11 @@ test("Windows player runtime and stylesheet have cache-busting URLs", async () =
   const page = await readFile(new URL("../my-downloads.html", import.meta.url), "utf8");
   const script = await readFile(new URL("../scripts/my-downloads.js", import.meta.url), "utf8");
   const worker = await readFile(new URL("../service-worker.js", import.meta.url), "utf8");
-  assert.match(page, /my-downloads\.css\?v=offline-cinema-redesign-2/);
-  assert.match(script, /desktop-offline\.js\?windows-offline-hls-v3/);
+  assert.match(page, /my-downloads\.css\?v=offline-cinema-redesign-3/);
+  assert.match(script, /desktop-offline\.js\?windows-offline-hls-v4/);
   assert.match(worker, /vivid-cinema-shell-v\d+/);
-  assert.match(worker, /desktop-offline\.js\?windows-offline-hls-v3/);
-  assert.match(worker, /my-downloads\.css\?v=offline-cinema-redesign-2/);
+  assert.match(worker, /desktop-offline\.js\?windows-offline-hls-v4/);
+  assert.match(worker, /my-downloads\.css\?v=offline-cinema-redesign-3/);
 });
 
 test("offline library filters movies, sorts saved media, and reports on-device storage", async () => {
@@ -206,9 +206,9 @@ test("offline redesign provides title details, season grouping and continue watc
 test("offline redesign cache is versioned and precaches the active stylesheet", async () => {
   const page = await readFile(new URL("../my-downloads.html", import.meta.url), "utf8");
   const worker = await readFile(new URL("../service-worker.js", import.meta.url), "utf8");
-  assert.match(page, /my-downloads\.css\?v=offline-cinema-redesign-2/);
+  assert.match(page, /my-downloads\.css\?v=offline-cinema-redesign-3/);
   assert.match(worker, /vivid-cinema-shell-v\d+/);
-  assert.match(worker, /my-downloads\.css\?v=offline-cinema-redesign-2/);
+  assert.match(worker, /my-downloads\.css\?v=offline-cinema-redesign-3/);
 });
 
 test("My Downloads uses a clear discover, playback and offline-library hierarchy", async () => {
@@ -224,3 +224,52 @@ test("My Downloads uses a clear discover, playback and offline-library hierarchy
   assert.match(styles, /\.offline-job\{/);
   assert.match(styles, /@media\(max-width:720px\)/);
 });
+
+
+test("Windows offline library renders before loading the optional HLS compatibility runtime", async () => {
+  const bootstrap = await readFile(new URL("../scripts/my-downloads.js", import.meta.url), "utf8");
+  const desktop = await readFile(new URL("../scripts/downloads/desktop-offline.js", import.meta.url), "utf8");
+  const transcode = await readFile(new URL("../scripts/downloads/transcode-player.js", import.meta.url), "utf8");
+  assert.match(bootstrap, /if \(window\.vividDownloads\?\.available\) \{[\s\S]*?import\("\.\/downloads\/desktop-offline\.js\?windows-offline-hls-v4"\)/);
+  assert.match(bootstrap, /\} else \{\s*await loadHlsRuntime\(\)/);
+  assert.match(transcode, /function prepare\(\)/);
+  assert.match(transcode, /async function load\(session\)/);
+  assert.match(desktop, /transcodePlayer\.prepare\(\)/);
+});
+
+test("completed Windows downloads open directly before the FFmpeg compatibility fallback", async () => {
+  const desktop = await readFile(new URL("../scripts/downloads/desktop-offline.js", import.meta.url), "utf8");
+  const page = await readFile(new URL("../my-downloads.html", import.meta.url), "utf8");
+  assert.match(desktop, /async function startCompatibilityPlayback\(job,fileIndex,request\)/);
+  assert.match(desktop, /const mediaUrl=await engine\.mediaUrl\(job\.id,fileIndex\)/);
+  assert.match(desktop, /player\.src=mediaUrl;player\.load\(\)/);
+  assert.match(desktop, /engine\.openDownloadTranscode\(job\.id,fileIndex\)/);
+  assert.match(desktop, /nativeFallbackTimer=window\.setTimeout/);
+  assert.match(page, /id="offline-player-loading"/);
+});
+
+test("poster enrichment patches existing cards without rebuilding the scrolling library", async () => {
+  const desktop = await readFile(new URL("../scripts/downloads/desktop-offline.js", import.meta.url), "utf8");
+  assert.match(desktop, /function patchPosterArtwork\(media,poster\)/);
+  assert.match(desktop, /patchPosterArtwork\(media,poster\)/);
+  assert.doesNotMatch(desktop, /if\(changed\)render\(\)/);
+});
+
+
+test("Windows offline playback does not start torrent discovery until a download action", async () => {
+  const main = await readFile(new URL("../desktop/main.cjs", import.meta.url), "utf8");
+  const engine = await readFile(new URL("../desktop/download-engine.cjs", import.meta.url), "utf8");
+  assert.match(main, /new DesktopDownloadEngine\(\{[^}]*deferTorrentClient: true/);
+  assert.match(engine, /if \(!this\.deferTorrentClient\) this\.createClient\(\)/);
+  assert.match(engine, /function getTorrentSearchApi\(\)/);
+  assert.doesNotMatch(engine.slice(0, engine.indexOf("class DesktopDownloadEngine")), /require\(["']webtorrent["']\)/);
+});
+
+test("FFmpeg compatibility startup prioritises first video segment over subtitle extraction", async () => {
+  const engine = await readFile(new URL("../desktop/local-transcode-engine.cjs", import.meta.url), "utf8");
+  const firstSegment = engine.indexOf('waitForFile(path.join(directory, "segment_00000.ts")');
+  const subtitleSpawn = engine.indexOf('const subtitleChild = spawn(this.ffmpegPath');
+  assert.ok(firstSegment >= 0 && subtitleSpawn > firstSegment);
+  assert.match(engine, /"-hls_time", "2"/);
+});
+
