@@ -137,7 +137,7 @@ export async function listAccountProfiles(request, env) {
       includeAvatars ? item.ref.collection("avatar").doc("image").get() : Promise.resolve(null),
       pinReference.get()
     ]);
-    const avatarData = avatarSnapshot?.data()?.data || data.avatarData || "";
+    const avatarData = includeAvatars ? (avatarSnapshot?.data()?.data || data.avatarData || "") : "";
     const profile = serializeProfile(item.id, { ...data, avatarData });
     return { ...profile, hasPin: pinSnapshot.exists };
   }));
