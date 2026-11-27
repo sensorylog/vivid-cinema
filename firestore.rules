@@ -386,7 +386,7 @@ service cloud.firestore {
       // profiles are created later through the trusted profile API.
       function validViewingProfile(profileId) {
         return request.resource.data.keys().hasOnly([
-          'id','name','avatarUrl','avatarData','avatarSource','avatarId','isKids','maturityLevel',
+          'id','name','avatarUrl','avatarSource','avatarId','isKids','maturityLevel',
           'isOwner','schemaVersion','createdAt','updatedAt'
         ])
         && request.resource.data.keys().hasAll([
@@ -400,10 +400,6 @@ service cloud.firestore {
         && request.resource.data.avatarUrl is string
         && request.resource.data.avatarUrl.size() <= 2048
         && (request.resource.data.avatarUrl == '' || request.resource.data.avatarUrl.matches('^https://.*'))
-        && (!request.resource.data.keys().hasAny(['avatarData']) ||
-          (request.resource.data.avatarData is string
-            && request.resource.data.avatarData.size() <= 180000
-            && (request.resource.data.avatarData == '' || request.resource.data.avatarData.matches('^data:image/webp;base64,[A-Za-z0-9+/]+={0,2}$'))))
         && (!request.resource.data.keys().hasAny(['avatarSource']) ||
           request.resource.data.avatarSource in ['auto','google','collection','upload'])
         && request.resource.data.avatarId is string
@@ -428,6 +424,11 @@ service cloud.firestore {
         allow update: if isOwner(userId) && profileId == 'owner'
           && resource.data.isOwner == true && validViewingProfile(profileId);
         allow delete: if isOwner(userId);
+
+        // Avatar bytes are read and written only by the authenticated profile API.
+        match /avatar/{avatarId} {
+          allow read, write: if false;
+        }
 
         match /migrations/{migrationId} {
           allow get, list: if hasViewingProfile(userId, profileId);
