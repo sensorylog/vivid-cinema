@@ -67,6 +67,8 @@ function cloud(path,data){
   if(!u||!owner||String(u.uid)!==owner.uid||
      (localStorage.getItem(LOCAL_OWNER_KEY)||"guest")!==ownerAtCall||
      getActiveProfileId(owner.uid)!==owner.profileId)return {status:"local"};
+  await initializeProfileFoundation(u);
+  if(getActiveProfileId(owner.uid)!==owner.profileId)return {status:"local"};
   const {db,doc,setDoc}=await fb();
   await setDoc(doc(db,"users",u.uid,"profiles",owner.profileId,...path),data,{merge:true});
   window.dispatchEvent(new CustomEvent("vivid:sync-status",{detail:{store:"intelligence",status:"synced",path:path.join("/")}}));
