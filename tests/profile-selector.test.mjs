@@ -39,7 +39,7 @@ test("profile selector initializes the owner migration before loading profile ch
 
 test("profile manager uses authenticated same-origin APIs and handles create, update and delete", () => {
   assert.match(manager, /user\.getIdToken\(\)/);
-  assert.match(manager, /fetch\(path/);
+  assert.match(manager, /fetch\(getCloudflareApiUrl\(path\)/);
   assert.match(manager, /credentials: "same-origin"/);
   assert.match(manager, /POST", details/);
   assert.match(manager, /PATCH", \{ profileId, \.\.\.details \}/);
@@ -69,7 +69,7 @@ test("profile UI exposes the bounded Vivid avatar collection and compressed cust
 
 test("Google account photo is adopted for the owner profile and can be replaced by a chosen avatar", () => {
   assert.match(profiles, /const googlePhoto = safeAvatarUrl\(current\)/);
-  assert.match(profiles, /avatarSource: "google"/);
+  assert.match(profiles, /updates\.avatarSource = "google"/);
   assert.match(selector, /selectedAvatarUrl = ""/);
   assert.match(selector, /selectedAvatarSource = "collection"/);
   assert.match(selector, /selectedAvatarSource = "upload"/);
@@ -78,7 +78,7 @@ test("Google account photo is adopted for the owner profile and can be replaced 
   assert.match(selector, /profile-use-google/);
   assert.match(selector, /selectedAvatarSource = "google"/);
   assert.equal(selector.split('$("profile-use-google").addEventListener("click"').length - 1, 1);
-  assert.match(selector, /const googlePhoto = normalizeAvatarUrl/);
+  assert.match(selector, /const photo = normalizeAvatarUrl/);
   assert.match(selector, /setProfilePin\(editingId, pin, currentPin, openSession\)/);
   assert.match(selector, /removeProfilePin\(editingId, currentPin\)/);
   assert.match(selector, /resetProfilePin\(resetProfileId\)/);
