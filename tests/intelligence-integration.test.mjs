@@ -78,8 +78,8 @@ test("service worker keeps the integration shell versioned and For You assets pr
   assert.match(serviceWorker, /"\.\/scripts\/intelligence\.js"/);
 });
 
-test("behavior event sync downloads remote events, merges by session and event identity, and marks taste dirty", () => {
-  assert.match(intelligence, //collection\\\(db,"users",u\\.uid,"profiles",profileId,"events"\\\)/g/);
+test("behavior event sync reads and merges profile-scoped event history", () => {
+  assert.ok(intelligence.includes('collection(db,"users",u.uid,"profiles",profileId,"events")'));
   assert.match(intelligence, /mergeBehaviorEvents\(s\.events,remoteEvents,300\)/);
   assert.match(intelligence, /remoteAddedTasteSignal/);
   assert.match(intelligence, /eventsToUpload\.slice\(i,i\+20\)/);
