@@ -479,7 +479,12 @@ if(typeof window!=="undefined"){
   void startLibrarySync();
   window.addEventListener("vivid:profile-changed",event=>{
     const uid=String(event.detail?.uid||"");
-    if(uid)ensureLocalOwner(uid,event.detail?.profileId||null);
+    if(!uid)return;
+    ensureLocalOwner(uid,event.detail?.profileId||null);
+    void getFirebaseAuth().then(auth=>{
+      if(auth?.currentUser?.uid===uid)return syncLibraryForUser(auth.currentUser);
+      return null;
+    }).catch(error=>console.warn("Vivid profile library sync unavailable:",error));
   });
   window.addEventListener("online",()=>{
     void getFirebaseAuth().then(auth=>{
