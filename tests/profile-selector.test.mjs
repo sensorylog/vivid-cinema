@@ -23,12 +23,16 @@ test("successful sign-in opens the Who's Watching profile selector by default", 
   assert.match(page, /id="profile-signout"/);
   assert.match(selector, /signOut\(auth\)/);
   assert.match(selector, /setActiveProfileId\(user\.uid, profile\.id\)/);
+  assert.match(selector, /if \(profile\.hasPin\)/);
+  assert.match(selector, /verifyProfilePin\(pendingProfile\.id, pin\)/);
+  assert.match(selector, /signInWithCustomToken\(auth, result\.customToken\)/);
 });
 
 test("profile selector initializes the owner migration before loading profile choices", () => {
   assert.match(selector, /initializeProfileFoundation\(user\)/);
   assert.match(profiles, /await ensureOwnerProfile\(user\)/);
   assert.match(selector, /fetchProfiles\(\)/);
+  assert.match(selector, /if \(!result\.migrationComplete\)/);
   assert.match(selector, /location\.replace\(destination\(\)\)/);
 });
 
@@ -39,12 +43,17 @@ test("profile manager uses authenticated same-origin APIs and handles create, up
   assert.match(manager, /POST", details/);
   assert.match(manager, /PATCH", \{ profileId, \.\.\.details \}/);
   assert.match(manager, /DELETE", \{ profileId \}/);
+  assert.match(manager, /requestProfilePin/);
+  assert.match(manager, /includeAvatars=1/);
 });
 
 test("profile UI exposes the bounded Vivid avatar collection and compressed custom-photo upload", () => {
   assert.match(page, /id="avatar-gallery"/);
   assert.match(page, /id="profile-photo"/);
   assert.match(page, /id="profile-use-google"/);
+  assert.match(page, /id="profile-pin-dialog"/);
+  assert.match(page, /id="profile-pin-settings"/);
+  assert.match(page, /id="profile-pin-manage"/);
   assert.doesNotMatch(page, /profile-is-kids/);
   assert.match(selector, /PROFILE_AVATARS/);
   assert.match(selector, /compressProfileImage\(file\)/);
@@ -66,6 +75,9 @@ test("Google account photo is adopted for the owner profile and can be replaced 
   assert.match(selector, /selectedAvatarSource = "google"/);
   assert.equal(selector.split('$("profile-use-google").addEventListener("click"').length - 1, 1);
   assert.match(selector, /const googlePhoto = normalizeAvatarUrl/);
+  assert.match(selector, /setProfilePin\(editingId, pin, currentPin, openSession\)/);
+  assert.match(selector, /removeProfilePin\(editingId, currentPin\)/);
+  assert.match(selector, /resetProfilePin\(resetProfileId\)/);
 });
 
 test("profile deletion protects the owner and requires an explicit confirmation", () => {
