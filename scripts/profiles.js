@@ -146,6 +146,40 @@ export async function listProfiles(user = null) {
     .sort((a, b) => a.id === OWNER_PROFILE_ID ? -1 : b.id === OWNER_PROFILE_ID ? 1 : Number(a.createdAt?.toMillis?.() || 0) - Number(b.createdAt?.toMillis?.() || 0));
 }
 
+export async function listProfileSummaries(user = null) {
+  const firebase = await getFirebase();
+  const { auth, ensureAppCheck } = firebase;
+  const current = requireSignedInUser(user || auth.currentUser, auth);
+  await ensureAppCheck();
+  const token = await current.getIdToken();
+  const response = await fetch("/api/profiles", {
+    headers: { Authorization: "Bearer " + token },
+    cache: "no-store"
+  });
+  const result = await response.json().catch(() => ({}));
+  if (!response.ok || result.ok !== true || !Array.isArray(result.profiles)) {
+    throw new Error(result.message || "Could not validate your profile security settings.");
+  }
+  return {
+    profiles: result.profiles.map(profile => ({ ...profile, hasPin: profile.hasPin === true })),
+    migrationComplete: result.migrationComplete === true
+  };
+}
+
+export async function validateProfileSession(user, profileId) {
+  const firebase = await getFirebase();
+  const current = requireSignedInUser(user || firebase.auth.currentUser, firebase.auth);
+  const token = await current.getIdToken();
+  const response = await fetch("https://vivid-cinema-api.vercel.app/api/profile-pin", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Authorization: "Bearer " + token },
+    body: JSON.stringify({ action: "validate", profileId }),
+    cache: "no-store"
+  });
+  const result = await response.json().catch(() => ({}));
+  return response.ok && result.ok === true;
+}
+
 export function getActiveProfileId(uid) {
   try {
     const id = localStorage.getItem(activeProfileStorageKey(uid)) || OWNER_PROFILE_ID;
