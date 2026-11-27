@@ -254,3 +254,22 @@ test("poster enrichment patches existing cards without rebuilding the scrolling 
   assert.match(desktop, /patchPosterArtwork\(media,poster\)/);
   assert.doesNotMatch(desktop, /if\(changed\)render\(\)/);
 });
+
+
+test("Windows offline playback does not start torrent discovery until a download action", async () => {
+  const main = await readFile(new URL("../desktop/main.cjs", import.meta.url), "utf8");
+  const engine = await readFile(new URL("../desktop/download-engine.cjs", import.meta.url), "utf8");
+  assert.match(main, /new DesktopDownloadEngine\(\{[^}]*deferTorrentClient: true/);
+  assert.match(engine, /if \(!this\.deferTorrentClient\) this\.createClient\(\)/);
+  assert.match(engine, /function getTorrentSearchApi\(\)/);
+  assert.doesNotMatch(engine.slice(0, engine.indexOf("class DesktopDownloadEngine")), /require\(["']webtorrent["']\)/);
+});
+
+test("FFmpeg compatibility startup prioritises first video segment over subtitle extraction", async () => {
+  const engine = await readFile(new URL("../desktop/local-transcode-engine.cjs", import.meta.url), "utf8");
+  const firstSegment = engine.indexOf('waitForFile(path.join(directory, "segment_00000.ts")');
+  const subtitleSpawn = engine.indexOf('const subtitleChild = spawn(this.ffmpegPath');
+  assert.ok(firstSegment >= 0 && subtitleSpawn > firstSegment);
+  assert.match(engine, /"-hls_time", "2"/);
+});
+
