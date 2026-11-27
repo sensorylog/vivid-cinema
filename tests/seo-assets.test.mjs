@@ -28,7 +28,7 @@ test("static SEO build emits canonical metadata, structured data and a curated s
     assert.match(index, /rel="canonical" href="https:\/\/cinema\.example\//);
     assert.match(index, /name="twitter:card" content="summary_large_image"/);
     assert.match(index, /application\/ld\+json/);
-    assert.match(home, /Discover Movies, TV Shows &amp; Anime/);
+    assert.match(home, /Discover Movies, TV Shows & Anime/);
     assert.match(title, /Dynamic title/);
     assert.doesNotMatch(title, /noindex/);
     assert.match(library, /name="robots" content="noindex,follow"/);
