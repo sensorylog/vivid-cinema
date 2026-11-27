@@ -1,4 +1,9 @@
 import {
+  androidVersionFromTag,
+  latestAndroidBuild,
+  selectLatestAndroidRelease
+} from "./android-release-feed.js";
+import {
   isAndroidUpdateCheckFresh,
   readAndroidUpdateState,
   shouldShowAndroidUpdate,
@@ -7,7 +12,7 @@ import {
 
 const OWNER = "sensorylog";
 const REPO = "vivid-cinema";
-const RELEASE_API = `https://api.github.com/repos/${OWNER}/${REPO}/releases/latest`;
+const RELEASES_API = `https://api.github.com/repos/${OWNER}/${REPO}/releases?per_page=100`;
 
 function nativeRuntime() {
   try { return Boolean(window.Capacitor?.isNativePlatform?.()); } catch { return false; }
@@ -63,86 +68,61 @@ function createUpdateNotice(update, onDismiss) {
   });
 }
 
-function latestAndroidBuild(assets) {
-  const apk = assets.find(asset => asset.name === "Vivid-Cinema-Android.apk");
-  const metadata = assets.map(asset => {
-    const match = /^Vivid-Cinema-Android-build-(\d+)\.json$/i.exec(asset.name || "");
-    return match ? { ...asset, build: Number(match[1]) } : null;
-  }).filter(Boolean).sort((a, b) => b.build - a.build)[0];
-
-  if (apk?.browser_download_url && metadata && Number.isSafeInteger(metadata.build)) {
-    return { build: metadata.build, url: apk.browser_download_url };
-  }
-
-  // Backward compatibility for versioned APKs from earlier workflow runs.
-  const legacyApk = assets.map(asset => {
-    const match = /^Vivid-Cinema-Android-(\d+(?:\.\d+){1,3})-build-(\d+)\.apk$/i.exec(asset.name || "");
-    return match ? { ...asset, version: match[1], build: Number(match[2]) } : null;
-  }).filter(Boolean).sort((a, b) => b.build - a.build)[0];
-  return legacyApk?.browser_download_url
-    ? { build: legacyApk.build, version: legacyApk.version, url: legacyApk.browser_download_url }
-    : null;
-}
-
 let updateCheckInFlight = false;
 
 async function checkForAndroidUpdate() {
-  // Google Play must update Play-distributed installs through Play itself.
-  // The GitHub APK installer is reserved for direct/sideloaded builds.
+  // Google Play installs are updated by Google Play, never by the sideload APK feed.
   if (!nativeRuntime() || window.VIVID_ANDROID_DISTRIBUTION === "play" || updateCheckInFlight) return;
   updateCheckInFlight = true;
   try {
-  const local = window.VIVID_ANDROID_BUILD_INFO || { version: "0.0.0", build: 0 };
-  const storage = (() => { try { return window.localStorage; } catch { return null; } })();
-  let state = readAndroidUpdateState(storage);
+    const local = window.VIVID_ANDROID_BUILD_INFO || { version: "0.0.0", build: 0 };
+    const storage = (() => { try { return window.localStorage; } catch { return null; } })();
+    let state = readAndroidUpdateState(storage);
 
-  // Render a previously discovered update immediately. Every page in the bundled
-  // site loads this module, so persistent state prevents both repeated API calls
-  // and a dismissed notice reappearing on the next navigation.
-  if (shouldShowAndroidUpdate(state, Number(local.build || 0))) {
-    createUpdateNotice(state.update, () => {
-      state = { ...state, dismissedBuild: state.update.build };
-      writeAndroidUpdateState(storage, state);
-    });
-  }
-  if (isAndroidUpdateCheckFresh(state)) return;
-
-  try {
-    const response = await fetch(RELEASE_API, {
-      headers: { Accept: "application/vnd.github+json" },
-      cache: "no-store"
-    });
-    if (!response.ok) {
-      writeAndroidUpdateState(storage, { ...state, checkedAt: Date.now(), failed: true });
-      return;
-    }
-    const release = await response.json();
-    const remote = latestAndroidBuild(Array.isArray(release.assets) ? release.assets : []);
-    if (!remote) {
-      // A newly published desktop release may appear before its Android APK
-      // workflow finishes uploading assets. Retry soon and retain any cached APK.
-      writeAndroidUpdateState(storage, { ...state, checkedAt: Date.now(), failed: true });
-      return;
-    }
-    const version = String(release.tag_name || local.version || "latest").replace(/^v/i, "");
-    state = {
-      ...state,
-      checkedAt: Date.now(),
-      failed: false,
-      update: { ...remote, version: remote.version || version }
-    };
-    writeAndroidUpdateState(storage, state);
     if (shouldShowAndroidUpdate(state, Number(local.build || 0))) {
       createUpdateNotice(state.update, () => {
         state = { ...state, dismissedBuild: state.update.build };
         writeAndroidUpdateState(storage, state);
       });
     }
-  } catch (error) {
-    // Avoid hammering the unauthenticated GitHub API on every page while offline.
-    writeAndroidUpdateState(storage, { ...state, checkedAt: Date.now(), failed: true });
-    console.debug("Vivid Android update check skipped:", error);
-  }
+    if (isAndroidUpdateCheckFresh(state)) return;
+
+    try {
+      const response = await fetch(RELEASES_API, {
+        headers: { Accept: "application/vnd.github+json" },
+        cache: "no-store"
+      });
+      if (!response.ok) {
+        writeAndroidUpdateState(storage, { ...state, checkedAt: Date.now(), failed: true });
+        return;
+      }
+      const releases = await response.json();
+      const release = selectLatestAndroidRelease(releases);
+      const remote = release ? latestAndroidBuild(release.assets) : null;
+      if (!release || !remote) {
+        // Windows releases are deliberately ignored. Retry soon if the Android
+        // release is still being uploaded, without discarding a cached APK.
+        writeAndroidUpdateState(storage, { ...state, checkedAt: Date.now(), failed: true });
+        return;
+      }
+      const version = androidVersionFromTag(release.tag_name) || remote.version || local.version || "latest";
+      state = {
+        ...state,
+        checkedAt: Date.now(),
+        failed: false,
+        update: { ...remote, version }
+      };
+      writeAndroidUpdateState(storage, state);
+      if (shouldShowAndroidUpdate(state, Number(local.build || 0))) {
+        createUpdateNotice(state.update, () => {
+          state = { ...state, dismissedBuild: state.update.build };
+          writeAndroidUpdateState(storage, state);
+        });
+      }
+    } catch (error) {
+      writeAndroidUpdateState(storage, { ...state, checkedAt: Date.now(), failed: true });
+      console.debug("Vivid Android update check skipped:", error);
+    }
   } finally {
     updateCheckInFlight = false;
   }
@@ -154,8 +134,6 @@ if (document.readyState === "loading") {
   void checkForAndroidUpdate();
 }
 
-// Re-check after returning from Android Settings or the package installer. The
-// persistent cooldown makes these lifecycle events cheap when no check is due.
 document.addEventListener("visibilitychange", () => {
   if (!document.hidden) void checkForAndroidUpdate();
 });
