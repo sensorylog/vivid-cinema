@@ -91,7 +91,7 @@ test("profile APIs resolve to the hosted Pages origin from Android and Electron 
   assert.match(manager, /getCloudflareApiUrl\(path\)/);
   assert.match(readFileSync(new URL("../scripts/profiles.js", import.meta.url), "utf8"), /getCloudflareApiUrl\("\/api\/profiles"\)/);
   assert.match(cloudflareApi, /vividDownloads\?\.available === true/);
-  assert.match(cloudflareService, /parsed\.protocol === "http:" && parsed\.hostname === "localhost"/);
+  assert.match(cloudflareService, /parsed\.hostname === "localhost" && \["http:", "https:", "capacitor:"\]\.includes\(parsed\.protocol\)/);
   assert.match(pinApi, /parsed\.protocol === "http:" && parsed\.hostname === "localhost"/);
 });
 
