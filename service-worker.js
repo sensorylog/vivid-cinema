@@ -1,6 +1,6 @@
 // Bump this version whenever the precached app shell changes.
 const HLS_LIBRARY_URL = "https://cdn.jsdelivr.net/npm/hls.js@1.7.3/dist/hls.min.js";
-const CACHE_NAME = "vivid-cinema-shell-v379";
+const CACHE_NAME = "vivid-cinema-shell-v380";
 const APP_SHELL = [
   HLS_LIBRARY_URL,
   "./","./index.html","./home.html","./african-stories.html","./downloads.html","./my-downloads.html","./for-you.html",
@@ -18,7 +18,7 @@ const APP_SHELL = [
   "./styles/vivid-tflix-hero.css","./styles/vivid-tflix-hero.css?v=hero-trailer-full-bleed-1","./styles/vivid-viewport.css?v=page-gutters-1","./styles/vivid-apple-tv-mobile.css?v=apple-tv-mobile-2","./scripts/tflix-hero.js",
   "./scripts/tflix-hero.js?v=hero-responsive-artwork-1","./styles/vivid-atmosphere.css","./styles/vivid-search-standalone.css","./styles/vivid-desktop.css","./styles/vivid-landing.css",
   "./styles/vivid-anime.css","./styles/vivid-anime-premium.css","./styles/vivid-anime-premium-library.css","./styles/vivid-anime-premium-title.css","./styles/vivid-anime-premium-watch.css","./styles/vivid-anime-premium-membership.css","./styles/vivid-anime-premium-admin.css","./styles/vivid-viewport.css","./styles/vivid-legal.css","./styles/vivid-live.css","./styles/vivid-audit-fixes.css",
-  "./styles/vivid-achievements.css?v=20261018-achievements-1","./scripts/achievements.js","./scripts/achievements-page.js?v=20261018-cinematic-1","./scripts/achievement-catalog.js","./scripts/app-shell.js","./scripts/movie-quick-actions.js","./styles/vivid-movie-quick-actions.css","./scripts/home-optional-resources.js",
+  "./styles/vivid-achievements.css?v=20261018-achievements-1","./scripts/achievements.js","./scripts/achievements-page.js?v=20261018-cinematic-1","./scripts/achievement-catalog.js","./scripts/app-shell.js","./scripts/app-shell.js?v=profile-gate-guard-2","./scripts/profile-selector.js?v=profile-token-verify-2","./scripts/account.js?v=profile-auth-ready-2","./scripts/movie-quick-actions.js","./styles/vivid-movie-quick-actions.css","./scripts/home-optional-resources.js",
   "./scripts/donate.js","./scripts/google-tag.js","./scripts/analytics.js","./scripts/vivid-pulse.js","./scripts/provider-region.js",
   "./scripts/search.js","./scripts/search-page.js","./scripts/intelligence.js","./scripts/intent-parser.js","./scripts/plot-search.js",
   "./scripts/for-you.js","./scripts/vivid-recall-chat.js","./scripts/cloudflare-ai.js","./scripts/local-owner.js","./scripts/profile-schema.js","./scripts/profiles.js","./scripts/firebase.js","./scripts/turnstile-app-check.js?v=20261127-profile-timeout-2","./scripts/cloudflare-api.js",
@@ -175,7 +175,7 @@ self.addEventListener("fetch",event=>{
  // Always try the network first for auth pages, auth modules and Firebase config.
  const isAuthDocument=/\/(?:login|auth|forgot-password|verify-email|auth-diagnostics|account|profiles)\.html$/.test(url.pathname);
  const isWatchRoomRuntime=/watch-room-api|watch-room-playback/.test(new URL(request.url).pathname);
-const isAuthRuntime=/\/scripts\/(?:auth|firebase|nav-auth|auth-diagnostics|account|account-bootstrap|profile-manager|profile-selector(?:-watchdog)?|profiles|cloudflare-ai)\.js$/.test(url.pathname)||/\/init\.json$/.test(url.pathname);
+const isAuthRuntime=/\/scripts\/(?:auth|firebase|nav-auth|auth-diagnostics|app-shell|account|account-bootstrap|profile-manager|profile-selector(?:-watchdog)?|profiles|cloudflare-ai)\.js$/.test(url.pathname)||/\/init\.json$/.test(url.pathname);
  const isFreshNewsRuntime=/\/scripts\/(?:newsroom|intelligence)\.js$/.test(url.pathname)||/\/styles\/vivid-news\.css$/.test(url.pathname)||/\/data\/(?:news-feed\.json|news-thumbnails\/)/.test(url.pathname);
  if(isAuthDocument||isAuthRuntime||isWatchRoomRuntime){event.respondWith(networkFirst(request));return;}
  if(isFreshNewsRuntime){event.respondWith(networkFirst(request));return;}
