@@ -5,6 +5,7 @@ import { inspectMediaUrl } from "./media-inspector.js";
 import { choosePreferredTrack, clearSubtitleOverlay, parseSubtitleFile, renderSubtitleAtTime } from "./subtitle-engine.js";
 import { getPlaybackPreferences, playbackProfileKey, savePlaybackPreferences } from "./playback-preferences.js";
 import { createTranscodePlayer } from "./transcode-player.js?windows-offline-hls-v5";
+import { getActiveProfileId, initializeProfileFoundation } from "../profiles.js";
 
 if (window.vividDownloads?.available) {
 document.body.classList.add("vivid-desktop-offline-library");
@@ -1537,6 +1538,43 @@ byId("offline-footnote").textContent="Your videos are stored on this device in t
 const pending=sessionStorage.getItem("vivid:pending-desktop-download");
 if(pending){sessionStorage.removeItem("vivid:pending-desktop-download");try{void searchTitle(JSON.parse(pending));}catch{setMessage("Open a movie page and tap Download to find a release.");}}
 else setMessage("Your offline library is ready.");
-void refresh();
+
+let desktopAuth = null;
+let activeDesktopOwner = null;
+async function switchDesktopProfile(user) {
+  if(user?.uid){
+    try{await initializeProfileFoundation(user);}
+    catch(error){console.warn("Vivid profile migration is unavailable while opening Windows offline storage:",error);}
+  }
+  const profileId=user?.uid?getActiveProfileId(user.uid):"guest";
+  const owner=user?.uid?String(user.uid)+"::"+String(profileId):"guest";
+  if(owner===activeDesktopOwner)return;
+  activeDesktopOwner=owner;
+  if(typeof engine.setOwner!=="function")throw new Error("This Vivid desktop build cannot safely separate offline downloads by profile. Update the app and retry.");
+  await engine.setOwner(owner);
+  await refresh();
+}
+async function bootstrapDesktopProfile() {
+  const [{auth},{onAuthStateChanged}]=await Promise.all([
+    import("../firebase.js"),
+    import("https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js")
+  ]);
+  desktopAuth=auth;
+  if(typeof auth.authStateReady==="function")await auth.authStateReady();
+  await switchDesktopProfile(auth.currentUser);
+  onAuthStateChanged(auth,user=>{
+    void switchDesktopProfile(user).catch(error=>setMessage(error?.message||"Could not switch the offline library to this profile."));
+  });
+  window.addEventListener("vivid:profile-changed",event=>{
+    if(desktopAuth?.currentUser?.uid===String(event.detail?.uid||"")){
+      void switchDesktopProfile(desktopAuth.currentUser).catch(error=>setMessage(error?.message||"Could not switch the offline library to this profile."));
+    }
+  });
+}
+try {
+  await bootstrapDesktopProfile();
+} catch(error) {
+  setMessage(error?.message||"Could not initialize the profile-specific offline library.");
+}
 
 }
