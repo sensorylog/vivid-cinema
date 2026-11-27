@@ -125,19 +125,28 @@ export async function listAccountProfiles(request, env) {
   const { db, user } = await requireProfileUser(request, env);
   await enforceRateLimit(db, user.uid, "profiles-list", 60, 60 * 1000);
   const includeAvatars = new URL(request.url).searchParams.get("includeAvatars") === "1";
-  const snapshot = await db.collection("users").doc(user.uid).collection("profiles").get();
+  const ownerReference = db.collection("users").doc(user.uid).collection("profiles").doc(OWNER_PROFILE_ID);
+  const [snapshot, migrationSnapshot] = await Promise.all([
+    ownerReference.parent.get(),
+    ownerReference.collection("migrations").doc("account-data-to-owner-profile-v1").get()
+  ]);
   const profiles = await Promise.all(snapshot.docs.map(async item => {
     const data = item.data() || {};
-    let avatarData = "";
-    if (includeAvatars) {
-      const avatarSnapshot = await item.ref.collection("avatar").doc("image").get();
-      avatarData = avatarSnapshot.data()?.data || data.avatarData || "";
-    }
-    return serializeProfile(item.id, { ...data, avatarData });
+    const pinReference = item.ref.collection("profileSecurity").doc("pin");
+    const [avatarSnapshot, pinSnapshot] = await Promise.all([
+      includeAvatars ? item.ref.collection("avatar").doc("image").get() : Promise.resolve(null),
+      pinReference.get()
+    ]);
+    const avatarData = avatarSnapshot?.data()?.data || data.avatarData || "";
+    const profile = serializeProfile(item.id, { ...data, avatarData });
+    return { ...profile, hasPin: Boolean(pinSnapshot.exists && pinSnapshot.data()?.pinHash) };
   }));
-  return profiles
-    .filter(profile => profile.id === OWNER_PROFILE_ID || /^[A-Za-z0-9_-]{1,64}$/.test(profile.id))
-    .sort((a, b) => a.id === OWNER_PROFILE_ID ? -1 : b.id === OWNER_PROFILE_ID ? 1 : String(a.createdAt || "").localeCompare(String(b.createdAt || "")));
+  return {
+    profiles: profiles
+      .filter(profile => profile.id === OWNER_PROFILE_ID || /^[A-Za-z0-9_-]{1,64}$/.test(profile.id))
+      .sort((a, b) => a.id === OWNER_PROFILE_ID ? -1 : b.id === OWNER_PROFILE_ID ? 1 : String(a.createdAt || "").localeCompare(String(b.createdAt || ""))),
+    migrationComplete: migrationSnapshot.data()?.status === "complete"
+  };
 }
 
 export async function createAccountProfile(request, env) {
