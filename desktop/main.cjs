@@ -173,7 +173,7 @@ function markStartup(stage) {
 
 function normalizeDownloadOwner(value) {
   const owner = String(value || "").trim();
-  if (!owner || owner.length > 256 || !/^[A-Za-z0-9:_-]+$/.test(owner)) {
+  if (!owner || owner.length > 256 || /[\/\\\u0000-\u001f]/.test(owner)) {
     throw new TypeError("A valid Vivid account/profile download owner is required.");
   }
   return owner;
