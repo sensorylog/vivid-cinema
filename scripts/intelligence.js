@@ -1,7 +1,8 @@
 import { tmdbApi } from "./tmdb.js";
 import { getLocalLibrary } from "./library.js";
 
-import { switchLocalOwner } from "./local-owner.js";
+import { seedLegacyOwnerProfileSnapshot, switchLocalOwner } from "./local-owner.js";
+import { getActiveProfileId, initializeProfileFoundation } from "./profiles.js";
 
 const KEY="vivid:intelligence:v1";
 const SESSION_KEY="vivid:session:v1";
@@ -14,13 +15,21 @@ const empty=()=>({version:1,feedback:{},feedbackCleared:{},events:[],taste:{genr
 let firebasePromise=null, syncPromise=null, sessionId=null;
 const LOCAL_OWNER_KEY="vivid:intelligence-owner:v1";
 const TASTE_SIGNAL_TYPES=new Set(["title_opened","trailer_started","watch_started","playback_progress","watch_completed","recommendation_clicked"]);
-function ensureIntelligenceOwner(uid){
+function ensureIntelligenceOwner(uid, requestedProfileId = null){
+ const profileId=uid?(requestedProfileId||getActiveProfileId(uid)):"guest";
+ const scopedOwner=uid?String(uid)+"::"+String(profileId):null;
  try{
+  if(uid)seedLegacyOwnerProfileSnapshot({
+   storage:localStorage,ownerKey:LOCAL_OWNER_KEY,
+   activeKeys:[KEY,SESSION_KEY,TASTE_CACHE_KEY],
+   previousOwner:String(uid),targetOwner:scopedOwner,
+   emptyValues:{[KEY]:JSON.stringify(empty()),[SESSION_KEY]:"",[TASTE_CACHE_KEY]:""}
+  });
   const result=switchLocalOwner({
    storage:localStorage,
    ownerKey:LOCAL_OWNER_KEY,
    activeKeys:[KEY,SESSION_KEY,TASTE_CACHE_KEY],
-   uid,
+   uid:scopedOwner,
    emptyValues:{[KEY]:JSON.stringify(empty()),[SESSION_KEY]:"",[TASTE_CACHE_KEY]:""}
   });
   if(result.changed){
@@ -52,11 +61,14 @@ async function user(){
 }
 function cloud(path,data){
  const ownerAtCall=localStorage.getItem(LOCAL_OWNER_KEY)||"guest";
+ const split=ownerAtCall.lastIndexOf("::");
+ const owner=split>0?{uid:ownerAtCall.slice(0,split),profileId:ownerAtCall.slice(split+2)}:null;
  return user().then(async u=>{
-  if(!u||ownerAtCall==="guest"||String(u.uid)!==ownerAtCall||
-     (localStorage.getItem(LOCAL_OWNER_KEY)||"guest")!==ownerAtCall)return {status:"local"};
+  if(!u||!owner||String(u.uid)!==owner.uid||
+     (localStorage.getItem(LOCAL_OWNER_KEY)||"guest")!==ownerAtCall||
+     getActiveProfileId(owner.uid)!==owner.profileId)return {status:"local"};
   const {db,doc,setDoc}=await fb();
-  await setDoc(doc(db,"users",u.uid,...path),data,{merge:true});
+  await setDoc(doc(db,"users",u.uid,"profiles",owner.profileId,...path),data,{merge:true});
   window.dispatchEvent(new CustomEvent("vivid:sync-status",{detail:{store:"intelligence",status:"synced",path:path.join("/")}}));
   return {status:"synced"};
  }).catch(error=>{
@@ -172,15 +184,19 @@ export function mergeBehaviorEvents(localEvents = [], remoteEvents = [], limit =
 export async function syncIntelligenceForUser(u){
  ensureIntelligenceOwner(u?.uid || null);
  if(!u)return read();
- let syncStage="initializing Firestore";
+ let syncStage="initializing profile and Firestore";
  try{
+  await initializeProfileFoundation(u);
+  const profileId=getActiveProfileId(u.uid);
+  const scopedOwner=String(u.uid)+"::"+String(profileId);
+  ensureIntelligenceOwner(u.uid,profileId);
   const {db,collection,getDocsFromServer,doc,setDoc,deleteDoc}=await fb();
-  syncStage="reading remote feedback, events, and taste";
-  const [f,e,t]=await Promise.all([getDocsFromServer(collection(db,"users",u.uid,"feedback")),getDocsFromServer(collection(db,"users",u.uid,"events")),getDocsFromServer(collection(db,"users",u.uid,"taste"))]);
+  syncStage="reading profile-scoped feedback, events, and taste";
+  const [f,e,t]=await Promise.all([getDocsFromServer(collection(db,"users",u.uid,"profiles",profileId,"feedback")),getDocsFromServer(collection(db,"users",u.uid,"profiles",profileId,"events")),getDocsFromServer(collection(db,"users",u.uid,"profiles",profileId,"taste"))]);
   syncStage="checking signed-in account";
   const {auth}=await fb();
   if(String(auth?.currentUser?.uid || "")!==String(u.uid) ||
-     (localStorage.getItem(LOCAL_OWNER_KEY) || "guest")!==String(u.uid)){
+     (localStorage.getItem(LOCAL_OWNER_KEY) || "guest")!==scopedOwner){
    throw new Error("The signed-in account changed during intelligence sync. Please retry.");
   }
   const s=read();const stateAtSync=localStorage.getItem(KEY)||"";let feedbackChanged=false;
@@ -195,7 +211,7 @@ export async function syncIntelligenceForUser(u){
   const eventDocIdsToDelete=new Set(eventDocsToDelete.map(d=>d.id));
   const retainedRemoteEventIds=new Set(e.docs.filter(d=>!eventDocIdsToDelete.has(d.id)).map(d=>d.id));
   const ownerIsCurrent=()=>String(auth?.currentUser?.uid||"")===String(u.uid)&&
-   (localStorage.getItem(LOCAL_OWNER_KEY)||"guest")===String(u.uid);
+   (localStorage.getItem(LOCAL_OWNER_KEY)||"guest")===scopedOwner;
   syncStage="cleaning up invalid remote events";
   for(let i=0;i<eventDocsToDelete.length;i+=20){
    if(!ownerIsCurrent())throw new Error("The signed-in account changed during event retention cleanup. Please retry.");
@@ -211,7 +227,7 @@ export async function syncIntelligenceForUser(u){
    if(!ownerIsCurrent())throw new Error("The signed-in account changed during event sync. Please retry.");
    await Promise.all(eventsToUpload.slice(i,i+20).map(event=>{
     const eventDocId=String(event.sessionId)+"_"+String(event.id);
-    return setDoc(doc(db,"users",u.uid,"events",eventDocId),event,{merge:true});
+    return setDoc(doc(db,"users",u.uid,"profiles",profileId,"events",eventDocId),event,{merge:true});
    }));
   }
   syncStage="reconciling feedback";
@@ -224,13 +240,13 @@ export async function syncIntelligenceForUser(u){
   for(const [id,localItem] of Object.entries(s.feedback)){
    const remoteItem=remoteFeedback.get(id);
    if(!remoteItem || Number(localItem.updatedAt||0)>Number(remoteItem.updatedAt||0)){
-    await setDoc(doc(db,"users",u.uid,"feedback",id),{id:localItem.id,media_type:localItem.media_type,title:localItem.title,year:localItem.year,poster_path:localItem.poster_path,backdrop_path:localItem.backdrop_path,kind:localItem.kind,updatedAt:localItem.updatedAt});
+    await setDoc(doc(db,"users",u.uid,"profiles",profileId,"feedback",id),{id:localItem.id,media_type:localItem.media_type,title:localItem.title,year:localItem.year,poster_path:localItem.poster_path,backdrop_path:localItem.backdrop_path,kind:localItem.kind,updatedAt:localItem.updatedAt});
    }
   }
   for(const [id,tombstone] of Object.entries(s.feedbackCleared)){
    const remoteItem=remoteFeedback.get(id);
    if(!remoteItem || Number(tombstone.updatedAt||0)>Number(remoteItem.updatedAt||0)){
-    await setDoc(doc(db,"users",u.uid,"feedback",id),{kind:"cleared",updatedAt:Number(tombstone.updatedAt)||Date.now()});
+    await setDoc(doc(db,"users",u.uid,"profiles",profileId,"feedback",id),{kind:"cleared",updatedAt:Number(tombstone.updatedAt)||Date.now()});
    }
   }
   f.docs.forEach(d=>{
@@ -260,7 +276,7 @@ export async function syncIntelligenceForUser(u){
    s.onboarding={...s.onboarding,...remoteOnboarding};
    try{localStorage.setItem(ONBOARDING_SEEN_KEY,"1")}catch{}
   }else if(s.onboarding.shownAt||s.onboarding.completed||s.onboarding.dismissed){
-   await setDoc(doc(db,"users",u.uid,"taste","profile"),{onboarding:s.onboarding},{merge:true});
+   await setDoc(doc(db,"users",u.uid,"profiles",profileId,"taste","profile"),{onboarding:s.onboarding},{merge:true});
   }
    if(feedbackChanged||s.taste.dirty){
     // Keep local behavior/feedback changes dirty; a newer remote timestamp
@@ -270,12 +286,12 @@ export async function syncIntelligenceForUser(u){
    }else if(remote&&Number(remote.updatedAt||0)>Number(s.taste.updatedAt||0)){
     s.taste={...remote,dirty:false};
    }else if(Number(s.taste.updatedAt||0)>0&&Number(s.taste.updatedAt||0)>Number(remote?.updatedAt||0)){
-    await setDoc(doc(db,"users",u.uid,"taste","profile"),{version:1,genres:s.taste.genres||{},languages:s.taste.languages||{},countries:s.taste.countries||{},actors:s.taste.actors||{},directors:s.taste.directors||{},media:s.taste.media||{movie:0,tv:0},decades:s.taste.decades||{},updatedAt:Number(s.taste.updatedAt)||0});
+    await setDoc(doc(db,"users",u.uid,"profiles",profileId,"taste","profile"),{version:1,genres:s.taste.genres||{},languages:s.taste.languages||{},countries:s.taste.countries||{},actors:s.taste.actors||{},directors:s.taste.directors||{},media:s.taste.media||{movie:0,tv:0},decades:s.taste.decades||{},updatedAt:Number(s.taste.updatedAt)||0});
   }
   syncStage="finalizing sync";
   const {auth:finalAuth}=await fb();
   if(String(finalAuth?.currentUser?.uid || "")!==String(u.uid) ||
-     (localStorage.getItem(LOCAL_OWNER_KEY) || "guest")!==String(u.uid)){
+     (localStorage.getItem(LOCAL_OWNER_KEY) || "guest")!==scopedOwner){
    throw new Error("The signed-in account changed before intelligence state could be reconciled. Please retry.");
   }
   if((localStorage.getItem(KEY)||"")!==stateAtSync){
@@ -313,9 +329,15 @@ export function startIntelligenceSync(){
  return syncPromise;
 }
 if(typeof window!=="undefined"){
- // Keep account ownership aligned on every surface that imports Intelligence,
- // not only the watch page.
+ // Keep account and profile ownership aligned on every surface that imports Intelligence.
  void startIntelligenceSync();
+ window.addEventListener("vivid:profile-changed",event=>{
+  const uid=String(event.detail?.uid||"");
+  if(!uid)return;
+  ensureIntelligenceOwner(uid,event.detail?.profileId||null);
+  invalidateRecommendationCaches();
+  void user().then(u=>u?.uid===uid&&syncIntelligenceForUser(u)).catch(()=>{});
+ });
  window.addEventListener("online",()=>{
   void user().then(u=>u&&syncIntelligenceForUser(u)).catch(()=>{});
  });
