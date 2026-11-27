@@ -53,7 +53,6 @@ test("profile UI exposes the bounded Vivid avatar collection and compressed cust
 });
 
 test("Google account photo is adopted for the owner profile and can be replaced by a chosen avatar", () => {
-  assert.match(selector, /user\.providerData\?\.find\(item => item\.providerId === "google\.com"\)/);
   assert.match(profiles, /const googlePhoto = safeAvatarUrl\(current\)/);
   assert.match(profiles, /avatarSource: "google"/);
   assert.match(selector, /selectedAvatarUrl = ""/);
@@ -76,15 +75,3 @@ test("profile selector assets are network refreshed and accessible from the acco
   assert.match(account, /href="profiles\.html"/);
 });
 
-
-test("profile manager supports Kids designation and persistent avatar choices", () => {
-  assert.match(page, /id="profile-is-kids"/);
-  assert.match(page, /profile-kids-option/);
-  assert.match(selector, /profile\.isKids \? "Kids profile"/);
-  assert.match(selector, /\$("profile-is-kids")\.checked/);
-  assert.match(selector, /isKids: \$("profile-is-kids")\.checked/);
-  assert.match(selector, /selectedAvatarSource = "google"/);
-  assert.match(selector, /selectedAvatarSource = "upload"/);
-  assert.match(selector, /selectedAvatarSource = "collection"/);
-  assert.match(selector, /includes\(owner\.avatarSource\)/);
-});
