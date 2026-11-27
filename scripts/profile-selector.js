@@ -600,42 +600,72 @@ function showProfileLoadError(error) {
 }
 
 $("manage-toggle").disabled = true;
-onAuthStateChanged(auth,async currentUser => {
-  if (!currentUser || currentUser.isAnonymous) {
-    location.replace("login.html?returnTo=" + encodeURIComponent("profiles.html" + location.search));
+// Firebase can still be restoring persisted browser auth when the profile page
+// first executes (notably after an OAuth redirect in Safari). Never interpret
+// that unresolved state as a signed-out user: doing so sends the viewer back to
+// login, which then sends them straight back here and creates a redirect loop.
+async function startProfileAuthObserver() {
+  try {
+    if (typeof auth.authStateReady === "function") {
+      await withProfileTimeout(
+        auth.authStateReady(),
+        10_000,
+        "Your Vivid sign-in is still being restored. Please retry profile loading."
+      );
+    }
+  } catch (error) {
+    console.error("Vivid profile auth restoration did not finish:", error);
+    showProfileLoadError(error);
     return;
   }
-  if (user?.uid === currentUser.uid && profiles.length) { user = currentUser; return; }
-  user = currentUser;
-  if (switchingProfile) return;
-  $("manage-toggle").disabled = false;
-  try {
-    let resetProfileId = "";
+
+  onAuthStateChanged(auth, async currentUser => {
+    if (!currentUser || currentUser.isAnonymous) {
+      location.replace("login.html?returnTo=" + encodeURIComponent("profiles.html" + location.search));
+      return;
+    }
+    if (user?.uid === currentUser.uid && profiles.length) { user = currentUser; return; }
+    user = currentUser;
+    if (switchingProfile) return;
+    $("manage-toggle").disabled = false;
     try {
-      resetProfileId = sessionStorage.getItem("vivid:profile-pin-reset:v1") || "";
-      sessionStorage.removeItem("vivid:profile-pin-reset:v1");
-    } catch {}
-    if (resetProfileId) {
-      await resetProfilePin(resetProfileId);
-      say("The profile PIN was reset. You can choose the profile and set a new PIN.");
-    }
-    await refreshProfiles();
-    const tokenResult = await withProfileTimeout(
-      user.getIdTokenResult(),
-      8_000,
-      "Your Vivid sign-in is taking too long to verify. Check your connection and retry."
-    );
-    const active = profiles.find(item => item.id === String(tokenResult.claims.profileId || ""));
-    if (active?.hasPin) {
-      if (!await validateProfileSession(user, active.id)) {
-        await chooseProfile(active);
-        return;
+      let resetProfileId = "";
+      try {
+        resetProfileId = sessionStorage.getItem("vivid:profile-pin-reset:v1") || "";
+        sessionStorage.removeItem("vivid:profile-pin-reset:v1");
+      } catch {}
+      if (resetProfileId) {
+        await resetProfilePin(resetProfileId);
+        say("The profile PIN was reset. You can choose the profile and set a new PIN.");
       }
-      bindProfileActivity(active);
+      await refreshProfiles();
+      const tokenResult = await withProfileTimeout(
+        user.getIdTokenResult(),
+        8_000,
+        "Your Vivid sign-in is taking too long to verify. Check your connection and retry."
+      );
+      const active = profiles.find(item => item.id === String(tokenResult.claims.profileId || ""));
+      if (active?.hasPin) {
+        if (!await validateProfileSession(user, active.id)) {
+          await chooseProfile(active);
+          return;
+        }
+        bindProfileActivity(active);
+      }
+      if (active?.isKids) {
+        const owner = profiles.find(item => item.isOwner);
+        if (!owner?.hasPin) {
+          say("Kids Mode exit is locked. Sign out, sign back in as the account owner, then open the Main Profile and set its PIN.", true);
+          return;
+        }
+        say("Parent verification is required to leave Kids Mode.");
+        await chooseProfile(owner);
+      }
+    } catch(error) {
+      console.error("Vivid profile selector initialization failed:", error);
+      showProfileLoadError(error);
     }
-    if (active?.isKids) { const owner = profiles.find(item => item.isOwner); if (!owner?.hasPin) { say("Kids Mode exit is locked. Sign out, sign back in as the account owner, then open the Main Profile and set its PIN.",true); return; } say("Parent verification is required to leave Kids Mode."); await chooseProfile(owner); }
-  } catch(error) {
-    console.error("Vivid profile selector initialization failed:", error);
-    showProfileLoadError(error);
-  }
-});
+  });
+}
+
+void startProfileAuthObserver();
