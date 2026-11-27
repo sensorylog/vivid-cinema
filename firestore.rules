@@ -286,7 +286,7 @@ service cloud.firestore {
           && request.resource.data.unlockedAt is number
           && request.resource.data.unlockedAt >= 0
           && request.resource.data.schemaVersion == 1;
-        allow delete: if isOwner(userId);
+        allow delete: if false;
       }
 
       match /pushSubscriptions/{subscriptionId} {
