@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-import { hashProfilePin, verifyProfilePinHash } from "../api/profile-pin.js";
+import { hashProfilePin, verifyProfilePinHash, isAllowedOrigin } from "../api/profile-pin.js";
 
 const read = path => readFile(new URL(path, import.meta.url), "utf8");
 
@@ -18,6 +18,14 @@ test("profile PINs use salted PBKDF2 hashes and never store the raw four digits"
   assert.throws(() => hashProfilePin("12a4"));
   assert.throws(() => hashProfilePin("123"));
   assert.throws(() => hashProfilePin("12345"));
+});
+
+test("profile PIN API accepts only HTTPS previews belonging to the Vivid Cloudflare Pages project", () => {
+  assert.equal(isAllowedOrigin("https://vivid-cinema.pages.dev"), true);
+  assert.equal(isAllowedOrigin("https://feature-preview.vivid-cinema.pages.dev"), true);
+  assert.equal(isAllowedOrigin("https://feature-preview.vivid-cinema.pages.dev.evil.example"), false);
+  assert.equal(isAllowedOrigin("https://unrelated.pages.dev"), false);
+  assert.equal(isAllowedOrigin("http://feature-preview.vivid-cinema.pages.dev"), false);
 });
 
 test("profile PIN API enforces lockout, recent-auth recovery and server-issued sessions", async () => {
