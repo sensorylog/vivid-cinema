@@ -592,7 +592,8 @@ html.vivid-performance-legacy .offline-stat-card{background:#0d1320}
 
 /* Offline library rendering: keep card geometry stable while artwork arrives. */
 .offline-library-grid{align-items:stretch;contain:layout style}
-.offline-media-card,.offline-series-card{content-visibility:auto;contain-intrinsic-size:auto 270px}
+.offline-media-card{content-visibility:auto;contain-intrinsic-size:auto 190px}
+.offline-series-card{contain:layout style}
 .offline-poster{background-color:#172238;background-image:radial-gradient(ellipse at 50% 28%,rgba(126,145,190,.22),transparent 70%),linear-gradient(145deg,#26334d,#101725)}
 .offline-poster img{display:block;background:#172238}
 .offline-player-section{scroll-margin-top:18px}
