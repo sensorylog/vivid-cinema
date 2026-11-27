@@ -70,7 +70,7 @@ test("profile management API protects the owner profile and exposes only explici
   assert.match(service, /owner-profile-protected/);
   assert.match(service, /A Vivid account can have up to/);
   assert.match(service, /Access-Control-Allow-Methods/);
-  assert.match(rules, /match \/users\/{userId}\/profiles\/{profileId}/);
+  assert.ok(rules.includes("match /users/{userId}/profiles/{profileId}"));
 });
 
 test("profile metadata never stores PIN material in the public profile document schema", () => {
