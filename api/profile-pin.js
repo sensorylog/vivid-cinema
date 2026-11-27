@@ -20,6 +20,7 @@ const PIN_LOCKOUT_MS = 15 * 60 * 1000;
 const PIN_RATE_WINDOW_MS = 15 * 60 * 1000;
 const PIN_RATE_LIMIT = 30;
 const SESSION_TTL_MS = 8 * 60 * 60 * 1000;
+const SESSION_IDLE_TIMEOUT_MS = 30 * 60 * 1000;
 const RECENT_AUTH_MS = 5 * 60 * 1000;
 const PROFILE_ID_PATTERN = /^[A-Za-z0-9_-]{1,64}$/;
 const PIN_PATTERN = /^\d{4}$/;
@@ -218,6 +219,7 @@ async function createProfileSession(auth, profileReference, uid, profileId, pinH
     uid,
     profileId,
     createdAt: Timestamp.fromMillis(now),
+    lastActivityAt: Timestamp.fromMillis(now),
     expiresAt,
     revoked: false,
     ...(pinHash ? { pinHash } : {})
@@ -322,11 +324,15 @@ export default async function handler(req, res) {
       ]);
       const session = sessionSnapshot.data() || {};
       const expiresAt = Number(session.expiresAt?.toMillis?.() || 0);
+      const lastActivityAt = Number(session.lastActivityAt?.toMillis?.() || 0);
+      const now = Date.now();
       const pinMatches = !pinSnapshot.exists || session.pinHash === pinSnapshot.data()?.pinHash;
       if (!sessionSnapshot.exists || session.uid !== claims.uid || session.profileId !== profileId ||
-          session.revoked === true || expiresAt <= Date.now() || !pinMatches) {
+          session.revoked === true || expiresAt <= now ||
+          lastActivityAt <= now - SESSION_IDLE_TIMEOUT_MS || !pinMatches) {
         throw new ProfilePinError(401, "profile-session-expired", "Your profile session has expired. Unlock it again.");
       }
+      await sessionSnapshot.ref.update({ lastActivityAt: Timestamp.fromMillis(now) });
       return res.status(200).json({ ok: true, expiresAt });
     }
 
