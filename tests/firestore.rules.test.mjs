@@ -216,10 +216,12 @@ test("profile PIN sessions are enforced by Firestore and cannot be forged by loc
     });
     await setDoc(doc(admin, "users/pin-owner/profiles/kid-1/profileSessions/session-1"), {
       uid: "pin-owner", profileId: "kid-1", revoked: false, pinHash: "server-only-hash",
+      lastActivityAt: Timestamp.fromMillis(Date.now()),
       expiresAt: Timestamp.fromMillis(Date.now() + 60 * 60 * 1000)
     });
     await setDoc(doc(admin, "users/pin-owner/profiles/kid-1/profileSessions/expired"), {
       uid: "pin-owner", profileId: "kid-1", revoked: false, pinHash: "server-only-hash",
+      lastActivityAt: Timestamp.fromMillis(Date.now()),
       expiresAt: Timestamp.fromMillis(Date.now() - 60 * 1000)
     });
   });
