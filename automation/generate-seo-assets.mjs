@@ -90,6 +90,41 @@ const PUBLIC_PAGES = {
   }
 };
 
+const TMDB_IMAGE_BASE = "https://image.tmdb.org/t/p/w500";
+
+export async function buildMediaSitemapEntries(fetchImpl, apiKey, origin = DEFAULT_ORIGIN) {
+  if (!apiKey) return [];
+  const endpoints = [
+    ["trending/all/week", null],
+    ["movie/popular", "movie"],
+    ["tv/popular", "tv"]
+  ];
+  const pages = await Promise.all(endpoints.map(async ([endpoint, fixedType]) => {
+    const url = new URL("https://api.themoviedb.org/3/" + endpoint);
+    url.searchParams.set("api_key", apiKey);
+    url.searchParams.set("language", "en-US");
+    url.searchParams.set("page", "1");
+    try {
+      const response = await fetchImpl(url.href, { headers: { Accept: "application/json" } });
+      if (!response.ok) return [];
+      const payload = await response.json();
+      return (payload.results || []).map(item => ({
+        id: String(item.id || ""),
+        type: fixedType || (item.media_type === "tv" ? "tv" : item.media_type === "movie" ? "movie" : ""),
+        title: String(item.title || item.name || "").trim(),
+        image: item.backdrop_path || item.poster_path || ""
+      })).filter(item => /^\d{1,12}$/.test(item.id) && ["movie", "tv"].includes(item.type) && item.title);
+    } catch { return []; }
+  }));
+  const unique = new Map();
+  for (const item of pages.flat()) unique.set(item.type + ":" + item.id, item);
+  return [...unique.values()].map(item => ({
+    url: origin + "/title.html?id=" + encodeURIComponent(item.id) + "&type=" + item.type,
+    title: item.title,
+    image: item.image ? TMDB_IMAGE_BASE + item.image : ""
+  }));
+}
+
 const NOINDEX_PAGES = [
   "account.html", "auth.html", "auth-diagnostics.html", "login.html", "forgot-password.html",
   "verify-email.html", "library.html", "my-downloads.html", "for-you.html", "watch.html",
@@ -202,10 +237,25 @@ export async function generateSeoAssets(directory, siteOrigin = process.env.VIVI
     await writeFile(filePath, html, "utf8");
   }
 
+  let tmdbApiKey = process.env.VIVID_TMDB_API_KEY || "";
+  if (!tmdbApiKey) {
+    try {
+      const configSource = await readFile(path.resolve(directory, "../scripts/config.js"), "utf8");
+      tmdbApiKey = (configSource.match(/tmdbApiKey:\s*["']([^"']+)["']/) || [])[1] || "";
+    } catch {}
+  }
+  const mediaEntries = await buildMediaSitemapEntries(fetch, tmdbApiKey, origin);
+  const staticXml = sitemapEntries.map(url => "  <url><loc>" + url + "</loc></url>");
+  const mediaXml = mediaEntries.map(item =>
+    "  <url><loc>" + item.url + "</loc>" +
+    (item.image ? '<image:image><image:loc>' + item.image + "</image:loc><image:title>" + escapeAttribute(item.title) + "</image:title></image:image>" : "") +
+    "</url>"
+  );
   const sitemap = [
     '<?xml version="1.0" encoding="UTF-8"?>',
-    '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
-    ...sitemapEntries.map(url => "  <url><loc>" + url + "</loc></url>"),
+    '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">',
+    ...staticXml,
+    ...mediaXml,
     "</urlset>",
     ""
   ].join("\n");
@@ -213,5 +263,5 @@ export async function generateSeoAssets(directory, siteOrigin = process.env.VIVI
   await writeFile(path.join(directory, "robots.txt"),
     "User-agent: *\nAllow: /\n\nSitemap: " + origin + "/sitemap.xml\n", "utf8");
 
-  return { indexedPages: sitemapEntries.length, noindexPages: NOINDEX_PAGES.length, origin };
+  return { indexedPages: sitemapEntries.length, mediaPages: mediaEntries.length, noindexPages: NOINDEX_PAGES.length, origin };
 }
