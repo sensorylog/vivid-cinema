@@ -374,6 +374,109 @@ service cloud.firestore {
     }
 
 
+      // Viewing profiles are private to the signed-in account. Only the
+      // permanent owner profile can be bootstrapped by a client; additional
+      // profiles are created later through the trusted profile API.
+      function validViewingProfile(profileId) {
+        return request.resource.data.keys().hasOnly([
+          'id','name','avatarUrl','avatarId','isKids','maturityLevel',
+          'isOwner','schemaVersion','createdAt','updatedAt'
+        ])
+        && request.resource.data.keys().hasAll([
+          'name','avatarUrl','avatarId','isKids','maturityLevel',
+          'isOwner','schemaVersion'
+        ])
+        && request.resource.data.name is string
+        && request.resource.data.name.size() >= 1
+        && request.resource.data.name.size() <= 48
+        && request.resource.data.avatarUrl is string
+        && request.resource.data.avatarUrl.size() <= 2048
+        && (request.resource.data.avatarUrl == '' || request.resource.data.avatarUrl.matches('^https://.*'))
+        && request.resource.data.avatarId is string
+        && request.resource.data.avatarId.size() <= 80
+        && request.resource.data.isKids is bool
+        && request.resource.data.maturityLevel in ['adult','kids']
+        && request.resource.data.maturityLevel == (request.resource.data.isKids ? 'kids' : 'adult')
+        && request.resource.data.isOwner == (profileId == 'owner')
+        && request.resource.data.schemaVersion == 1
+        && (!request.resource.data.keys().hasAny(['createdAt']) || request.resource.data.createdAt is timestamp)
+        && (!request.resource.data.keys().hasAny(['updatedAt']) || request.resource.data.updatedAt is timestamp);
+      }
+
+      function hasViewingProfile(userId, profileId) {
+        return isOwner(userId)
+          && exists(/databases/$(database)/documents/users/$(userId)/profiles/$(profileId));
+      }
+
+      match /profiles/{profileId} {
+        allow get, list: if isOwner(userId);
+        allow create: if isOwner(userId) && profileId == 'owner' && validViewingProfile(profileId);
+        allow update: if isOwner(userId) && profileId == 'owner'
+          && resource.data.isOwner == true && validViewingProfile(profileId);
+        allow delete: if false;
+
+        match /migrations/{migrationId} {
+          allow get, list: if hasViewingProfile(userId, profileId);
+          allow create, update: if hasViewingProfile(userId, profileId)
+            && migrationId == 'account-data-to-owner-profile-v1'
+            && request.resource.data.keys().hasOnly([
+              'migrationId','status','schemaVersion','collections','completedAt'
+            ])
+            && request.resource.data.migrationId == migrationId
+            && request.resource.data.status in ['started','complete']
+            && request.resource.data.schemaVersion == 1
+            && request.resource.data.collections is map
+            && request.resource.data.collections.keys().hasOnly([
+              'favorites','watchLater','history','completed','progress',
+              'libraryTombstones','feedback','events','taste','animePreferences','achievements'
+            ]);
+          allow delete: if false;
+        }
+
+        match /{profileCollection}/{documentId} {
+          allow read: if hasViewingProfile(userId, profileId)
+            && profileCollection in [
+              'favorites','watchLater','history','completed','progress',
+              'libraryTombstones','feedback','events','taste','animePreferences','achievements'
+            ];
+          allow create, update: if hasViewingProfile(userId, profileId)
+            && (
+              (profileCollection in ['favorites','watchLater','history','completed']
+                && validContentId(documentId) && validLibraryData())
+              || (profileCollection == 'progress'
+                && validProgressId(documentId) && validProgressData())
+              || (profileCollection == 'libraryTombstones'
+                && validTombstoneData())
+              || (profileCollection == 'feedback'
+                && validFeedbackData())
+              || (profileCollection == 'events'
+                && validEventData())
+              || (profileCollection == 'taste'
+                && documentId == 'profile' && validTasteData())
+              || (profileCollection == 'animePreferences'
+                && documentId == 'default' && validAnimePreferences())
+              || (profileCollection == 'achievements'
+                && documentId in [
+                  'first-favorite','favorites-5','favorites-10','favorites-25',
+                  'queue-first','queue-5','queue-10',
+                  'history-first','history-5','history-10',
+                  'completion-first','completion-5','whole-picture',
+                  'feature-focus','series-scout','library-25'
+                ]
+                && request.resource.data.keys().hasOnly(['id','unlockedAt','schemaVersion'])
+                && request.resource.data.id == documentId
+                && request.resource.data.unlockedAt is number
+                && request.resource.data.unlockedAt >= 0
+                && request.resource.data.schemaVersion == 1)
+            );
+          allow delete: if hasViewingProfile(userId, profileId)
+            && profileCollection in [
+              'favorites','watchLater','history','completed','progress',
+              'libraryTombstones','feedback','events','taste','animePreferences','achievements'
+            ];
+        }
+      }
+
     // Public editorial content is written only by trusted ingestion/editor tooling.
     function verifiedMember() {
       return signedIn() && request.auth.token.email_verified == true;
