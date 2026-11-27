@@ -27,7 +27,6 @@ if (!auth.__ready) {
 `;
 
 const authSdkMock = `
-import { auth } from "/scripts/firebase.js";
 const listeners = new Set();
 export function onAuthStateChanged(_auth, callback) {
   listeners.add(callback);
