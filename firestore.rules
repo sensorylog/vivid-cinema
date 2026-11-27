@@ -440,7 +440,7 @@ service cloud.firestore {
         allow create: if isOwner(userId) && profileId == 'owner' && validViewingProfile(profileId);
         allow update: if isOwner(userId) && profileId == 'owner'
           && resource.data.isOwner == true && validViewingProfile(profileId);
-        allow delete: if isOwner(userId);
+        allow delete: if false;
 
         // Avatar bytes are read and written only by the authenticated profile API.
         match /avatar/{avatarId} {
