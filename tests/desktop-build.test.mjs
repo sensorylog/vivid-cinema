@@ -46,6 +46,14 @@ test("Windows installer and portable executable targets use Vivid branding", () 
   assert.ok(fs.existsSync(path.join(root, "icons", "vivid-icon.svg")));
   assert.ok(fs.existsSync(path.join(root, "icons", "vivid-icon-180.png")));
 });
+test("Windows desktop navigation exposes the dedicated Offline library tab", () => {
+  const shell = fs.readFileSync(path.join(root, "scripts", "app-shell.js"), "utf8");
+  assert.match(shell, /window\.vividDownloads\?\.available/);
+  assert.match(shell, /navLink\("my-downloads\.html", "bi-cloud-download", "Offline", page === "downloads-library"\)/);
+  const mobileNavigation = shell.slice(shell.indexOf("function syncMobileNavigation"), shell.indexOf("function syncNavigation"));
+  assert.doesNotMatch(mobileNavigation, /my-downloads\.html/, "Offline remains Windows desktop-only");
+});
+
 test("desktop runtime starts from the bundled local app and keeps hosted recovery available", () => {
   const main = fs.readFileSync(path.join(root, "desktop", "main.cjs"), "utf8");
   assert.match(main, /app\.getAppPath\(\)/);
