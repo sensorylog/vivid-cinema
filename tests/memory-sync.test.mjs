@@ -39,10 +39,16 @@ test("playback and intelligence cloud writes are bound to the active profile", (
   assert.match(intelligence, /\(localStorage\.getItem\(KEY\)\|\|""\)!==stateAtStart/);
 });
 
-test("auth listeners continue handling later account changes", () => {
-  assert.match(progress, /onAuthStateChanged/getActiveProfileId\\\(owner\\.uid\\\) === owner\\.profileId/g(auth, user => /getActiveProfileId\\\(owner\\.uid\\\) === owner\\.profileId/g{/getActiveProfileId\\\(owner\\.uid\\\) === owner\\.profileId/gs*ensureProgressOwner/getActiveProfileId\\\(owner\\.uid\\\) === owner\\.profileId/g(user/getActiveProfileId\\\(owner\\.uid\\\) === owner\\.profileId/g?/getActiveProfileId\\\(owner\\.uid\\\) === owner\\.profileId/g.uid /getActiveProfileId\\\(owner\\.uid\\\) === owner\\.profileId/g|/getActiveProfileId\\\(owner\\.uid\\\) === owner\\.profileId/g| null/getActiveProfileId\\\(owner\\.uid\\\) === owner\\.profileId/g)/);
-  assert.match(intelligence, /onAuthStateChanged/getActiveProfileId\\\(owner\\.uid\\\) === owner\\.profileId/g(auth,u=>/getActiveProfileId\\\(owner\\.uid\\\) === owner\\.profileId/g{/getActiveProfileId\\\(owner\\.uid\\\) === owner\\.profileId/gs*ensureIntelligenceOwner/getActiveProfileId\\\(owner\\.uid\\\) === owner\\.profileId/g(u/getActiveProfileId\\\(owner\\.uid\\\) === owner\\.profileId/g?/getActiveProfileId\\\(owner\\.uid\\\) === owner\\.profileId/g.uid /getActiveProfileId\\\(owner\\.uid\\\) === owner\\.profileId/g|/getActiveProfileId\\\(owner\\.uid\\\) === owner\\.profileId/g| null/getActiveProfileId\\\(owner\\.uid\\\) === owner\\.profileId/g)/);
-  assert.match(library, /onAuthStateChanged/getActiveProfileId\\\(owner\\.uid\\\) === owner\\.profileId/g(auth,user=>/getActiveProfileId\\\(owner\\.uid\\\) === owner\\.profileId/g{/getActiveProfileId\\\(owner\\.uid\\\) === owner\\.profileId/gs*ensureLocalOwner/getActiveProfileId\\\(owner\\.uid\\\) === owner\\.profileId/g(user/getActiveProfileId\\\(owner\\.uid\\\) === owner\\.profileId/g?/getActiveProfileId\\\(owner\\.uid\\\) === owner\\.profileId/g.uid /getActiveProfileId\\\(owner\\.uid\\\) === owner\\.profileId/g|/getActiveProfileId\\\(owner\\.uid\\\) === owner\\.profileId/g| null/getActiveProfileId\\\(owner\\.uid\\\) === owner\\.profileId/g)/);
+test("auth listeners continue handling later account and profile changes", () => {
+  assert.ok(progress.includes("onAuthStateChanged(auth, user => {"));
+  assert.ok(progress.includes("ensureProgressOwner(user?.uid || null)"));
+  assert.ok(intelligence.includes("onAuthStateChanged(auth,u=>{"));
+  assert.ok(intelligence.includes("ensureIntelligenceOwner(u?.uid || null)"));
+  assert.ok(library.includes("onAuthStateChanged(auth,user=>{"));
+  assert.ok(library.includes("ensureLocalOwner(user?.uid || null)"));
+  assert.match(progress, /vivid:profile-changed/);
+  assert.match(intelligence, /vivid:profile-changed/);
+  assert.match(library, /vivid:profile-changed/);
 });
 
 test("intelligence sync reports outcomes and retries when the device reconnects", () => {
