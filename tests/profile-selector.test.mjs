@@ -44,6 +44,16 @@ test("profile route validation does not turn transient service failures into sel
   assert.match(shell, /PROFILE_SESSION_REJECTED/);
 });
 
+test("profile selector waits for Firebase auth persistence before deciding a user is signed out", () => {
+  const startup = selector.slice(selector.indexOf("async function startProfileAuthObserver"), selector.indexOf("void startProfileAuthObserver();"));
+  assert.match(startup, /auth\.authStateReady\(\)/);
+  assert.match(startup, /withProfileTimeout/);
+  assert.match(startup, /Your Vivid sign-in is still being restored/);
+  assert.ok(startup.indexOf("auth.authStateReady()") < startup.indexOf("onAuthStateChanged(auth"),
+    "the signed-out redirect must not run before Firebase has restored persisted auth");
+  assert.match(startup, /showProfileLoadError\(error\)/);
+});
+
 test("profile startup bounds Firebase token refresh and gives users a retry instead of an endless spinner", () => {
   assert.match(manager, /Promise\.race\(\[request, timeout\]\)/);
   assert.match(manager, /user\.getIdToken\(\)/);
@@ -146,7 +156,7 @@ test("profile deletion protects the owner and requires an explicit confirmation"
 });
 
 test("profile selector assets are network refreshed and accessible from the account hub", () => {
-  assert.match(worker, /vivid-cinema-shell-v378/);
+  assert.match(worker, /vivid-cinema-shell-v379/);
   assert.match(worker, /profile-selector/);
   assert.match(worker, /profile-selector-watchdog/);
   assert.match(worker, /profiles\.html/);
