@@ -105,7 +105,7 @@ function renderProfiles() {
     name.textContent = profile.name;
     const meta = document.createElement("span");
     meta.className = "profile-card-meta";
-    meta.textContent = profile.isOwner ? "Account owner" : "Vivid profile";
+    meta.textContent = profile.isOwner ? "Account owner" : profile.isKids ? "Kids profile" : "Vivid profile";
     card.append(avatar,name,meta);
     card.addEventListener("click", () => manageMode ? openEditor(profile) : chooseProfile(profile));
     grid.append(card);
@@ -166,11 +166,12 @@ function openEditor(profile = null) {
   deleteButton.hidden = !profile || profile.isOwner;
   photoInput.value = "";
   photoPreview.hidden = !selectedAvatarData;
-  if (selectedAvatarData) {
+  if (selectedAvatarData || (selectedAvatarSource === "google" && selectedAvatarUrl)) {
     photoPreview.replaceChildren();
-    const img = document.createElement("img"); img.src = selectedAvatarData; img.alt = "";
-    const label = document.createElement("span"); label.textContent = "Custom photo selected";
+    const img = document.createElement("img"); img.src = selectedAvatarData || selectedAvatarUrl; img.alt = "";
+    const label = document.createElement("span"); label.textContent = selectedAvatarData ? "Custom photo selected" : "Google photo selected";
     photoPreview.append(img,label);
+    photoPreview.hidden = false;
   }
   $("editor-title").textContent = profile ? "Edit profile" : "Create a profile";
   saveButton.textContent = profile ? "Save changes" : "Create profile";
@@ -202,6 +203,17 @@ $("manage-toggle").addEventListener("click",() => {
   $("profile-subheading").textContent = manageMode ? "Edit names and avatars, or remove a profile." : "Choose your space. Your cinema journey stays yours.";
   renderProfiles();
 });
+$("profile-use-google").addEventListener("click",() => {
+  if (!googlePhoto) return;
+  selectedAvatarSource = "google";
+  selectedAvatarUrl = googlePhoto;
+  selectedAvatarData = "";
+  photoPreview.replaceChildren();
+  const img = document.createElement("img"); img.src = googlePhoto; img.alt = "";
+  const label = document.createElement("span"); label.textContent = "Google photo selected";
+  photoPreview.append(img,label);
+  photoPreview.hidden = false;
+});
 $("editor-close").addEventListener("click",() => dialog.close());
 $("profile-cancel").addEventListener("click",() => dialog.close());
 dialog.addEventListener("click",event => { if(event.target === dialog) dialog.close(); });
@@ -211,6 +223,7 @@ photoInput.addEventListener("change",async() => {
   try {
     selectedAvatarData = await compressProfileImage(file);
     selectedAvatarUrl = "";
+    selectedAvatarSource = "upload";
     selectedAvatarSource = "upload";
     photoPreview.replaceChildren();
     const img = document.createElement("img"); img.src = selectedAvatarData; img.alt = "";
