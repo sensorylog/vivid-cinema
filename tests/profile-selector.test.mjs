@@ -20,6 +20,8 @@ test("successful sign-in opens the Who's Watching profile selector by default", 
   assert.match(shell, /"login\.html", "forgot-password\.html"/);
   assert.match(page, /Who's watching\?/);
   assert.match(page, /id="profile-grid"/);
+  assert.match(page, /id="profile-signout"/);
+  assert.match(selector, /signOut\(auth\)/);
   assert.match(selector, /setActiveProfileId\(user\.uid, profile\.id\)/);
 });
 
@@ -48,6 +50,7 @@ test("profile UI exposes the bounded Vivid avatar collection and compressed cust
   assert.match(manager, /image\/webp/);
   assert.match(manager, /512/);
   assert.match(manager, /130 \* 1024/);
+  assert.match(manager, /40000000/);
 });
 
 test("Google account photo is adopted for the owner profile and can be replaced by a chosen avatar", () => {
@@ -68,7 +71,7 @@ test("profile deletion protects the owner and requires an explicit confirmation"
 });
 
 test("profile selector assets are network refreshed and accessible from the account hub", () => {
-  assert.match(worker, /vivid-cinema-shell-v367/);
+  assert.match(worker, /vivid-cinema-shell-v369/);
   assert.match(worker, /profile-selector/);
   assert.match(worker, /profiles\.html/);
   assert.match(account, /href="profiles\.html"/);
