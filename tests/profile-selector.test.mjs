@@ -107,5 +107,9 @@ test("profile selector assets are network refreshed and accessible from the acco
   assert.match(selector, /ArrowLeft/);
   assert.match(selector, /event\.key === "Home"/);
   assert.match(selector, /event\.key === "End"/);
+  assert.match(selector, /validateProfileSession/);
+  assert.match(selector, /timeupdate/);
+  assert.match(shell, /bindProfileActivity/);
+  assert.match(shell, /timeupdate/);
 });
 
