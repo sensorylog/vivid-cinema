@@ -73,7 +73,7 @@ function requestedPostAuthDestination(){
     const target=new URL(raw,window.location.origin);
     if(target.origin!==window.location.origin||!target.pathname.endsWith(".html"))return "";
     if(["/auth.html","/login.html","/forgot-password.html","/profiles.html"].includes(target.pathname))return "";
-    return target.pathname.replace(/^\\//,"")+target.search+target.hash;
+    return (target.pathname.startsWith("/") ? target.pathname.slice(1) : target.pathname)+target.search+target.hash;
   }catch{return "";}
 }
 function postAuthDestination(){
