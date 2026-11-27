@@ -146,9 +146,9 @@ test("corrupt or unavailable Android update storage fails safely", () => {
 });
 
 test("Android v1 update discovery is isolated from Windows desktop releases", () => {
-  assert.match(updater, /releases\\?per_page=100/);
-  assert.doesNotMatch(updater, /releases\\/latest/);
-  assert.match(updater, /selectLatestAndroidRelease/);
+  assert.ok(updater.includes("releases?per_page=100"));
+  assert.ok(!updater.includes("releases/latest"));
+  assert.ok(updater.includes("selectLatestAndroidRelease"));
   const selected = selectLatestAndroidRelease([
     { tag_name: "v1.0.99", published_at: "2026-11-27T00:00:00Z", assets: [] },
     { tag_name: "android-v1.0.0", published_at: "2026-11-27T01:00:00Z", assets: [] },
@@ -172,23 +172,23 @@ test("Android v1 update discovery is isolated from Windows desktop releases", ()
 });
 
 test("fresh Android v1 workflow builds and publishes an independent APK release", () => {
-  assert.match(independentWorkflow, /name: Vivid Cinema Android Direct Release/);
-  assert.match(independentWorkflow, /workflow_dispatch:/);
-  assert.match(independentWorkflow, /default: "1.0.0"/);
-  assert.match(independentWorkflow, /tag="android-v\\$ANDROID_VERSION_INPUT"/);
-  assert.match(independentWorkflow, /VIVID_ANDROID_VERSION_CODE/);
-  assert.match(independentWorkflow, /build_number=\\$\\(\\(2000000 \\+ GITHUB_RUN_NUMBER\\)\\)/);
-  assert.match(independentWorkflow, /make_latest=false/);
-  assert.match(independentWorkflow, /Vivid-Cinema-Debug\\.keystore/);
-  assert.match(independentWorkflow, /Refusing to generate a new key/);
-  assert.match(independentWorkflow, /legacy installed apps/);
-  assert.doesNotMatch(independentWorkflow, /if:\\s*false/);
-  assert.match(configure, /process\\.env\\.VIVID_ANDROID_VERSION \\|\\| packageJson\\.version/);
+  assert.ok(independentWorkflow.includes("name: Vivid Cinema Android Direct Release"));
+  assert.ok(independentWorkflow.includes("workflow_dispatch:"));
+  assert.ok(independentWorkflow.includes('default: "1.0.0"'));
+  assert.ok(independentWorkflow.includes('tag="android-v$ANDROID_VERSION_INPUT"'));
+  assert.ok(independentWorkflow.includes("VIVID_ANDROID_VERSION_CODE"));
+  assert.ok(independentWorkflow.includes("build_number=$((2000000 + GITHUB_RUN_NUMBER))"));
+  assert.ok(independentWorkflow.includes("make_latest=false"));
+  assert.ok(independentWorkflow.includes("Vivid-Cinema-Debug.keystore"));
+  assert.ok(independentWorkflow.includes("Refusing to generate a new key"));
+  assert.ok(independentWorkflow.includes("legacy installed apps"));
+  assert.ok(!independentWorkflow.includes("if: false"));
+  assert.ok(configure.includes("process.env.VIVID_ANDROID_VERSION || packageJson.version"));
 });
 
 test("Android download page resolves Android v1 independently of the Windows release", () => {
-  assert.match(downloads, /ANDROID_RELEASES_API/);
-  assert.match(downloads, /selectLatestAndroidRelease/);
-  assert.match(downloads, /androidVersionFromTag/);
-  assert.match(downloads, /Windows version/);
+  assert.ok(downloads.includes("ANDROID_RELEASES_API"));
+  assert.ok(downloads.includes("selectLatestAndroidRelease"));
+  assert.ok(downloads.includes("androidVersionFromTag"));
+  assert.ok(downloads.includes("Windows version"));
 });
