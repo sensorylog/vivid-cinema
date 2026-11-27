@@ -487,8 +487,16 @@ pinSettingsForm.addEventListener("submit", async event => {
     const result = await setProfilePin(editingId, pin, currentPin, openSession);
     if (result.customToken) {
       switchingProfile = true;
-      try { user = (await signInWithCustomToken(auth, result.customToken)).user; }
-      finally { switchingProfile = false; }
+      try {
+        user = (await signInWithCustomToken(auth, result.customToken)).user;
+        const claims = await user.getIdTokenResult();
+        if (claims.claims.profileId === editingId && claims.claims.profileSessionId) {
+          sessionStorage.setItem("vivid:profile-session:v1:" + user.uid, JSON.stringify({
+            profileId: editingId,
+            sessionId: claims.claims.profileSessionId
+          }));
+        }
+      } finally { switchingProfile = false; }
     }
     await refreshProfiles();
     const updated = profiles.find(item => item.id === editingId);
