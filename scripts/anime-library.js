@@ -15,6 +15,8 @@ function normalizeItem(item = {}) {
   if (!/^\d+$/.test(id) || !MEDIA_TYPES.has(mediaType)) {
     throw new TypeError("Anime library items require a numeric TMDB ID and movie or tv media type.");
   }
+  const sourceGenres = Array.isArray(item.genre_ids) ? item.genre_ids : Array.isArray(item.genres) ? item.genres.map(genre => genre?.id) : [];
+  const genreIds = [...new Set(sourceGenres.map(Number).filter(value => Number.isInteger(value) && value > 0 && value <= 200000))].slice(0, 20);
   return {
     id,
     media_type: mediaType,
@@ -22,6 +24,9 @@ function normalizeItem(item = {}) {
     year: String(item.year || "").slice(0, 10),
     poster_path: String(item.poster_path || "").slice(0, 500),
     backdrop_path: String(item.backdrop_path || "").slice(0, 500),
+    ...(genreIds.length ? { genre_ids: genreIds } : {}),
+    ...(typeof item.adult === "boolean" ? { adult: item.adult } : {}),
+    ...(typeof item.certification === "string" ? { certification: item.certification.slice(0, 16) } : {}),
     isAnime: true
   };
 }
