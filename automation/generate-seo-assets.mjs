@@ -203,8 +203,8 @@ function injectDiscoveryLinks(html) {
     '<a href="/offline-downloads.html">Offline movie downloads</a>' +
     '</nav>';
   const stylesheet = '<link rel="stylesheet" href="/styles/vivid-search-guide.css">';
-  if (!html.includes('vivid-search-guide.css')) html = html.replace(/<\\/head>/i, stylesheet + '</head>');
-  return html.replace(/<footer\\b/i, links + '<footer');
+  if (!html.includes('vivid-search-guide.css')) html = html.replace(/<\/head>/i, stylesheet + '</head>');
+  return html.replace(/<footer\b/i, links + '<footer');
 }
 
 function addStructuredData(html, schema) {
