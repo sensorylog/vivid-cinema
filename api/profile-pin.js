@@ -221,9 +221,11 @@ async function createProfileSession(auth, profileReference, uid, profileId, pinH
     revoked: false,
     ...(pinHash ? { pinHash } : {})
   });
+  const profileSnapshot = await profileReference.get();
   const customToken = await auth.createCustomToken(uid, {
     profileId,
-    profileSessionId: sessionId
+    profileSessionId: sessionId,
+    isKids: profileSnapshot.data()?.isKids === true
   });
   return { customToken, sessionExpiresAt: expiresAt.toMillis() };
 }
@@ -304,7 +306,7 @@ export default async function handler(req, res) {
       if (pinSnapshot.exists) {
         throw new ProfilePinError(423, "pin-required", "This profile is PIN protected. Enter its PIN to continue.");
       }
-      const customToken = await auth.createCustomToken(claims.uid, { profileId });
+      const customToken = await auth.createCustomToken(claims.uid, { profileId, isKids: targetSnapshot.data()?.isKids === true });
       return res.status(200).json({ ok: true, customToken });
     }
 
