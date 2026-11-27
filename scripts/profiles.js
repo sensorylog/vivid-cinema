@@ -111,7 +111,7 @@ export async function ensureOwnerProfile(user = null) {
       throw new Error("The owner profile has an unsupported or invalid profile record.");
     }
     const googlePhoto = safeAvatarUrl(current);
-    if (googlePhoto && !existing.avatarUrl && existing.avatarSource !== "collection") {
+    if (googlePhoto && !existing.avatarUrl && !["collection","upload"].includes(existing.avatarSource)) {
       const timestamp = serverTimestamp();
       await setDoc(reference, { avatarUrl: googlePhoto, avatarSource: "google", updatedAt: timestamp }, { merge: true });
       return { id: OWNER_PROFILE_ID, ...existing, avatarUrl: googlePhoto, avatarSource: "google", created: false };
@@ -122,7 +122,7 @@ export async function ensureOwnerProfile(user = null) {
   const profile = normalizeProfile(OWNER_PROFILE_ID, {
     name: current.displayName || current.email?.split("@")[0] || "Main Profile",
     avatarUrl: safeAvatarUrl(current),
-    avatarSource: safeAvatarUrl(current) ? "google" : "collection"
+    avatarSource: safeAvatarUrl(current) ? "google" : "default"
   });
   const timestamp = serverTimestamp();
   await setDoc(reference, {
