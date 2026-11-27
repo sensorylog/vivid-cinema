@@ -2,6 +2,7 @@ import { tmdbApi } from "./tmdb.js";
 import { getImageUrl, getMediaUrl, normalizeMedia } from "./media.js";
 import { FREE_ANIME_PREVIEWS } from "./anime-free-policy.js";
 import { escapeHtml } from "./utils.js";
+import { filterAllowedTitles } from "./parental-controls.js";
 
 const grid = document.getElementById("anime-grid");
 const status = document.getElementById("anime-status");
@@ -30,9 +31,12 @@ async function load() {
         return null;
       }
     }));
-    const items = results.filter(Boolean);
-    if (grid) grid.innerHTML = items.map(card).join("") || '<div class="vivid-anime-empty">Free anime previews are temporarily unavailable. Please try again later.</div>';
-    if (status) status.textContent = "Six selected series · one free episode per title. Unlock the full catalogue with Vivid Anime Premium.";
+    const resolved = results.filter(Boolean);
+    const items = await filterAllowedTitles(resolved);
+    if (grid) grid.innerHTML = items.map(card).join("") || '<div class="vivid-anime-empty">No free anime previews match this profile’s viewing limits.</div>';
+    if (status) status.textContent = items.length
+      ? items.length + " available free anime previews · one free episode per title. Unlock the full catalogue with Vivid Anime Premium."
+      : resolved.length ? "No free previews match this profile’s viewing limits." : "Free anime previews are temporarily unavailable.";
   } catch (error) {
     if (grid) grid.innerHTML = '<div class="vivid-anime-empty">Anime previews are temporarily unavailable. Please try again later.</div>';
     if (status) status.textContent = "Free anime is temporarily unavailable.";
