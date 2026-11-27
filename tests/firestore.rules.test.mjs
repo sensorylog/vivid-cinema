@@ -215,11 +215,11 @@ test("profile PIN sessions are enforced by Firestore and cannot be forged by loc
       pinHash: "server-only-hash", pinSalt: "server-only-salt", iterations: 310000
     });
     await setDoc(doc(admin, "users/pin-owner/profiles/kid-1/profileSessions/session-1"), {
-      uid: "pin-owner", profileId: "kid-1", revoked: false,
+      uid: "pin-owner", profileId: "kid-1", revoked: false, pinHash: "server-only-hash",
       expiresAt: Timestamp.fromMillis(Date.now() + 60 * 60 * 1000)
     });
     await setDoc(doc(admin, "users/pin-owner/profiles/kid-1/profileSessions/expired"), {
-      uid: "pin-owner", profileId: "kid-1", revoked: false,
+      uid: "pin-owner", profileId: "kid-1", revoked: false, pinHash: "server-only-hash",
       expiresAt: Timestamp.fromMillis(Date.now() - 60 * 1000)
     });
   });
@@ -290,7 +290,7 @@ test("unlocked profiles remain isolated by signed profile identity and legacy da
       pinHash: "server-only", pinSalt: "server-only", iterations: 310000
     });
     await setDoc(doc(admin, "users/profile-scope/profiles/owner/profileSessions/owner-session"), {
-      uid: "profile-scope", profileId: "owner", revoked: false,
+      uid: "profile-scope", profileId: "owner", revoked: false, pinHash: "server-only",
       expiresAt: Timestamp.fromMillis(Date.now() + 60 * 60 * 1000)
     });
   });
