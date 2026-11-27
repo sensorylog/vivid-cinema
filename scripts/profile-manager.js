@@ -56,6 +56,7 @@ export async function requestProfilePin(action, profileId, details = {}) {
   return result;
 }
 
+export const selectProfile = profileId => requestProfilePin("select", profileId);
 export const verifyProfilePin = (profileId, pin) => requestProfilePin("verify", profileId, { pin });
 export const setProfilePin = (profileId, pin, currentPin = "", openSession = false) =>
   requestProfilePin("set", profileId, { pin, currentPin, openSession });
