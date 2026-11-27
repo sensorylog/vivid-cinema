@@ -75,7 +75,10 @@ function render(jobs) {
   }).join("");
 }
 async function switchOwner(user) {
-  if(user?.uid)await initializeProfileFoundation(user);
+  if(user?.uid){
+    try{await initializeProfileFoundation(user);}
+    catch(error){console.warn("Vivid profile migration is unavailable while opening offline metadata:",error);}
+  }
   const profileId=user?.uid?getActiveProfileId(user.uid):"guest";
   const owner=user?.uid?String(user.uid)+"::"+String(profileId):"guest";
   if(owner===activeOwner)return;
