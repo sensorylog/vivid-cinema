@@ -226,3 +226,10 @@ test("profile identities use the original cinematic avatar artwork and mobile sy
   assert.match(page, /phase7-profile-recovery-1/);
   assert.match(accountStyles, /\.account-page \.account-sync \.vivid-button\{flex:1 1 100%;width:100%/);
 });
+
+test("profile selector page is exempt from the protected-page overlay even on extensionless routes", () => {
+  assert.match(shell, /document\.body\?\.classList\.contains\("profile-selector-page"\)/);
+  assert.match(shell, /document\.body\?\.dataset\?\.vividPage === "profiles"/);
+  assert.match(shell, /\["profiles", "profiles\.html"\]\.includes\(page\)/);
+  assert.match(shell, /getElementById\("vivid-profile-gate-notice"\)\?\.remove\(\)/);
+});
