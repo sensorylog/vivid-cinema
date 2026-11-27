@@ -61,7 +61,7 @@ export function normalizeAvatarData(value) {
 
 export function normalizeProfile(profileId, data = {}) {
   const id = normalizeProfileId(profileId);
-  const isKids = data.isKids === true;
+  const isKids = id !== OWNER_PROFILE_ID && data.isKids === true;
   return {
     id,
     name: normalizeProfileName(data.name, id === OWNER_PROFILE_ID ? "Main Profile" : "Vivid Profile"),
