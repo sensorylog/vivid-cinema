@@ -96,7 +96,7 @@ const NOINDEX_PAGES = [
   "watch-rooms.html", "watch-room-cinema.html", "offline.html", "moderator.html",
   "african-stories-admin.html", "african-stories-submit.html", "african-stories-watch.html",
   "anime-premium-admin.html", "anime-premium-library.html", "anime-premium-return.html",
-  "donation-success.html", "african-stories.html", "news-story.html", "title.html", "person.html",
+  "donation-success.html", "african-stories.html", "news-story.html",
   "live.html", "search.html"
 ];
 
@@ -187,7 +187,7 @@ export async function generateSeoAssets(directory, siteOrigin = process.env.VIVI
           "url": canonical,
           "isPartOf": { "@type": "WebSite", "name": "Vivid Cinema", "url": origin + "/" }
         };
-    html = addStructuredData(html, schema);
+    if (!(filename === "index.html" && html.includes('application/ld+json'))) html = addStructuredData(html, schema);
     await writeFile(filePath, html, "utf8");
     sitemapEntries.push(canonical);
   }
