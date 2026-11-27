@@ -220,6 +220,13 @@ jobs:
       - name: Build Windows installer and portable executable
         if: steps.release-decision.outputs.publish != 'true'
         run: npm run desktop:dist
+      - name: Report Windows binary sizes
+        if: steps.release-decision.outputs.publish != 'true'
+        shell: pwsh
+        run: |
+          $artifacts = Get-ChildItem dist-desktop -File | Where-Object { $_.Name -like "Vivid-Cinema-Setup-*.exe" -or $_.Name -like "Vivid-Cinema-Portable-*.exe" }
+          if (!$artifacts) { throw "Windows installer and portable binaries were not produced." }
+          $artifacts | ForEach-Object { Write-Host ("{0}: {1:N2} MiB ({2} bytes)" -f $_.Name, ($_.Length / 1MB), $_.Length) }
       - name: Upload Windows build artifacts
         if: steps.release-decision.outputs.publish != 'true'
         uses: actions/upload-artifact@v7
