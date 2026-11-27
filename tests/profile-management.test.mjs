@@ -43,6 +43,7 @@ test("profile normalization validates identity, Kids type, HTTPS photos and comp
   assert.equal(profile.avatarSource, "upload");
   assert.equal(normalizeProfile("owner", { name: "Main", avatarUrl: "https://example.com/photo.png" }).avatarSource, "google");
   assert.equal(normalizeProfile("owner", { name: "Main", avatarSource: "collection" }).avatarSource, "collection");
+  assert.equal(normalizeProfile("owner", { name: "Main" }).avatarSource, "default");
   assert.equal(profile.isKids, true);
   assert.equal(profile.maturityLevel, "kids");
   assert.equal(profile.isOwner, false);
