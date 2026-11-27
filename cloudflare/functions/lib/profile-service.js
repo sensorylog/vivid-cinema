@@ -85,13 +85,17 @@ function cleanProfileInput(profileId, body, existing = {}) {
   if (!AVATAR_IDS.has(String(avatarId || ""))) throw new AnimePremiumError(400, "invalid-avatar", "Choose an avatar from the Vivid collection.");
   const avatarUrl = body.avatarUrl == null ? String(existing.avatarUrl || "") : String(body.avatarUrl);
   const avatarData = body.avatarData == null ? String(existing.avatarData || "") : String(body.avatarData);
+  const avatarSource = body.avatarSource == null ? String(existing.avatarSource || (avatarData ? "upload" : avatarUrl ? "google" : "collection")) : String(body.avatarSource);
   const isKids = body.isKids == null ? existing.isKids === true : body.isKids === true;
-  const normalized = normalizeProfile(profileId, { name, avatarId, avatarUrl, avatarData, isKids });
+  const normalized = normalizeProfile(profileId, { name, avatarId, avatarUrl, avatarData, avatarSource, isKids });
   if (!normalized.name || normalized.avatarId !== avatarId) {
     throw new AnimePremiumError(400, "invalid-profile", "The profile details are not valid.");
   }
   if (avatarUrl && !normalized.avatarUrl) throw new AnimePremiumError(400, "invalid-avatar-url", "Profile photo URLs must use secure HTTPS.");
   if (avatarData && !normalized.avatarData) throw new AnimePremiumError(400, "invalid-avatar-image", "Upload a valid compressed WebP image.");
+  if (normalized.avatarSource !== avatarSource || (avatarSource === "upload" && !avatarData) || (avatarSource === "google" && !avatarUrl)) {
+    throw new AnimePremiumError(400, "invalid-avatar-source", "Choose a valid Vivid avatar or photo.");
+  }
   return normalized;
 }
 
