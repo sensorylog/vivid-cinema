@@ -1,4 +1,4 @@
-import { switchLocalOwner } from "./local-owner.js";
+import { seedLegacyOwnerProfileSnapshot, switchLocalOwner } from "./local-owner.js";
 import { getActiveProfileId, initializeProfileFoundation } from "./profiles.js";
 
 const STORAGE_KEY="vivid:library:v2";
@@ -10,6 +10,16 @@ let localMutationRevision=0;
 function ensureLocalOwner(uid, requestedProfileId = null){
   const profileId = uid ? (requestedProfileId || getActiveProfileId(uid)) : "guest";
   const scopedOwner = uid ? String(uid) + "::" + String(profileId) : null;
+  if(uid){
+    seedLegacyOwnerProfileSnapshot({
+      storage:localStorage,
+      ownerKey:LOCAL_OWNER_KEY,
+      activeKeys:[STORAGE_KEY,TOMBSTONE_STORAGE_KEY],
+      previousOwner:String(uid),
+      targetOwner:scopedOwner,
+      emptyValues:{[STORAGE_KEY]:JSON.stringify(emptyLibrary()),[TOMBSTONE_STORAGE_KEY]:"{}"}
+    });
+  }
   try{
     const result=switchLocalOwner({
       storage:localStorage,
