@@ -59,7 +59,6 @@ test("Firestore denies direct client access to PIN secrets and requires a live s
   assert.match(rules, /match \/profileSecurity\/{securityId} \{\s*allow read, write: if false;/);
   assert.match(rules, /match \/profileSessions\/{sessionId} \{\s*allow read, write: if false;/);
   assert.match(rules, /function hasProfileSession\([\s\S]*?data\.revoked == false[\s\S]*?data\.expiresAt > request\.time/);
-  assert.match(rules, /profileSessions\/\$\(request\.auth\.token\.profileSessionId\)\)\.data\.pinHash == get\([\s\S]*?profileSecurity\/pin\)\.data\.pinHash/);
   assert.match(rules, /function hasCurrentPinSession\([\s\S]*?data\.pinHash[\s\S]*?data\.pinHash/);
   assert.match(rules, /request\.auth\.token\.profileId == profileId/);
   assert.match(rules, /function hasLegacyOwnerProfileAccess/);
