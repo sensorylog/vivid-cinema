@@ -85,6 +85,18 @@ function requireSignedInUser(user, auth) {
   return current;
 }
 
+
+function stableData(value) {
+  if (value == null || typeof value !== "object") return value;
+  if (typeof value.toMillis === "function") return { __timestamp: value.toMillis() };
+  if (value instanceof Date) return { __timestamp: value.getTime() };
+  if (Array.isArray(value)) return value.map(stableData);
+  return Object.fromEntries(Object.keys(value).sort().map(key => [key, stableData(value[key])]));
+}
+function sameData(left, right) {
+  return JSON.stringify(stableData(left)) === JSON.stringify(stableData(right));
+}
+
 function safeAvatarUrl(user) {
   const candidate = String(user?.photoURL || "").trim();
   if (!candidate) return "";
@@ -193,16 +205,19 @@ export async function migrateLegacyProfileData(user = null) {
     for (let offset = 0; offset < pending.length; offset += 350) {
       const batch = writeBatch(db);
       for (const item of pending.slice(offset, offset + 350)) {
-        batch.set(doc(db, "users", current.uid, "profiles", OWNER_PROFILE_ID, collectionName, item.id), item.data, { merge: true });
+        batch.set(doc(db, "users", current.uid, "profiles", OWNER_PROFILE_ID, collectionName, item.id), item.data);
       }
       await batch.commit();
     }
 
     const verified = await getDocsFromServer(destinationRef);
-    const verifiedIds = new Set(verified.docs.map(item => item.id));
-    const missing = source.docs.filter(item => !verifiedIds.has(item.id));
-    if (missing.length) {
-      throw new Error("Profile migration verification failed for " + collectionName + ": " + missing.length + " records are missing. Original data remains untouched.");
+    const verifiedById = new Map(verified.docs.map(item => [item.id, item.data()]));
+    const missing = source.docs.filter(item => !verifiedById.has(item.id));
+    const mismatched = pending.filter(item => !sameData(item.data, verifiedById.get(item.id)));
+    if (missing.length || mismatched.length) {
+      throw new Error("Profile migration verification failed for " + collectionName +
+        ": " + missing.length + " records are missing and " + mismatched.length +
+        " copied records differ. Original data remains untouched.");
     }
     summary[collectionName] = { sourceCount: source.size, destinationCount: verified.size, copiedCount: pending.length };
   }
