@@ -235,7 +235,7 @@ function render(){
   const completed=completedJobs.length;
   const active=visibleJobs.filter(x=>["downloading","queued","verifying"].includes(x.status)).length;
   const savedBytes=completedJobs.reduce((sum,job)=>sum+(Array.isArray(job.files)&&job.files.length?job.files.reduce((fileSum,file)=>fileSum+Math.max(0,Number(file.size)||0),0):Math.max(0,Number(job.total)||0)),0);
-  byId("offline-total").textContent=String(jobs.length);
+  byId("offline-total").textContent=String(visibleJobs.length);
   byId("offline-completed").textContent=String(completed);
   byId("offline-active").textContent=String(active);
   updateAggregateSpeed();
