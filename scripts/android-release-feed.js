@@ -1,4 +1,4 @@
-const ANDROID_TAG = /^android-v(\\d+)\\.(\\d+)\\.(\\d+)$/i;
+const ANDROID_TAG = /^android-v(\d+)\.(\d+)\.(\d+)$/i;
 
 function versionParts(tag) {
   const match = ANDROID_TAG.exec(String(tag || ""));
@@ -25,7 +25,7 @@ export function latestAndroidBuild(assets) {
   if (!Array.isArray(assets)) return null;
   const apk = assets.find(asset => asset?.name === "Vivid-Cinema-Android.apk");
   const metadata = assets.map(asset => {
-    const match = /^Vivid-Cinema-Android-build-(\\d+)\\.json$/i.exec(asset?.name || "");
+    const match = /^Vivid-Cinema-Android-build-(\d+)\.json$/i.exec(asset?.name || "");
     return match ? { ...asset, build: Number(match[1]) } : null;
   }).filter(asset => asset && Number.isSafeInteger(asset.build) && asset.build > 0)
     .sort((a, b) => b.build - a.build)[0];
