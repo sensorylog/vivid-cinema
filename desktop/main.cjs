@@ -162,6 +162,7 @@ let localOrigin;
 let downloadEngine;
 let downloadEngineOwner = null;
 let activeDownloadOwner = "guest";
+let downloadOwnerSwitchQueue = Promise.resolve();
 let transcodeEngine;
 let transcodeEngineStartPromise = null;
 let autoUpdater = null;
@@ -211,19 +212,32 @@ function ensureDownloadEngine() {
   return downloadEngine;
 }
 
-async function setDownloadOwner(value) {
+function setDownloadOwner(value) {
   const nextOwner = normalizeDownloadOwner(value);
-  if (nextOwner === activeDownloadOwner && downloadEngineOwner === nextOwner && downloadEngine) {
-    await downloadEngine.ready;
+  const task = downloadOwnerSwitchQueue.catch(() => {}).then(async () => {
+    if (nextOwner === activeDownloadOwner && downloadEngineOwner === nextOwner && downloadEngine) {
+      await downloadEngine.ready;
+      return { ownerId: nextOwner };
+    }
+    const previousOwner = activeDownloadOwner;
+    const previousEngine = downloadEngine;
+    // Change the active key before awaiting shutdown so concurrent IPC calls
+    // cannot keep using the outgoing profile's engine.
+    activeDownloadOwner = nextOwner;
+    try {
+      if (previousEngine) await previousEngine.shutdown();
+    } catch (error) {
+      activeDownloadOwner = previousOwner;
+      throw error;
+    }
+    downloadEngine = null;
+    downloadEngineOwner = null;
+    const engine = ensureDownloadEngine();
+    await engine.ready;
     return { ownerId: nextOwner };
-  }
-  if (downloadEngine) await downloadEngine.shutdown();
-  downloadEngine = null;
-  downloadEngineOwner = null;
-  activeDownloadOwner = nextOwner;
-  const engine = ensureDownloadEngine();
-  await engine.ready;
-  return { ownerId: nextOwner };
+  });
+  downloadOwnerSwitchQueue = task.catch(() => {});
+  return task;
 }
 
 async function ensureTranscodeEngine() {
