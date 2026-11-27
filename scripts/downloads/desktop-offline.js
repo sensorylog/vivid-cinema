@@ -1287,6 +1287,9 @@ async function releaseLocalMedia(){
 async function playLocalFile(){
   const request=++playbackRequest;
   const cleanup=releaseLocalMedia();
+  const section=byId("offline-player-section");
+  section.hidden=false;section.classList.remove("controls-hidden");
+  byId("offline-player-title").textContent="Opening local video";
   setPlayerLoading(true,"Opening local video","Checking the file and preparing playback…");
   const file=await engine.openLocalTranscode();
   if(!file){setPlayerLoading(false);return;}
@@ -1304,7 +1307,7 @@ async function playLocalFile(){
   player.controls=false;byId("offline-custom-controls").hidden=false;
   playerSection.classList.remove("controls-hidden");playerSection.hidden=false;
   playerSection.scrollIntoView({behavior:"smooth",block:"start"});
-  try{await player.play();setMessage("Opened "+file.fileName+" with Vivid compatibility playback.");}catch{setMessage("Your video is ready. Press Play in the Vivid player to begin.");}
+  try{await player.play();setMessage("Opened "+file.fileName+" with Vivid compatibility playback.");}catch{setPlayerLoading(false);setMessage("Your video is ready. Press Play in the Vivid player to begin.");}
   syncPlayerControls();
 }
 byId("offline-open-local-file").addEventListener("click",async event=>{
