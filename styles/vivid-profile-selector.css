@@ -59,3 +59,8 @@
 @media(max-width:520px){.profile-security-row{align-items:flex-start;flex-direction:column}.profile-security-row button{align-self:flex-end}}
 
 .profile-kids-panel{margin:20px 0;padding:16px;border:1px solid rgba(255,255,255,.12);border-radius:18px;background:rgba(255,255,255,.035)}.profile-kids-toggle{display:flex;align-items:center;gap:12px;cursor:pointer}.profile-kids-toggle input{width:20px;height:20px;accent-color:#8db7ff}.profile-kids-toggle span{display:grid;gap:4px}.profile-kids-toggle small,.profile-kids-settings small{color:var(--vivid-muted,#a8adba);font-size:.82rem}.profile-kids-settings{display:grid;gap:12px;margin-top:16px}.profile-kids-settings[hidden]{display:none}.profile-kids-settings select[multiple]{min-height:112px}.profile-kids-note{margin:0;color:#b8d7ff;font-size:.84rem}.vivid-parental-block{max-width:680px;margin:12vh auto;padding:36px 24px;text-align:center;border:1px solid rgba(255,255,255,.14);border-radius:24px;background:rgba(13,17,25,.94);color:#fff}.vivid-parental-block h1{margin:20px 0 10px}.vivid-parental-block p{color:#c0c6d2;line-height:1.6}
+
+
+/* Clear keyboard focus without adding visual noise to pointer navigation. */
+.profile-selector-page :is(a,button,input,select,textarea):not(.profile-card):focus-visible{outline:3px solid #dce5ff;outline-offset:3px}
+.profile-selector-page .avatar-choice:focus-visible{outline:3px solid #dce5ff;outline-offset:3px}
