@@ -117,7 +117,7 @@ export function verifyProfilePinHash(pin, record) {
 function isRecentAccountAuth(claims) {
   const authTime = Number(claims?.auth_time || 0) * 1000;
   const provider = String(claims?.firebase?.sign_in_provider || "");
-  return authTime > 0 && Date.now() - authTime <= RECENT_AUTH_MS && provider !== "custom" && provider !== "anonymous";
+  return authTime > 0 && Date.now() - authTime <= RECENT_AUTH_MS && claims?.email_verified === true && provider !== "custom" && provider !== "anonymous";
 }
 
 async function consumeRateLimit(db, uid, profileId) {
@@ -248,6 +248,9 @@ export default async function handler(req, res) {
   if (!setCors(req, res)) return sendError(res, 403, "origin-not-allowed", "This origin is not allowed.");
 
   try {
+    if (Number(req.headers["content-length"] || 0) > 4096) {
+      throw new ProfilePinError(413, "request-too-large", "The profile security request is too large.");
+    }
     const authorization = req.headers.authorization || "";
     const match = authorization.match(/^Bearer\s+(.+)$/i);
     if (!match) throw new ProfilePinError(401, "unauthenticated", "Sign in to manage profile security.");
