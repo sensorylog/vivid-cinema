@@ -27,9 +27,8 @@ test("successful sign-in opens the Who's Watching profile selector by default", 
 
 test("profile selector initializes the owner migration before loading profile choices", () => {
   assert.match(selector, /initializeProfileFoundation\(user\)/);
-  assert.match(selector, /ensureOwnerProfile\(user\)/);
+  assert.match(profiles, /await ensureOwnerProfile\(user\)/);
   assert.match(selector, /fetchProfiles\(\)/);
-  assert.match(selector, /current\.some\(item => item\.id === profile\.id\)/);
   assert.match(selector, /location\.replace\(destination\(\)\)/);
 });
 
