@@ -58,8 +58,8 @@ async function loadLatestRelease() {
   if (windowsResult.status === "fulfilled") {
     const release = windowsResult.value;
     const assets = Array.isArray(release.assets) ? release.assets : [];
-    const installer = assets.find(asset => /^Vivid-Cinema-Setup-\\d+(?:\\.\\d+){1,3}\\.exe$/i.test(asset.name || ""));
-    const portable = assets.find(asset => /^Vivid-Cinema-Portable-\\d+(?:\\.\\d+){1,3}\\.exe$/i.test(asset.name || ""));
+    const installer = assets.find(asset => /^Vivid-Cinema-Setup-\d+(?:\.\d+){1,3}\.exe$/i.test(asset.name || ""));
+    const portable = assets.find(asset => /^Vivid-Cinema-Portable-\d+(?:\.\d+){1,3}\.exe$/i.test(asset.name || ""));
 
     if (installer) {
       setDownload("windows-installer", installer.browser_download_url, installer.name);
