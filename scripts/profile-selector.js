@@ -1,6 +1,7 @@
 import { auth } from "./firebase.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
 import { ensureOwnerProfile, initializeProfileFoundation, setActiveProfileId } from "./profiles.js";
+import { normalizeAvatarUrl } from "./profile-schema.js";
 import { fetchProfiles, createProfile, updateProfile, deleteProfile, compressProfileImage, PROFILE_AVATARS, MAX_PROFILES } from "./profile-manager.js";
 
 const $ = id => document.getElementById(id);
@@ -180,6 +181,12 @@ async function refreshProfiles() {
   await initializeProfileFoundation(user);
   await ensureOwnerProfile(user);
   profiles = await fetchProfiles();
+  const owner = profiles.find(profile => profile.isOwner);
+  const googlePhoto = normalizeAvatarUrl(user.photoURL || user.providerData?.find(item => item.providerId === "google.com")?.photoURL || "");
+  if (owner && !owner.avatarUrl && googlePhoto) {
+    await updateProfile(owner.id, { name: owner.name, avatarId: owner.avatarId, avatarUrl: googlePhoto });
+    profiles = await fetchProfiles();
+  }
   if (!profiles.length) throw new Error("No profiles are available for this Vivid account.");
   renderProfiles();
   say("Choose a profile to continue.");
