@@ -224,6 +224,7 @@ function buildPrimaryLinks(page) {
     navLink("anime-premium.html", "bi-stars", "Premium", page.startsWith("anime-premium")),
     navLink("anime.html", "bi-stars", "Free Anime", page === "anime"),
     navLink("live.html", "bi-broadcast-pin", "Live", page === "live"),
+    ...(window.vividDownloads?.available ? [navLink("my-downloads.html", "bi-cloud-download", "Offline", page === "downloads-library")] : []),
     africanStoriesNavLink(page === "african-stories"),
     navLink("library.html", "bi-bookmark-fill", "Library", page === "library"),
     '<a id="auth-link" class="vivid-nav-profile" href="account.html" aria-label="Open account"' + (page === "account" ? ' aria-current="page"' : '') + '><i class="bi bi-person-circle" aria-hidden="true"></i><span>Account</span></a>'
