@@ -1,15 +1,50 @@
 import { db } from "./firebase.js";
 import { doc, getDoc } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
 import { escapeHtml } from "./utils.js";
+import { setPageSeo } from "./seo.js";
 const $ = id => document.getElementById(id);
 const articleId = new URLSearchParams(location.search).get("id") || "";
 const articleRoot = $("news-story-content");
 const notice = $("news-story-notice");
+function isoDate(value) {
+  try {
+    const date = value?.toDate ? value.toDate() : value ? new Date(value) : null;
+    return date && !Number.isNaN(date.getTime()) ? date.toISOString() : undefined;
+  } catch { return undefined; }
+}
 function dateText(value) {
   const date = value?.toDate ? value.toDate() : value ? new Date(value) : null;
   return date && !Number.isNaN(date.getTime()) ? new Intl.DateTimeFormat(undefined,{dateStyle:"medium",timeStyle:"short"}).format(date) : "Publisher date unavailable";
 }
 function renderArticle(article) {
+  const headline = String(article.headline || "Vivid Cinema News").trim();
+  const description = String(article.summary || article.headline || "Read the latest entertainment story on Vivid Cinema.").trim().slice(0, 260);
+  const canonical = new URL(location.href);
+  canonical.hash = "";
+  const imageUrl = /^https:\/\//i.test(article.imageUrl || "") ? article.imageUrl : undefined;
+  const published = isoDate(article.publishedAt);
+  const modified = isoDate(article.updatedAt) || published;
+  setPageSeo({
+    title: headline + " | Vivid Cinema News",
+    description,
+    canonicalUrl: canonical.href,
+    image: imageUrl,
+    type: "article",
+    structuredData: {
+      "@context": "https://schema.org",
+      "@type": "NewsArticle",
+      "headline": headline,
+      "description": description,
+      "url": canonical.href,
+      "datePublished": published,
+      "dateModified": modified,
+      "image": imageUrl ? [imageUrl] : undefined,
+      "publisher": { "@type": "Organization", "name": "Vivid Cinema" },
+      "author": { "@type": "Organization", "name": "Vivid Cinema News" },
+      ...(article.publisher ? { "sourceOrganization": { "@type": "Organization", "name": String(article.publisher) } } : {}),
+      "articleSection": String(article.category || "Entertainment")
+    }
+  });
   const image = /^https:\/\//i.test(article.imageUrl || "") ? '<img class="vivid-story-image" src="' + escapeHtml(article.imageUrl) + '" alt="" decoding="async">' : "";
   articleRoot.innerHTML = '<div class="vivid-story-kicker">' + escapeHtml(article.regionLabel || article.region || "VIVID NEWS") + ' · ' + escapeHtml(article.category || "Entertainment") + '</div>' +
     '<h1>' + escapeHtml(article.headline || "Untitled story") + '</h1><div class="vivid-story-byline"><span>' + escapeHtml(article.publisher || "Original publisher") + '</span><span>Published ' + escapeHtml(dateText(article.publishedAt)) + '</span>' +

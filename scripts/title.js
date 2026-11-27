@@ -7,6 +7,7 @@ import { hasLibraryItem, startLibrarySync, toggleLibraryItem, upsertLibraryItem 
 import { getProviderCountry, setProviderCountry } from "./provider-region.js";
 import { getLatestPlaybackProgress } from "./recommendations.js";
 import { recordBehavior } from "./intelligence.js";
+import { setPageSeo } from "./seo.js";
 
 const $ = (id) => document.getElementById(id);
 const route = getRoute();
@@ -76,6 +77,7 @@ function wireLibraryActions() {
 }
 
 function renderError(message) {
+  setPageSeo({ title: "Title unavailable · Vivid Cinema", description: "This movie or series could not be found on Vivid Cinema.", robots: "noindex,follow" });
   $("title-content").innerHTML = '<section class="vivid-title-error"><i class="bi bi-exclamation-circle"></i><h1>We couldn’t load this title.</h1><p>' + escapeHtml(message) + '</p><a class="vivid-button vivid-button--secondary" href="home.html">Back to browse</a></section>';
 }
 
@@ -354,7 +356,41 @@ function render(details, externalCertification = "", externalCertificationNote =
   const hasResume=Number(savedProgress?.progress||0)>5;
   const titleWatchUrl=buildWatchUrl(media.id,media.media_type,resumeSeason,resumeEpisode,hasResume?savedProgress.progress:null)+(isAnimeTitle(details)?"&anime=1":"");
 
-  document.title=title+" · Vivid Cinema";
+  const releaseDate = details.release_date || details.first_air_date || "";
+  const description = String(media.overview || "").trim() ||
+    "Explore " + title + (media.media_type === "tv" ? ", the TV series" : ", the movie") + " on Vivid Cinema. Discover its story, cast, release details, ratings and trailers.";
+  const canonicalUrl = new URL(window.location.href);
+  canonicalUrl.hash = "";
+  const posterImage = media.poster_path ? "https://image.tmdb.org/t/p/w780" + media.poster_path : undefined;
+  const socialImage = details.backdrop_path ? "https://image.tmdb.org/t/p/w1280" + details.backdrop_path : posterImage;
+  const titleSchema = {
+    "@context": "https://schema.org",
+    "@type": media.media_type === "tv" ? "TVSeries" : "Movie",
+    "name": title,
+    "description": description,
+    "url": canonicalUrl.href,
+    "image": socialImage || posterImage,
+    "datePublished": releaseDate || undefined,
+    "genre": (details.genres || []).map(genre => genre.name).filter(Boolean),
+    "inLanguage": details.original_language || "en",
+    "aggregateRating": Number(details.vote_count) > 0 && Number(details.vote_average) > 0 ? {
+      "@type": "AggregateRating",
+      "ratingValue": Number(details.vote_average).toFixed(1),
+      "bestRating": "10",
+      "worstRating": "0",
+      "ratingCount": Number(details.vote_count)
+    } : undefined,
+    ...(media.media_type === "movie" && Number(details.runtime) > 0 ? { "duration": "PT" + Math.floor(Number(details.runtime) / 60) + "H" + (Number(details.runtime) % 60) + "M" } : {})
+  };
+  Object.keys(titleSchema).forEach(key => titleSchema[key] === undefined && delete titleSchema[key]);
+  setPageSeo({
+    title: title + (releaseDate ? " (" + releaseDate.slice(0, 4) + ")" : "") + (media.media_type === "tv" ? " — TV Series" : " — Movie") + " | Vivid Cinema",
+    description,
+    canonicalUrl: canonicalUrl.href,
+    image: socialImage,
+    type: media.media_type === "tv" ? "video.tv_show" : "video.movie",
+    structuredData: titleSchema
+  });
   const country=getInitialCountry(details);
   $("title-content").innerHTML=
     '<div class="vivid-title-page-artwork" aria-hidden="true" style="--title-page-artwork: url(&quot;' + escapeHtml(backdropUrl) + '&quot;)"></div>'+
@@ -417,6 +453,28 @@ function openTitleDownload() {
   }
 }
 function renderPersonPage(person) {
+  const personName = String(person?.name || "Cast and crew").trim();
+  const personDescription = String(person?.biography || "").trim().slice(0, 260) ||
+    "Explore " + personName + "'s filmography, movie credits and television work on Vivid Cinema.";
+  const personImage = person?.profile_path ? "https://image.tmdb.org/t/p/w500" + person.profile_path : undefined;
+  const personUrl = new URL(window.location.href);
+  personUrl.hash = "";
+  setPageSeo({
+    title: personName + " — Movies, TV Shows & Biography | Vivid Cinema",
+    description: personDescription,
+    canonicalUrl: personUrl.href,
+    image: personImage,
+    type: "profile",
+    structuredData: {
+      "@context": "https://schema.org",
+      "@type": "Person",
+      "name": personName,
+      "description": personDescription,
+      "url": personUrl.href,
+      ...(personImage ? { "image": personImage } : {}),
+      ...(person?.known_for_department ? { "jobTitle": person.known_for_department } : {})
+    }
+  });
   const cast = Array.isArray(person?.combined_credits?.cast) ? person.combined_credits.cast : [];
   const crew = Array.isArray(person?.combined_credits?.crew) ? person.combined_credits.crew : [];
   const department = String(person?.known_for_department || "").toLowerCase();

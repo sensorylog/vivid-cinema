@@ -1,6 +1,7 @@
 import { tmdbApi } from "./tmdb.js";
 import { getImageUrl, getMediaUrl, normalizeResults } from "./media.js";
 import { escapeHtml, getErrorMessage } from "./utils.js";
+import { setPageSeo } from "./seo.js";
 
 const $ = (id) => document.getElementById(id);
 const params = new URLSearchParams(window.location.search);
@@ -76,6 +77,29 @@ function creditTable(credits, includeMediaType = false) {
 }
 
 function render(person) {
+  const personName = String(person?.name || "Cast and crew").trim();
+  const personDescription = String(person?.biography || "").trim().slice(0, 260) ||
+    "Explore " + personName + "'s filmography, acting credits, television work and career on Vivid Cinema.";
+  const personImagePath = person?.profile_path || person?.images?.profiles?.[0]?.file_path || "";
+  const personImage = personImagePath ? "https://image.tmdb.org/t/p/w780" + personImagePath : undefined;
+  const personUrl = new URL(window.location.href);
+  personUrl.hash = "";
+  setPageSeo({
+    title: personName + " — Movies, TV Shows & Biography | Vivid Cinema",
+    description: personDescription,
+    canonicalUrl: personUrl.href,
+    image: personImage,
+    type: "profile",
+    structuredData: {
+      "@context": "https://schema.org",
+      "@type": "Person",
+      "name": personName,
+      "description": personDescription,
+      "url": personUrl.href,
+      ...(personImage ? { "image": personImage } : {}),
+      ...(person?.known_for_department ? { "jobTitle": person.known_for_department } : {})
+    }
+  });
   const credits = person.combined_credits || {};
   const cast = Array.isArray(credits.cast) ? credits.cast : [];
   const crew = Array.isArray(credits.crew) ? credits.crew : [];
@@ -112,7 +136,7 @@ function render(person) {
 
   const actingCredits = cast;
   const crewCredits = crew;
-  document.title = person.name + " · Vivid Cinema";
+
   $("person-content").innerHTML =
     '<div class="vivid-person-layout">' +
       '<aside class="vivid-person-sidebar" aria-label="Person details">' +
