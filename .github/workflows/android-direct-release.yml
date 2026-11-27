@@ -183,6 +183,14 @@ jobs:
           test "$actual" = "$expected"
           unzip -l "$apk" | grep -q 'res/mipmap-anydpi-v26/ic_launcher.xml'
 
+      - name: Download the previous Android APK for in-place upgrade verification
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          mkdir -p release-output/legacy
+          gh release download v1.0.46 --repo "$GITHUB_REPOSITORY" --pattern "Vivid-Cinema-Android.apk" --dir release-output/legacy
+          test -s release-output/legacy/Vivid-Cinema-Android.apk
       - name: Install and resume the APK on an Android emulator
         uses: ReactiveCircus/android-emulator-runner@v2
         with:
@@ -193,25 +201,33 @@ jobs:
           disable-animations: true
           script: |
             set -euo pipefail
+            legacy_apk="release-output/legacy/Vivid-Cinema-Android.apk"
             apk="release-output/Vivid-Cinema-Android.apk"
-            adb install "$apk"
+            adb install "$legacy_apk"
+            legacy_launch="$(adb shell am start -W -n com.vividcinema.app/.MainActivity)"
+            printf '%s\\n' "$legacy_launch"
+            printf '%s' "$legacy_launch" | grep -q "Status: ok"
+            sleep 5
+            adb install -r "$apk"
             launch="$(adb shell am start -W -n com.vividcinema.app/.MainActivity)"
-            printf '%s\n' "$launch"
+            printf '%s\\n' "$launch"
             printf '%s' "$launch" | grep -q "Status: ok"
             sleep 15
-            pid="$(adb shell pidof com.vividcinema.app | tr -d '\r')"
+            package_dump="$(adb shell dumpsys package com.vividcinema.app)"
+            printf '%s\\n' "$package_dump" | grep -F "versionName=$VIVID_ANDROID_VERSION"
+            printf '%s\\n' "$package_dump" | grep -F "versionCode=$VIVID_ANDROID_VERSION_CODE"
+            pid="$(adb shell pidof com.vividcinema.app | tr -d '\\r')"
             test -n "$pid"
             adb logcat -d --pid="$pid" > "$RUNNER_TEMP/vivid-android-emulator.log"
             if grep -E "FATAL EXCEPTION|Fatal signal|Process: com\\.vividcinema\\.app" "$RUNNER_TEMP/vivid-android-emulator.log"; then
-              echo "Vivid Cinema crashed during Android emulator startup."
+              echo "Vivid Cinema crashed during Android install or in-place upgrade."
               exit 1
             fi
             adb shell input keyevent KEYCODE_HOME
             sleep 2
             adb shell am start -W -n com.vividcinema.app/.MainActivity | grep -q "Status: ok"
             sleep 3
-            test -n "$(adb shell pidof com.vividcinema.app | tr -d '\r')"
-
+            test -n "$(adb shell pidof com.vividcinema.app | tr -d '\\r')"
       - name: Publish the independent Android v1 release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
