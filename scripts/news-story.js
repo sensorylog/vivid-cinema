@@ -40,7 +40,8 @@ function renderArticle(article) {
       "dateModified": modified,
       "image": imageUrl ? [imageUrl] : undefined,
       "publisher": { "@type": "Organization", "name": "Vivid Cinema" },
-      "author": { "@type": "Organization", "name": String(article.publisher || "Vivid Cinema News") },
+      "author": { "@type": "Organization", "name": "Vivid Cinema News" },
+      ...(article.publisher ? { "sourceOrganization": { "@type": "Organization", "name": String(article.publisher) } } : {}),
       "articleSection": String(article.category || "Entertainment")
     }
   });
