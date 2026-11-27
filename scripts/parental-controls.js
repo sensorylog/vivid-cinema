@@ -145,7 +145,7 @@ export async function isTitleAllowed(item = {}, options = {}) {
   const hasGenreMetadata =
     (Array.isArray(item.genre_ids) && item.genre_ids.length > 0) ||
     (Array.isArray(item.genres) && item.genres.length > 0);
-  if (!hasGenreMetadata) {
+  if (!hasGenreMetadata || typeof item.adult !== "boolean") {
     try {
       // Saved library and offline records from older versions may not contain
       // genre metadata. Resolve it before applying genre restrictions.
