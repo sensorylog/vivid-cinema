@@ -104,30 +104,35 @@ function escapeAttribute(value) {
   return String(value).replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;");
 }
 
+function insertBeforeHeadEnd(html, tag) {
+  return html.replace(new RegExp("</head>", "i"), tag + "</head>");
+}
+
 function setMeta(html, attribute, key, value) {
   const escaped = escapeAttribute(value);
-  const matcher = new RegExp("<meta\\b(?=[^>]*\\b" + attribute + "\\s*=\\s*['\"]" + key + "['\"])[^>]*>", "i");
+  const matcher = new RegExp("<meta\\\\b(?=[^>]*\\\\b" + attribute + "\\\\s*=\\\\s*['\\\"]" + key + "['\\\"])[^>]*>", "i");
   const replacement = '<meta ' + attribute + '="' + key + '" content="' + escaped + '">';
-  return matcher.test(html) ? html.replace(matcher, replacement) : html.replace(/<\\/head>/i, replacement + "</head>");
+  return matcher.test(html) ? html.replace(matcher, replacement) : insertBeforeHeadEnd(html, replacement);
 }
 
 function setCanonical(html, href) {
   const tag = '<link rel="canonical" href="' + escapeAttribute(href) + '">';
-  const matcher = /<link\\b(?=[^>]*\\brel\\s*=\\s*['"]canonical['"])[^>]*>/i;
-  return matcher.test(html) ? html.replace(matcher, tag) : html.replace(/<\\/head>/i, tag + "</head>");
+  const matcher = new RegExp("<link\\\\b(?=[^>]*\\\\brel\\\\s*=\\\\s*['\\\"]canonical['\\\"])[^>]*>", "i");
+  return matcher.test(html) ? html.replace(matcher, tag) : insertBeforeHeadEnd(html, tag);
 }
 
 function setTitle(html, title) {
-  return /<title[^>]*>[\\s\\S]*?<\\/title>/i.test(html)
-    ? html.replace(/<title[^>]*>[\\s\\S]*?<\\/title>/i, "<title>" + title + "</title>")
-    : html.replace(/<\\/head>/i, "<title>" + title + "</title></head>");
+  const matcher = new RegExp("<title[^>]*>[\\\\s\\\\S]*?<\\\\/title>", "i");
+  return matcher.test(html)
+    ? html.replace(matcher, "<title>" + title + "</title>")
+    : insertBeforeHeadEnd(html, "<title>" + title + "</title>");
 }
 
 function addStructuredData(html, schema) {
   const tag = '<script id="vivid-static-seo-jsonld" type="application/ld+json">' +
-    JSON.stringify(schema).replace(/</g, "\\u003c") + "</script>";
-  const matcher = /<script\\b(?=[^>]*\\bid\\s*=\\s*['"]vivid-static-seo-jsonld['"])[^>]*>[\\s\\S]*?<\\/script>/i;
-  return matcher.test(html) ? html.replace(matcher, tag) : html.replace(/<\\/head>/i, tag + "</head>");
+    JSON.stringify(schema).replace(/</g, "\\\\u003c") + "</script>";
+  const matcher = new RegExp("<script\\\\b(?=[^>]*\\\\bid\\\\s*=\\\\s*['\\\"]vivid-static-seo-jsonld['\\\"])[^>]*>[\\\\s\\\\S]*?<\\\\/script>", "i");
+  return matcher.test(html) ? html.replace(matcher, tag) : insertBeforeHeadEnd(html, tag);
 }
 
 export async function generateSeoAssets(directory, siteOrigin = process.env.VIVID_SITE_URL || DEFAULT_ORIGIN) {
