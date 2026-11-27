@@ -11,7 +11,7 @@ const buildNumber = Number(process.env.VIVID_ANDROID_BUILD || process.env.GITHUB
 if (!Number.isSafeInteger(buildNumber) || buildNumber < 1) throw new Error("Android build number must be a positive integer.");
 const versionCode = 100000 + buildNumber;
 const versionName = process.env.VIVID_ANDROID_VERSION || packageJson.version;
-if (!/^\\d+\\.\\d+\\.\\d+$/.test(versionName)) throw new Error(`Invalid Android version name: ${versionName}`);
+if (!/^\d+\.\d+\.\d+$/.test(versionName)) throw new Error(`Invalid Android version name: ${versionName}`);
 const playStoreDistribution = process.env.VIVID_ANDROID_DISTRIBUTION === "play";
 const voiceEnabled = process.env.VIVID_ANDROID_ENABLE_VOICE === "true";
 const gradlePath = path.join(androidRoot, "app", "build.gradle");
