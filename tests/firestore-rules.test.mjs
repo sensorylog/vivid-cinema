@@ -233,7 +233,7 @@ test("profile library access is bound to the selected signed profile, including 
       pinHash: "server-only", pinSalt: "server-only", iterations: 310000
     });
     await setDoc(doc(admin, "users/profile-scope/profiles/owner/profileSessions/owner-session"), {
-      uid: "profile-scope", profileId: "owner", revoked: false,
+      uid: "profile-scope", profileId: "owner", revoked: false, pinHash: "server-only",
       expiresAt: Timestamp.fromMillis(Date.now() + 60 * 60 * 1000)
     });
   });
