@@ -2,6 +2,7 @@
 const HLS_LIBRARY_URL = "https://cdn.jsdelivr.net/npm/hls.js@1.7.3/dist/hls.min.js";
 const CACHE_NAME = "vivid-cinema-shell-v364";
 const APP_SHELL = [
+  HLS_LIBRARY_URL,
   "./","./index.html","./home.html","./african-stories.html","./downloads.html","./my-downloads.html","./for-you.html",
   "./person.html","./discover.html","./collection.html","./title.html","./watch.html", "./styles/vivid-archive-cinema.css?v=archive-cinema-1", "./scripts/playback/archive-film-fallback.js",
   "./scripts/downloads/desktop-offline.js?windows-offline-hls-v4","./scripts/downloads/transcode-player.js?windows-offline-hls-v5","./scripts/downloads/browser-hls-adapter.js","./scripts/downloads.js?v=direct-download-v4","./styles/vivid-premium-experience.css?v=3","./styles/vivid-media-layout.css?v=1","./styles/my-downloads.css?v=offline-cinema-redesign-3",
