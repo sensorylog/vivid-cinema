@@ -1,6 +1,6 @@
 import { auth } from "./firebase.js";
 import { onAuthStateChanged, signOut, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
-import { clearActiveProfileId, ensureOwnerProfile, initializeProfileFoundation, getActiveProfileId, setActiveProfileId, OWNER_PROFILE_ID } from "./profiles.js";
+import { clearActiveProfileId, ensureOwnerProfile, initializeProfileFoundation, getActiveProfileId, setActiveProfileId, validateProfileSession, OWNER_PROFILE_ID } from "./profiles.js";
 import { normalizeAvatarUrl } from "./profile-schema.js";
 import { fetchProfiles, createProfile, updateProfile, deleteProfile, compressProfileImage, selectProfile, verifyProfilePin, setProfilePin, removeProfilePin, resetProfilePin, PROFILE_AVATARS, MAX_PROFILES } from "./profile-manager.js";
 
@@ -19,6 +19,9 @@ const photoPreview = $("profile-photo-preview");
 let user = null;
 let profiles = [];
 let editingId = null;
+let profileActivityBound = false;
+let profileActivityProfileId = "";
+let profileActivityPingAt = 0;
 let selectedAvatar = "aurora";
 let selectedAvatarData = "";
 let selectedAvatarUrl = "";
@@ -299,6 +302,35 @@ const pinDialog = $("profile-pin-dialog");
 const pinForm = $("profile-pin-form");
 const pinSettingsDialog = $("profile-pin-settings");
 const pinSettingsForm = $("profile-pin-settings-form");
+
+function bindProfileActivity(profile) {
+  if (!user?.uid || !profile?.hasPin || (profileActivityBound && profileActivityProfileId === profile.id)) return;
+  profileActivityBound = true;
+  profileActivityProfileId = profile.id;
+  profileActivityPingAt = Date.now();
+  const ping = async () => {
+    if (document.visibilityState === "hidden" || pinDialog.open) return;
+    const now = Date.now();
+    if (now - profileActivityPingAt < 5 * 60 * 1000) return;
+    profileActivityPingAt = now;
+    try {
+      if (!await validateProfileSession(user, profile.id)) {
+        profileActivityBound = false;
+        chooseProfile(profile);
+      }
+    } catch (error) {
+      console.warn("Could not refresh the profile unlock:", error);
+    }
+  };
+  const handler = () => { void ping(); };
+  ["pointerdown", "keydown", "touchstart", "scroll"].forEach(eventName => {
+    document.addEventListener(eventName, handler, { passive: true });
+  });
+  document.addEventListener("timeupdate", handler, true);
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState !== "hidden") handler();
+  });
+}
 pinDialog.addEventListener("close", () => {
   $("profile-pin-input").value = "";
   $("profile-pin-status-message").textContent = "";
@@ -523,6 +555,13 @@ onAuthStateChanged(auth,async currentUser => {
     await refreshProfiles();
     const tokenResult = await user.getIdTokenResult();
     const active = profiles.find(item => item.id === String(tokenResult.claims.profileId || ""));
+    if (active?.hasPin) {
+      if (!await validateProfileSession(user, active.id)) {
+        await chooseProfile(active);
+        return;
+      }
+      bindProfileActivity(active);
+    }
     if (active?.isKids) { const owner = profiles.find(item => item.isOwner); if (!owner?.hasPin) { say("Kids Mode exit is locked. Sign out, sign back in as the account owner, then open the Main Profile and set its PIN.",true); return; } say("Parent verification is required to leave Kids Mode."); await chooseProfile(owner); }
   } catch(error) { say(error.message || "Could not load your profiles.",true); grid.replaceChildren(); }
 });
