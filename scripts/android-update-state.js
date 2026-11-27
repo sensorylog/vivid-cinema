@@ -1,6 +1,6 @@
 export const ANDROID_UPDATE_STATE_KEY = "vivid:android:update-state:v1";
-export const ANDROID_UPDATE_SUCCESS_TTL_MS = 6 * 60 * 60 * 1000;
-export const ANDROID_UPDATE_FAILURE_TTL_MS = 15 * 60 * 1000;
+export const ANDROID_UPDATE_SUCCESS_TTL_MS = 15 * 60 * 1000;
+export const ANDROID_UPDATE_FAILURE_TTL_MS = 5 * 60 * 1000;
 
 export function readAndroidUpdateState(storage) {
   try {
