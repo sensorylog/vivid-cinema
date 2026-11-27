@@ -274,6 +274,16 @@ const pinDialog = $("profile-pin-dialog");
 const pinForm = $("profile-pin-form");
 const pinSettingsDialog = $("profile-pin-settings");
 const pinSettingsForm = $("profile-pin-settings-form");
+pinDialog.addEventListener("close", () => {
+  $("profile-pin-input").value = "";
+  $("profile-pin-status-message").textContent = "";
+  pendingProfile = null;
+});
+pinSettingsDialog.addEventListener("close", () => {
+  $("profile-current-pin").value = "";
+  $("profile-new-pin").value = "";
+  $("profile-confirm-pin").value = "";
+});
 pinForm.addEventListener("submit", async event => {
   event.preventDefault();
   if (pinSaving || !pendingProfile) return;
