@@ -265,19 +265,25 @@ service cloud.firestore {
           && get(/databases/$(database)/documents/users/$(userId)/profiles/$(profileId)/profileSessions/$(request.auth.token.profileSessionId)).data.expiresAt > request.time;
       }
 
+      function hasCurrentPinSession(userId, profileId) {
+        return hasProfileSession(userId, profileId)
+          && get(/databases/$(database)/documents/users/$(userId)/profiles/$(profileId)/profileSessions/$(request.auth.token.profileSessionId)).data.pinHash
+            == get(/databases/$(database)/documents/users/$(userId)/profiles/$(profileId)/profileSecurity/pin).data.pinHash;
+      }
+
       function hasViewingProfile(userId, profileId) {
         return isOwner(userId)
           && request.auth.token.keys().hasAll(['profileId'])
           && request.auth.token.profileId == profileId
           && exists(/databases/$(database)/documents/users/$(userId)/profiles/$(profileId))
-          && (!hasProfilePin(userId, profileId) || hasProfileSession(userId, profileId));
+          && (!hasProfilePin(userId, profileId) || hasCurrentPinSession(userId, profileId));
       }
 
       function hasLegacyOwnerProfileAccess(userId) {
         return isOwner(userId)
           && request.auth.token.keys().hasAll(['profileId'])
           && request.auth.token.profileId == 'owner'
-          && (!hasProfilePin(userId, 'owner') || hasProfileSession(userId, 'owner'));
+          && (!hasProfilePin(userId, 'owner') || hasCurrentPinSession(userId, 'owner'));
       }
 
     match /users/{userId} {
