@@ -43,6 +43,23 @@ test("profile route validation does not turn transient service failures into sel
   assert.match(shell, /PROFILE_SESSION_REJECTED/);
 });
 
+test("profile startup bounds Firebase token refresh and gives users a retry instead of an endless spinner", () => {
+  assert.match(manager, /Promise\.race\(\[request, timeout\]\)/);
+  assert.match(manager, /user\.getIdToken\(\)/);
+  assert.match(manager, /Vivid's profile service took too long to respond/);
+  assert.match(selector, /showProfileLoadError/);
+  assert.match(selector, /profile-load-retry/);
+  assert.match(profiles, /withProfileTimeout/);
+  assert.match(profiles, /Your Vivid sign-in is taking too long to refresh/);
+});
+
+test("a server-issued Firebase profile claim restores a missing Safari storage selection", () => {
+  assert.match(shell, /The Firebase custom-token claim is the server-issued source of truth/);
+  assert.match(shell, /setActiveProfileId\(user\.uid, claimedProfileId\)/);
+  assert.match(profiles, /sessionStorage\.getItem\(key\)/);
+  assert.match(profiles, /sessionStorage\.setItem\(key, id\)/);
+});
+
 test("profile selector renders existing profiles before starting owner-scoped library migration", () => {
   const refreshStart = selector.indexOf("async function refreshProfiles()");
   const fetchStart = selector.indexOf("let result = await fetchProfiles();", refreshStart);
