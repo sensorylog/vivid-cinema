@@ -400,6 +400,13 @@ function syncMobileNavigation() {
 }
 
 function syncNavigation() {
+  // The household selector is a required step before entering the app. Do not
+  // render global navigation there: its links are protected by the profile
+  // guard and would immediately send an unselected viewer back to this page.
+  if (currentPage() === "profiles") {
+    document.querySelectorAll(".vivid-mobile-nav, .vivid-native-more-menu").forEach(item => item.remove());
+    return;
+  }
   syncDesktopNavigation();
   syncMobileNavigation();
 }
@@ -687,6 +694,7 @@ function ensureBackControl() {
   const main = document.querySelector("main");
   if (!main || document.querySelector("[data-vivid-back]")) return;
   const page = document.body?.dataset?.vividPage || "";
+  if (page === "profiles") return;
   const isWindowsDesktop = window.vividDownloads?.available === true;
   if (isWindowsDesktop) {
     if (page === "landing") return;
