@@ -33,7 +33,7 @@ test("profile IDs reject path traversal and malformed identifiers", () => {
 });
 
 test("normalized profile metadata never accepts an insecure avatar URL", () => {
-  const profile = normalizeProfile("owner", {
+  const profile = normalizeProfile("kid-1", {
     name: "  Main Viewer  ",
     avatarUrl: "http://example.com/avatar.png",
     isKids: true
@@ -42,7 +42,7 @@ test("normalized profile metadata never accepts an insecure avatar URL", () => {
   assert.equal(profile.avatarUrl, "");
   assert.equal(profile.isKids, true);
   assert.equal(profile.maturityLevel, "kids");
-  assert.equal(profile.isOwner, true);
+  assert.equal(profile.isOwner, false);
 });
 
 test("profile collection paths are account- and profile-scoped and allow only approved stores", () => {
