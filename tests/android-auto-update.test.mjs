@@ -187,6 +187,7 @@ test("fresh Android v1 workflow builds and publishes an independent APK release"
   assert.ok(independentWorkflow.includes("Refusing to generate a new key"));
   assert.ok(independentWorkflow.includes("legacy installed apps"));
   assert.ok(independentWorkflow.includes("bridge_legacy_release"));
+  assert.ok(independentWorkflow.includes("Vivid-Cinema-Android-$ANDROID_VERSION_INPUT-build-$VIVID_ANDROID_BUILD.apk"));
   assert.ok(!independentWorkflow.includes("if: false"));
   assert.ok(configure.includes("process.env.VIVID_ANDROID_VERSION || packageJson.version"));
 });
