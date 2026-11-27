@@ -78,6 +78,7 @@ test("privileged profile writes require a live, PIN-bound active profile session
   assert.match(service, /session\.uid !== user\.uid/);
   assert.match(service, /session\.profileId !== profileId/);
   assert.match(service, /session\.revoked === true/);
+  assert.match(service, /lastActivityAt <= Date\.now\(\) - PROFILE_SESSION_IDLE_TIMEOUT_MS/);
   assert.match(service, /expiresAt <= Date\.now\(\)/);
   assert.match(service, /session\.pinHash !== pinSnapshot\.data\(\)\?\.pinHash/);
   assert.equal(service.match(/requireUnlockedProfile\(db, user, user\.profileId\)/g)?.length, 3);
