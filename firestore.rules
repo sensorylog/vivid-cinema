@@ -151,7 +151,7 @@ service cloud.firestore {
 
     function validTasteData() {
       return request.resource.data.keys().hasOnly([
-        'version','genres','languages','countries','actors','directors','media','decades','updatedAt'
+        'version','genres','languages','countries','actors','directors','media','decades','updatedAt','onboarding'
       ])
       && request.resource.data.version is number
       && request.resource.data.version >= 1
@@ -163,7 +163,14 @@ service cloud.firestore {
       && request.resource.data.directors is map && request.resource.data.directors.keys().size() <= 100
       && request.resource.data.media is map && request.resource.data.media.keys().size() <= 100
       && request.resource.data.decades is map && request.resource.data.decades.keys().size() <= 100
-      && request.resource.data.updatedAt is number;
+      && request.resource.data.updatedAt is number
+      && (!request.resource.data.keys().hasAny(['onboarding']) ||
+        (request.resource.data.onboarding is map
+          && request.resource.data.onboarding.keys().hasOnly(['shownAt','completed','dismissed','completedAt'])
+          && (!request.resource.data.onboarding.keys().hasAny(['shownAt']) || request.resource.data.onboarding.shownAt is number)
+          && (!request.resource.data.onboarding.keys().hasAny(['completedAt']) || request.resource.data.onboarding.completedAt is number)
+          && (!request.resource.data.onboarding.keys().hasAny(['completed']) || request.resource.data.onboarding.completed is bool)
+          && (!request.resource.data.onboarding.keys().hasAny(['dismissed']) || request.resource.data.onboarding.dismissed is bool)));
     }
 
     function validPushSubscription() {
