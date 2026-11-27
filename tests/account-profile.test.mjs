@@ -135,7 +135,9 @@ test("account page includes a visible bootstrap diagnostic and account deletion 
   assert.match(script, /async function permanentlyDeleteAccount\(\)/);
   assert.match(script, /reauthenticateWithCredential/);
   assert.match(script, /reauthenticateWithPopup/);
-  assert.match(script, /deleteUser\(user\)/);
+  assert.match(script, /reauthenticateForDeletion\(user\)/);
+  assert.match(script, /https:\/\/vivid-cinema-api\.vercel\.app\/api\/delete-account/);
+  assert.match(script, /deletionResult\.ok !== true/);
   assert.match(script, /ACCOUNT_PRIVATE_COLLECTIONS/);
   assert.match(script, /async function deleteProfileDocuments\(uid\)/);
   assert.match(script, /"users", uid, "profiles", profile\.id, collectionName/);
