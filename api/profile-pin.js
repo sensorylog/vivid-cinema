@@ -12,7 +12,7 @@ const DEFAULT_ALLOWED_ORIGINS = [
   "capacitor://localhost",
   "http://localhost"
 ];
-const PIN_ITERATIONS = 310000;
+const PIN_ITERATIONS = 600000;
 const PIN_BYTES = 32;
 const PIN_SALT_BYTES = 16;
 const PIN_ATTEMPT_LIMIT = 5;
