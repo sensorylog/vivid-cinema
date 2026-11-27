@@ -50,6 +50,37 @@ export async function requireProfileUser(request, env) {
   }
 }
 
+const PROFILE_SESSION_ID_PATTERN = /^[A-Za-z0-9_-]{1,64}$/;
+
+export async function requireUnlockedProfile(db, user, profileId) {
+  if (!user?.uid || user.profileId !== profileId) {
+    throw new AnimePremiumError(403, "profile-authorization-required", "Open this profile before managing its settings.");
+  }
+  const profileReference = db.collection("users").doc(user.uid).collection("profiles").doc(profileId);
+  const [profileSnapshot, pinSnapshot] = await Promise.all([
+    profileReference.get(),
+    profileReference.collection("profileSecurity").doc("pin").get()
+  ]);
+  if (!profileSnapshot.exists) {
+    throw new AnimePremiumError(404, "profile-not-found", "This Vivid profile no longer exists.");
+  }
+  if (!pinSnapshot.exists) return profileSnapshot.data() || {};
+
+  const sessionId = String(user.profileSessionId || "");
+  if (!PROFILE_SESSION_ID_PATTERN.test(sessionId)) {
+    throw new AnimePremiumError(401, "profile-session-required", "Unlock this profile again before managing it.");
+  }
+  const sessionSnapshot = await profileReference.collection("profileSessions").doc(sessionId).get();
+  const session = sessionSnapshot.data() || {};
+  const expiresAt = Number(session.expiresAt?.toMillis?.() || 0);
+  if (!sessionSnapshot.exists || session.uid !== user.uid || session.profileId !== profileId ||
+      session.revoked === true || expiresAt <= Date.now() ||
+      session.pinHash !== pinSnapshot.data()?.pinHash) {
+    throw new AnimePremiumError(401, "profile-session-expired", "This profile unlock has expired. Enter its PIN again.");
+  }
+  return profileSnapshot.data() || {};
+}
+
 export function profileErrorResponse(error, origin, env) {
   const status = error instanceof AnimePremiumError ? error.status : 500;
   return jsonResponse({
@@ -155,13 +186,13 @@ export async function createAccountProfile(request, env) {
   const { db, user } = await requireProfileUser(request, env);
   await enforceRateLimit(db, user.uid, "profiles-create", 10, 60 * 60 * 1000);
   const body = await readProfileBody(request);
-  if (user.profileId && user.profileId !== OWNER_PROFILE_ID) {
-    const active = await db.collection("users").doc(user.uid).collection("profiles").doc(user.profileId).get();
-    if (active.data()?.isKids === true) throw new AnimePremiumError(403, "parent-authorization-required", "Kids profiles cannot create additional viewing profiles. Verify with the Main Profile first.");
+  if (user.profileId !== OWNER_PROFILE_ID) {
+    throw new AnimePremiumError(403, "parent-authorization-required", "Only the Main Profile can create additional viewing profiles.");
   }
+  await requireUnlockedProfile(db, user, OWNER_PROFILE_ID);
   const name = typeof body.name === "string" ? body.name.trim() : "";
   if (!name) throw new AnimePremiumError(400, "invalid-profile-name", "Enter a name for this profile.");
-  if(body.isKids===true&&user.profileId!==OWNER_PROFILE_ID)throw new AnimePremiumError(403,"parent-authorization-required","Only the Main Profile can create a Kids profile.");
+
   const profilesRef = db.collection("users").doc(user.uid).collection("profiles");
   const now = Timestamp.fromMillis(Date.now());
   const ownerRef = profilesRef.doc(OWNER_PROFILE_ID);
@@ -195,13 +226,16 @@ export async function updateAccountProfile(request, env) {
   const { db, user } = await requireProfileUser(request, env);
   await enforceRateLimit(db, user.uid, "profiles-update", 30, 60 * 60 * 1000);
   const body = await readProfileBody(request);
-  if (user.profileId && user.profileId !== OWNER_PROFILE_ID) {
-    const active = await db.collection("users").doc(user.uid).collection("profiles").doc(user.profileId).get();
-    if (active.data()?.isKids === true) throw new AnimePremiumError(403, "parent-authorization-required", "Kids profiles cannot manage other viewing profiles.");
-  }
   let profileId;
   try { profileId = normalizeProfileId(body.profileId); }
   catch { throw new AnimePremiumError(400, "invalid-profile-id", "Choose a valid Vivid profile."); }
+  if (!user.profileId || (user.profileId !== OWNER_PROFILE_ID && user.profileId !== profileId)) {
+    throw new AnimePremiumError(403, "parent-authorization-required", "Only the Main Profile can manage another viewing profile.");
+  }
+  const activeProfile = await requireUnlockedProfile(db, user, user.profileId);
+  if (activeProfile.isKids === true) {
+    throw new AnimePremiumError(403, "parent-authorization-required", "Kids profiles cannot manage profile settings.");
+  }
   const reference = db.collection("users").doc(user.uid).collection("profiles").doc(profileId);
   const policyFields=["isKids","movieRatingLimit","tvRatingLimit","blockedGenreIds","blockedTitles","allowUnrated"];
   const hasPolicyChange=policyFields.some(key=>Object.prototype.hasOwnProperty.call(body,key));
@@ -243,10 +277,10 @@ export async function deleteAccountProfile(request, env) {
   const { db, user } = await requireProfileUser(request, env);
   await enforceRateLimit(db, user.uid, "profiles-delete", 5, 60 * 60 * 1000);
   const body = await readProfileBody(request);
-  if (user.profileId && user.profileId !== OWNER_PROFILE_ID) {
-    const active = await db.collection("users").doc(user.uid).collection("profiles").doc(user.profileId).get();
-    if (active.data()?.isKids === true) throw new AnimePremiumError(403, "parent-authorization-required", "Kids profiles cannot delete other viewing profiles.");
+  if (user.profileId !== OWNER_PROFILE_ID) {
+    throw new AnimePremiumError(403, "parent-authorization-required", "Only the Main Profile can delete a viewing profile.");
   }
+  await requireUnlockedProfile(db, user, OWNER_PROFILE_ID);
   let profileId;
   try { profileId = normalizeProfileId(body.profileId); }
   catch { throw new AnimePremiumError(400, "invalid-profile-id", "Choose a valid Vivid profile."); }
