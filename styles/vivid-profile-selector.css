@@ -47,3 +47,13 @@
 @media(prefers-reduced-motion:reduce){.profile-avatar,.profile-card-edit,.profile-loading span{animation:none;transition:none}}
 
 .profile-google-photo{display:inline-flex;align-items:center;gap:8px;margin-top:12px;padding:9px 12px;border:1px solid rgba(255,255,255,.14);border-radius:10px;background:rgba(255,255,255,.06);color:#dce5ff;font-size:.76rem;font-weight:700;cursor:pointer}
+
+.profile-security-row{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 16px;margin-top:18px;border:1px solid rgba(255,255,255,.1);border-radius:13px;background:rgba(255,255,255,.035)}
+.profile-security-row>div{display:grid;gap:4px}.profile-security-row strong{font-size:.84rem;color:#f1f3f7}.profile-security-row small{font-size:.72rem;color:#8993a5}
+.profile-pin-manage{border:1px solid rgba(255,255,255,.18);border-radius:999px;background:rgba(255,255,255,.07);color:#fff;padding:9px 15px;font-size:.75rem;font-weight:750;cursor:pointer}
+.profile-pin-manage:hover{background:rgba(255,255,255,.13)}
+.profile-pin-description{color:#aab3c2;font-size:.86rem;line-height:1.6;margin:0 0 18px}
+.profile-pin-dialog{max-width:460px}
+.profile-pin-dialog .profile-field input{letter-spacing:.28em;font-variant-numeric:tabular-nums}
+#profile-pin-forgot{color:#b7c2d2}
+@media(max-width:520px){.profile-security-row{align-items:flex-start;flex-direction:column}.profile-security-row button{align-self:flex-end}}
