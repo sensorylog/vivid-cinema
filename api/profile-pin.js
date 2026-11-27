@@ -332,6 +332,7 @@ export default async function handler(req, res) {
         throw new ProfilePinError(401, "profile-session-expired", "Your profile session has expired. Choose your profile again.");
       }
       const targetSnapshot = await profileReference.get();
+      await sessionSnapshot.ref.update({ lastActivityAt: Timestamp.fromMillis(Date.now()) });
       const customToken = await auth.createCustomToken(claims.uid, {
         profileId,
         profileSessionId: sessionId,
