@@ -22,25 +22,21 @@ test("library, progress, and intelligence use the shared owner snapshot policy",
   assert.match(intelligence, /void startIntelligenceSync/getActiveProfileId\\\(owner\\.uid\\\) === owner\\.profileId/g(/getActiveProfileId\\\(owner\\.uid\\\) === owner\\.profileId/g)/);
 });
 
-test("playback writes are bound to the owner active when queued", () => {
-  assert.match(progress, /const ownerAtQueue = localStorage/getActiveProfileId\\\(owner\\.uid\\\) === owner\\.profileId/g.getItem/getActiveProfileId\\\(owner\\.uid\\\) === owner\\.profileId/g(LOCAL_OWNER_KEY/getActiveProfileId\\\(owner\\.uid\\\) === owner\\.profileId/g) /getActiveProfileId\\\(owner\\.uid\\\) === owner\\.profileId/g|/getActiveProfileId\\\(owner\\.uid\\\) === owner\\.profileId/g| "guest"/);
-  assert.match(progress, /activeOwner === ownerAtQueue/);
-  assert.match(progress, /String/getActiveProfileId\\\(owner\\.uid\\\) === owner\\.profileId/g(auth/getActiveProfileId\\\(owner\\.uid\\\) === owner\\.profileId/g?/getActiveProfileId\\\(owner\\.uid\\\) === owner\\.profileId/g.currentUser/getActiveProfileId\\\(owner\\.uid\\\) === owner\\.profileId/g?/getActiveProfileId\\\(owner\\.uid\\\) === owner\\.profileId/g.uid /getActiveProfileId\\\(owner\\.uid\\\) === owner\\.profileId/g|/getActiveProfileId\\\(owner\\.uid\\\) === owner\\.profileId/g|/getActiveProfileId\\\(owner\\.uid\\\) === owner\\.profileId/g/);
-  assert.match(progress, /The signed-in account changed during playback progress sync/);
-  assert.match(progress, /getDocsFromServer/getActiveProfileId\\\(owner\\.uid\\\) === owner\\.profileId/g(collection/getActiveProfileId\\\(owner\\.uid\\\) === owner\\.profileId/g(db, "users", user/getActiveProfileId\\\(owner\\.uid\\\) === owner\\.profileId/g.uid, "progress"/getActiveProfileId\\\(owner\\.uid\\\) === owner\\.profileId/g)/getActiveProfileId\\\(owner\\.uid\\\) === owner\\.profileId/g)/);
+test("playback and intelligence cloud writes are bound to the active profile", () => {
+  assert.ok(progress.includes('const ownerAtQueue = localStorage.getItem(LOCAL_OWNER_KEY) || "guest"'));
+  assert.ok(progress.includes("activeOwner === ownerAtQueue"));
+  assert.ok(progress.includes("getActiveProfileId(owner.uid) === owner.profileId"));
+  assert.ok(progress.includes('collection(db, "users", user.uid, "profiles", profileId, "progress")'));
   assert.match(progress, /remoteUpdated > 0 && remoteUpdated >= localUpdated/);
-  assert.match(progress, /JSON/getActiveProfileId\\\(owner\\.uid\\\) === owner\\.profileId/g.stringify/getActiveProfileId\\\(owner\\.uid\\\) === owner\\.profileId/g(merged/getActiveProfileId\\\(owner\\.uid\\\) === owner\\.profileId/g) !== JSON/getActiveProfileId\\\(owner\\.uid\\\) === owner\\.profileId/g.stringify/getActiveProfileId\\\(owner\\.uid\\\) === owner\\.profileId/g(local/getActiveProfileId\\\(owner\\.uid\\\) === owner\\.profileId/g[contentId/getActiveProfileId\\\(owner\\.uid\\\) === owner\\.profileId/g]/getActiveProfileId\\\(owner\\.uid\\\) === owner\\.profileId/g)/);
-  assert.match(progress, /vivid:sync-status/);
-  assert.match(progress, /progressSyncStatus/getActiveProfileId\\\(owner\\.uid\\\) === owner\\.profileId/g("error", user/getActiveProfileId\\\(owner\\.uid\\\) === owner\\.profileId/g.uid, "sync"/getActiveProfileId\\\(owner\\.uid\\\) === owner\\.profileId/g)/);
-  assert.match(progress, /progressSyncStatus/getActiveProfileId\\\(owner\\.uid\\\) === owner\\.profileId/g("synced", uid, contentId/getActiveProfileId\\\(owner\\.uid\\\) === owner\\.profileId/g)/);
-  assert.match(intelligence, /if/getActiveProfileId\\\(owner\\.uid\\\) === owner\\.profileId/g(remoteUpdatedAt<localVersion/getActiveProfileId\\\(owner\\.uid\\\) === owner\\.profileId/g)return/);
-  assert.match(intelligence, /getDocsFromServer/getActiveProfileId\\\(owner\\.uid\\\) === owner\\.profileId/g(collection/getActiveProfileId\\\(owner\\.uid\\\) === owner\\.profileId/g(db,"users",u/getActiveProfileId\\\(owner\\.uid\\\) === owner\\.profileId/g.uid,"feedback"/getActiveProfileId\\\(owner\\.uid\\\) === owner\\.profileId/g)/getActiveProfileId\\\(owner\\.uid\\\) === owner\\.profileId/g)/);
-  assert.match(intelligence, /getDocsFromServer/getActiveProfileId\\\(owner\\.uid\\\) === owner\\.profileId/g(collection/getActiveProfileId\\\(owner\\.uid\\\) === owner\\.profileId/g(db,"users",u/getActiveProfileId\\\(owner\\.uid\\\) === owner\\.profileId/g.uid,"taste"/getActiveProfileId\\\(owner\\.uid\\\) === owner\\.profileId/g)/getActiveProfileId\\\(owner\\.uid\\\) === owner\\.profileId/g)/);
+  assert.match(progress, /JSON\.stringify\(merged\) !== JSON\.stringify\(local\[contentId\]\)/);
+  assert.match(progress, /progressSyncStatus\("error", user\.uid, "sync"\)/);
+  assert.match(intelligence, /if\(remoteUpdatedAt<localVersion\)return/);
+  assert.ok(intelligence.includes('collection(db,"users",u.uid,"profiles",profileId,"feedback")'));
+  assert.ok(intelligence.includes('collection(db,"users",u.uid,"profiles",profileId,"taste")'));
   assert.match(intelligence, /The signed-in account changed before intelligence state could be reconciled/);
-  assert.match(intelligence, /const s=read/getActiveProfileId\\\(owner\\.uid\\\) === owner\\.profileId/g(/getActiveProfileId\\\(owner\\.uid\\\) === owner\\.profileId/g);const stateAtSync=localStorage/getActiveProfileId\\\(owner\\.uid\\\) === owner\\.profileId/g.getItem/getActiveProfileId\\\(owner\\.uid\\\) === owner\\.profileId/g(KEY/getActiveProfileId\\\(owner\\.uid\\\) === owner\\.profileId/g)/getActiveProfileId\\\(owner\\.uid\\\) === owner\\.profileId/g|/getActiveProfileId\\\(owner\\.uid\\\) === owner\\.profileId/g|""/);
   assert.match(intelligence, /Local intelligence changed during sync; newer local state was retained/);
-  assert.match(intelligence, /const ownerAtStart=localStorage/getActiveProfileId\\\(owner\\.uid\\\) === owner\\.profileId/g.getItem/getActiveProfileId\\\(owner\\.uid\\\) === owner\\.profileId/g(LOCAL_OWNER_KEY/getActiveProfileId\\\(owner\\.uid\\\) === owner\\.profileId/g)/getActiveProfileId\\\(owner\\.uid\\\) === owner\\.profileId/g|/getActiveProfileId\\\(owner\\.uid\\\) === owner\\.profileId/g|"guest"/);
-  assert.match(intelligence, //getActiveProfileId\\\(owner\\.uid\\\) === owner\\.profileId/g(localStorage/getActiveProfileId\\\(owner\\.uid\\\) === owner\\.profileId/g.getItem/getActiveProfileId\\\(owner\\.uid\\\) === owner\\.profileId/g(KEY/getActiveProfileId\\\(owner\\.uid\\\) === owner\\.profileId/g)/getActiveProfileId\\\(owner\\.uid\\\) === owner\\.profileId/g|/getActiveProfileId\\\(owner\\.uid\\\) === owner\\.profileId/g|""/getActiveProfileId\\\(owner\\.uid\\\) === owner\\.profileId/g)!==stateAtStart/);
+  assert.match(intelligence, /const ownerAtStart=localStorage\.getItem\(LOCAL_OWNER_KEY\)\|\|"guest"/);
+  assert.match(intelligence, /\(localStorage\.getItem\(KEY\)\|\|""\)!==stateAtStart/);
 });
 
 test("auth listeners continue handling later account changes", () => {
