@@ -13,11 +13,11 @@ on:
         required: true
         type: string
         default: "1.0.0"
-      legacy_bridge_tag:
-        description: Windows release tag to receive the one-time compatibility APK for existing installs (leave empty after the first Android v1 update)
+      bridge_legacy_release:
+        description: Also mirror this APK to the current Windows release so older Android installs can discover their first update
         required: false
-        type: string
-        default: "v1.0.47"
+        type: boolean
+        default: true
 
 permissions:
   contents: write
@@ -39,7 +39,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           ANDROID_VERSION_INPUT: ${{ inputs.android_version || '1.0.0' }}
-          LEGACY_BRIDGE_TAG: ${{ inputs.legacy_bridge_tag || 'v1.0.47' }}
+          BRIDGE_LEGACY_RELEASE: ${{ inputs.bridge_legacy_release }}
         shell: bash
         run: |
           set -euo pipefail
@@ -55,7 +55,11 @@ jobs:
             echo "should_build=true" >> "$GITHUB_OUTPUT"
           fi
           echo "android_version=$ANDROID_VERSION_INPUT" >> "$GITHUB_OUTPUT"
-          echo "legacy_bridge_tag=$LEGACY_BRIDGE_TAG" >> "$GITHUB_OUTPUT"
+          if [ "$GITHUB_EVENT_NAME" = "push" ] || [ "$BRIDGE_LEGACY_RELEASE" = "true" ]; then
+            echo "legacy_bridge_tag=v1.0.47" >> "$GITHUB_OUTPUT"
+          else
+            echo "legacy_bridge_tag=" >> "$GITHUB_OUTPUT"
+          fi
 
   build-test-publish:
     needs: release-guard
