@@ -1,6 +1,7 @@
 import { auth } from "./firebase.js";
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
 import { initializeProfileFoundation, setActiveProfileId } from "./profiles.js";
+import { normalizeAvatarUrl } from "./profile-schema.js";
 import { fetchProfiles, createProfile, updateProfile, deleteProfile, compressProfileImage, PROFILE_AVATARS, MAX_PROFILES } from "./profile-manager.js";
 
 const $ = id => document.getElementById(id);
@@ -141,7 +142,7 @@ function renderGallery() {
     button.className = "avatar-choice";
     button.style.setProperty("--avatar-bg",background);
     button.setAttribute("role","radio");
-    button.setAttribute("aria-checked",String(selectedAvatar === avatar.id));
+    button.setAttribute("aria-checked",String(selectedAvatarSource === "collection" && selectedAvatar === avatar.id));
     button.setAttribute("aria-label",avatar.label);
     button.innerHTML = '<i class="bi ' + icon + '" aria-hidden="true"></i>';
     button.addEventListener("click",() => {
@@ -174,6 +175,8 @@ function openEditor(profile = null) {
     photoPreview.append(img,label);
     photoPreview.hidden = false;
   }
+  const googlePhoto = normalizeAvatarUrl(user?.photoURL || user?.providerData?.find(item => item.providerId === "google.com")?.photoURL || "");
+  $("profile-use-google").hidden = !googlePhoto;
   $("editor-title").textContent = profile ? "Edit profile" : "Create a profile";
   saveButton.textContent = profile ? "Save changes" : "Create profile";
   renderGallery();
@@ -217,6 +220,19 @@ $("profile-use-google").addEventListener("click",() => {
   const label = document.createElement("span"); label.textContent = "Google photo selected";
   photoPreview.append(img,label);
   photoPreview.hidden = false;
+});
+$("profile-use-google").addEventListener("click",() => {
+  const photo = normalizeAvatarUrl(user?.photoURL || user?.providerData?.find(item => item.providerId === "google.com")?.photoURL || "");
+  if (!photo) return;
+  selectedAvatarData = "";
+  selectedAvatarUrl = photo;
+  selectedAvatarSource = "google";
+  photoPreview.replaceChildren();
+  const img = document.createElement("img"); img.src = photo; img.alt = "";
+  const label = document.createElement("span"); label.textContent = "Google account photo selected";
+  photoPreview.append(img,label);
+  photoPreview.hidden = false;
+  renderGallery();
 });
 $("editor-close").addEventListener("click",() => dialog.close());
 $("profile-cancel").addEventListener("click",() => dialog.close());
