@@ -24,6 +24,8 @@ test("Premium catalogue uses the existing anime metadata API and filters Japanes
   assert.match(script, /getAnimePage\(/);
   assert.match(script, /tmdbApi\.searchMulti\(/);
   assert.match(script, /isAnimeMetadata\(item\)/);
+  assert.match(script, /parental-controls/);
+  assert.match(script, /filterAllowedTitles\(raw\.flatMap/);
   assert.doesNotMatch(script, /initializeApp\s*\(|getAuth\s*\(/);
 });
 
@@ -65,7 +67,7 @@ test("search, type, year and sort controls share one catalogue state", () => {
 
 test("Premium discovery assets are cached and syntax-checked", () => {
   assert.match(sw, /scripts\/anime-premium-discovery\.js/);
-  assert.match(sw, /vivid-cinema-shell-v372/);
+  assert.match(sw, /vivid-cinema-shell-v373/);
   assert.match(sw, /anime-premium-title\.html/);
   assert.match(sw, /anime-premium-title\.js/);
   assert.match(sw, /vivid-anime-premium-title\.css/);
