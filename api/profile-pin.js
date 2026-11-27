@@ -39,9 +39,19 @@ function allowedOrigins() {
   return new Set([...DEFAULT_ALLOWED_ORIGINS, ...configured]);
 }
 
+function isAllowedOrigin(origin) {
+  if (allowedOrigins().has(origin)) return true;
+  try {
+    const parsed = new URL(origin);
+    return parsed.protocol === "http:" && parsed.hostname === "localhost";
+  } catch {
+    return false;
+  }
+}
+
 function setCors(req, res) {
   const origin = req.headers.origin;
-  if (!origin || !allowedOrigins().has(origin)) return false;
+  if (!origin || !isAllowedOrigin(origin)) return false;
   res.setHeader("Access-Control-Allow-Origin", origin);
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Authorization, Content-Type");
