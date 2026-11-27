@@ -182,3 +182,70 @@ test("Kids policy blocks over-limit, unrated, genre-blocked and individually blo
   });
   expect(results).toEqual([true, false, false, false, false, true, false, false, true, false]);
 });
+
+
+test("Kids profiles use stricter fallback limits when parental policy services are unavailable", async ({ page }) => {
+  await page.addInitScript(() => {
+    window.__profileClaims = { profileId: "kid-offline", isKids: true };
+    window.__activeProfileId = "kid-offline";
+  });
+  const offlineProfiles = profilesMock.replace(
+    "export async function listProfileSummaries() {\n  return { profiles: [window.__parentalPolicy || {}] };\n}",
+    "export async function listProfileSummaries() { throw new Error('offline'); }"
+  );
+  await page.route("**/scripts/firebase.js", route => route.fulfill({ status: 200, contentType: "text/javascript", body: authMock }));
+  await page.route("**/scripts/profiles.js", route => route.fulfill({ status: 200, contentType: "text/javascript", body: offlineProfiles }));
+  await page.route("**/scripts/tmdb.js", route => route.fulfill({
+    status: 200,
+    contentType: "text/javascript",
+    body: `export const tmdbApi = {
+      movieDetails: async id => ({ id, adult: false, genre_ids: [35] }),
+      tvDetails: async id => ({ id, adult: false, genre_ids: [35] }),
+      movieReleaseDates: async () => ({ results: [{ iso_3166_1: "US", release_dates: [{ certification: "G" }] }] }),
+      tvContentRatings: async () => ({ results: [{ iso_3166_1: "US", rating: "TV-G" }] })
+    }`
+  }));
+  await page.route("**/scripts/provider-region.js", route => route.fulfill({ status: 200, contentType: "text/javascript", body: "export function getProviderCountry() { return 'US'; }" }));
+  await page.goto("/home.html", { waitUntil: "domcontentloaded" });
+
+  const results = await page.evaluate(async () => {
+    const policy = await import("/scripts/parental-controls.js");
+    return Promise.all([
+      policy.isTitleAllowed({ id: 201, media_type: "movie", certification: "PG" }),
+      policy.isTitleAllowed({ id: 202, media_type: "movie", certification: "G", genre_ids: [35], adult: false }),
+      policy.isTitleAllowed({ id: 203, media_type: "tv", certification: "TV-PG", genre_ids: [35], adult: false })
+    ]);
+  });
+  expect(results).toEqual([false, true, false]);
+});
+
+test("current signed profile claims override a stale cached Kids policy", async ({ page }) => {
+  await page.addInitScript(() => {
+    window.__profileClaims = { profileId: "adult-offline", isKids: false };
+    window.__activeProfileId = "adult-offline";
+    localStorage.setItem("vivid:parental-policy:v1:browser-test-user:adult-offline", JSON.stringify({
+      id: "adult-offline",
+      isKids: true,
+      movieRatingLimit: "G",
+      tvRatingLimit: "TV-Y",
+      blockedGenreIds: [27, 53, 80, 10752],
+      blockedTitles: [],
+      allowUnrated: false
+    }));
+  });
+  const offlineProfiles = profilesMock.replace(
+    "export async function listProfileSummaries() {\n  return { profiles: [window.__parentalPolicy || {}] };\n}",
+    "export async function listProfileSummaries() { throw new Error('offline'); }"
+  );
+  await page.route("**/scripts/firebase.js", route => route.fulfill({ status: 200, contentType: "text/javascript", body: authMock }));
+  await page.route("**/scripts/profiles.js", route => route.fulfill({ status: 200, contentType: "text/javascript", body: offlineProfiles }));
+  await page.route("**/scripts/tmdb.js", route => route.fulfill({ status: 200, contentType: "text/javascript", body: "export const tmdbApi = {};" }));
+  await page.route("**/scripts/provider-region.js", route => route.fulfill({ status: 200, contentType: "text/javascript", body: "export function getProviderCountry() { return 'US'; }" }));
+  await page.goto("/home.html", { waitUntil: "domcontentloaded" });
+
+  const allowed = await page.evaluate(async () => {
+    const policy = await import("/scripts/parental-controls.js");
+    return policy.isTitleAllowed({ id: 204, media_type: "movie", certification: "PG-13" });
+  });
+  expect(allowed).toBe(true);
+});
