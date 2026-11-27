@@ -84,7 +84,7 @@ function cleanProfileInput(profileId, body, existing = {}) {
   const avatarId = body.avatarId == null ? (existing.avatarId || "aurora") : String(body.avatarId);
   if (!AVATAR_IDS.has(String(avatarId || ""))) throw new AnimePremiumError(400, "invalid-avatar", "Choose an avatar from the Vivid collection.");
   const avatarSource = body.avatarSource == null
-    ? (["default","google","collection","upload"].includes(existing.avatarSource)
+    ? (["auto","google","collection","upload"].includes(existing.avatarSource)
       ? existing.avatarSource
       : existing.avatarData ? "upload" : existing.avatarUrl ? "google" : profileId === OWNER_PROFILE_ID ? "default" : "collection")
     : String(body.avatarSource);
