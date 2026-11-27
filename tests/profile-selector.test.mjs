@@ -113,3 +113,21 @@ test("profile selector assets are network refreshed and accessible from the acco
   assert.match(shell, /timeupdate/);
 });
 
+
+
+test("profile identities use the original cinematic avatar artwork and mobile sync stacks cleanly", async () => {
+  const [selector, styles, artwork, accountStyles, page] = await Promise.all([
+    read("../scripts/profile-selector.js"),
+    read("../styles/vivid-profile-selector.css"),
+    read("../assets/profile-avatars.svg"),
+    read("../styles/vivid-account.css"),
+    read("../profiles.html")
+  ]);
+  assert.match(artwork, /<svg[^>]+viewBox="0 0 1024 1024"/);
+  assert.equal((artwork.match(/<g transform="translate\(/g) || []).length, 16);
+  assert.match(selector, /profile-avatar-art/);
+  assert.match(selector, /--avatar-x/);
+  assert.match(styles, /background-image:url\("\.\.\/assets\/profile-avatars\.svg"\)/);
+  assert.match(page, /phase5-avatar-art-1/);
+  assert.match(accountStyles, /\.account-page \.account-sync \.vivid-button\{flex:1 1 100%;width:100%/);
+});
