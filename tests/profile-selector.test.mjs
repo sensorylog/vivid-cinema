@@ -28,6 +28,19 @@ test("successful sign-in opens the Who's Watching profile selector by default", 
   assert.match(selector, /verifyProfilePin\(pendingProfile\.id, pin\)/);
   assert.match(selector, /finishProfileOpen\(profile, result\.customToken\)/);
   assert.match(selector, /signInWithCustomToken\(auth, customToken\)/);
+  const openFlow = selector.slice(selector.indexOf("async function finishProfileOpen"), selector.indexOf("function startProfileMigration"));
+  assert.ok(openFlow.indexOf("setActiveProfileId") < openFlow.indexOf("signInWithCustomToken"),
+    "the selected profile must be persisted before Firebase emits its auth-state event");
+  assert.match(openFlow, /clearActiveProfileId/);
+});
+
+test("profile route validation does not turn transient service failures into selector redirects", () => {
+  const summary = profiles.slice(profiles.indexOf("export async function listProfileSummaries"), profiles.indexOf("export function getActiveProfileId"));
+  assert.doesNotMatch(summary, /ensureAppCheck/);
+  assert.match(summary, /AbortController/);
+  assert.match(summary, /PROFILE_CHECK_UNAVAILABLE/);
+  assert.match(shell, /temporarily unavailable; preserving the selected route/);
+  assert.match(shell, /PROFILE_SESSION_REJECTED/);
 });
 
 test("profile selector renders existing profiles before starting owner-scoped library migration", () => {
