@@ -48,7 +48,7 @@ test("all local-first stores react to profile changes and retain account-switch 
   }
   assert.ok(library.includes("The active account or profile changed during library sync"));
   assert.ok(progress.includes("The signed-in account changed during playback progress sync"));
-  assert.ok(intelligence.includes("The signed-in account changed before intelligence state could be reconciled"));
+  assert.ok(intelligence.includes("The signed-in account changed during intelligence sync"));
 });
 
 test("library and progress retain local-first state when cloud sync fails", () => {
