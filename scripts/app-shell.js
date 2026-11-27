@@ -1,5 +1,5 @@
 import { VIVID_CONFIG } from "./config.js";
-import { clearActiveProfileId, getActiveProfileId, hasActiveProfileSelection, listProfiles } from "./profiles.js";
+import { clearActiveProfileId, getActiveProfileId, hasActiveProfileSelection, listProfileSummaries, validateProfileSession } from "./profiles.js";
 import { applyPerformanceProfile } from "./performance-profile.js";
 import { resolveAndroidBackAction } from "./android-navigation.js";
 import "./movie-quick-actions.js";
@@ -422,12 +422,22 @@ async function enforceProfileSelection(user) {
     return;
   }
   try {
-    const profiles = await listProfiles(user);
+    const { profiles } = await listProfileSummaries(user);
     const activeId = getActiveProfileId(user.uid);
-    if (!profiles.some(profile => profile.id === activeId)) {
+    const activeProfile = profiles.find(profile => profile.id === activeId);
+    if (!activeProfile) {
       clearActiveProfileId(user.uid);
       redirectToProfiles();
       return;
+    }
+    if (activeProfile.hasPin) {
+      const tokenResult = await user.getIdTokenResult();
+      if (tokenResult.claims.profileId !== activeId ||
+        typeof tokenResult.claims.profileSessionId !== "string" ||
+        !await validateProfileSession(user, activeId)) {
+        redirectToProfiles();
+        return;
+      }
     }
     if (page === "auth.html") window.location.replace("home.html");
   } catch (error) {
