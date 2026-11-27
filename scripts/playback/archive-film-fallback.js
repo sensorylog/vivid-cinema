@@ -61,14 +61,14 @@ function createCard(item, results, onPlay) {
   const action = document.createElement("button"); action.type = "button"; action.textContent = "Play in Vivid"; action.addEventListener("click", () => onPlay?.(item));
   details.append(name, meta, link); card.append(details, action); results.append(card);
 }
-export function mountArchiveFilmSearch({ root, title = "", year = "", onPlay }) {
+export function mountArchiveFilmSearch({ root, title = "", year = "", onPlay, initialSource = "archive" }) {
   if (!root || root.dataset.archiveMounted === "true") return;
   root.dataset.archiveMounted = "true";
   const section = document.createElement("section"); section.className = "vivid-archive-search";
   section.innerHTML = '<div class="vivid-archive-heading"><strong>Open Film Sources</strong><span>Choose a catalogue with playable, rights-labelled films</span></div><div class="vivid-archive-tabs" role="group" aria-label="Film source"><button type="button" data-catalog="archive" aria-pressed="true">Internet Archive</button><button type="button" data-catalog="commons" aria-pressed="false">Wikimedia Commons</button><button type="button" data-catalog="loc" aria-pressed="false">Library of Congress</button></div><form class="vivid-archive-form"><label for="vivid-archive-query">Search this source</label><div class="vivid-archive-search-row"><input id="vivid-archive-query" name="q" type="search" maxlength="120" autocomplete="off" placeholder="Search classic films" required><button type="submit">Search</button></div></form><p class="vivid-archive-note">Only direct video files or official archive players with a public-domain or compatible open-license declaration are offered. Rights metadata is not a substitute for legal advice; always inspect the original record.</p><div class="vivid-archive-results" aria-live="polite"></div>';
   root.append(section);
   const form=section.querySelector("form"), input=section.querySelector("input"), results=section.querySelector(".vivid-archive-results"), submit=section.querySelector('button[type="submit"]');
-  let selected="archive", activeController=null;
+  let selected=["archive","commons","loc"].includes(initialSource)?initialSource:"archive", activeController=null;
   input.value=cleanText(title,120);
   const status=message=>{results.replaceChildren();const p=document.createElement("p");p.className="vivid-archive-status";p.textContent=message;results.append(p);};
   async function searchArchive(query, signal) {
@@ -130,7 +130,15 @@ export function mountArchiveFilmSearch({ root, title = "", year = "", onPlay }) 
     } catch(error){if(error?.name!=="AbortError")status("This catalogue is temporarily unavailable. Try another source.");}
     finally{window.clearTimeout(timeoutId);if(activeController===controller)activeController=null;submit.disabled=false;}
   }
-  section.querySelectorAll("[data-catalog]").forEach(button=>button.addEventListener("click",()=>{selected=button.dataset.catalog;section.querySelectorAll("[data-catalog]").forEach(node=>node.setAttribute("aria-pressed",node===button?"true":"false"));void search(cleanText(input.value,120)||cleanText(title,120));}));
+  const selectCatalog = source => {
+    if (!["archive","commons","loc"].includes(source)) return;
+    selected=source;
+    section.querySelectorAll("[data-catalog]").forEach(node=>node.setAttribute("aria-pressed",node.dataset.catalog===selected?"true":"false"));
+    void search(cleanText(input.value,120)||cleanText(title,120));
+  };
+  section.querySelectorAll("[data-catalog]").forEach(button=>button.addEventListener("click",()=>selectCatalog(button.dataset.catalog)));
+  root.addEventListener("vivid:archive-catalog-select",event=>selectCatalog(event.detail?.source));
+  section.querySelectorAll("[data-catalog]").forEach(node=>node.setAttribute("aria-pressed",node.dataset.catalog===selected?"true":"false"));
   form.addEventListener("submit",event=>{event.preventDefault();const query=cleanText(input.value,120);if(query.length<2){status("Enter at least two characters to search.");return;}void search(query);});
   const initial=cleanText(title,120);if(initial.length>=2)void search(initial);
 }
