@@ -2,6 +2,7 @@ import { tmdbApi } from "./tmdb.js";
 import { getImageUrl, getMediaUrl, normalizeResults } from "./media.js";
 import { escapeHtml, getErrorMessage } from "./utils.js";
 import { setPageSeo } from "./seo.js";
+import { filterAllowedTitles } from "./parental-controls.js";
 
 const $ = (id) => document.getElementById(id);
 const params = new URLSearchParams(window.location.search);
@@ -168,6 +169,8 @@ async function init() {
   try {
     const person = await tmdbApi.personDetails(id);
     if (!person?.id || !person?.name) throw new Error("This person profile is unavailable.");
+    if (person.credits?.cast) person.credits.cast = await filterAllowedTitles(person.credits.cast);
+    if (person.credits?.crew) person.credits.crew = await filterAllowedTitles(person.credits.crew);
     render(person);
   } catch (error) {
     $("person-content").innerHTML = '<section class="vivid-title-error"><i class="bi bi-exclamation-circle"></i><h1>We couldn’t load this profile.</h1><p>' + escapeHtml(getErrorMessage(error)) + '</p><a class="vivid-button vivid-button--secondary" href="home.html">Back to browse</a></section>';
