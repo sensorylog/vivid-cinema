@@ -5,7 +5,7 @@ import {
   assertFails, assertSucceeds, initializeTestEnvironment
 } from "@firebase/rules-unit-testing";
 import {
-  collection, deleteDoc, doc, getDoc, getDocs, serverTimestamp, setDoc, updateDoc, writeBatch
+  collection, deleteDoc, doc, getDoc, getDocs, serverTimestamp, setDoc, updateDoc, writeBatch, Timestamp
 } from "firebase/firestore";
 
 let env;
@@ -190,6 +190,59 @@ test("behavior events are owner-private, append-only, and deletable only by thei
   await assertFails(deleteDoc(doc(member("event-intruder", "Intruder"), "users", "event-owner", "events", "session-1_event-2")));
 });
 
+
+test("profile library access is bound to the selected signed profile, including legacy owner data", async () => {
+  await env.withSecurityRulesDisabled(async context => {
+    const admin = context.firestore();
+    await setDoc(doc(admin, "users/profile-scope/profiles/owner"), {
+      id: "owner", name: "Owner", avatarId: "aurora", avatarUrl: "",
+      isOwner: true, isKids: false, maturityLevel: "adult", schemaVersion: 1
+    });
+    await setDoc(doc(admin, "users/profile-scope/profiles/child"), {
+      id: "child", name: "Child", avatarId: "ember", avatarUrl: "",
+      isOwner: false, isKids: true, maturityLevel: "kids", schemaVersion: 1
+    });
+    await setDoc(doc(admin, "users/profile-scope/favorites/movie:legacy"), {
+      id: "legacy", media_type: "movie", title: "Legacy owner data", year: "2025",
+      poster_path: "", backdrop_path: "", updatedAt: Date.now()
+    });
+    await setDoc(doc(admin, "users/profile-scope/profiles/owner/favorites/movie:owner"), {
+      id: "owner", media_type: "movie", title: "Owner data", year: "2025",
+      poster_path: "", backdrop_path: "", updatedAt: Date.now()
+    });
+    await setDoc(doc(admin, "users/profile-scope/profiles/child/favorites/movie:child"), {
+      id: "child", media_type: "movie", title: "Child data", year: "2025",
+      poster_path: "", backdrop_path: "", updatedAt: Date.now()
+    });
+  });
+
+  const owner = member("profile-scope", "Owner");
+  const child = env.authenticatedContext("profile-scope", {
+    email_verified: true, name: "Child", profileId: "child"
+  }).firestore();
+  await assertSucceeds(getDoc(doc(owner, "users/profile-scope/favorites/movie:legacy")));
+  await assertSucceeds(getDoc(doc(owner, "users/profile-scope/profiles/owner/favorites/movie:owner")));
+  await assertFails(getDoc(doc(owner, "users/profile-scope/profiles/child/favorites/movie:child")));
+  await assertSucceeds(getDoc(doc(child, "users/profile-scope/profiles/child/favorites/movie:child")));
+  await assertFails(getDoc(doc(child, "users/profile-scope/profiles/owner/favorites/movie:owner")));
+  await assertFails(getDoc(doc(child, "users/profile-scope/favorites/movie:legacy")));
+
+  await env.withSecurityRulesDisabled(async context => {
+    const admin = context.firestore();
+    await setDoc(doc(admin, "users/profile-scope/profiles/owner/profileSecurity/pin"), {
+      pinHash: "server-only", pinSalt: "server-only", iterations: 310000
+    });
+    await setDoc(doc(admin, "users/profile-scope/profiles/owner/profileSessions/owner-session"), {
+      uid: "profile-scope", profileId: "owner", revoked: false,
+      expiresAt: Timestamp.fromMillis(Date.now() + 60 * 60 * 1000)
+    });
+  });
+  await assertFails(getDoc(doc(owner, "users/profile-scope/favorites/movie:legacy")));
+  const ownerUnlocked = env.authenticatedContext("profile-scope", {
+    email_verified: true, name: "Owner", profileId: "owner", profileSessionId: "owner-session"
+  }).firestore();
+  await assertSucceeds(getDoc(doc(ownerUnlocked, "users/profile-scope/favorites/movie:legacy")));
+});
 
 test("discovery queue is private and publication is coupled to an article write", async () => {
   const publishedAt = new Date(Date.now() - 60_000);
