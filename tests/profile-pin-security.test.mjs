@@ -39,7 +39,8 @@ test("server PIN endpoint verifies Firebase identity and applies brute-force pro
   assert.match(pinApi, /isRecentAccountAuth\(claims\)/);
   assert.match(pinApi, /auth\.createCustomToken\(uid/);
   assert.match(pinApi, /action === "select"/);
-  assert.match(pinApi, /auth\.createCustomToken\(claims\.uid, \{ profileId \}\)/);\n  assert.match(pinApi, /createProfileSession\(auth, profileReference, claims\.uid, profileId, record\.pinHash\)/);\n  assert.match(pinApi, /createProfileSession\(auth, profileReference, claims\.uid, profileId, hashed\.pinHash\)/);
+  assert.match(pinApi, /auth\.createCustomToken\(claims\.uid, \{ profileId \}\)/);
+  assert.match(pinApi, /createProfileSession\(auth, profileReference, claims\.uid, profileId, record\.pinHash\)/);\n  assert.match(pinApi, /createProfileSession\(auth, profileReference, claims\.uid, profileId, hashed\.pinHash\)/);
   assert.match(pinApi, /pinSnapshot\.exists/);
 });
 
