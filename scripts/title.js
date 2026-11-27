@@ -362,13 +362,14 @@ function render(details, externalCertification = "", externalCertificationNote =
   const canonicalUrl = new URL(window.location.href);
   canonicalUrl.hash = "";
   const posterImage = media.poster_path ? "https://image.tmdb.org/t/p/w780" + media.poster_path : undefined;
+  const socialImage = details.backdrop_path ? "https://image.tmdb.org/t/p/w1280" + details.backdrop_path : posterImage;
   const titleSchema = {
     "@context": "https://schema.org",
     "@type": media.media_type === "tv" ? "TVSeries" : "Movie",
     "name": title,
     "description": description,
     "url": canonicalUrl.href,
-    "image": posterImage,
+    "image": socialImage || posterImage,
     "datePublished": releaseDate || undefined,
     "genre": (details.genres || []).map(genre => genre.name).filter(Boolean),
     "inLanguage": details.original_language || "en",
@@ -386,8 +387,8 @@ function render(details, externalCertification = "", externalCertificationNote =
     title: title + (releaseDate ? " (" + releaseDate.slice(0, 4) + ")" : "") + (media.media_type === "tv" ? " — TV Series" : " — Movie") + " | Vivid Cinema",
     description,
     canonicalUrl: canonicalUrl.href,
-    image: posterImage,
-    type: "video.other",
+    image: socialImage,
+    type: media.media_type === "tv" ? "video.tv_show" : "video.movie",
     structuredData: titleSchema
   });
   const country=getInitialCountry(details);
