@@ -343,42 +343,63 @@ function cancelEdits() {
   refreshSaveState();
 }
 
-onAuthStateChanged(auth, async (user) => {
-  if (!user) {
-    window.location.replace("login.html");
+async function startAccountAuthObserver() {
+  try {
+    if (typeof auth.authStateReady === "function") {
+      await withTimeout(
+        auth.authStateReady(),
+        10_000,
+        "Your Vivid sign-in is still being restored. Keep this page open and try again."
+      );
+    }
+  } catch (error) {
+    console.warn("Vivid account auth restoration did not finish:", error);
+    setStatus(error.message || "Vivid could not confirm your sign-in yet. Please retry.", "error");
     return;
   }
-  // Keep the account usable while Firestore restores or fetches profile data.
-  renderSignedInIdentity(user);
-  setSyncStatus("Library on this device", "Your account is signed in; cloud details are loading.", "idle");
-  setStatus("Signed in. Loading your account details…");
-  try {
-    await loadUser(user);
-  } catch (error) {
-    console.error("Vivid account load failed:", error);
-    currentUser = user;
-    const local = loadLocalPreferences();
-    fillCountryOptions(local.providerCountry);
-    if (nameEl) nameEl.value = user.displayName || user.email?.split("@")[0] || "Vivid member";
-    if (profileTitleEl) profileTitleEl.textContent = nameEl?.value || "Vivid member";
-    if (profileSummaryEl) profileSummaryEl.textContent = user.email || "Your personal cinema profile";
-    if (emailEl) emailEl.value = user.email || "";
-    if (providerEl) providerEl.textContent = providerLabel(user);
-    if (accountTypeEl) accountTypeEl.textContent = providerLabel(user);
-    if (verificationEl) {
-      verificationEl.textContent = user.emailVerified ? "Email verified" : "Not verified";
-      verificationEl.dataset.state = user.emailVerified ? "success" : "warning";
+
+  let redirectingToLogin = false;
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) {
+      if (redirectingToLogin) return;
+      redirectingToLogin = true;
+      window.location.replace("login.html");
+      return;
     }
-    renderAvatar(user, nameEl?.value || "Vivid member");
-    if (autoplayEl) autoplayEl.checked = local.autoplayTrailers;
-    if (reducedMotionEl) reducedMotionEl.checked = local.reducedMotion;
-    if (createdEl) createdEl.textContent = formatCreatedDate(user, {});
-    renderCounts(getLocalLibrary());
-    snapshotForm();
-    setSyncStatus("Cloud profile unavailable", "Your local library is available; cloud profile could not be loaded.", "error");
-    setStatus("Loaded a local fallback. Cloud preferences could not be reached.", "error");
-  }
-});
+    // Keep the account usable while Firestore restores or fetches profile data.
+    renderSignedInIdentity(user);
+    setSyncStatus("Library on this device", "Your account is signed in; cloud details are loading.", "idle");
+    setStatus("Signed in. Loading your account details…");
+    try {
+      await loadUser(user);
+    } catch (error) {
+      console.error("Vivid account load failed:", error);
+      currentUser = user;
+      const local = loadLocalPreferences();
+      fillCountryOptions(local.providerCountry);
+      if (nameEl) nameEl.value = user.displayName || user.email?.split("@")[0] || "Vivid member";
+      if (profileTitleEl) profileTitleEl.textContent = nameEl?.value || "Vivid member";
+      if (profileSummaryEl) profileSummaryEl.textContent = user.email || "Your personal cinema profile";
+      if (emailEl) emailEl.value = user.email || "";
+      if (providerEl) providerEl.textContent = providerLabel(user);
+      if (accountTypeEl) accountTypeEl.textContent = providerLabel(user);
+      if (verificationEl) {
+        verificationEl.textContent = user.emailVerified ? "Email verified" : "Not verified";
+        verificationEl.dataset.state = user.emailVerified ? "success" : "warning";
+      }
+      renderAvatar(user, nameEl?.value || "Vivid member");
+      if (autoplayEl) autoplayEl.checked = local.autoplayTrailers;
+      if (reducedMotionEl) reducedMotionEl.checked = local.reducedMotion;
+      if (createdEl) createdEl.textContent = formatCreatedDate(user, {});
+      renderCounts(getLocalLibrary());
+      snapshotForm();
+      setSyncStatus("Cloud profile unavailable", "Your local library is available; cloud profile could not be loaded.", "error");
+      setStatus("Loaded a local fallback. Cloud preferences could not be reached.", "error");
+    }
+  });
+}
+
+void startAccountAuthObserver();
 
 for (const control of [nameEl, countryEl, autoplayEl, reducedMotionEl]) {
   control?.addEventListener("input", refreshSaveState);

@@ -413,6 +413,49 @@ function syncNavigation() {
 
 const PROFILE_SESSION_UID_KEY = "vivid:profile-session-uid:v1";
 const PROFILE_RETURN_TO_KEY = "vivid:profile-return-to:v1";
+const PROFILE_GATE_REDIRECT_PREFIX = "vivid:profile-gate-redirected:v1:";
+const profileGateRedirectedUids = new Set();
+
+function clearProfileGateRedirect(uid) {
+  if (!uid) return;
+  profileGateRedirectedUids.delete(String(uid));
+  try { sessionStorage.removeItem(PROFILE_GATE_REDIRECT_PREFIX + String(uid)); } catch {}
+}
+
+function clearAllProfileGateRedirects() {
+  profileGateRedirectedUids.clear();
+  try {
+    for (let index = sessionStorage.length - 1; index >= 0; index -= 1) {
+      const key = sessionStorage.key(index);
+      if (key?.startsWith(PROFILE_GATE_REDIRECT_PREFIX)) sessionStorage.removeItem(key);
+    }
+  } catch {}
+}
+
+function showProfileGateNotice() {
+  if (document.getElementById("vivid-profile-gate-notice")) return;
+  const notice = document.createElement("div");
+  notice.id = "vivid-profile-gate-notice";
+  notice.setAttribute("role", "alert");
+  Object.assign(notice.style, {
+    position: "fixed", inset: "0", zIndex: "2147483001", display: "grid",
+    placeItems: "center", padding: "24px", background: "rgba(5, 7, 12, .94)",
+    color: "#fff", textAlign: "center", font: "600 16px/1.5 system-ui, sans-serif"
+  });
+  const panel = document.createElement("div");
+  Object.assign(panel.style, { maxWidth: "420px", padding: "28px", borderRadius: "20px", background: "#151923", border: "1px solid rgba(255,255,255,.12)" });
+  const heading = document.createElement("h2");
+  heading.textContent = "Choose your Vivid profile";
+  const message = document.createElement("p");
+  message.textContent = "Your profile session is not active on this page. Choose a profile to continue.";
+  const link = document.createElement("a");
+  link.href = "profiles.html";
+  link.textContent = "Open profile selector";
+  Object.assign(link.style, { display: "inline-block", marginTop: "12px", padding: "12px 18px", borderRadius: "999px", background: "#fff", color: "#10131a", textDecoration: "none" });
+  panel.append(heading, message, link);
+  notice.append(panel);
+  document.body.append(notice);
+}
 
 function rememberProfileReturnRoute() {
   const page = location.pathname.split("/").filter(Boolean).pop() || "home.html";
@@ -460,7 +503,20 @@ async function enforceProfileSelection(user) {
   if (["profiles.html", "auth.html", "login.html", "forgot-password.html", "auth-diagnostics.html", "verify-email.html", "anime-premium-return.html"].includes(page)) return;
   const redirectToProfiles = () => {
     rememberProfileReturnRoute();
-    if (page !== "profiles.html") window.location.replace("profiles.html");
+    const key = PROFILE_GATE_REDIRECT_PREFIX + String(user.uid);
+    let alreadyRedirected = profileGateRedirectedUids.has(String(user.uid));
+    try {
+      alreadyRedirected = alreadyRedirected || sessionStorage.getItem(key) === "1";
+      if (!alreadyRedirected) sessionStorage.setItem(key, "1");
+    } catch {}
+    if (!alreadyRedirected) {
+      profileGateRedirectedUids.add(String(user.uid));
+      window.location.replace("profiles.html");
+      return;
+    }
+    // A repeated missing-claim callback must not start another navigation
+    // cycle. Keep the page blocked and provide one deliberate route to profiles.
+    showProfileGateNotice();
   };
 
   let tokenResult;
@@ -485,6 +541,7 @@ async function enforceProfileSelection(user) {
     redirectToProfiles();
     return;
   }
+  clearProfileGateRedirect(user.uid);
   const storedProfileId = getActiveProfileId(user.uid);
   if (storedProfileId !== claimedProfileId) {
     try { setActiveProfileId(user.uid, claimedProfileId); }
@@ -560,11 +617,15 @@ function syncAccountNavigation() {
       onAuthStateChanged(auth, (user) => {
         let previousUid = "";
         try { previousUid = localStorage.getItem(PROFILE_SESSION_UID_KEY) || ""; } catch {}
-        if (previousUid && previousUid !== String(user?.uid || "")) clearActiveProfileId(previousUid);
+        if (previousUid && previousUid !== String(user?.uid || "")) {
+          clearActiveProfileId(previousUid);
+          clearProfileGateRedirect(previousUid);
+        }
         if (user?.uid) {
           try { localStorage.setItem(PROFILE_SESSION_UID_KEY, String(user.uid)); } catch {}
         } else {
           if (previousUid) clearActiveProfileId(previousUid);
+          clearAllProfileGateRedirects();
           try { localStorage.removeItem(PROFILE_SESSION_UID_KEY); } catch {}
         }
         const destination = user ? "account.html" : "auth.html";

@@ -65,7 +65,8 @@ test("ordinary JavaScript and CSS serve cache immediately and refresh in the bac
   assert.match(source, /const CACHE_NAME = "vivid-cinema-shell-v\d+"/);
   assert.ok(source.includes("event.respondWith(isCodeOrStyle?staleWhileRevalidate(request,event):isHtml?networkFirst(request):staleWhileRevalidate(request,event));"));
   assert.ok(source.includes("const isAuthRuntime="));
-  assert.ok(!source.includes("auth-diagnostics|app-shell|account"));
+  assert.ok(source.includes("app-shell"), "app-shell must be network-first with authentication runtime assets");
+  assert.match(source, /isAuthRuntime=.*app-shell/);
   assert.match(source, /redirect:"follow"/);
   assert.match(source, /response\.redirected&&response\.url/);
 });
