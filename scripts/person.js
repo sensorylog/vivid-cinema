@@ -136,7 +136,7 @@ function render(person) {
 
   const actingCredits = cast;
   const crewCredits = crew;
-  document.title = person.name + " · Vivid Cinema";
+
   $("person-content").innerHTML =
     '<div class="vivid-person-layout">' +
       '<aside class="vivid-person-sidebar" aria-label="Person details">' +
