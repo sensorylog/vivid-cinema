@@ -214,11 +214,8 @@ async function signInWithVerifiedProfileSession(customToken, expectedProfileId, 
   if (!selectedUser?.uid || selectedUser.uid !== expectedAccountId) {
     throw new Error("The selected profile belongs to a different account. Please sign in again.");
   }
-  await withProfileTimeout(
-    selectedUser.getIdToken(true),
-    10_000,
-    "Vivid could not refresh the selected profile session. Please retry."
-  );
+  // The custom token already contains the server-issued profile claims.
+  // Forcing a refresh here discards custom-token-only claims before navigation.
   const tokenResult = await withProfileTimeout(
     selectedUser.getIdTokenResult(),
     8_000,
@@ -240,6 +237,13 @@ async function finishProfileOpen(profile, customToken) {
     user = selectedUser;
     // Persist only after Firebase confirms the server-issued profile claim.
     setActiveProfileId(accountId, profile.id);
+    const selectedClaims = await selectedUser.getIdTokenResult();
+    const sessionId = String(selectedClaims.claims.profileSessionId || "");
+    if (!sessionId) throw new Error("Vivid could not save the selected profile session. Please choose again.");
+    sessionStorage.setItem("vivid:profile-session:v1:" + accountId, JSON.stringify({
+      profileId: profile.id,
+      sessionId
+    }));
   } finally {
     switchingProfile = false;
   }
@@ -333,7 +337,7 @@ async function refreshProfiles() {
 $("profile-signout").addEventListener("click",async() => {
   const button = $("profile-signout");
   button.disabled = true;
-  try { sessionStorage.removeItem("vivid:profile-return-to:v1"); await signOut(auth); location.replace("login.html"); }
+  try { sessionStorage.removeItem("vivid:profile-return-to:v1"); sessionStorage.removeItem("vivid:profile-session:v1:" + user?.uid); await signOut(auth); location.replace("login.html"); }
   catch(error) { button.disabled = false; say(error.message || "Could not sign out. Please try again.",true); }
 });
 $("manage-toggle").addEventListener("click",() => {
