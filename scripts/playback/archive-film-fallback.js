@@ -15,8 +15,9 @@ function safeHttpUrl(value) {
 }
 function acceptedLicense(value) {
   const license = cleanText(value, 200);
-  if (/\b(non.?commercial|no.?derivatives|all rights reserved|copyright restricted)\b/i.test(license)) return "";
+  if (/\b(non.?commercial|no.?derivatives|all rights reserved|copyright restricted|rights status not evaluated|undetermined)\b/i.test(license)) return "";
   if (/public domain|cc0|cc by(?:-sa)?(?:\s|$)/i.test(license)) return license;
+  if (/no known restrictions on (?:publication|use)/i.test(license)) return "No known restrictions advisory (verify item record)";
   return "";
 }
 export function licenseFor(metadata) {
