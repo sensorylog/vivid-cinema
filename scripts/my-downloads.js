@@ -2,6 +2,7 @@ import { DownloadManager } from "./downloads/download-manager.js";
 import { createIndexedDBPersistence } from "./downloads/indexeddb-persistence.js";
 import { createBrowserDownloadAdapter } from "./downloads/browser-direct-adapter.js";
 import { createOfflinePlaybackController } from "./downloads/offline-playback.js";
+import { getActiveProfileId, initializeProfileFoundation } from "./profiles.js";
 
 async function loadHlsRuntime() {
   if (window.Hls) return;
@@ -32,7 +33,7 @@ const jobsNode = byId("offline-jobs");
 const messageNode = byId("offline-message");
 const playerSection = byId("offline-player-section");
 const video = byId("offline-player");
-let manager = null, playback = null, activeAdapter = null, unsubscribe = null, activeOwner = null, generation = 0;
+let manager = null, playback = null, activeAdapter = null, unsubscribe = null, activeOwner = null, generation = 0, currentAuth = null;
 
 function escapeHtml(value) {
   return String(value ?? "").replace(/[&<>"']/g, char => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[char]);
@@ -74,7 +75,10 @@ function render(jobs) {
   }).join("");
 }
 async function switchOwner(user) {
-  const owner=user?.uid?String(user.uid):"guest"; if(owner===activeOwner)return;
+  if(user?.uid)await initializeProfileFoundation(user);
+  const profileId=user?.uid?getActiveProfileId(user.uid):"guest";
+  const owner=user?.uid?String(user.uid)+"::"+String(profileId):"guest";
+  if(owner===activeOwner)return;
   const run=++generation; unsubscribe?.(); unsubscribe=null;
   try{await playback?.stop();}catch{} try{await manager?.persistence?.close?.();}catch{}
   activeOwner=owner; byId("offline-owner").textContent=user?.uid?"Signed-in account":"Guest library";
@@ -132,8 +136,12 @@ byId("offline-player-close").addEventListener("click",async()=>{await playback?.
 async function start(){
   try{
     const [{auth},{onAuthStateChanged}]=await Promise.all([import("./firebase.js"),import("https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js")]);
+    currentAuth=auth;
     if(typeof auth.authStateReady==="function")await auth.authStateReady();
     onAuthStateChanged(auth,user=>{void switchOwner(user);});
+    window.addEventListener("vivid:profile-changed",event=>{
+      if(currentAuth?.currentUser?.uid===String(event.detail?.uid||""))void switchOwner(currentAuth.currentUser);
+    });
   }catch(error){console.warn("Vivid download library is using guest storage:",error);await switchOwner(null);}
 }
 void start();
