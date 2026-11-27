@@ -147,6 +147,19 @@ export function getActiveProfileId(uid) {
   }
 }
 
+export function hasActiveProfileSelection(uid) {
+  try {
+    const value = localStorage.getItem(activeProfileStorageKey(uid));
+    return Boolean(value && PROFILE_ID_PATTERN.test(value));
+  } catch {
+    return false;
+  }
+}
+
+export function clearActiveProfileId(uid) {
+  try { localStorage.removeItem(activeProfileStorageKey(uid)); } catch {}
+}
+
 export function setActiveProfileId(uid, profileId) {
   const key = activeProfileStorageKey(uid);
   const id = normalizeProfileId(profileId);
