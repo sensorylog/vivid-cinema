@@ -62,7 +62,7 @@ test("movie and TV playback retains seven sources while Free Anime is restricted
   assert.match(source, /button\.hidden = isAnimePlayback\(\) \? source !== "vidapi"/);
   assert.match(source, /<span class="vivid-server-count">7 sources<\/span>/);
   assert.doesNotMatch(source, /mountPlaybackServerSettings\(serverPanel/);
-  for (const provider of ["embedwave", "vidfast", "ezvidapi", "embedapistream", "moviesapi", "archive"]) {
+  for (const provider of ["embedwave", "vidfast", "ezvidapi", "embedapistream", "moviesapi", "archive", "commons", "loc"]) {
     assert.ok(source.includes(`data-player-source="${provider}"`), `${provider} should have a Player 1 button`);
   }
 });
@@ -224,4 +224,14 @@ test("Internet Archive is a selectable movie source, not only an exhausted-serve
   assert.match(source, /data-player-source="archive"/);
   assert.match(source, /if \(source === "archive"\) \{[\s\S]*?showArchiveFallback\(\);[\s\S]*?return;/);
   assert.match(source, /button\.hidden = isAnimePlayback\(\) \? source !== "vidapi" : !\[[^\]]*"archive"\]\.includes\(source\)/);
+});
+
+
+test("open movie catalogues are selectable sources and never appear for anime", () => {
+  assert.match(source, /data-player-source="archive"/);
+  assert.match(source, /data-player-source="commons"/);
+  assert.match(source, /data-player-source="loc"/);
+  assert.match(source, /\["archive", "commons", "loc"\]\.includes\(source\)/);
+  assert.match(source, /button\.hidden = isAnimePlayback\(\) \? source !== "vidapi"/);
+  assert.match(source, /directPlayer\.src = directUrl/);
 });
