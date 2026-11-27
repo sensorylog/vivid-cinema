@@ -138,7 +138,7 @@ test("payment return checks server membership and never grants access from the c
 test("membership return survives Vivid email verification and is cached offline", () => {
   assert.match(sendVerification, /anime-premium-membership\.html/);
   assert.match(verifyEmail, /anime-premium-membership\.html/);
-  assert.match(sw, /vivid-cinema-shell-v366/);
+  assert.match(sw, /vivid-cinema-shell-v370/);
   assert.match(sw, /anime-premium-membership\.html/);
   assert.match(sw, /anime-premium-return\.html/);
   assert.match(sw, /anime-premium-membership\.js/);
