@@ -422,6 +422,16 @@ function clearProfileGateRedirect(uid) {
   try { sessionStorage.removeItem(PROFILE_GATE_REDIRECT_PREFIX + String(uid)); } catch {}
 }
 
+function clearAllProfileGateRedirects() {
+  profileGateRedirectedUids.clear();
+  try {
+    for (let index = sessionStorage.length - 1; index >= 0; index -= 1) {
+      const key = sessionStorage.key(index);
+      if (key?.startsWith(PROFILE_GATE_REDIRECT_PREFIX)) sessionStorage.removeItem(key);
+    }
+  } catch {}
+}
+
 function showProfileGateNotice() {
   if (document.getElementById("vivid-profile-gate-notice")) return;
   const notice = document.createElement("div");
@@ -614,10 +624,8 @@ function syncAccountNavigation() {
         if (user?.uid) {
           try { localStorage.setItem(PROFILE_SESSION_UID_KEY, String(user.uid)); } catch {}
         } else {
-          if (previousUid) {
-            clearActiveProfileId(previousUid);
-            clearProfileGateRedirect(previousUid);
-          }
+          if (previousUid) clearActiveProfileId(previousUid);
+          clearAllProfileGateRedirects();
           try { localStorage.removeItem(PROFILE_SESSION_UID_KEY); } catch {}
         }
         const destination = user ? "account.html" : "auth.html";
