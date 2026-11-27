@@ -59,9 +59,9 @@ test("library sync propagates Firestore failures so the account UI cannot report
   assert.match(syncBody, /Do not replace local data until all required cloud operations have been[\s\S]*?acknowledged/);
 });
 
-test("library sync reconciles deletions and avoids rewriting every unchanged remote item", () => {
+test("library sync reconciles profile-scoped deletions and avoids rewriting unchanged items", () => {
   const library = readFileSync(new URL("../scripts/library.js", import.meta.url), "utf8");
-  assert.match(library, //deleteDoc\\\(doc\\\(db,\\s\*"users",\\s\*user\\.uid,\\s\*"profiles",\\s\*profileId,\\s\*tombstone\\.collection,\\s\*contentId\\\)\\\)/g/);
+  assert.ok(library.includes('deleteDoc(doc(db,"users",user.uid,"profiles",profileId,tombstone.collection,contentId))'));
   assert.match(library, /if\(!remote \|\| Number\(item\.updatedAt\|\|0\)>Number\(remote\.updatedAt\|\|0\)\)/);
   assert.match(library, /await mapLimit\(writes,8/);
 });
