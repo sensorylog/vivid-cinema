@@ -114,6 +114,9 @@ export async function signInWithCustomToken() { throw new Error("not used"); }
 `;
 
 test("profile selector waits for persisted Firebase auth before deciding to redirect", async ({ page }) => {
+  const runtimeErrors = [];
+  page.on("pageerror", error => runtimeErrors.push(error.message));
+  page.on("console", message => { if (message.type() === "error") runtimeErrors.push(message.text()); });
   await page.route("**/scripts/firebase.js*", route => route.fulfill({
     status: 200, contentType: "text/javascript", body: firebaseMock
   }));
@@ -142,7 +145,7 @@ test("profile selector waits for persisted Firebase auth before deciding to redi
   await expect(page).toHaveURL(/profiles\.html$/);
   await page.evaluate(() => window.__releaseProfileAuth());
 
-  console.log("Profile selector after auth restore:", await page.locator("#profile-grid").innerText(), "| status:", await page.locator("#profile-status").innerText());
+  console.log("Profile selector after auth restore:", await page.locator("#profile-grid").innerText(), "| status:", await page.locator("#profile-status").innerText(), "| runtime errors:", runtimeErrors);
   await expect(page.getByRole("button", { name: "Choose Main Profile" })).toBeVisible();
   await page.getByRole("button", { name: "Choose Main Profile" }).click();
   await expect(page).toHaveURL(/home\.html$/);
