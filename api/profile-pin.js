@@ -283,6 +283,20 @@ export default async function handler(req, res) {
     if (action !== "validate") await consumeRateLimit(db, claims.uid, profileId);
 
     if (action === "select") {
+      const profilesCollection = db.collection("users").doc(claims.uid).collection("profiles");
+      const targetSnapshot = await profileReference.get();
+      const currentProfileId = String(claims.profileId || "");
+      if (currentProfileId && currentProfileId !== profileId) {
+        const currentSnapshot = await profilesCollection.doc(currentProfileId).get();
+        if (currentSnapshot.data()?.isKids === true && profileId !== "owner" && targetSnapshot.data()?.isKids !== true) {
+          throw new ProfilePinError(403, "parent-authorization-required", "A parent PIN is required to leave Kids Mode.");
+        }
+      } else if (!currentProfileId) {
+        const kidsProfiles = await profilesCollection.where("isKids", "==", true).limit(1).get();
+        if (!kidsProfiles.empty && profileId !== "owner" && targetSnapshot.data()?.isKids !== true) {
+          throw new ProfilePinError(403, "parent-authorization-required", "A parent PIN is required to leave Kids Mode.");
+        }
+      }
       const pinSnapshot = await pinReference.get();
       if (pinSnapshot.exists) {
         throw new ProfilePinError(423, "pin-required", "This profile is PIN protected. Enter its PIN to continue.");

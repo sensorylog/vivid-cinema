@@ -155,6 +155,10 @@ export async function createAccountProfile(request, env) {
   const { db, user } = await requireProfileUser(request, env);
   await enforceRateLimit(db, user.uid, "profiles-create", 10, 60 * 60 * 1000);
   const body = await readProfileBody(request);
+  if (user.profileId && user.profileId !== OWNER_PROFILE_ID) {
+    const active = await db.collection("users").doc(user.uid).collection("profiles").doc(user.profileId).get();
+    if (active.data()?.isKids === true) throw new AnimePremiumError(403, "parent-authorization-required", "Kids profiles cannot create additional viewing profiles. Verify with the Main Profile first.");
+  }
   const name = typeof body.name === "string" ? body.name.trim() : "";
   if (!name) throw new AnimePremiumError(400, "invalid-profile-name", "Enter a name for this profile.");
   if(body.isKids===true&&user.profileId!==OWNER_PROFILE_ID)throw new AnimePremiumError(403,"parent-authorization-required","Only the Main Profile can create a Kids profile.");
@@ -191,6 +195,10 @@ export async function updateAccountProfile(request, env) {
   const { db, user } = await requireProfileUser(request, env);
   await enforceRateLimit(db, user.uid, "profiles-update", 30, 60 * 60 * 1000);
   const body = await readProfileBody(request);
+  if (user.profileId && user.profileId !== OWNER_PROFILE_ID) {
+    const active = await db.collection("users").doc(user.uid).collection("profiles").doc(user.profileId).get();
+    if (active.data()?.isKids === true) throw new AnimePremiumError(403, "parent-authorization-required", "Kids profiles cannot manage other viewing profiles.");
+  }
   let profileId;
   try { profileId = normalizeProfileId(body.profileId); }
   catch { throw new AnimePremiumError(400, "invalid-profile-id", "Choose a valid Vivid profile."); }
@@ -235,6 +243,10 @@ export async function deleteAccountProfile(request, env) {
   const { db, user } = await requireProfileUser(request, env);
   await enforceRateLimit(db, user.uid, "profiles-delete", 5, 60 * 60 * 1000);
   const body = await readProfileBody(request);
+  if (user.profileId && user.profileId !== OWNER_PROFILE_ID) {
+    const active = await db.collection("users").doc(user.uid).collection("profiles").doc(user.profileId).get();
+    if (active.data()?.isKids === true) throw new AnimePremiumError(403, "parent-authorization-required", "Kids profiles cannot delete other viewing profiles.");
+  }
   let profileId;
   try { profileId = normalizeProfileId(body.profileId); }
   catch { throw new AnimePremiumError(400, "invalid-profile-id", "Choose a valid Vivid profile."); }
