@@ -248,8 +248,10 @@ jobs:
           # new Android-only release feed. New Android builds use android-v* tags.
           if [ -n "$LEGACY_BRIDGE_TAG" ]; then
             gh release view "$LEGACY_BRIDGE_TAG" --repo "$GITHUB_REPOSITORY" >/dev/null
+            bridge_apk="release-output/Vivid-Cinema-Android-$ANDROID_VERSION_INPUT-build-$VIVID_ANDROID_BUILD.apk"
+            cp release-output/Vivid-Cinema-Android.apk "$bridge_apk"
             gh release upload "$LEGACY_BRIDGE_TAG" \
-              release-output/Vivid-Cinema-Android.apk \
+              "$bridge_apk" \
               "release-output/Vivid-Cinema-Android-build-$VIVID_ANDROID_BUILD.json" \
               --repo "$GITHUB_REPOSITORY" --clobber
             echo "Added a one-time Android migration asset to $LEGACY_BRIDGE_TAG for legacy installed apps."
