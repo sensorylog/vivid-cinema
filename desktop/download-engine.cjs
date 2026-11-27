@@ -3,8 +3,14 @@ const path = require("node:path");
 const fs = require("node:fs");
 const fsp = require("node:fs/promises");
 const crypto = require("node:crypto");
-const WebTorrent = require("webtorrent");
-const TorrentSearchApi = require("torrent-search-api");
+let TorrentSearchApi = null;
+function getTorrentSearchApi() {
+  if (!TorrentSearchApi) {
+    TorrentSearchApi = require("torrent-search-api");
+    TorrentSearchApi.enablePublicProviders();
+  }
+  return TorrentSearchApi;
+}
 
 const VIDEO_EXTENSIONS = /\.(mp4|m4v|mkv|avi|mov|webm|ogv|mpg|mpeg|wmv|flv|ts|m2ts|3gp)$/i;
  // Maintained public tracker endpoints provide extra discovery paths for
@@ -57,12 +63,14 @@ class DesktopDownloadEngine {
     this.downloadPath = path.join(app.getPath("downloads"), "Vivid Cinema");
     this.statePath = path.join(app.getPath("userData"), "vivid-downloads.json");
     fs.mkdirSync(this.downloadPath, { recursive: true });
-    TorrentSearchApi.enablePublicProviders();
-    this.createClient();
+    // Browsing and playing completed downloads must not initialise WebTorrent
+    // or its provider adapters. Load those heavier runtimes only on demand.
+    this.client = null;
     this.ready = this.restore();
   }
 
   createClient() {
+    const WebTorrent = require("webtorrent");
     const client = new WebTorrent();
     this.client = client;
     client.on("error", error => {
@@ -150,7 +158,7 @@ class DesktopDownloadEngine {
     await this.ready;
     const term = safeText(query, 160);
     if (term.length < 2) throw new Error("Enter at least two characters.");
-    const rows = await TorrentSearchApi.search(term, "All", 60);
+    const rows = await getTorrentSearchApi().search(term, "All", 60);
     return (Array.isArray(rows) ? rows : []).filter(x => x && x.title && (Number(x.seeds || 0) > 0 || Number(x.peers || 0) > 0)).map(source => {
       const id = crypto.randomUUID();
       this.searchResults.set(id, source);
@@ -179,7 +187,7 @@ class DesktopDownloadEngine {
     const source = result && this.searchResults.get(String(result.id));
     if (!source) throw new Error("Search result expired. Search again and choose a result.");
     if (!this.client || this.client.destroyed) this.createClient();
-    const magnet = result.magnet || await TorrentSearchApi.getMagnet(source);
+    const magnet = result.magnet || await getTorrentSearchApi().getMagnet(source);
     if (typeof magnet !== "string" || !magnet.startsWith("magnet:?")) throw new Error("No valid magnet link was returned.");
     const id = crypto.randomUUID();
     const job = {
@@ -356,8 +364,8 @@ class DesktopDownloadEngine {
         lastWarning: job.discovery.lastWarning,
         videoFiles: job.discovery.videoFiles || 0,
         deselectedFiles: job.discovery.deselectedFiles || 0,
-        dhtEnabled: Boolean(this.client.dht),
-        dhtListening: Boolean(this.client.dht && this.client.dht.listening)
+        dhtEnabled: Boolean(this.client?.dht),
+        dhtListening: Boolean(this.client?.dht && this.client.dht.listening)
       } : null,
       speed: torrent?.downloadSpeed || 0, downloaded: torrent?.downloaded || job.downloaded || 0,
       total: torrent?.length || job.total || fileSize || 0, peers: torrent?.numPeers || 0,
@@ -493,7 +501,11 @@ class DesktopDownloadEngine {
       job.torrent = null;
     }
     await this.persist().catch(error => console.warn("Could not persist downloads on exit:", error.message));
-    await new Promise(resolve => this.client.destroy(resolve));
+    if (this.client && !this.client.destroyed) {
+      const client = this.client;
+      this.client = null;
+      await new Promise(resolve => client.destroy(resolve));
+    }
   }
 }
 module.exports = { DesktopDownloadEngine, FALLBACK_TRACKERS, selectVideoPayload };
