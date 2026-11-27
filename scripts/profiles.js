@@ -122,7 +122,7 @@ export async function ensureOwnerProfile(user = null) {
   const profile = normalizeProfile(OWNER_PROFILE_ID, {
     name: current.displayName || current.email?.split("@")[0] || "Main Profile",
     avatarUrl: safeAvatarUrl(current),
-    avatarSource: safeAvatarUrl(current) ? "google" : "default"
+    avatarSource: safeAvatarUrl(current) ? "google" : "auto"
   });
   const timestamp = serverTimestamp();
   await setDoc(reference, {
