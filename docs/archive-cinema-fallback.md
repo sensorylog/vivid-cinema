@@ -1,34 +1,26 @@
-# Archive Cinema playback source
+# Open Film Sources in Vivid Cinema
 
-Internet Archive is available as a selectable source in Player 1 on movie watch pages. Viewers can choose it directly from the server picker, search the archive catalogue, inspect the original item and its rights declaration, and play a selected listing in the existing player. It also remains available as a last-resort discovery option after Vivid's normal movie sources have been exhausted.
+Player 1 offers three selectable catalogues for movie pages: Internet Archive, Wikimedia Commons and the Library of Congress. They are independent of Vivid's normal third-party embed servers and are also available as a last-resort discovery option after normal movie servers fail.
 
-## Flow
+## Internet Archive
 
-1. The viewer selects **Internet Archive** in the Player 1 server picker, or Vivid reveals the catalogue after its normal movie sources are exhausted.
-2. Search the Internet Archive Advanced Search API for movie records matching the requested title.
-3. Fetch each candidate's metadata record.
-4. Reject candidates without a public-domain declaration or a supported commercial Creative Commons license.
-5. Reject non-commercial (NC), no-derivatives (ND), private, and non-video files.
-6. Open the selected item using the Internet Archive's own embedded player. Vivid does not proxy, mirror, download, or re-host the media.
+Searches the Internet Archive Advanced Search API, fetches each candidate's metadata, and offers the official archive embed only when the record declares a public-domain or supported commercial Creative Commons licence and includes a playable video file. Accepted declarations are Public Domain Mark, CC0, CC BY and CC BY-SA. Non-commercial and no-derivatives licences are rejected. Uploader-supplied rights declarations are not independently verified.
 
-Accepted declarations are Public Domain Mark, CC0, CC BY and CC BY-SA. The archive item details page is linked beside every result so viewers can inspect the source and rights statement.
+## Wikimedia Commons
 
-## Important rights limitation
+Searches the Commons API for video files and uses each file's own extended metadata. Only direct HTTPS MP4, WebM or OGV files with a public-domain, CC0, CC BY or CC BY-SA declaration are offered. The original Commons file page is linked beside every result. Browser codec support varies by format.
 
-Internet Archive says that rights information is often supplied by the uploader and that it cannot guarantee the accuracy of uploader-provided copyright information. Therefore this filter is a conservative metadata screen, not legal verification or a guarantee that a title is public domain. The UI discloses this limitation and links to the original item. Remove or disable any item if a rights holder disputes its status.
+## Library of Congress
 
-Internet Archive guidance:
-- https://archivesupport.zendesk.com/hc/en-us/articles/360014759692-Rights
-- https://archivesupport.zendesk.com/hc/en-us/articles/360017808151-Movies-and-Videos-A-Basic-Guide
+Searches the official loc.gov film-and-video JSON endpoint, then fetches each item's detail record and digital resources. It only offers an MP4 resource when the item has an explicit public-domain, compatible Creative Commons, or "No known restrictions on publication/use" rights advisory. The latter is shown as an advisory, not a guarantee of public-domain status. Items with undetermined rights or no playable MP4 are excluded. The original item record is linked for inspection.
 
-## Playback behavior
+The Library of Congress says the National Screening Room includes both copyrighted and public-domain works; item-level rights/access checks are therefore mandatory. The LOC API documents distinct search, item and resource endpoints, and the collection notes that most titles are available as MP4 downloads. See [LOC National Screening Room](https://www.loc.gov/collections/national-screening-room/about-this-collection/), [LOC API endpoints](https://www.loc.gov/apis/json-and-yaml/requests/endpoints/), and [LOC streaming services](https://www.loc.gov/apis/micro-services/streaming-services/).
 
-- Available only on movie watch pages; never exposed to Free Anime or Premium Anime.
-- Catalogue requests begin only after the viewer selects Internet Archive or after Vivid's movie servers are exhausted.
-- Uses Player 1's existing iframe and the Archive's official embed URL.
-- Archive playback is user-selected and is not part of automatic server failover.
-- The archive player controls playback, subtitles, quality and progress. Vivid cannot inspect its cross-origin iframe internals.
+## Playback and limitations
 
-## Library of Congress expansion
-
-The Library of Congress National Screening Room remains a separate planned source. Its API exposes heterogeneous item and resource records, and item-level rights/access conditions vary. Do not show it as a playable source until the integration can identify a real playable media resource and preserve the item's rights/access notices. See the official [National Screening Room rights and access guidance](https://www.loc.gov/collections/national-screening-room/about-this-collection/rights-and-access/) and [Library of Congress streaming API documentation](https://www.loc.gov/apis/micro-services/streaming-services/).
+- All three catalogues are available only for movie playback, never Free Anime or Premium Anime.
+- Internet Archive uses its official embedded player. Commons and LOC use their direct MP4/WebM/OGV files in Vivid's native HTML5 video element.
+- Catalogue requests begin when a user selects a source or when the normal movie servers are exhausted.
+- The sources are archives of public-domain/openly licensed material, not substitutes for current commercial streaming catalogues. Most new studio releases will not be available here.
+- Vivid does not proxy, mirror, download or re-host these files. Source availability, formats, playback restrictions and rights metadata can change; users can open the original item record.
+- The source picker keeps Vivid's existing commercial embed providers unchanged.
