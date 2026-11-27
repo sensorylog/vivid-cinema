@@ -6,7 +6,13 @@ const $ = id => document.getElementById(id);
 const articleId = new URLSearchParams(location.search).get("id") || "";
 const articleRoot = $("news-story-content");
 const notice = $("news-story-notice");
-function isoDate(value) {\n  try { const date = value?.toDate ? value.toDate() : value ? new Date(value) : null; return date && !Number.isNaN(date.getTime()) ? date.toISOString() : undefined; } catch { return undefined; }\n}\nfunction dateText(value) {
+function isoDate(value) {
+  try {
+    const date = value?.toDate ? value.toDate() : value ? new Date(value) : null;
+    return date && !Number.isNaN(date.getTime()) ? date.toISOString() : undefined;
+  } catch { return undefined; }
+}
+function dateText(value) {
   const date = value?.toDate ? value.toDate() : value ? new Date(value) : null;
   return date && !Number.isNaN(date.getTime()) ? new Intl.DateTimeFormat(undefined,{dateStyle:"medium",timeStyle:"short"}).format(date) : "Publisher date unavailable";
 }
