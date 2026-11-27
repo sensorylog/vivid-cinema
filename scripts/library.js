@@ -307,7 +307,10 @@ async function mapLimit(items,limit,worker){
 }
 
 async function performLibrarySyncForUser(user=null,profileId=null){
+  let syncStage = "profile setup";
+  try {
   if(!user?.uid)return readLocal();
+  syncStage = "profile authorization and setup";
   await initializeProfileFoundation(user);
   profileId=profileId||getActiveProfileId(user.uid);
   if(getActiveProfileId(user.uid)!==profileId)throw new Error("The active profile changed before library sync could start.");
@@ -319,6 +322,7 @@ async function performLibrarySyncForUser(user=null,profileId=null){
   // A signed-in cloud sync is a protected action, so initialize the configured
   // Turnstile-backed provider before the first server read or write.
   const firebase = await getFirebase();
+  syncStage = "App Check validation";
   await firebase.ensureAppCheck();
 
   ensureLocalOwner(user.uid,profileId);
@@ -326,6 +330,7 @@ async function performLibrarySyncForUser(user=null,profileId=null){
 
   // Server-only reads are intentional: a cache-only/offline response must never
   // be reported to the user as a successful cloud sync.
+  syncStage = "cloud library reads";
   const [remoteCollections,remoteTombstones]=await Promise.all([
     Promise.all(COLLECTIONS.map(key=>fetchRemote(user.uid,key,profileId))),
     fetchTombstones(user.uid,profileId)
@@ -349,6 +354,7 @@ async function performLibrarySyncForUser(user=null,profileId=null){
   const tombstoneEntries=Object.entries(tombstones).filter(([key,item])=>
     item.collection&&item.contentId&&!activeKeys.has(key)
   );
+  syncStage = "deletion reconciliation";
   await mapLimit(tombstoneEntries,8,async([key,tombstone])=>{
     const remote=remoteTombstoneMap.get(key);
     if(!remote || Number(remote.deletedAt||0)<Number(tombstone.deletedAt||0)){
@@ -377,6 +383,7 @@ async function performLibrarySyncForUser(user=null,profileId=null){
       }
     }
   });
+  syncStage = "library uploads";
   await mapLimit(writes,8,async({collection,item})=>{
     await setRemoteItem(user.uid,collection,item,profileId);
   });
@@ -386,6 +393,7 @@ async function performLibrarySyncForUser(user=null,profileId=null){
     const key=String(item.collection)+":"+String(item.contentId);
     return activeKeys.has(key);
   });
+  syncStage = "deletion cleanup";
   await mapLimit(staleTombstones,8,async(item)=>{
     const winning=merged[item.collection]?.find(entry=>itemKey(entry)===String(item.contentId));
     if(!winning || Number(winning.updatedAt||0)<=Number(item.deletedAt||0))return;
@@ -395,6 +403,7 @@ async function performLibrarySyncForUser(user=null,profileId=null){
 
   // Do not let a sync started for a previous account overwrite the current
   // account's local snapshot if authentication changed while requests were in flight.
+  syncStage = "final profile validation";
   const activeAuth=await getFirebaseAuth();
   if(!activeAuth?.currentUser)throw new Error("Authentication is unavailable during library sync.");
   if(String(activeAuth.currentUser.uid)!==String(user.uid) || getActiveProfileId(user.uid)!==profileId)throw new Error("The active account or profile changed during library sync. Please retry.");
@@ -411,6 +420,10 @@ async function performLibrarySyncForUser(user=null,profileId=null){
   );
   saveLocalTombstones(remainingTombstones);
   return merged;
+  } catch (error) {
+    if (error && typeof error === "object" && !error.syncStage) error.syncStage = syncStage;
+    throw error;
+  }
 }
 
 const syncInFlight=new Map();
