@@ -65,6 +65,9 @@ test("profile APIs authenticate Firebase users, rate limit changes and enforce p
   assert.match(service, /owner-profile-required/);
   assert.match(service, /transaction\.create\(reference, created\)/);
   assert.match(service, /PROFILE_DELETE_COLLECTIONS/);
+  assert.match(service, /collection\("avatar"\)\.doc\("image"\)/);
+  assert.match(service, /includeAvatars/);
+  assert.match(service, /"avatar"/);
   assert.match(service, /reference\.delete\(\)/);
 });
 
@@ -77,6 +80,8 @@ test("profile management API protects the owner profile and exposes only explici
   assert.match(service, /A Vivid account can have up to/);
   assert.match(service, /Access-Control-Allow-Methods/);
   assert.ok(rules.includes("match /users/{userId}/profiles/{profileId}"));
+  assert.match(rules, /match \/avatar\/\{avatarId\} \{\s*allow read, write: if false;/);
+  assert.doesNotMatch(rules.slice(rules.indexOf("function validViewingProfile"), rules.indexOf("function hasViewingProfile")), /avatarData/);
   assert.match(rules, /avatarSource.*auto.*google.*collection.*upload/s);
   assert.equal(rules.split("match /users/{userId}/profiles/{profileId}").length - 1, 1);
   assert.equal(rules.split("match /{document=**}").length - 1, 1);
