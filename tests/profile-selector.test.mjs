@@ -35,6 +35,11 @@ test("successful sign-in opens the Who's Watching profile selector by default", 
   assert.match(openFlow, /clearActiveProfileId/);
 });
 
+test("profile selector does not expose protected global navigation before a profile is chosen", () => {
+  assert.match(shell, /if \(currentPage\(\) === "profiles"\)/);
+  assert.match(shell, /if \(page === "profiles"\) return/);
+});
+
 test("profile route validation does not turn transient service failures into selector redirects", () => {
   const summary = profiles.slice(profiles.indexOf("export async function listProfileSummaries"), profiles.indexOf("export function getActiveProfileId"));
   assert.doesNotMatch(summary, /ensureAppCheck/);
