@@ -35,7 +35,7 @@ test("owner can write a valid library item", async () => {
   const db = env.authenticatedContext("alice", { profileId: "owner" }).firestore();
   await assertSucceeds(setDoc(doc(db, "users/alice/favorites/movie:550"), {
     id: "550", media_type: "movie", title: "The Matrix", year: "1999",
-    poster_path: "/matrix.jpg", backdrop_path: "/matrix-backdrop.jpg",
+    poster_path: "/matrix.jpg", backdrop_path: "/matrix-backdrop.jpg", genre_ids: [28, 878], adult: false, certification: "PG-13",
     updatedAt: Date.now(), completion: 0
   }));
 });
