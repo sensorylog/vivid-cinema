@@ -1549,9 +1549,9 @@ async function switchDesktopProfile(user) {
   const profileId=user?.uid?getActiveProfileId(user.uid):"guest";
   const owner=user?.uid?String(user.uid)+"::"+String(profileId):"guest";
   if(owner===activeDesktopOwner)return;
-  activeDesktopOwner=owner;
   if(typeof engine.setOwner!=="function")throw new Error("This Vivid desktop build cannot safely separate offline downloads by profile. Update the app and retry.");
   await engine.setOwner(owner);
+  activeDesktopOwner=owner;
   await refresh();
 }
 async function bootstrapDesktopProfile() {
