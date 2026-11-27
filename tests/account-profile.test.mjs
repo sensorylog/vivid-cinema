@@ -113,9 +113,19 @@ test("account logout gives immediate feedback and handles a stalled sign-out", (
   assert.match(script, /Could not log out\. Check your connection and try again\./);
 });
 
+test("account waits for Firebase auth restoration before redirecting signed-out users", () => {
+  const startup = script.slice(script.indexOf("async function startAccountAuthObserver"), script.indexOf("void startAccountAuthObserver();"));
+  assert.match(startup, /auth\.authStateReady\(\)/);
+  assert.match(startup, /withTimeout/);
+  assert.match(startup, /redirectingToLogin/);
+  assert.ok(startup.indexOf("auth.authStateReady()") < startup.indexOf("onAuthStateChanged(auth"),
+    "account must not redirect while persisted Firebase auth is still restoring");
+});
+
 test("account page and account runtime are network-first for installed PWA freshness", () => {
   const worker = readFileSync(new URL("../service-worker.js", import.meta.url), "utf8");
-  assert.match(page, /scripts\/account\.js\?v=20261127-profile-foundation-1/);
+  assert.match(page, /scripts\/account\.js\?v=profile-auth-ready-2/);
+  assert.match(page, /scripts\/app-shell\.js\?v=profile-gate-guard-2/);
   assert.match(worker, /vivid-cinema-shell-v\d+/);
   assert.match(worker, /auth-diagnostics\|account\|profiles\)\\\.html/);
   assert.match(worker, /isAuthRuntime=.*profile-selector.*profiles.*cloudflare-ai/);
