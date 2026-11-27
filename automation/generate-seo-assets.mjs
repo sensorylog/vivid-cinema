@@ -96,7 +96,7 @@ const NOINDEX_PAGES = [
   "watch-rooms.html", "watch-room-cinema.html", "offline.html", "moderator.html",
   "african-stories-admin.html", "african-stories-submit.html", "african-stories-watch.html",
   "anime-premium-admin.html", "anime-premium-library.html", "anime-premium-return.html",
-  "donation-success.html", "african-stories.html", "news-story.html",
+  "donation-success.html", "african-stories.html",
   "live.html", "search.html"
 ];
 
