@@ -430,14 +430,16 @@ async function enforceProfileSelection(user) {
       redirectToProfiles();
       return;
     }
-    if (activeProfile.hasPin) {
-      const tokenResult = await user.getIdTokenResult();
-      if (tokenResult.claims.profileId !== activeId ||
-        typeof tokenResult.claims.profileSessionId !== "string" ||
-        !await validateProfileSession(user, activeId)) {
-        redirectToProfiles();
-        return;
-      }
+    const tokenResult = await user.getIdTokenResult();
+    if (tokenResult.claims.profileId !== activeId) {
+      redirectToProfiles();
+      return;
+    }
+    if (activeProfile.hasPin &&
+      (typeof tokenResult.claims.profileSessionId !== "string" ||
+        !await validateProfileSession(user, activeId))) {
+      redirectToProfiles();
+      return;
     }
     if (page === "auth.html") window.location.replace("home.html");
   } catch (error) {
