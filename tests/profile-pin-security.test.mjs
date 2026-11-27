@@ -48,6 +48,7 @@ test("normal profile-session checks do not consume the PIN-attempt rate limit", 
   assert.match(pinApi, /if \(action !== "validate"\) await consumeRateLimit/);
   assert.match(pinApi, /action === "validate"/);
   assert.match(pinApi, /session\.revoked === true/);
+  assert.match(pinApi, /const pinMatches = !pinSnapshot\.exists \|\| session\.pinHash === pinSnapshot\.data\(\)\?\.pinHash/);
   assert.match(pinApi, /expiresAt <= Date\.now\(\)/);
 });
 
