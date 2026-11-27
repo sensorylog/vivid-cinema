@@ -105,7 +105,7 @@ function renderProfiles() {
     name.textContent = profile.name;
     const meta = document.createElement("span");
     meta.className = "profile-card-meta";
-    meta.textContent = profile.isOwner ? "Account owner" : profile.isKids ? "Kids profile" : "Vivid profile";
+    meta.textContent = profile.isOwner ? "Account owner" : "Vivid profile";
     card.append(avatar,name,meta);
     card.addEventListener("click", () => manageMode ? openEditor(profile) : chooseProfile(profile));
     grid.append(card);
@@ -162,8 +162,6 @@ function openEditor(profile = null) {
   selectedAvatarUrl = profile?.avatarUrl || "";
   selectedAvatarSource = profile?.avatarSource || (selectedAvatarData ? "upload" : selectedAvatarUrl ? "google" : "collection");
   nameInput.value = profile?.name || "";
-  $("profile-is-kids").checked = profile?.isKids === true;
-  $("profile-is-kids").disabled = profile?.isOwner === true;
   $("profile-use-google").hidden = !profile?.isOwner || !googlePhoto;
   editorStatus.textContent = "";
   deleteButton.hidden = !profile || profile.isOwner;
@@ -245,7 +243,7 @@ form.addEventListener("submit",async event => {
   if (!name || name.length > 48) { editorStatus.textContent = "Enter a profile name between 1 and 48 characters."; nameInput.focus(); return; }
   saving = true; saveButton.disabled = true; editorStatus.textContent = "Saving profile…";
   try {
-    const payload = { name, avatarId: selectedAvatar, avatarData: selectedAvatarData, avatarUrl: selectedAvatarUrl, avatarSource: selectedAvatarSource, isKids: $("profile-is-kids").checked };
+    const payload = { name, avatarId: selectedAvatar, avatarData: selectedAvatarData, avatarUrl: selectedAvatarUrl, avatarSource: selectedAvatarSource };
     if (editingId) await updateProfile(editingId,payload);
     else await createProfile(payload);
     await refreshProfiles();
