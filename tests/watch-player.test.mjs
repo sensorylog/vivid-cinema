@@ -70,7 +70,7 @@ test("movie and TV playback exposes ten sources while Free Anime is restricted",
 
 
 test("movie/TV server picker keeps all providers in a simple scrollable dropdown", async () => {
-  assert.match(source, /"embedwave", "vidfast", "ezvidapi", "embedapistream", "moviesapi", "archive"\]\.includes\(source\)/);
+  assert.match(source, /["archive", "commons", "loc"]\.includes\(source\)/);
   assert.match(source, /const toggleServerMenu = \(\) =>/);
   assert.match(source, /positionServerPanel/);
   const styles = await readFile(new URL("../styles/vivid-cleanup.css", import.meta.url), "utf8");
@@ -209,7 +209,7 @@ test("Archive Cinema is integrated as a rights-filtered movie fallback in Player
   assert.ok(source.includes("showArchiveFallback();"));
   assert.match(source, /if \(archiveRoot\) archiveRoot\.hidden = true/);
   assert.match(source, /currentParams\?\.type !== "movie"/);
-  assert.match(source, /activeSource = "archive"/);
+  assert.match(source, /activeSource = provider/);
   assert.match(source, /https:\/\/archive\.org\/embed\//);
   const archive = await readFile(new URL("../scripts/playback/archive-film-fallback.js", import.meta.url), "utf8");
   assert.ok(archive.includes('creativecommons\\.org'));
@@ -220,10 +220,10 @@ test("Archive Cinema is integrated as a rights-filtered movie fallback in Player
 
 
 test("Internet Archive is a selectable movie source, not only an exhausted-server fallback", () => {
-  assert.match(source, /if \(source === "archive"\) return !isAnimePlayback\(\) && currentParams\?\.type === "movie"/);
+  assert.match(source, /if \(["archive", "commons", "loc"]\.includes\(source\)\) return !isAnimePlayback\(\) && currentParams\?\.type === "movie"/);
   assert.match(source, /data-player-source="archive"/);
-  assert.match(source, /if \(source === "archive"\) \{[\s\S]*?showArchiveFallback\(\);[\s\S]*?return;/);
-  assert.match(source, /button\.hidden = isAnimePlayback\(\) \? source !== "vidapi" : !\[[^\]]*"archive"\]\.includes\(source\)/);
+  assert.match(source, /if \(["archive", "commons", "loc"]\.includes\(source\)\) \{[\s\S]*?activeSource = source;[\s\S]*?showArchiveFallback\(\);[\s\S]*?return;/);
+  assert.match(source, /button\.hidden = isAnimePlayback\(\) \? source !== "vidapi" : !\[[^\]]*"loc"\]\.includes\(source\)/);
 });
 
 
