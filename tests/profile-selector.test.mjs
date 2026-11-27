@@ -84,5 +84,5 @@ test("profile manager supports Kids designation and persistent avatar choices", 
   assert.match(selector, /selectedAvatarSource = "google"/);
   assert.match(selector, /selectedAvatarSource = "upload"/);
   assert.match(selector, /selectedAvatarSource = "collection"/);
-  assert.match(selector, /owner\.avatarSource === "auto"/);
+  assert.match(selector, /includes\(owner\.avatarSource\)/);
 });
