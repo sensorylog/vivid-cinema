@@ -2,6 +2,8 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { buildTitleSeoHtml } from "../cloudflare/functions/title.html.js";
 import { renderNewsStoryHtml } from "../cloudflare/functions/news-story.html.js";
+import { buildPersonSeoHtml } from "../cloudflare/functions/person.html.js";
+import { mergePublishedArticlesIntoSitemap } from "../cloudflare/functions/sitemap.xml.js";
 import { buildMediaSitemapEntries } from "../automation/generate-seo-assets.mjs";
 
 test("movie title pages are edge-rendered with unique metadata, semantic content and Movie JSON-LD", () => {
@@ -72,4 +74,40 @@ test("media sitemap includes unique valid movie and TV title URLs", async () => 
   assert.ok(entries.some(item => item.url.endsWith("/title.html?id=2&type=tv")));
   assert.ok(entries.some(item => item.image.endsWith("/one.jpg")));
   assert.deepEqual(await buildMediaSitemapEntries(fakeFetch, ""), []);
+});
+
+
+test("cast and crew profiles are edge-rendered with Person schema and filmography", () => {
+  const html = '<head><title>Person</title></head><body><main id="person-content">Loading</main></body>';
+  const person = {
+    id: 287, name: "Brad Pitt", biography: "An American actor and film producer.",
+    known_for_department: "Acting", profile_path: "/brad.jpg",
+    combined_credits: { cast: [{ id: 550, media_type: "movie", title: "Fight Club", popularity: 90 }] }
+  };
+  const result = buildPersonSeoHtml(html, person, "https://vivid-cinema.pages.dev/person.html?id=287");
+  assert.match(result, /Brad Pitt — Movies, TV Shows &amp; Biography/);
+  assert.match(result, /"@type":"Person"/);
+  assert.match(result, /Fight Club/);
+  assert.match(result, /title\.html\?id=550&amp;type=movie/);
+  assert.doesNotMatch(result, /Loading/);
+});
+
+test("dynamic sitemap includes published stories only and escapes XML", () => {
+  const base = '<?xml version="1.0"?><urlset></urlset>';
+  const docs = [
+    { name: "projects/vivid/databases/(default)/documents/articles/story_1", fields: {
+      status: { stringValue: "published" }, sourceUrl: { stringValue: "https://publisher.example/story" },
+      publishedAt: { timestampValue: "2026-11-25T10:00:00Z" }
+    }},
+    { name: "projects/vivid/databases/(default)/documents/articles/private_1", fields: {
+      status: { stringValue: "draft" }, sourceUrl: { stringValue: "https://publisher.example/private" }
+    }},
+    { name: "projects/vivid/databases/(default)/documents/articles/unsafe_1", fields: {
+      status: { stringValue: "published" }, sourceUrl: { stringValue: "javascript:alert(1)" }
+    }}
+  ];
+  const result = mergePublishedArticlesIntoSitemap(base, docs);
+  assert.match(result, /news-story\.html\?id=story_1/);
+  assert.match(result, /2026-11-25T10:00:00\.000Z/);
+  assert.doesNotMatch(result, /private_1|unsafe_1/);
 });
