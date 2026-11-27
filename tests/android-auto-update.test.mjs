@@ -12,7 +12,7 @@ import {
   writeAndroidUpdateState
 } from "../scripts/android-update-state.js";
 
-const [workflow, updater, builder, configure, legacyConfigure, nativeUpdater, downloads, capacitorConfig, iconScript, independentWorkflow] = await Promise.all([
+const [workflow, updater, builder, configure, legacyConfigure, nativeUpdater, downloads, capacitorConfig, iconScript, independentWorkflow, feed] = await Promise.all([
   readFile(new URL("../.github/workflows/android-debug-apk.yml", import.meta.url), "utf8"),
   readFile(new URL("../scripts/android-updater.js", import.meta.url), "utf8"),
   readFile(new URL("../automation/build-static-dist.mjs", import.meta.url), "utf8"),
@@ -22,7 +22,8 @@ const [workflow, updater, builder, configure, legacyConfigure, nativeUpdater, do
   readFile(new URL("../scripts/downloads.js", import.meta.url), "utf8"),
   readFile(new URL("../capacitor.config.json", import.meta.url), "utf8"),
   readFile(new URL("../automation/apply-android-icon.mjs", import.meta.url), "utf8"),
-  readFile(new URL("../.github/workflows/android-direct-release.yml", import.meta.url), "utf8")
+  readFile(new URL("../.github/workflows/android-direct-release.yml", import.meta.url), "utf8"),
+  readFile(new URL("../scripts/android-release-feed.js", import.meta.url), "utf8")
 ]);
 
 test("Android workflow publishes a cleanly named APK and build metadata without production secrets", () => {
@@ -59,7 +60,6 @@ test("updater compares remote metadata and installs the cleanly named APK", () =
   assert.match(updater, /shouldShowAndroidUpdate/);
   assert.match(updater, /isAndroidUpdateCheckFresh/);
   assert.match(updater, /window\.VIVID_ANDROID_DISTRIBUTION === "play"/);
-  assert.ok(updater.includes("if (!release || !remote)"));
   assert.match(updater, /finally \{[\s\S]*?updateCheckInFlight = false/);
   assert.ok(updater.includes("if (!release || !remote)"));
   assert.match(updater, /without discarding a cached APK/);
