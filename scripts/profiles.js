@@ -75,6 +75,12 @@ export function normalizeProfile(profileId, data = {}) {
     }).join("").trim().slice(0, 48)
     : "";
   const avatarUrl = normalizeAvatarUrl(data.avatarUrl);
+  const avatarData = typeof data.avatarData === "string" &&
+    data.avatarData.startsWith("data:image/webp;base64,") &&
+    data.avatarData.length <= MAX_AVATAR_DATA_LENGTH &&
+    /^data:image\\/webp;base64,[A-Za-z0-9+/]+={0,2}$/.test(data.avatarData)
+    ? data.avatarData
+    : "";
   const isKids = data.isKids === true;
   return {
     id,
