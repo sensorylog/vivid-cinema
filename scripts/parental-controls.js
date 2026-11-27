@@ -35,7 +35,12 @@ async function getActiveProfile() {
     import("./profiles.js")
   ]);
   const user = auth.currentUser;
-  if (!user || user.isAnonymous) return null;
+  if (!user || user.isAnonymous) {
+    currentProfile = null;
+    currentUid = "";
+    loadedAt = 0;
+    return null;
+  }
 
   const token = await user.getIdTokenResult();
   const profileId = String(token.claims.profileId || getActiveProfileId(user.uid));
