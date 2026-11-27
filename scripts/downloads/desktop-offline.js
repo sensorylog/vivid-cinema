@@ -4,7 +4,7 @@ import { describeLoadedMedia, probePlaybackCapabilities } from "./media-capabili
 import { inspectMediaUrl } from "./media-inspector.js";
 import { choosePreferredTrack, clearSubtitleOverlay, parseSubtitleFile, renderSubtitleAtTime } from "./subtitle-engine.js";
 import { getPlaybackPreferences, playbackProfileKey, savePlaybackPreferences } from "./playback-preferences.js";
-import { createTranscodePlayer } from "./transcode-player.js?windows-offline-hls-v5";
+import { createTranscodePlayer } from "./transcode-player.js?windows-offline-hls-v7";
 import { getActiveProfileId, initializeProfileFoundation } from "../profiles.js";
 
 if (window.vividDownloads?.available) {
