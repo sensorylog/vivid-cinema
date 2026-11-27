@@ -1,5 +1,5 @@
 import { auth } from "./firebase.js";
-import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
+import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
 import { initializeProfileFoundation, setActiveProfileId } from "./profiles.js";
 import { fetchProfiles, createProfile, updateProfile, deleteProfile, compressProfileImage, PROFILE_AVATARS, MAX_PROFILES } from "./profile-manager.js";
 
@@ -208,6 +208,12 @@ async function refreshProfiles() {
   renderProfiles();
   say("Choose a profile to continue.");
 }
+$("profile-signout").addEventListener("click",async() => {
+  const button = $("profile-signout");
+  button.disabled = true;
+  try { await signOut(auth); location.replace("login.html"); }
+  catch(error) { button.disabled = false; say(error.message || "Could not sign out. Please try again.",true); }
+});
 $("manage-toggle").addEventListener("click",() => {
   manageMode = !manageMode;
   $("manage-toggle").textContent = manageMode ? "Done" : "Manage profiles";
