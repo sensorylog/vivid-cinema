@@ -387,7 +387,7 @@ export default async function handler(req, res) {
     }
 
     if (action === "remove" || action === "reset") {
-      if (profileId === "owner") {
+      if (action === "remove" && profileId === "owner") {
         const kidsProfiles = await profileReference.parent.where("isKids", "==", true).limit(1).get();
         if (!kidsProfiles.empty) throw new ProfilePinError(409, "kids-parent-pin-required", "The Main Profile PIN protects Kids Mode exit. Remove all Kids profiles before removing or resetting this PIN.");
       }
