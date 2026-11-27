@@ -156,17 +156,42 @@ export async function listProfiles(user = null) {
 
 export async function listProfileSummaries(user = null) {
   const firebase = await getFirebase();
-  const { auth, ensureAppCheck } = firebase;
+  const { auth } = firebase;
   const current = requireSignedInUser(user || auth.currentUser, auth);
-  await ensureAppCheck();
   const token = await current.getIdToken();
-  const response = await fetch(getCloudflareApiUrl("/api/profiles"), {
-    headers: { Authorization: "Bearer " + token },
-    cache: "no-store"
-  });
+  const controller = new AbortController();
+  const timeout = window.setTimeout(() => controller.abort(), 8_000);
+  let response;
+  try {
+    // This endpoint authenticates with the Firebase ID token. Requiring
+    // browser App Check here creates a circular dependency: the route guard
+    // can redirect a selected user before the profile page can recover.
+    response = await fetch(getCloudflareApiUrl("/api/profiles"), {
+      headers: { Authorization: "Bearer " + token },
+      cache: "no-store",
+      credentials: "same-origin",
+      signal: controller.signal
+    });
+  } catch (error) {
+    if (error?.name === "AbortError") {
+      const unavailable = new Error("Profile verification is temporarily unavailable.");
+      unavailable.code = "PROFILE_CHECK_UNAVAILABLE";
+      throw unavailable;
+    }
+    const unavailable = new Error("Profile verification is temporarily unavailable.");
+    unavailable.code = "PROFILE_CHECK_UNAVAILABLE";
+    unavailable.cause = error;
+    throw unavailable;
+  } finally {
+    window.clearTimeout(timeout);
+  }
   const result = await response.json().catch(() => ({}));
   if (!response.ok || result.ok !== true || !Array.isArray(result.profiles)) {
-    throw new Error(result.message || "Could not validate your profile security settings.");
+    const rejected = new Error(result.message || "Could not validate your profile security settings.");
+    rejected.code = response.status === 401 || response.status === 403
+      ? "PROFILE_SESSION_REJECTED"
+      : "PROFILE_CHECK_UNAVAILABLE";
+    throw rejected;
   }
   return {
     profiles: result.profiles.map(profile => ({ ...profile, hasPin: profile.hasPin === true })),
@@ -178,14 +203,28 @@ export async function validateProfileSession(user, profileId) {
   const firebase = await getFirebase();
   const current = requireSignedInUser(user || firebase.auth.currentUser, firebase.auth);
   const token = await current.getIdToken();
-  const response = await fetch("https://vivid-cinema-api.vercel.app/api/profile-pin", {
-    method: "POST",
-    headers: { "Content-Type": "application/json", Authorization: "Bearer " + token },
-    body: JSON.stringify({ action: "validate", profileId }),
-    cache: "no-store"
-  });
+  const controller = new AbortController();
+  const timeout = window.setTimeout(() => controller.abort(), 8_000);
+  let response;
+  try {
+    response = await fetch("https://vivid-cinema-api.vercel.app/api/profile-pin", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: "Bearer " + token },
+      body: JSON.stringify({ action: "validate", profileId }),
+      cache: "no-store",
+      signal: controller.signal
+    });
+  } finally {
+    window.clearTimeout(timeout);
+  }
   const result = await response.json().catch(() => ({}));
-  return response.ok && result.ok === true;
+  if (response.status === 401 || response.status === 403) return false;
+  if (!response.ok) {
+    const unavailable = new Error("Profile security verification is temporarily unavailable.");
+    unavailable.code = "PROFILE_CHECK_UNAVAILABLE";
+    throw unavailable;
+  }
+  return result.ok === true;
 }
 
 export function getActiveProfileId(uid) {
