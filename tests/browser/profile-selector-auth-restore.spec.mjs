@@ -163,9 +163,9 @@ test("failed Firebase persistence initialization shows recovery instead of a log
   }));
 
   await page.goto("/profiles.html", { waitUntil: "domcontentloaded" });
-  await expect(page).toHaveURL(/profiles\\.html$/);
+  await expect(page).toHaveURL(/profiles\.html$/);
   await expect(page.locator("#profile-grid .profile-load-retry")).toBeVisible();
   await expect(page.locator("#profile-grid .profile-load-error")).toContainText("Firebase could not restore IndexedDB auth persistence");
-  await expect(page).not.toHaveURL(/login\\.html$/);
+  await expect(page).not.toHaveURL(/login\.html$/);
 });
 
