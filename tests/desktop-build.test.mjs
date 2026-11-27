@@ -515,7 +515,7 @@ test("Windows runtime is current, hardened, and the offline shell cache is inval
     grantFileProtocolExtraPrivileges: false
   });
   assert.equal(pkg.dependencies["electron-updater"], undefined);
-  assert.equal(pkg.compression, "maximum", "Windows artifacts should use maximum supported compression");
+  assert.equal(pkg.build.compression, "maximum", "Windows artifacts should use maximum supported compression");
   const preload = fs.readFileSync(path.join(root, "desktop", "preload.cjs"), "utf8");
   assert.doesNotMatch(preload, /\bBuffer\b|\bsetImmediate\b|\bclearImmediate\b|require\(["'](?:events|timers|url)["']\)/);
   const serviceWorker = fs.readFileSync(path.join(root, "service-worker.js"), "utf8");
