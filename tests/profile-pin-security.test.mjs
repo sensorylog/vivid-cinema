@@ -9,6 +9,7 @@ const manager = readFileSync(new URL("../scripts/profile-manager.js", import.met
 const shell = readFileSync(new URL("../scripts/app-shell.js", import.meta.url), "utf8");
 const rules = readFileSync(new URL("../firestore.rules", import.meta.url), "utf8");
 const page = readFileSync(new URL("../profiles.html", import.meta.url), "utf8");
+const profileService = readFileSync(new URL("../cloudflare/functions/lib/profile-service.js", import.meta.url), "utf8");
 
 test("profile PINs are stored as salted PBKDF2 hashes, never plaintext", () => {
   const first = hashProfilePin("4826");
@@ -64,6 +65,11 @@ test("Firestore denies direct client access to PIN secrets and requires a live s
   assert.match(rules, /function hasLegacyOwnerProfileAccess/);
   assert.match(rules, /request\.auth\.token\.profileId == 'owner'/);
   assert.match(rules, /!hasProfilePin\(userId, profileId\) \|\| hasCurrentPinSession\(userId, profileId\)/);
+});
+
+test("profile listing exposes only a PIN-enabled flag and never returns the stored PIN hash", () => {
+  assert.match(profileService, /hasPin: pinSnapshot\.exists/);
+  assert.doesNotMatch(profileService, /pinHash/);
 });
 
 test("profile chooser exposes PIN setup, unlock, and recovery without persisting the PIN in browser storage", () => {
