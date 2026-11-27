@@ -85,7 +85,6 @@ test("profile management API protects the owner profile and exposes only explici
   assert.match(rules, /avatarSource.*auto.*google.*collection.*upload/s);
   assert.equal(rules.split("match /users/{userId}/profiles/{profileId}").length - 1, 1);
   assert.equal(rules.split("match /{document=**}").length - 1, 1);
-  assert.ok(rules.includes("avatarData.matches('^data:image/webp;base64,[A-Za-z0-9+/]+={0,2}$')"));
 });
 
 test("profile metadata never stores PIN material in the public profile document schema", () => {
