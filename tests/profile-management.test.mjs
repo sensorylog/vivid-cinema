@@ -71,6 +71,20 @@ test("profile APIs authenticate Firebase users, rate limit changes and enforce p
   assert.match(service, /transaction\.delete\(reference\)/);
 });
 
+
+test("privileged profile writes require a live, PIN-bound active profile session", () => {
+  assert.match(service, /export async function requireUnlockedProfile/);
+  assert.match(service, /user\.profileSessionId/);
+  assert.match(service, /session\.uid !== user\.uid/);
+  assert.match(service, /session\.profileId !== profileId/);
+  assert.match(service, /session\.revoked === true/);
+  assert.match(service, /expiresAt <= Date\.now\(\)/);
+  assert.match(service, /session\.pinHash !== pinSnapshot\.data\(\)\?\.pinHash/);
+  assert.equal(service.match(/requireUnlockedProfile\(db, user, user\.profileId\)/g)?.length, 3);
+  assert.match(service, /Only the Main Profile can create a Kids profile/);
+  assert.match(service, /Only the Main Profile can change Kids Mode and parental controls/);
+});
+
 test("profile management API protects the owner profile and exposes only explicit methods", () => {
   assert.match(listCreate, /onRequestGet/);
   assert.match(listCreate, /onRequestPost/);
