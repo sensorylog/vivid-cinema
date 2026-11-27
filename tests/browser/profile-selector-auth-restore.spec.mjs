@@ -32,7 +32,15 @@ const listeners = new Set();
 export function onAuthStateChanged(_auth, callback) {
   listeners.add(callback);
   if (_auth.__ready) callback(_auth.currentUser);
-  else _auth.authStateReady().then(() => callback(_auth.currentUser));
+  else {
+    // Model a browser callback arriving before persisted auth has restored.
+    // The selector must wait on authStateReady rather than treating this null
+    // snapshot as a real signed-out state.
+    callback(null);
+    _auth.authStateReady().then(() => {
+      if (listeners.has(callback)) callback(_auth.currentUser);
+    });
+  }
   return () => listeners.delete(callback);
 }
 export async function signInWithCustomToken(_auth, token) {
