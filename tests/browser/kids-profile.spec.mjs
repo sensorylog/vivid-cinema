@@ -58,6 +58,7 @@ export async function compressProfileImage() { return ""; }
 export async function selectProfile() { return { customToken: "owner-session-token" }; }
 export async function verifyProfilePin(id, pin) {
   window.__verifiedPin = pin;
+  sessionStorage.setItem("vivid:test-verified-pin", pin);
   if (pin !== "2468") throw new Error("Incorrect PIN.");
   return { customToken: "owner-session-token" };
 }
@@ -117,12 +118,14 @@ test("leaving an active Kids profile requires the Main Profile PIN and only then
   await page.locator("#profile-pin-unlock").click();
   await expect(page.locator("#profile-pin-status-message")).toContainText("Incorrect PIN");
   await expect(page.locator("#profile-pin-dialog")).toBeVisible();
-  await expect(page).not.toHaveURL(/home\.html$/);
+  await expect(page).not.toHaveURL(/home\\.html$/);
 
   await page.locator("#profile-pin-input").fill("2468");
   await page.locator("#profile-pin-unlock").click();
-  await expect(page).toHaveURL(/home\.html$/);
-  await expect.poll(() => page.evaluate(() => window.__verifiedPin)).toBe("2468");
+  await expect(page).toHaveURL(/home\\.html$/);
+  // A successful PIN unlock navigates to a new document. sessionStorage survives
+  // same-origin navigation, whereas window properties intentionally do not.
+  await expect.poll(() => page.evaluate(() => sessionStorage.getItem("vivid:test-verified-pin"))).toBe("2468");
 });
 
 test("Kids policy blocks over-limit, unrated, genre-blocked and individually blocked titles", async ({ page }) => {
