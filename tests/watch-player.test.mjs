@@ -56,7 +56,7 @@ test("free anime previews are allowlisted and expose only one in-app player", ()
 
 
 
-test("movie and TV playback retains seven sources while Free Anime is restricted", () => {
+test("movie and TV playback exposes ten sources while Free Anime is restricted", () => {
   assert.match(source, /const order = \["vidapi", "vidsrc", "embedwave", "vidfast", "ezvidapi", "embedapistream", "moviesapi"\]/);
   assert.match(source, /if \(source === "vidapi" \|\| source === "vidsrc" \|\| source === "vidfast" \|\| source === "embedapistream" \|\| source === "moviesapi"\) return hasFallbackId\(\)/);
   assert.match(source, /button\.hidden = isAnimePlayback\(\) \? source !== "vidapi"/);
