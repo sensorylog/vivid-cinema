@@ -110,12 +110,19 @@ export async function ensureOwnerProfile(user = null) {
     if (existing.isOwner !== true || existing.schemaVersion !== PROFILE_SCHEMA_VERSION) {
       throw new Error("The owner profile has an unsupported or invalid profile record.");
     }
+    const googlePhoto = safeAvatarUrl(current);
+    if (googlePhoto && !existing.avatarUrl && existing.avatarSource !== "collection") {
+      const timestamp = serverTimestamp();
+      await setDoc(reference, { avatarUrl: googlePhoto, avatarSource: "google", updatedAt: timestamp }, { merge: true });
+      return { id: OWNER_PROFILE_ID, ...existing, avatarUrl: googlePhoto, avatarSource: "google", created: false };
+    }
     return { id: OWNER_PROFILE_ID, ...existing, created: false };
   }
 
   const profile = normalizeProfile(OWNER_PROFILE_ID, {
     name: current.displayName || current.email?.split("@")[0] || "Main Profile",
-    avatarUrl: safeAvatarUrl(current)
+    avatarUrl: safeAvatarUrl(current),
+    avatarSource: safeAvatarUrl(current) ? "google" : "collection"
   });
   const timestamp = serverTimestamp();
   await setDoc(reference, {
