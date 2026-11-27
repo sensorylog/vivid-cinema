@@ -441,14 +441,14 @@ export async function getAnimePage(page = 1, filters = {}) {
   const results = await Promise.allSettled(requests);
   const successful = results.filter(result => result.status === "fulfilled").map(result => result.value);
   if (!successful.length) throw (results.find(result => result.status === "rejected")?.reason || new Error("Anime catalogue unavailable."));
-  const items = successful.flatMap(({ data, type: mediaType }) => normalizeResults(data?.results || [], mediaType))
-    .sort((a,b) => Number(b.raw?.popularity || 0) - Number(a.raw?.popularity || 0) || Number(b.vote_average || 0) - Number(a.vote_average || 0));
+  const items = await filterAllowedTitles(successful.flatMap(({ data, type: mediaType }) => normalizeResults(data?.results || [], mediaType))
+    .sort((a,b) => Number(b.raw?.popularity || 0) - Number(a.raw?.popularity || 0) || Number(b.vote_average || 0) - Number(a.vote_average || 0)));
   return { items, page, totalPages: Math.min(500, Math.max(...successful.map(({data}) => Number(data?.total_pages || 1)), 1)), partial: successful.length < requests.length };
 }
 
 export async function getFeaturedMovies(limit = 8) {
   const data = await tmdbApi.trending("movie", "week");
-  return normalizeResults(data.results || [], "movie").filter((item) => item.backdrop_path).slice(0, limit);
+  return filterAllowedTitles(normalizeResults(data.results || [], "movie").filter((item) => item.backdrop_path).slice(0, limit));
 }
 
 async function loadHomeKey(key, page) {
