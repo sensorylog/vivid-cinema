@@ -38,6 +38,8 @@ test("server PIN endpoint verifies Firebase identity and applies brute-force pro
   assert.match(pinApi, /consumeRateLimit\(db, claims\.uid, profileId\)/);
   assert.match(pinApi, /isRecentAccountAuth\(claims\)/);
   assert.match(pinApi, /auth\.createCustomToken\(uid/);
+  assert.match(pinApi, /action === "select"/);
+  assert.match(pinApi, /pinSnapshot\.exists/);
 });
 
 test("normal profile-session checks do not consume the PIN-attempt rate limit", () => {
@@ -51,6 +53,9 @@ test("Firestore denies direct client access to PIN secrets and requires a live s
   assert.match(rules, /match \/profileSecurity\/{securityId} \{\s*allow read, write: if false;/);
   assert.match(rules, /match \/profileSessions\/{sessionId} \{\s*allow read, write: if false;/);
   assert.match(rules, /function hasProfileSession\([\s\S]*?data\.revoked == false[\s\S]*?data\.expiresAt > request\.time/);
+  assert.match(rules, /request\.auth\.token\.profileId == profileId/);
+  assert.match(rules, /function hasLegacyOwnerProfileAccess/);
+  assert.match(rules, /request\.auth\.token\.profileId == 'owner'/);
   assert.match(rules, /!hasProfilePin\(userId, profileId\) \|\| hasProfileSession\(userId, profileId\)/);
 });
 
@@ -66,6 +71,7 @@ test("profile chooser exposes PIN setup, unlock, and recovery without persisting
 });
 
 test("every protected page validates the server-issued profile session before proceeding", () => {
+  assert.match(shell, /tokenResult\.claims\.profileId !== activeId/);
   assert.match(shell, /activeProfile\.hasPin/);
   assert.match(shell, /tokenResult\.claims\.profileSessionId/);
   assert.match(shell, /validateProfileSession\(user, activeId\)/);
