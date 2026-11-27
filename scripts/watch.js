@@ -176,13 +176,17 @@ function showArchiveFallback() {
   const root = $("vivid-archive-search");
   if (!root) return false;
   root.hidden = false;
-  if (root.dataset.archiveMounted === "true") return true;
+  if (root.dataset.archiveMounted === "true") {
+    root.dispatchEvent(new CustomEvent("vivid:archive-catalog-select", { detail: { source: activeSource } }));
+    return true;
+  }
   void import("./playback/archive-film-fallback.js").then(({ mountArchiveFilmSearch }) => {
     if (!root.isConnected || isAnimePlayback() || currentParams?.type !== "movie") return;
     mountArchiveFilmSearch({
       root,
       title: media?.title || "",
       year: String(media?.release_date || "").slice(0, 4),
+      initialSource: activeSource,
       onPlay: item => {
         const provider = ["archive", "commons", "loc"].includes(item?.provider) ? item.provider : "archive";
         if (provider === "archive" && !/^[a-z0-9._-]{1,180}$/i.test(String(item?.identifier || ""))) return;
