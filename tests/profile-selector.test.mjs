@@ -21,6 +21,7 @@ test("successful sign-in opens the Who's Watching profile selector by default", 
   assert.match(shell, /"login\.html", "forgot-password\.html"/);
   assert.match(page, /Who's watching\?/);
   assert.match(page, /id="profile-grid"/);
+  assert.match(page, /profile-selector-watchdog\.js/);
   assert.match(page, /id="profile-signout"/);
   assert.match(selector, /signOut\(auth\)/);
   assert.match(selector, /setActiveProfileId\(accountId, profile\.id\)/);
