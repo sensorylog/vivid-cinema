@@ -35,6 +35,14 @@ const playerSection = byId("offline-player-section");
 const video = byId("offline-player");
 let manager = null, playback = null, activeAdapter = null, unsubscribe = null, activeOwner = null, generation = 0, currentAuth = null;
 
+async function offlineOwnerKey(uid, profileId) {
+  const source = String(uid) + "::" + String(profileId);
+  if (!globalThis.crypto?.subtle || typeof TextEncoder !== "function") {
+    throw new Error("Secure profile-scoped offline storage is unavailable in this browser.");
+  }
+  const digest = await globalThis.crypto.subtle.digest("SHA-256", new TextEncoder().encode(source));
+  return "profile-" + Array.from(new Uint8Array(digest), byte => byte.toString(16).padStart(2, "0")).join("");
+}
 function escapeHtml(value) {
   return String(value ?? "").replace(/[&<>"']/g, char => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[char]);
 }
@@ -80,7 +88,7 @@ async function switchOwner(user) {
     catch(error){console.warn("Vivid profile migration is unavailable while opening offline metadata:",error);}
   }
   const profileId=user?.uid?getActiveProfileId(user.uid):"guest";
-  const owner=user?.uid?String(user.uid)+"::"+String(profileId):"guest";
+  const owner=user?.uid?await offlineOwnerKey(user.uid,profileId):"guest";
   if(owner===activeOwner)return;
   const run=++generation; unsubscribe?.(); unsubscribe=null;
   try{await playback?.stop();}catch{} try{await manager?.persistence?.close?.();}catch{}
