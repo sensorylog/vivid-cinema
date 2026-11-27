@@ -123,9 +123,18 @@ function serializeProfile(id, data = {}) {
 export async function listAccountProfiles(request, env) {
   const { db, user } = await requireProfileUser(request, env);
   await enforceRateLimit(db, user.uid, "profiles-list", 60, 60 * 1000);
+  const includeAvatars = new URL(request.url).searchParams.get("includeAvatars") === "1";
   const snapshot = await db.collection("users").doc(user.uid).collection("profiles").get();
-  return snapshot.docs
-    .map(item => serializeProfile(item.id, item.data()))
+  const profiles = await Promise.all(snapshot.docs.map(async item => {
+    const data = item.data() || {};
+    let avatarData = "";
+    if (includeAvatars) {
+      const avatarSnapshot = await item.ref.collection("avatar").doc("image").get();
+      avatarData = avatarSnapshot.data()?.data || data.avatarData || "";
+    }
+    return serializeProfile(item.id, { ...data, avatarData });
+  }));
+  return profiles
     .filter(profile => profile.id === OWNER_PROFILE_ID || /^[A-Za-z0-9_-]{1,64}$/.test(profile.id))
     .sort((a, b) => a.id === OWNER_PROFILE_ID ? -1 : b.id === OWNER_PROFILE_ID ? 1 : String(a.createdAt || "").localeCompare(String(b.createdAt || "")));
 }
@@ -154,8 +163,10 @@ export async function createAccountProfile(request, env) {
     }
     const reference = profilesRef.doc();
     const normalized = cleanProfileInput(reference.id, body);
-    created = { ...normalized, createdAt: now, updatedAt: now };
+    const { avatarData, ...metadata } = normalized;
+    created = { ...metadata, createdAt: now, updatedAt: now };
     transaction.create(reference, created);
+    if (avatarData) transaction.create(reference.collection("avatar").doc("image"), { data: avatarData, updatedAt: now });
     transaction.set(limitRef, { profileCount: currentCount + 1, updatedAt: now });
   });
   return serializeProfile(created.id, created);
@@ -175,12 +186,18 @@ export async function updateAccountProfile(request, env) {
     const snapshot = await transaction.get(reference);
     if (!snapshot.exists) throw new AnimePremiumError(404, "profile-not-found", "This Vivid profile no longer exists.");
     const existing = snapshot.data() || {};
+    const avatarReference = reference.collection("avatar").doc("image");
+    const avatarSnapshot = await transaction.get(avatarReference);
+    const existingWithAvatar = { ...existing, avatarData: avatarSnapshot.data()?.data || existing.avatarData || "" };
     if (existing.isOwner === true && body.isKids === true) {
       throw new AnimePremiumError(400, "owner-cannot-be-kids", "The main account profile cannot be changed into a Kids profile.");
     }
-    const normalized = cleanProfileInput(profileId, body, existing);
-    updated = { ...normalized, createdAt: existing.createdAt || now, updatedAt: now };
+    const normalized = cleanProfileInput(profileId, body, existingWithAvatar);
+    const { avatarData, ...metadata } = normalized;
+    updated = { ...metadata, createdAt: existing.createdAt || now, updatedAt: now };
     transaction.set(reference, updated);
+    if (avatarData) transaction.set(avatarReference, { data: avatarData, updatedAt: now });
+    else if (avatarSnapshot.exists) transaction.delete(avatarReference);
   });
   return serializeProfile(profileId, updated);
 }
