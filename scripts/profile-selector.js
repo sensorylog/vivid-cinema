@@ -162,6 +162,9 @@ function openEditor(profile = null) {
   selectedAvatarUrl = profile?.avatarUrl || "";
   selectedAvatarSource = profile?.avatarSource || (selectedAvatarData ? "upload" : selectedAvatarUrl ? "google" : "collection");
   nameInput.value = profile?.name || "";
+  $("profile-is-kids").checked = profile?.isKids === true;
+  $("profile-is-kids").disabled = profile?.isOwner === true;
+  $("profile-use-google").hidden = !profile?.isOwner || !googlePhoto;
   editorStatus.textContent = "";
   deleteButton.hidden = !profile || profile.isOwner;
   photoInput.value = "";
@@ -192,6 +195,18 @@ async function refreshProfiles() {
   await initializeProfileFoundation(user);
   await ensureOwnerProfile(user);
   profiles = await fetchProfiles();
+  googlePhoto = normalizeAvatarUrl(user.photoURL || user.providerData?.find(item => item.providerId === "google.com")?.photoURL || "");
+  const owner = profiles.find(profile => profile.isOwner);
+  if (owner && owner.avatarSource === "auto" && googlePhoto) {
+    await updateProfile(owner.id, {
+      name: owner.name,
+      avatarId: owner.avatarId,
+      avatarUrl: googlePhoto,
+      avatarData: "",
+      avatarSource: "google"
+    });
+    profiles = await fetchProfiles();
+  }
   if (!profiles.length) throw new Error("No profiles are available for this Vivid account.");
   renderProfiles();
   say("Choose a profile to continue.");
@@ -224,7 +239,6 @@ photoInput.addEventListener("change",async() => {
     selectedAvatarData = await compressProfileImage(file);
     selectedAvatarUrl = "";
     selectedAvatarSource = "upload";
-    selectedAvatarSource = "upload";
     photoPreview.replaceChildren();
     const img = document.createElement("img"); img.src = selectedAvatarData; img.alt = "";
     const label = document.createElement("span"); label.textContent = "Custom photo ready";
@@ -240,7 +254,7 @@ form.addEventListener("submit",async event => {
   if (!name || name.length > 48) { editorStatus.textContent = "Enter a profile name between 1 and 48 characters."; nameInput.focus(); return; }
   saving = true; saveButton.disabled = true; editorStatus.textContent = "Saving profile…";
   try {
-    const payload = { name, avatarId: selectedAvatar, avatarData: selectedAvatarData, avatarUrl: selectedAvatarUrl, avatarSource: selectedAvatarSource };
+    const payload = { name, avatarId: selectedAvatar, avatarData: selectedAvatarData, avatarUrl: selectedAvatarUrl, avatarSource: selectedAvatarSource, isKids: $("profile-is-kids").checked };
     if (editingId) await updateProfile(editingId,payload);
     else await createProfile(payload);
     await refreshProfiles();
