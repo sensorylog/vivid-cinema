@@ -3,13 +3,14 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
 const read = path => readFile(new URL(path, import.meta.url), "utf8");
-const [page, selector, manager, auth, worker, account] = await Promise.all([
+const [page, selector, manager, auth, worker, account, profiles] = await Promise.all([
   read("../profiles.html"),
   read("../scripts/profile-selector.js"),
   read("../scripts/profile-manager.js"),
   read("../scripts/auth.js"),
   read("../service-worker.js"),
-  read("../account.html")
+  read("../account.html"),
+  read("../scripts/profiles.js")
 ]);
 
 test("successful sign-in opens the Who's Watching profile selector by default", () => {
@@ -49,9 +50,13 @@ test("profile UI exposes the bounded Vivid avatar collection and compressed cust
 
 test("Google account photo is adopted for the owner profile and can be replaced by a chosen avatar", () => {
   assert.match(selector, /user\.providerData\?\.find\(item => item\.providerId === "google\.com"\)/);
-  assert.match(selector, /updateProfile\(owner\.id/);
+  assert.match(profiles, /const googlePhoto = safeAvatarUrl\(current\)/);
+  assert.match(profiles, /avatarSource: "google"/);
   assert.match(selector, /selectedAvatarUrl = ""/);
+  assert.match(selector, /selectedAvatarSource = "collection"/);
+  assert.match(selector, /selectedAvatarSource = "upload"/);
   assert.match(selector, /avatarUrl: selectedAvatarUrl/);
+  assert.match(selector, /avatarSource: selectedAvatarSource/);
 });
 
 test("profile deletion protects the owner and requires an explicit confirmation", () => {
