@@ -224,3 +224,33 @@ test("My Downloads uses a clear discover, playback and offline-library hierarchy
   assert.match(styles, /\.offline-job\{/);
   assert.match(styles, /@media\(max-width:720px\)/);
 });
+
+
+test("Windows offline library renders before loading the optional HLS compatibility runtime", async () => {
+  const bootstrap = await readFile(new URL("../scripts/my-downloads.js", import.meta.url), "utf8");
+  const desktop = await readFile(new URL("../scripts/downloads/desktop-offline.js", import.meta.url), "utf8");
+  const transcode = await readFile(new URL("../scripts/downloads/transcode-player.js", import.meta.url), "utf8");
+  assert.match(bootstrap, /if \(window\.vividDownloads\?\.available\) \{[\s\S]*?import\("\.\/downloads\/desktop-offline\.js\?windows-offline-hls-v4"\)/);
+  assert.match(bootstrap, /\} else \{\s*await loadHlsRuntime\(\)/);
+  assert.match(transcode, /function prepare\(\)/);
+  assert.match(transcode, /async function load\(session\)/);
+  assert.match(desktop, /transcodePlayer\.prepare\(\)/);
+});
+
+test("completed Windows downloads open directly before the FFmpeg compatibility fallback", async () => {
+  const desktop = await readFile(new URL("../scripts/downloads/desktop-offline.js", import.meta.url), "utf8");
+  const page = await readFile(new URL("../my-downloads.html", import.meta.url), "utf8");
+  assert.match(desktop, /async function startCompatibilityPlayback\(job,fileIndex,request\)/);
+  assert.match(desktop, /const mediaUrl=await engine\.mediaUrl\(job\.id,fileIndex\)/);
+  assert.match(desktop, /player\.src=mediaUrl;player\.load\(\)/);
+  assert.match(desktop, /engine\.openDownloadTranscode\(job\.id,fileIndex\)/);
+  assert.match(desktop, /nativeFallbackTimer=window\.setTimeout/);
+  assert.match(page, /id="offline-player-loading"/);
+});
+
+test("poster enrichment patches existing cards without rebuilding the scrolling library", async () => {
+  const desktop = await readFile(new URL("../scripts/downloads/desktop-offline.js", import.meta.url), "utf8");
+  assert.match(desktop, /function patchPosterArtwork\(media,poster\)/);
+  assert.match(desktop, /patchPosterArtwork\(media,poster\)/);
+  assert.doesNotMatch(desktop, /if\(changed\)render\(\)/);
+});
