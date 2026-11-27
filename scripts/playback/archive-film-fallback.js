@@ -91,7 +91,7 @@ export function mountArchiveFilmSearch({ root, title = "", year = "", onPlay, in
     const data=await fetchJson(LOC_SEARCH+"?"+params,signal);
     const summaries=Array.isArray(data?.results)?data.results:[];
     const found=await Promise.all(summaries.slice(0,12).map(async summary=>{
-      const itemUrl=safeHttpUrl(summary.id);
+      const itemUrl=safeHttpUrl(String(summary.id||"").replace(/^http:\/\//i,"https://"));
       if(!itemUrl)return null;
       try {
         const detailUrl=new URL(itemUrl);
