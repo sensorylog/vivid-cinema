@@ -6,6 +6,7 @@ import { choosePreferredTrack, clearSubtitleOverlay, parseSubtitleFile, renderSu
 import { getPlaybackPreferences, playbackProfileKey, savePlaybackPreferences } from "./playback-preferences.js";
 import { createTranscodePlayer } from "./transcode-player.js?windows-offline-hls-v7";
 import { getActiveProfileId, initializeProfileFoundation } from "../profiles.js";
+import { isTitleAllowed, filterAllowedTitles } from "../parental-controls.js";
 
 if (window.vividDownloads?.available) {
 document.body.classList.add("vivid-desktop-offline-library");
@@ -22,6 +23,7 @@ const bytes = value => {
 const engine = window.vividDownloads;
 let currentMedia = null;
 let jobs = [];
+let visibleJobIds = new Set();
 let searchResults = [];
 const BATCH_KEY = "vivid:desktop-download-batch";
 let batchQueue = [];
@@ -111,9 +113,11 @@ function addSelectedToBatch(){
 }
 async function startBatch(){
   if(!batchQueue.length)return;
+  const pending=[...batchQueue];
+  const allowed=await Promise.all(pending.map(item=>isTitleAllowed(item.media)));
+  if(allowed.some(value=>!value)){setMessage("One or more selected downloads are restricted by this Kids profile.");return;}
   const button=byId("desktop-batch-queue").querySelector("[data-batch-start]");
   if(button){button.disabled=true;button.textContent="Starting batch…";}
-  const pending=[...batchQueue];
   const results=await Promise.allSettled(pending.map(item=>engine.start(item.result,item.media)));
   let started=0;
   results.forEach((result,index)=>{
@@ -184,6 +188,7 @@ function matchesLibrary(job){
   return true;
 }
 async function showTitleDetails(job){
+  if(!await isTitleAllowed({...job.media,id:job.media?.id,media_type:job.media?.media_type})){setMessage("This title is restricted by the active Kids profile.");return;}
   const dialog=byId("offline-title-dialog");
   const media=job.media||{};
   const isSeries=media.media_type==="tv";
@@ -225,20 +230,21 @@ byId("offline-title-detail-watch").addEventListener("click",async event=>{
   try{await play(job,0);}catch(error){setMessage(error?.message||"Could not open this saved title.");}
 });
 function render(){
-  const completedJobs=jobs.filter(x=>x.status==="completed");
+  const visibleJobs=jobs.filter(job=>visibleJobIds.has(String(job.id)));
+  const completedJobs=visibleJobs.filter(x=>x.status==="completed");
   const completed=completedJobs.length;
-  const active=jobs.filter(x=>["downloading","queued","verifying"].includes(x.status)).length;
+  const active=visibleJobs.filter(x=>["downloading","queued","verifying"].includes(x.status)).length;
   const savedBytes=completedJobs.reduce((sum,job)=>sum+(Array.isArray(job.files)&&job.files.length?job.files.reduce((fileSum,file)=>fileSum+Math.max(0,Number(file.size)||0),0):Math.max(0,Number(job.total)||0)),0);
   byId("offline-total").textContent=String(jobs.length);
   byId("offline-completed").textContent=String(completed);
   byId("offline-active").textContent=String(active);
   updateAggregateSpeed();
   byId("offline-storage").textContent=bytes(savedBytes);
-  const visible=jobs.filter(matchesLibrary);
-  const seriesCount=new Set(jobs.filter(job=>job.media?.media_type==="tv").map(job=>String(job.media.id||job.media.title||job.title))).size;
+  const visible=visibleJobs.filter(matchesLibrary);
+  const seriesCount=new Set(visibleJobs.filter(job=>job.media?.media_type==="tv").map(job=>String(job.media.id||job.media.title||job.title))).size;
   const countNode=byId("offline-library-count");
-  if(countNode)countNode.textContent=jobs.length+" downloads · "+seriesCount+" series";
-  if(!jobs.length){
+  if(countNode)countNode.textContent=visibleJobs.length+" downloads · "+seriesCount+" series";
+  if(!visibleJobs.length){
     byId("offline-jobs").innerHTML='<div class="offline-empty"><strong>Your cinema starts here</strong><p>Movies and episodes you save will appear here, ready for offline watching.</p></div>';
     return;
   }
@@ -281,7 +287,7 @@ async function renderContinueWatching(){
   const section=byId("offline-continue-section");
   const list=byId("offline-continue-list");
   if(!section||!list)return;
-  const candidates=jobs.filter(job=>job.status==="completed").slice(0,40);
+  const candidates=jobs.filter(job=>visibleJobIds.has(String(job.id))&&job.status==="completed").slice(0,40);
   if(!candidates.length){section.hidden=true;list.replaceChildren();return;}
   const results=await Promise.all(candidates.map(async job=>{
     try{return {job,position:Number(await engine.getPlaybackPosition(job.id,0))||0};}
@@ -338,6 +344,7 @@ async function loadSeriesSeason(seasonNumber){
   }
 }
 async function searchSelectedEpisodes(){
+  if(!currentMedia||!await isTitleAllowed(currentMedia)){setMessage("This series is restricted by the active Kids profile.");return;}
   const selected=[...byId("desktop-episodes").querySelectorAll('input[data-episode]:checked')]
     .map(input=>currentSeasonEpisodes.find(episode=>Number(episode.episode_number)===Number(input.dataset.episode)))
     .filter(Boolean);
@@ -361,6 +368,7 @@ async function searchSelectedEpisodes(){
   }finally{byId("desktop-episode-search").disabled=false;}
 }
 async function searchTitle(media){
+  if(!await isTitleAllowed(media)){currentMedia=null;setMessage("This title is restricted by the active Kids profile.");return;}
   currentMedia=media;
   byId("desktop-search-input").value=media.title||"";
   const seriesPicker=byId("desktop-series-picker");
@@ -445,6 +453,9 @@ async function refresh(){
   if(progressRenderTimer){clearTimeout(progressRenderTimer);progressRenderTimer=0;}
   try{
     jobs=(await engine.list()).filter(job=>job.status!=="cancelled");
+    const policyItems=jobs.map(job=>({...job.media,id:job.media?.id,media_type:job.media?.media_type,__offlineJobId:String(job.id)}));
+    const allowedItems=await filterAllowedTitles(policyItems);
+    visibleJobIds=new Set(allowedItems.map(item=>String(item.__offlineJobId)));
     render();
     void renderContinueWatching();
     void hydratePosterArtwork();
@@ -1372,6 +1383,8 @@ async function startCompatibilityPlayback(job,fileIndex,request){
   return nativeFallbackPromise;
 }
 async function play(job,fileIndex=0){
+  const media=job.media||{};
+  if(!await isTitleAllowed({...media,id:media.id,media_type:media.media_type}))throw new Error("This title is restricted by the active Kids profile.");
   const request=++playbackRequest;
   nativeFallbackPromise=null;nativeFallbackRequest=0;
   const file=Array.isArray(job.files)?job.files[fileIndex]:null;
@@ -1420,7 +1433,7 @@ byId("desktop-search-form").addEventListener("submit",async event=>{
   if(query.length<2){setMessage("Enter at least two characters.");return;}
   if(!currentMedia){setMessage("Choose a movie or series from the Vivid catalogue and tap Download so its exact identity can be checked.");return;}
   setMessage("Searching…");byId("desktop-search-results").innerHTML="";
-  try{renderSearch(await engine.search(query));setMessage("Choose a release to download.");}
+  try{if(!await isTitleAllowed(currentMedia)){setMessage("This title is restricted by the active Kids profile.");return;}renderSearch(await engine.search(query));setMessage("Choose a release to download.");}
   catch(error){setMessage(error?.message||"Search failed.");}
 });
 byId("desktop-quality").addEventListener("change",()=>renderSearch(searchResults));
@@ -1447,6 +1460,7 @@ byId("desktop-search-results").addEventListener("click",async event=>{
     const mediaForResult=currentMedia?.media_type==="tv"&&Number.isInteger(result.episode)
       ? {...currentMedia,season:result.season,episode:result.episode,episodeTitle:result.episodeTitle}
       : currentMedia||{title:result.title,media_type:"movie"};
+    if(!await isTitleAllowed(mediaForResult))throw new Error("This title is restricted by the active Kids profile.");
     await engine.start(result,mediaForResult);
     setMessage(Number.isInteger(result.episode)?"Episode download added. You can keep browsing while it saves.":"Download added. You can keep browsing while it saves.");
     await refresh();

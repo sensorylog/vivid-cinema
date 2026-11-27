@@ -3,6 +3,7 @@ import { createIndexedDBPersistence } from "./downloads/indexeddb-persistence.js
 import { createBrowserDownloadAdapter } from "./downloads/browser-direct-adapter.js";
 import { createOfflinePlaybackController } from "./downloads/offline-playback.js";
 import { getActiveProfileId, initializeProfileFoundation } from "./profiles.js";
+import { isTitleAllowed, filterAllowedTitles } from "./parental-controls.js";
 
 async function loadHlsRuntime() {
   if (window.Hls) return;
@@ -33,7 +34,7 @@ const jobsNode = byId("offline-jobs");
 const messageNode = byId("offline-message");
 const playerSection = byId("offline-player-section");
 const video = byId("offline-player");
-let manager = null, playback = null, activeAdapter = null, unsubscribe = null, activeOwner = null, generation = 0, currentAuth = null;
+let manager = null, playback = null, activeAdapter = null, unsubscribe = null, activeOwner = null, generation = 0, currentAuth = null, renderSequence = 0;
 
 async function offlineOwnerKey(uid, profileId) {
   const source = String(uid) + "::" + String(profileId);
@@ -63,7 +64,13 @@ function statusLabel(job) {
   if(job.status==="cancelled")return "Cancelled";
   return "Download failed";
 }
-function render(jobs) {
+async function render(jobs) {
+  const request=++renderSequence;
+  const policyItems=jobs.map(job=>({...job.media,id:job.media?.id,media_type:job.media?.media_type,__offlineJobId:String(job.id)}));
+  const allowedItems=await filterAllowedTitles(policyItems);
+  if(request!==renderSequence)return;
+  const allowedIds=new Set(allowedItems.map(item=>String(item.__offlineJobId)));
+  jobs=jobs.filter(job=>allowedIds.has(String(job.id)));
   const completed=jobs.filter(job=>job.status==="completed").length, active=jobs.filter(job=>["queued","downloading"].includes(job.status)).length;
   byId("offline-total").textContent=String(jobs.length); byId("offline-completed").textContent=String(completed); byId("offline-active").textContent=String(active);
   if(!jobs.length){jobsNode.innerHTML='<div class="offline-empty"><strong>No downloads yet</strong><p>Vivid does not currently have an authorized direct-download source connected.</p></div>';messageNode.textContent="Your download queue is empty.";return;}
@@ -155,6 +162,8 @@ jobsNode.addEventListener("click",async event=>{
   const button=event.target.closest("button[data-action]"); if(!button||!manager)return;
   const {action,id}=button.dataset; button.disabled=true;
   try{
+    const targetJob=manager.snapshot().find(item=>item.id===id);
+    if(targetJob&&(action==="play"||action==="export")){const media=targetJob.media||{};if(!await isTitleAllowed({...media,id:media.id,media_type:media.media_type}))throw new Error("This title is restricted by the active Kids profile.");}
     if(action==="pause")await manager.pause(id);
     if(action==="retry")await manager.retry(id);
     if(action==="cancel")await manager.cancel(id);
