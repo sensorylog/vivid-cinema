@@ -25,7 +25,8 @@ test("successful sign-in opens the Who's Watching profile selector by default", 
   assert.match(selector, /setActiveProfileId\(user\.uid, profile\.id\)/);
   assert.match(selector, /if \(profile\.hasPin\)/);
   assert.match(selector, /verifyProfilePin\(pendingProfile\.id, pin\)/);
-  assert.match(selector, /signInWithCustomToken\(auth, result\.customToken\)/);
+  assert.match(selector, /finishProfileOpen\(profile, result\.customToken\)/);
+  assert.match(selector, /signInWithCustomToken\(auth, customToken\)/);
 });
 
 test("profile selector initializes the owner migration before loading profile choices", () => {
