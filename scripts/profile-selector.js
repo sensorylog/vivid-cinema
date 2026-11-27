@@ -192,18 +192,6 @@ async function chooseProfile(profile) {
 async function refreshProfiles() {
   await initializeProfileFoundation(user);
   profiles = await fetchProfiles();
-  googlePhoto = normalizeAvatarUrl(user.photoURL || user.providerData?.find(item => item.providerId === "google.com")?.photoURL || "");
-  const owner = profiles.find(profile => profile.isOwner);
-  if (owner && ["default","google"].includes(owner.avatarSource) && googlePhoto && owner.avatarUrl !== googlePhoto) {
-    await updateProfile(owner.id, {
-      name: owner.name,
-      avatarId: owner.avatarId,
-      avatarUrl: googlePhoto,
-      avatarData: "",
-      avatarSource: "google"
-    });
-    profiles = await fetchProfiles();
-  }
   if (!profiles.length) throw new Error("No profiles are available for this Vivid account.");
   renderProfiles();
   say("Choose a profile to continue.");
