@@ -12,8 +12,8 @@ export async function onRequestGet({ request, env }) {
   const origin = request.headers.get("Origin") || "";
   try {
     validateProfileOrigin(request, env);
-    const profiles = await listAccountProfiles(request, env);
-    return jsonResponse({ ok: true, profiles }, 200, origin, env);
+    const result = await listAccountProfiles(request, env);
+    return jsonResponse({ ok: true, ...result }, 200, origin, env);
   } catch (error) {
     return profileErrorResponse(error, origin, env);
   }
