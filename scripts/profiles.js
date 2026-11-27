@@ -112,13 +112,19 @@ export async function ensureOwnerProfile(user = null) {
     if (existing.isOwner !== true || existing.schemaVersion !== PROFILE_SCHEMA_VERSION) {
       throw new Error("The owner profile has an unsupported or invalid profile record.");
     }
+    const normalized = normalizeProfile(OWNER_PROFILE_ID, existing);
+    const policyKeys = ["movieRatingLimit","tvRatingLimit","blockedGenreIds","blockedTitles","allowUnrated"];
+    const updates = Object.fromEntries(policyKeys.filter(key => JSON.stringify(existing[key]) !== JSON.stringify(normalized[key])).map(key => [key, normalized[key]]));
     const googlePhoto = safeAvatarUrl(current);
     if (googlePhoto && !existing.avatarUrl && !["collection","upload"].includes(existing.avatarSource)) {
-      const timestamp = serverTimestamp();
-      await setDoc(reference, { avatarUrl: googlePhoto, avatarSource: "google", updatedAt: timestamp }, { merge: true });
-      return { id: OWNER_PROFILE_ID, ...existing, avatarUrl: googlePhoto, avatarSource: "google", created: false };
+      updates.avatarUrl = googlePhoto;
+      updates.avatarSource = "google";
     }
-    return { id: OWNER_PROFILE_ID, ...existing, created: false };
+    if (Object.keys(updates).length) {
+      updates.updatedAt = serverTimestamp();
+      await setDoc(reference, updates, { merge: true });
+    }
+    return { id: OWNER_PROFILE_ID, ...existing, ...updates, created: false };
   }
 
   const profile = normalizeProfile(OWNER_PROFILE_ID, {

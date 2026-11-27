@@ -424,11 +424,12 @@ service cloud.firestore {
       function validViewingProfile(profileId) {
         return request.resource.data.keys().hasOnly([
           'id','name','avatarUrl','avatarSource','avatarId','isKids','maturityLevel',
+          'movieRatingLimit','tvRatingLimit','blockedGenreIds','blockedTitles','allowUnrated',
           'isOwner','schemaVersion','createdAt','updatedAt'
         ])
         && request.resource.data.keys().hasAll([
-          'name','avatarUrl','avatarId','isKids','maturityLevel',
-          'isOwner','schemaVersion'
+          'name','avatarUrl','avatarId','isKids','maturityLevel','movieRatingLimit','tvRatingLimit',
+          'blockedGenreIds','blockedTitles','allowUnrated','isOwner','schemaVersion'
         ])
         && request.resource.data.id == profileId
         && request.resource.data.name is string
@@ -444,7 +445,21 @@ service cloud.firestore {
         && request.resource.data.isKids is bool
         && request.resource.data.maturityLevel in ['adult','kids']
         && request.resource.data.maturityLevel == (request.resource.data.isKids ? 'kids' : 'adult')
+        && request.resource.data.movieRatingLimit in ['G','PG','PG-13','R','NC-17']
+        && request.resource.data.tvRatingLimit in ['TV-Y','TV-Y7','TV-G','TV-PG','TV-14','TV-MA']
+        && request.resource.data.blockedGenreIds is list
+        && request.resource.data.blockedGenreIds.size() <= 30
+        && request.resource.data.blockedGenreIds.hasOnly([12,14,16,18,27,28,35,36,37,53,80,99,878,9648,10402,10749,10751,10752,10770])
+        && request.resource.data.blockedTitles is list
+        && request.resource.data.blockedTitles.size() <= 100
+        && request.resource.data.allowUnrated is bool
         && request.resource.data.isOwner == (profileId == 'owner')
+        && (!request.resource.data.isOwner || (request.resource.data.isKids == false
+          && request.resource.data.movieRatingLimit == 'NC-17'
+          && request.resource.data.tvRatingLimit == 'TV-MA'
+          && request.resource.data.blockedGenreIds.size() == 0
+          && request.resource.data.blockedTitles.size() == 0
+          && request.resource.data.allowUnrated == true))
         && request.resource.data.schemaVersion == 1
         && (!request.resource.data.keys().hasAny(['createdAt']) || request.resource.data.createdAt is timestamp)
         && (!request.resource.data.keys().hasAny(['updatedAt']) || request.resource.data.updatedAt is timestamp);

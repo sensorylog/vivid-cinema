@@ -196,11 +196,11 @@ test("profile library access is bound to the selected signed profile, including 
     const admin = context.firestore();
     await setDoc(doc(admin, "users/profile-scope/profiles/owner"), {
       id: "owner", name: "Owner", avatarId: "aurora", avatarUrl: "",
-      isOwner: true, isKids: false, maturityLevel: "adult", schemaVersion: 1
+      isOwner: true, isKids: false, maturityLevel: "adult", movieRatingLimit: "NC-17", tvRatingLimit: "TV-MA", blockedGenreIds: [], blockedTitles: [], allowUnrated: true, schemaVersion: 1
     });
     await setDoc(doc(admin, "users/profile-scope/profiles/child"), {
       id: "child", name: "Child", avatarId: "ember", avatarUrl: "",
-      isOwner: false, isKids: true, maturityLevel: "kids", schemaVersion: 1
+      isOwner: false, isKids: true, maturityLevel: "kids", movieRatingLimit: "PG", tvRatingLimit: "TV-PG", blockedGenreIds: [27,53,80,10752], blockedTitles: [], allowUnrated: false, schemaVersion: 1
     });
     await setDoc(doc(admin, "users/profile-scope/favorites/movie:legacy"), {
       id: "legacy", media_type: "movie", title: "Legacy owner data", year: "2025",
