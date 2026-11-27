@@ -1,6 +1,6 @@
 import { auth } from "./firebase.js";
 import { onAuthStateChanged, signOut, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
-import { ensureOwnerProfile, initializeProfileFoundation, getActiveProfileId, setActiveProfileId } from "./profiles.js";
+import { clearActiveProfileId, ensureOwnerProfile, initializeProfileFoundation, getActiveProfileId, setActiveProfileId } from "./profiles.js";
 import { normalizeAvatarUrl } from "./profile-schema.js";
 import { fetchProfiles, createProfile, updateProfile, deleteProfile, compressProfileImage, verifyProfilePin, setProfilePin, removeProfilePin, resetProfilePin, PROFILE_AVATARS, MAX_PROFILES } from "./profile-manager.js";
 
@@ -237,7 +237,7 @@ async function refreshProfiles() {
 $("profile-signout").addEventListener("click",async() => {
   const button = $("profile-signout");
   button.disabled = true;
-  try { await signOut(auth); location.replace("login.html"); }
+  try { sessionStorage.removeItem("vivid:profile-return-to:v1"); await signOut(auth); location.replace("login.html"); }
   catch(error) { button.disabled = false; say(error.message || "Could not sign out. Please try again.",true); }
 });
 $("manage-toggle").addEventListener("click",() => {
@@ -260,6 +260,132 @@ $("profile-use-google").addEventListener("click",() => {
   photoPreview.hidden = false;
   renderGallery();
 });
+
+const pinDialog = $("profile-pin-dialog");
+const pinForm = $("profile-pin-form");
+const pinSettingsDialog = $("profile-pin-settings");
+const pinSettingsForm = $("profile-pin-settings-form");
+pinForm.addEventListener("submit", async event => {
+  event.preventDefault();
+  if (pinSaving || !pendingProfile) return;
+  const pin = $("profile-pin-input").value.trim();
+  if (!/^\\d{4}$/.test(pin)) {
+    $("profile-pin-status-message").textContent = "Enter all four digits.";
+    $("profile-pin-input").focus();
+    return;
+  }
+  pinSaving = true;
+  $("profile-pin-unlock").disabled = true;
+  $("profile-pin-status-message").textContent = "Verifying PIN…";
+  try {
+    const result = await verifyProfilePin(pendingProfile.id, pin);
+    const profile = pendingProfile;
+    pinDialog.close();
+    await finishProfileOpen(profile, result.customToken);
+  } catch (error) {
+    const wait = error.retryAfterMs > 0 ? " Try again in " + Math.ceil(error.retryAfterMs / 60000) + " minute(s)." : "";
+    $("profile-pin-status-message").textContent = (error.message || "Could not verify this PIN.") + wait;
+    $("profile-pin-input").value = "";
+    $("profile-pin-input").focus();
+  } finally {
+    pinSaving = false;
+    $("profile-pin-unlock").disabled = false;
+  }
+});
+function closePinDialog() {
+  pinDialog.close();
+  pendingProfile = null;
+}
+$("profile-pin-close").addEventListener("click", closePinDialog);
+$("profile-pin-cancel").addEventListener("click", closePinDialog);
+$("profile-pin-forgot").addEventListener("click", async () => {
+  if (!pendingProfile) return;
+  try {
+    sessionStorage.setItem("vivid:profile-pin-reset:v1", pendingProfile.id);
+    sessionStorage.removeItem("vivid:profile-return-to:v1");
+    await signOut(auth);
+    location.replace("login.html");
+  } catch (error) {
+    $("profile-pin-status-message").textContent = error.message || "Could not start PIN recovery.";
+  }
+});
+$("profile-pin-manage").addEventListener("click", () => {
+  const profile = profiles.find(item => item.id === editingId);
+  if (!profile) return;
+  $("profile-pin-settings-title").textContent = profile.hasPin ? "Change profile PIN" : "Set a profile PIN";
+  $("profile-current-pin-row").hidden = !profile.hasPin;
+  $("profile-pin-remove").hidden = !profile.hasPin;
+  $("profile-current-pin").value = "";
+  $("profile-new-pin").value = "";
+  $("profile-confirm-pin").value = "";
+  $("profile-pin-settings-status").textContent = "";
+  pinSettingsDialog.showModal();
+  $("profile-new-pin").focus();
+});
+pinSettingsForm.addEventListener("submit", async event => {
+  event.preventDefault();
+  if (pinSaving || !editingId) return;
+  const profile = profiles.find(item => item.id === editingId);
+  const pin = $("profile-new-pin").value.trim();
+  const confirm = $("profile-confirm-pin").value.trim();
+  const currentPin = $("profile-current-pin").value.trim();
+  if (!/^\\d{4}$/.test(pin) || pin !== confirm) {
+    $("profile-pin-settings-status").textContent = pin !== confirm ? "The PIN entries do not match." : "Enter a four-digit PIN.";
+    return;
+  }
+  if (profile?.hasPin && !/^\\d{4}$/.test(currentPin)) {
+    $("profile-pin-settings-status").textContent = "Enter the current four-digit PIN first.";
+    return;
+  }
+  pinSaving = true;
+  $("profile-pin-settings-save").disabled = true;
+  $("profile-pin-settings-status").textContent = "Saving profile security…";
+  try {
+    const openSession = getActiveProfileId(user.uid) === editingId;
+    const result = await setProfilePin(editingId, pin, currentPin, openSession);
+    if (result.customToken) {
+      switchingProfile = true;
+      try { user = (await signInWithCustomToken(auth, result.customToken)).user; }
+      finally { switchingProfile = false; }
+    }
+    await refreshProfiles();
+    const updated = profiles.find(item => item.id === editingId);
+    $("profile-pin-status").textContent = updated?.hasPin ? "PIN enabled" : "No profile PIN";
+    $("profile-pin-manage").textContent = updated?.hasPin ? "Change PIN" : "Set PIN";
+    pinSettingsDialog.close();
+    $("profile-pin-settings-status").textContent = "";
+  } catch (error) {
+    $("profile-pin-settings-status").textContent = error.message || "Could not save this PIN.";
+  } finally {
+    pinSaving = false;
+    $("profile-pin-settings-save").disabled = false;
+  }
+});
+$("profile-pin-remove").addEventListener("click", async () => {
+  if (pinSaving || !editingId) return;
+  const currentPin = $("profile-current-pin").value.trim();
+  if (!/^\\d{4}$/.test(currentPin)) {
+    $("profile-pin-settings-status").textContent = "Enter the current four-digit PIN to remove it.";
+    return;
+  }
+  pinSaving = true;
+  $("profile-pin-remove").disabled = true;
+  $("profile-pin-settings-status").textContent = "Removing profile PIN…";
+  try {
+    await removeProfilePin(editingId, currentPin);
+    await refreshProfiles();
+    $("profile-pin-status").textContent = "No profile PIN";
+    $("profile-pin-manage").textContent = "Set PIN";
+    pinSettingsDialog.close();
+  } catch (error) {
+    $("profile-pin-settings-status").textContent = error.message || "Could not remove this PIN.";
+  } finally {
+    pinSaving = false;
+    $("profile-pin-remove").disabled = false;
+  }
+});
+$("profile-pin-settings-close").addEventListener("click", () => pinSettingsDialog.close());
+$("profile-pin-settings-cancel").addEventListener("click", () => pinSettingsDialog.close());
 $("editor-close").addEventListener("click",() => dialog.close());
 $("profile-cancel").addEventListener("click",() => dialog.close());
 dialog.addEventListener("click",event => { if(event.target === dialog) dialog.close(); });
@@ -301,6 +427,7 @@ deleteButton.addEventListener("click",async() => {
   saving = true; deleteButton.disabled = true; editorStatus.textContent = "Deleting profile…";
   try {
     await deleteProfile(editingId);
+    if (getActiveProfileId(user.uid) === editingId) clearActiveProfileId(user.uid);
     await refreshProfiles();
     dialog.close();
   } catch(error) { editorStatus.textContent = error.message || "Could not delete this profile."; }
@@ -313,7 +440,18 @@ onAuthStateChanged(auth,async currentUser => {
     return;
   }
   user = currentUser;
+  if (switchingProfile) return;
   $("manage-toggle").disabled = false;
-  try { await refreshProfiles(); }
-  catch(error) { say(error.message || "Could not load your profiles.",true); grid.replaceChildren(); }
+  try {
+    let resetProfileId = "";
+    try {
+      resetProfileId = sessionStorage.getItem("vivid:profile-pin-reset:v1") || "";
+      sessionStorage.removeItem("vivid:profile-pin-reset:v1");
+    } catch {}
+    if (resetProfileId) {
+      await resetProfilePin(resetProfileId);
+      say("The profile PIN was reset. You can choose the profile and set a new PIN.");
+    }
+    await refreshProfiles();
+  } catch(error) { say(error.message || "Could not load your profiles.",true); grid.replaceChildren(); }
 });
