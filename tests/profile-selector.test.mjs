@@ -55,7 +55,10 @@ test("profile UI exposes the bounded Vivid avatar collection and compressed cust
   assert.match(page, /id="profile-pin-dialog"/);
   assert.match(page, /id="profile-pin-settings"/);
   assert.match(page, /id="profile-pin-manage"/);
-  assert.doesNotMatch(page, /profile-is-kids/);
+  assert.match(page, /profile-is-kids/);
+  assert.match(page, /profile-movie-rating/);
+  assert.match(page, /profile-tv-rating/);
+  assert.match(selector, /Parent verification is required to leave Kids Mode/);
   assert.match(selector, /PROFILE_AVATARS/);
   assert.match(selector, /compressProfileImage\(file\)/);
   assert.match(manager, /image\/webp/);
@@ -91,7 +94,7 @@ test("profile deletion protects the owner and requires an explicit confirmation"
 });
 
 test("profile selector assets are network refreshed and accessible from the account hub", () => {
-  assert.match(worker, /vivid-cinema-shell-v371/);
+  assert.match(worker, /vivid-cinema-shell-v372/);
   assert.match(worker, /profile-selector/);
   assert.match(worker, /profiles\.html/);
   assert.match(account, /href="profiles\.html"/);
