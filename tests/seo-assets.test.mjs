@@ -27,6 +27,7 @@ test("static SEO build emits canonical metadata, structured data and a curated s
     const sitemap = await readFile(path.join(directory, "sitemap.xml"), "utf8");
     const robots = await readFile(path.join(directory, "robots.txt"), "utf8");
     const freeMovies = await readFile(path.join(directory, "free-movies.html"), "utf8");
+    const live = await readFile(path.join(directory, "live.html"), "utf8");
 
     assert.equal(result.origin, "https://cinema.example");
     assert.ok(result.indexedPages >= 7);
