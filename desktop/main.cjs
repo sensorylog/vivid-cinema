@@ -160,6 +160,8 @@ function createLocalServer(root) {
 let localServer;
 let localOrigin;
 let downloadEngine;
+let downloadEngineOwner = null;
+let activeDownloadOwner = "guest";
 let transcodeEngine;
 let transcodeEngineStartPromise = null;
 let autoUpdater = null;
@@ -169,12 +171,59 @@ function markStartup(stage) {
   console.info("[Vivid startup] " + stage + ": " + Math.round(performance.now() - startupStartedAt) + "ms");
 }
 
+function normalizeDownloadOwner(value) {
+  const owner = String(value || "").trim();
+  if (!owner || owner.length > 256 || !/^[A-Za-z0-9:_-]+$/.test(owner)) {
+    throw new TypeError("A valid Vivid account/profile download owner is required.");
+  }
+  return owner;
+}
+
+function resolveLegacyDownloadStorage(ownerId) {
+  const markerPath = path.join(app.getPath("userData"), "vivid-downloads-profile-owner.json");
+  let marker = null;
+  try { marker = JSON.parse(fs.readFileSync(markerPath, "utf8")); } catch {}
+  if (!marker?.ownerId && ownerId !== "guest") {
+    fs.mkdirSync(path.dirname(markerPath), { recursive: true });
+    const temporary = markerPath + ".tmp";
+    fs.writeFileSync(temporary, JSON.stringify({ version: 1, ownerId }), "utf8");
+    fs.renameSync(temporary, markerPath);
+    marker = { ownerId };
+  }
+  // The first signed-in profile claims the existing global offline library.
+  // After that, every other profile (including guest) gets a separate folder.
+  return !marker?.ownerId ? ownerId === "guest" : String(marker.ownerId) === ownerId;
+}
+
 function ensureDownloadEngine() {
   if (!downloadEngine) {
     const { DesktopDownloadEngine } = require("./download-engine.cjs");
-    downloadEngine = new DesktopDownloadEngine({ app, BrowserWindow, dialog, shell, deferTorrentClient: true });
+    downloadEngine = new DesktopDownloadEngine({
+      app, BrowserWindow, dialog, shell, deferTorrentClient: true,
+      ownerId: activeDownloadOwner,
+      legacyStorage: resolveLegacyDownloadStorage(activeDownloadOwner)
+    });
+    downloadEngineOwner = activeDownloadOwner;
+  }
+  if (downloadEngineOwner !== activeDownloadOwner) {
+    throw new Error("The active Vivid profile changed. Reopen the offline library and retry.");
   }
   return downloadEngine;
+}
+
+async function setDownloadOwner(value) {
+  const nextOwner = normalizeDownloadOwner(value);
+  if (nextOwner === activeDownloadOwner && downloadEngineOwner === nextOwner && downloadEngine) {
+    await downloadEngine.ready;
+    return { ownerId: nextOwner };
+  }
+  if (downloadEngine) await downloadEngine.shutdown();
+  downloadEngine = null;
+  downloadEngineOwner = null;
+  activeDownloadOwner = nextOwner;
+  const engine = ensureDownloadEngine();
+  await engine.ready;
+  return { ownerId: nextOwner };
 }
 
 async function ensureTranscodeEngine() {
@@ -328,6 +377,10 @@ function configureOfflineMediaProtocol() {
 }
 function configureDownloadEngine() {
   // Register IPC endpoints at startup; construct the download runtime on first use.
+  ipcMain.handle("vivid-download-set-owner", async (event, ownerId) => {
+    if (!isTrustedDownloadSender(event)) throw new Error("Untrusted download owner request");
+    return setDownloadOwner(ownerId);
+  });
   ipcMain.handle("vivid-download-search", (event, query) => {
     if (!isTrustedDownloadSender(event)) throw new Error("Untrusted download request");
     return ensureDownloadEngine().search(query);
