@@ -265,7 +265,7 @@ export default async function handler(req, res) {
     const profileReference = await requireProfile(db, claims.uid, profileId);
     const pinReference = profileReference.collection("profileSecurity").doc("pin");
 
-    await consumeRateLimit(db, claims.uid, profileId);
+    if (action !== "validate") await consumeRateLimit(db, claims.uid, profileId);
 
     if (action === "validate") {
       const sessionId = String(claims.profileSessionId || "");
