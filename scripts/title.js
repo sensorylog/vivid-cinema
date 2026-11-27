@@ -8,6 +8,7 @@ import { getProviderCountry, setProviderCountry } from "./provider-region.js";
 import { getLatestPlaybackProgress } from "./recommendations.js";
 import { recordBehavior } from "./intelligence.js";
 import { setPageSeo } from "./seo.js";
+import { isTitleAllowed, filterAllowedTitles, renderParentalBlock } from "./parental-controls.js";
 
 const $ = (id) => document.getElementById(id);
 const route = getRoute();
@@ -526,6 +527,7 @@ async function init() {
     // Paint the title page from the lightweight metadata endpoint first. This avoids
     // making the first screen wait for credits, videos, providers and recommendations.
     const basic = type === "tv" ? await tmdbApi.tvDetailsBasic(id) : await tmdbApi.movieDetailsBasic(id);
+    if (!await isTitleAllowed({ ...basic, id, media_type: type })) { renderParentalBlock($("title-content"), basic?.name || basic?.title || "This title"); return; }
     render(basic);
     // Enrich the page in the background without blocking the first meaningful paint.
     void (async () => {
@@ -535,6 +537,10 @@ async function init() {
           type === "tv" ? tmdbApi.tvContentRatings(id) : tmdbApi.movieReleaseDates(id)
         ]);
         const preferredCountry = getProviderCountry();
+        const certification = type === "tv" ? (certificationData?.results?.find(item=>item.iso_3166_1===preferredCountry&&item.rating)?.rating || certificationData?.results?.find(item=>item.iso_3166_1==="US"&&item.rating)?.rating || "") : (certificationData?.results?.find(item=>item.iso_3166_1===preferredCountry)?.release_dates?.find(item=>item.certification)?.certification || certificationData?.results?.find(item=>item.iso_3166_1==="US")?.release_dates?.find(item=>item.certification)?.certification || "");
+        if (!await isTitleAllowed({ ...enriched, id, media_type: type }, { certification })) { renderParentalBlock($("title-content"), enriched?.name || enriched?.title || "This title"); return; }
+        if (enriched.recommendations?.results) enriched.recommendations.results = await filterAllowedTitles(enriched.recommendations.results);
+        if (enriched.similar?.results) enriched.similar.results = await filterAllowedTitles(enriched.similar.results);
         const ratingDetails = type === "tv"
           ? { rating: getCertification(enriched, preferredCountry), note: "" }
           : getMovieRatingDetails(enriched, preferredCountry, certificationData);

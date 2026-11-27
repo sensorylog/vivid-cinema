@@ -12,6 +12,7 @@ import { recordBehavior, startIntelligenceSync } from "./intelligence.js";
 import { playDirectStream, resolveDirectStream, stopDirectStream } from "./playback/player-engine.js";
 import { buildCustomEmbedUrl, getCustomPlaybackServer } from "./playback/playback-servers.js";
 import { mountWatchRoomPlayerLayout } from "./watch-room-player-layout.js";
+import { isTitleAllowed, filterAllowedTitles, renderParentalBlock } from "./parental-controls.js";
 import { buildVidapiEmbedUrl, buildVidsrcEmbedUrl, buildVidlinkEmbedUrl, buildVidplusEmbedUrl, buildVidkingEmbedUrl, buildEmbedWaveUrl, buildVidFastUrl, buildEzVidApiUrl, buildEmbedApiStreamUrl, buildMoviesApiUrl } from "./playback/playback-urls.js";
 
 const $ = (id) => document.getElementById(id);
@@ -851,6 +852,8 @@ async function loadWatchRecommendations(params) {
     }
   }
 
+  if (details?.recommendations?.results) details.recommendations.results = await filterAllowedTitles(details.recommendations.results);
+  if (details?.similar?.results) details.similar.results = await filterAllowedTitles(details.similar.results);
   if (rail.isConnected) rail.innerHTML = recommendationCards();
 }
 
@@ -1621,6 +1624,7 @@ async function load() {
   if (isWatchRoomCinemaMode && watchRoomScreeningValidated) roomOpenPlayerWindow?.();
   try {
     details = currentParams.type === "tv" ? await tmdbApi.tvDetails(currentParams.id) : await tmdbApi.movieDetails(currentParams.id);
+    if (!await isTitleAllowed({ ...details, id: currentParams.id, media_type: currentParams.type })) { renderParentalBlock($("watch-content"), details?.name || details?.title || "This title"); return; }
     media = normalizeMedia(details, currentParams.type);
     if (isLikelyAnime() && !isAnimePlayback()) {
       const query = new URLSearchParams({ id: String(currentParams.id), type: currentParams.type });

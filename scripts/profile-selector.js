@@ -115,7 +115,7 @@ function renderProfiles() {
     }
     const meta = document.createElement("span");
     meta.className = "profile-card-meta";
-    meta.textContent = profile.isOwner ? "Account owner" : profile.hasPin ? "PIN protected" : "Vivid profile";
+    meta.textContent = profile.isOwner ? "Account owner" : profile.isKids ? "Kids profile" : profile.hasPin ? "PIN protected" : "Vivid profile";
     card.append(avatar,name,meta);
     card.addEventListener("click", () => manageMode ? openEditor(profile) : chooseProfile(profile));
     grid.append(card);
@@ -172,6 +172,13 @@ function openEditor(profile = null) {
   selectedAvatarUrl = profile?.avatarUrl || "";
   selectedAvatarSource = profile?.avatarSource || (selectedAvatarData ? "upload" : selectedAvatarUrl ? "google" : "collection");
   nameInput.value = profile?.name || "";
+  $("profile-is-kids").checked = profile?.isKids === true;
+  $("profile-movie-rating").value = profile?.movieRatingLimit || (profile?.isKids ? "PG" : "NC-17");
+  $("profile-tv-rating").value = profile?.tvRatingLimit || (profile?.isKids ? "TV-PG" : "TV-MA");
+  const blockedGenres = new Set((profile?.blockedGenreIds || (profile?.isKids ? [27,53,80,10752] : [])).map(String));
+  [...$("profile-blocked-genres").options].forEach(option => option.selected = blockedGenres.has(option.value));
+  $("profile-blocked-titles").value = (profile?.blockedTitles || []).join(", ");
+  $("profile-kids-settings").hidden = !$("profile-is-kids").checked;
   editorStatus.textContent = "";
   deleteButton.hidden = !profile || profile.isOwner;
   $("profile-pin-status").textContent = profile?.hasPin ? "PIN enabled" : "No profile PIN";
@@ -446,7 +453,11 @@ form.addEventListener("submit",async event => {
   if (!name || name.length > 48) { editorStatus.textContent = "Enter a profile name between 1 and 48 characters."; nameInput.focus(); return; }
   saving = true; saveButton.disabled = true; editorStatus.textContent = "Saving profile…";
   try {
-    const payload = { name, avatarId: selectedAvatar, avatarData: selectedAvatarData, avatarUrl: selectedAvatarUrl, avatarSource: selectedAvatarSource };
+    const isKids = $("profile-is-kids").checked;
+    if (isKids && !profiles.find(item => item.isOwner)?.hasPin) throw new Error("Set a PIN on the Main Profile before enabling Kids Mode.");
+    const blockedTitles = $("profile-blocked-titles").value.split(",").map(value => value.trim().toLowerCase()).filter(Boolean);
+    if (blockedTitles.some(value => !/^(movie|tv):[1-9][0-9]{0,11}$/.test(value))) throw new Error("Use movie:ID or tv:ID for blocked titles.");
+    const payload = { name, avatarId: selectedAvatar, avatarData: selectedAvatarData, avatarUrl: selectedAvatarUrl, avatarSource: selectedAvatarSource, isKids, movieRatingLimit: $("profile-movie-rating").value, tvRatingLimit: $("profile-tv-rating").value, blockedGenreIds: [...$("profile-blocked-genres").selectedOptions].map(option => Number(option.value)), blockedTitles };
     if (editingId) await updateProfile(editingId,payload);
     else await createProfile(payload);
     await refreshProfiles();
@@ -468,6 +479,7 @@ deleteButton.addEventListener("click",async() => {
   } catch(error) { editorStatus.textContent = error.message || "Could not delete this profile."; }
   finally { saving = false; deleteButton.disabled = false; }
 });
+$("profile-is-kids").addEventListener("change", () => { const enabled=$("profile-is-kids").checked; $("profile-kids-settings").hidden=!enabled; if(enabled){if($("profile-movie-rating").value==="NC-17")$("profile-movie-rating").value="PG";if($("profile-tv-rating").value==="TV-MA")$("profile-tv-rating").value="TV-PG";if(!$("profile-blocked-genres").selectedOptions.length)[...$("profile-blocked-genres").options].forEach(option=>option.selected=["27","53","80","10752"].includes(option.value));} });
 $("manage-toggle").disabled = true;
 onAuthStateChanged(auth,async currentUser => {
   if (!currentUser || currentUser.isAnonymous) {
@@ -489,5 +501,8 @@ onAuthStateChanged(auth,async currentUser => {
       say("The profile PIN was reset. You can choose the profile and set a new PIN.");
     }
     await refreshProfiles();
+    const tokenResult = await user.getIdTokenResult();
+    const active = profiles.find(item => item.id === String(tokenResult.claims.profileId || getActiveProfileId(user.uid)));
+    if (active?.isKids) { const owner = profiles.find(item => item.isOwner); if (!owner?.hasPin) { say("Kids Mode exit is locked until a parent PIN is configured.",true); return; } say("Parent verification is required to leave Kids Mode."); await chooseProfile(owner); }
   } catch(error) { say(error.message || "Could not load your profiles.",true); grid.replaceChildren(); }
 });

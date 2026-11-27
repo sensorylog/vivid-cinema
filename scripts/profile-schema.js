@@ -1,4 +1,7 @@
 export const PROFILE_SCHEMA_VERSION = 1;
+export const MOVIE_RATING_LIMITS = Object.freeze(["G","PG","PG-13","R","NC-17"]);
+export const TV_RATING_LIMITS = Object.freeze(["TV-Y","TV-Y7","TV-G","TV-PG","TV-14","TV-MA"]);
+export const DEFAULT_KIDS_BLOCKED_GENRES = Object.freeze([27,53,80,10752]);
 export const OWNER_PROFILE_ID = "owner";
 export const MAX_PROFILES = 5;
 export const MAX_AVATAR_DATA_LENGTH = 180000;
@@ -71,6 +74,11 @@ export function normalizeProfile(profileId, data = {}) {
     avatarSource: ["auto","google","collection","upload"].includes(data.avatarSource) ? data.avatarSource : (data.avatarData ? "upload" : data.avatarUrl ? "google" : id === OWNER_PROFILE_ID ? "auto" : "collection"),
     isKids,
     maturityLevel: isKids ? "kids" : "adult",
+    movieRatingLimit: MOVIE_RATING_LIMITS.includes(data.movieRatingLimit) ? data.movieRatingLimit : (isKids ? "PG" : "NC-17"),
+    tvRatingLimit: TV_RATING_LIMITS.includes(data.tvRatingLimit) ? data.tvRatingLimit : (isKids ? "TV-PG" : "TV-MA"),
+    blockedGenreIds: [...new Set((Array.isArray(data.blockedGenreIds) ? data.blockedGenreIds : (isKids ? DEFAULT_KIDS_BLOCKED_GENRES : [])).map(Number).filter(id => Number.isInteger(id) && id > 0 && id < 100000))].slice(0,30),
+    blockedTitles: [...new Set((Array.isArray(data.blockedTitles) ? data.blockedTitles : []).map(value => String(value || "").trim().toLowerCase()).filter(value => /^(movie|tv):[1-9][0-9]{0,11}$/.test(value))].slice(0,100),
+    allowUnrated: isKids ? false : data.allowUnrated !== false,
     isOwner: id === OWNER_PROFILE_ID,
     schemaVersion: PROFILE_SCHEMA_VERSION
   };

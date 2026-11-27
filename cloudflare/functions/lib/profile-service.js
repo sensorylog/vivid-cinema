@@ -98,7 +98,9 @@ function cleanProfileInput(profileId, body, existing = {}) {
   const avatarUrl = source === "google" || source === "auto" ? requestedUrl : "";
   const avatarData = source === "upload" ? requestedData : "";
   const isKids = body.isKids == null ? existing.isKids === true : body.isKids === true;
-  const normalized = normalizeProfile(profileId, { name, avatarId, avatarUrl, avatarData, avatarSource: source, isKids });
+  const normalized = normalizeProfile(profileId, { name, avatarId, avatarUrl, avatarData, avatarSource: source, isKids, movieRatingLimit: body.movieRatingLimit ?? existing.movieRatingLimit, tvRatingLimit: body.tvRatingLimit ?? existing.tvRatingLimit, blockedGenreIds: body.blockedGenreIds ?? existing.blockedGenreIds, blockedTitles: body.blockedTitles ?? existing.blockedTitles, allowUnrated: body.allowUnrated ?? existing.allowUnrated });
+  const policyFields=["isKids","movieRatingLimit","tvRatingLimit","blockedGenreIds","blockedTitles","allowUnrated"];
+  if(policyFields.some(key=>Object.prototype.hasOwnProperty.call(body,key))&&body.__profileRole!=="owner")throw new AnimePremiumError(403,"parent-authorization-required","Only the Main Profile can change Kids Mode and parental controls.");
   if (!normalized.name || normalized.avatarId !== avatarId) {
     throw new AnimePremiumError(400, "invalid-profile", "The profile details are not valid.");
   }
@@ -155,6 +157,7 @@ export async function createAccountProfile(request, env) {
   const body = await readProfileBody(request);
   const name = typeof body.name === "string" ? body.name.trim() : "";
   if (!name) throw new AnimePremiumError(400, "invalid-profile-name", "Enter a name for this profile.");
+  if(body.isKids===true&&user.profileId!==OWNER_PROFILE_ID)throw new AnimePremiumError(403,"parent-authorization-required","Only the Main Profile can create a Kids profile.");
   const profilesRef = db.collection("users").doc(user.uid).collection("profiles");
   const now = Timestamp.fromMillis(Date.now());
   const ownerRef = profilesRef.doc(OWNER_PROFILE_ID);
@@ -164,15 +167,17 @@ export async function createAccountProfile(request, env) {
     const profiles = await transaction.get(profilesRef);
     const owner = await transaction.get(ownerRef);
     const limits = await transaction.get(limitRef);
+    const ownerPin = await transaction.get(ownerRef.collection("profileSecurity").doc("pin"));
     if (!owner.exists || owner.data()?.isOwner !== true) {
       throw new AnimePremiumError(409, "owner-profile-required", "The main Vivid profile must be initialized before adding profiles.");
     }
+    if(body.isKids===true&&!ownerPin.exists)throw new AnimePremiumError(409,"parent-pin-required","Set a PIN on the Main Profile before creating a Kids profile.");
     const currentCount = profiles.size;
     if (currentCount >= MAX_PROFILES) {
       throw new AnimePremiumError(409, "profile-limit-reached", "A Vivid account can have up to " + MAX_PROFILES + " profiles.");
     }
     const reference = profilesRef.doc();
-    const normalized = cleanProfileInput(reference.id, body);
+    const normalized = cleanProfileInput(reference.id, { ...body, __profileRole: user.profileId });
     const { avatarData, ...metadata } = normalized;
     created = { ...metadata, createdAt: now, updatedAt: now };
     transaction.create(reference, created);
@@ -190,6 +195,9 @@ export async function updateAccountProfile(request, env) {
   try { profileId = normalizeProfileId(body.profileId); }
   catch { throw new AnimePremiumError(400, "invalid-profile-id", "Choose a valid Vivid profile."); }
   const reference = db.collection("users").doc(user.uid).collection("profiles").doc(profileId);
+  const policyFields=["isKids","movieRatingLimit","tvRatingLimit","blockedGenreIds","blockedTitles","allowUnrated"];
+  const hasPolicyChange=policyFields.some(key=>Object.prototype.hasOwnProperty.call(body,key));
+  if(hasPolicyChange&&user.profileId!==OWNER_PROFILE_ID)throw new AnimePremiumError(403,"parent-authorization-required","Only the Main Profile can change Kids Mode and parental controls.");
   const now = Timestamp.fromMillis(Date.now());
   let updated;
   await db.runTransaction(async transaction => {
@@ -198,11 +206,13 @@ export async function updateAccountProfile(request, env) {
     const existing = snapshot.data() || {};
     const avatarReference = reference.collection("avatar").doc("image");
     const avatarSnapshot = await transaction.get(avatarReference);
+    const ownerPinSnapshot=hasPolicyChange?await transaction.get(reference.parent.doc(OWNER_PROFILE_ID).collection("profileSecurity").doc("pin")):null;
     const existingWithAvatar = { ...existing, avatarData: avatarSnapshot.data()?.data || existing.avatarData || "" };
+    if(body.isKids===true&&!ownerPinSnapshot?.exists&&existing.isKids!==true)throw new AnimePremiumError(409,"parent-pin-required","Set a PIN on the Main Profile before enabling Kids Mode.");
     if (existing.isOwner === true && body.isKids === true) {
       throw new AnimePremiumError(400, "owner-cannot-be-kids", "The main account profile cannot be changed into a Kids profile.");
     }
-    const normalized = cleanProfileInput(profileId, body, existingWithAvatar);
+    const normalized = cleanProfileInput(profileId, { ...body, __profileRole: user.profileId }, existingWithAvatar);
     const { avatarData, ...metadata } = normalized;
     updated = { ...metadata, createdAt: existing.createdAt || now, updatedAt: now };
     transaction.set(reference, updated);
