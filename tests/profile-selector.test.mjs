@@ -44,6 +44,8 @@ test("profile manager uses authenticated same-origin APIs and handles create, up
 test("profile UI exposes the bounded Vivid avatar collection and compressed custom-photo upload", () => {
   assert.match(page, /id="avatar-gallery"/);
   assert.match(page, /id="profile-photo"/);
+  assert.match(page, /id="profile-use-google"/);
+  assert.doesNotMatch(page, /profile-is-kids/);
   assert.match(selector, /PROFILE_AVATARS/);
   assert.match(selector, /compressProfileImage\(file\)/);
   assert.match(manager, /image\/webp/);
@@ -60,6 +62,8 @@ test("Google account photo is adopted for the owner profile and can be replaced 
   assert.match(selector, /selectedAvatarSource = "upload"/);
   assert.match(selector, /avatarUrl: selectedAvatarUrl/);
   assert.match(selector, /avatarSource: selectedAvatarSource/);
+  assert.match(selector, /profile-use-google/);
+  assert.match(selector, /selectedAvatarSource = "google"/);
 });
 
 test("profile deletion protects the owner and requires an explicit confirmation", () => {
@@ -69,7 +73,7 @@ test("profile deletion protects the owner and requires an explicit confirmation"
 });
 
 test("profile selector assets are network refreshed and accessible from the account hub", () => {
-  assert.match(worker, /vivid-cinema-shell-v369/);
+  assert.match(worker, /vivid-cinema-shell-v370/);
   assert.match(worker, /profile-selector/);
   assert.match(worker, /profiles\.html/);
   assert.match(account, /href="profiles\.html"/);
