@@ -11,7 +11,7 @@ const env = await initializeTestEnvironment({
 });
 
 test("anime library owner can save completed titles, season-scoped progress and preferences", async () => {
-  const db = env.authenticatedContext("anime-owner").firestore();
+  const db = env.authenticatedContext("anime-owner", { profileId: "owner" }).firestore();
   await assertSucceeds(setDoc(doc(db, "users/anime-owner/completed/tv:123"), {
     id: "123", media_type: "tv", title: "Anime series", year: "2025",
     poster_path: "/anime.jpg", backdrop_path: "/anime-bg.jpg",
@@ -32,7 +32,7 @@ test("anime library owner can save completed titles, season-scoped progress and 
 });
 
 test("owner can write a valid library item", async () => {
-  const db = env.authenticatedContext("alice").firestore();
+  const db = env.authenticatedContext("alice", { profileId: "owner" }).firestore();
   await assertSucceeds(setDoc(doc(db, "users/alice/favorites/movie:550"), {
     id: "550", media_type: "movie", title: "The Matrix", year: "1999",
     poster_path: "/matrix.jpg", backdrop_path: "/matrix-backdrop.jpg",
@@ -41,7 +41,7 @@ test("owner can write a valid library item", async () => {
 });
 
 test("users cannot write to another user's library", async () => {
-  const db = env.authenticatedContext("alice").firestore();
+  const db = env.authenticatedContext("alice", { profileId: "owner" }).firestore();
   await assertFails(setDoc(doc(db, "users/bob/favorites/movie:550"), {
     id: "550", media_type: "movie", title: "The Matrix", year: "1999",
     poster_path: "/matrix.jpg", backdrop_path: "/matrix-backdrop.jpg",
@@ -50,7 +50,7 @@ test("users cannot write to another user's library", async () => {
 });
 
 test("invalid completion values are rejected", async () => {
-  const db = env.authenticatedContext("alice").firestore();
+  const db = env.authenticatedContext("alice", { profileId: "owner" }).firestore();
   await assertFails(setDoc(doc(db, "users/alice/favorites/movie:550"), {
     id: "550", media_type: "movie", title: "The Matrix", year: "1999",
     poster_path: "/matrix.jpg", backdrop_path: "/matrix-backdrop.jpg",
@@ -59,7 +59,7 @@ test("invalid completion values are rejected", async () => {
 });
 
 test("oversized event metadata maps are rejected", async () => {
-  const db = env.authenticatedContext("alice").firestore();
+  const db = env.authenticatedContext("alice", { profileId: "owner" }).firestore();
   const metadata = Object.fromEntries(Array.from({ length: 21 }, (_, index) => ["field" + index, index]));
   await assertFails(setDoc(doc(db, "users/alice/events/event-1"), {
     id: "event-1", type: "playback_progress", occurredAt: Date.now(),
@@ -68,7 +68,7 @@ test("oversized event metadata maps are rejected", async () => {
 });
 
 test("taste profile maps are bounded", async () => {
-  const db = env.authenticatedContext("alice").firestore();
+  const db = env.authenticatedContext("alice", { profileId: "owner" }).firestore();
   const genres = Object.fromEntries(Array.from({ length: 101 }, (_, index) => ["genre" + index, 1]));
   await assertFails(setDoc(doc(db, "users/alice/taste/profile"), {
     version: 1, genres, languages: {}, countries: {}, actors: {},
@@ -77,7 +77,7 @@ test("taste profile maps are bounded", async () => {
 });
 
 test("owners can persist only known personal achievement records", async () => {
-  const db = env.authenticatedContext("alice").firestore();
+  const db = env.authenticatedContext("alice", { profileId: "owner" }).firestore();
   await assertSucceeds(setDoc(doc(db, "users/alice/achievements/first-favorite"), {
     id: "first-favorite", unlockedAt: Date.now(), schemaVersion: 1
   }));
@@ -90,7 +90,7 @@ test("owners can persist only known personal achievement records", async () => {
 });
 
 test("achievement records remain private to their owner", async () => {
-  const db = env.authenticatedContext("alice").firestore();
+  const db = env.authenticatedContext("alice", { profileId: "owner" }).firestore();
   await assertFails(setDoc(doc(db, "users/bob/achievements/first-favorite"), {
     id: "first-favorite", unlockedAt: Date.now(), schemaVersion: 1
   }));
@@ -110,7 +110,7 @@ test("unauthenticated users cannot read private user documents", async () => {
 
 
 test("analytics event writes are scoped to the signed-in user", async () => {
-  const alice = env.authenticatedContext("alice").firestore();
+  const alice = env.authenticatedContext("alice", { profileId: "owner" }).firestore();
   const validEvent = {
     event: "page_view", platform: "web", userId: "alice",
     sessionId: "session-1", timestamp: serverTimestamp(),
@@ -149,7 +149,7 @@ test("pseudonymous anonymous visitors can write their own first-open event", asy
 
 test("analytics event collection is readable only by the configured admin", async () => {
   const admin = env.authenticatedContext("awiBvDUVZvdyKnvOpGtD0rh2nZf1").firestore();
-  const regularUser = env.authenticatedContext("alice").firestore();
+  const regularUser = env.authenticatedContext("alice", { profileId: "owner" }).firestore();
   await assertSucceeds(getDocs(query(collection(admin, "analyticsEvents"), limit(10))));
   await assertFails(getDocs(query(collection(regularUser, "analyticsEvents"), limit(10))));
   await assertFails(getDocs(query(collection(env.unauthenticatedContext().firestore(), "analyticsEvents"), limit(10))));
@@ -157,7 +157,7 @@ test("analytics event collection is readable only by the configured admin", asyn
 
 
 test("owner profile bootstrap and profile-scoped library data are private to the account", async () => {
-  const alice = env.authenticatedContext("profile-alice").firestore();
+  const alice = env.authenticatedContext("profile-alice", { profileId: "owner" }).firestore();
   const bob = env.authenticatedContext("profile-bob").firestore();
   const ownerProfile = {
     id: "owner", name: "Alice", avatarUrl: "", avatarSource: "auto",
@@ -251,7 +251,7 @@ test("profile PIN sessions are enforced by Firestore and cannot be forged by loc
 });
 
 test("profile data cannot be written until its parent profile exists", async () => {
-  const alice = env.authenticatedContext("profile-no-parent").firestore();
+  const alice = env.authenticatedContext("profile-no-parent", { profileId: "missing" }).firestore();
   await assertFails(setDoc(doc(alice, "users/profile-no-parent/profiles/missing/favorites/movie:1"), {
     id: "1", media_type: "movie", title: "Example", year: "2025",
     poster_path: "", backdrop_path: "", updatedAt: Date.now()
@@ -375,7 +375,7 @@ test("Watch Rooms and Cinema Clubs are readable only by their recorded members a
 });
 
 test("private dashboard indexes cannot be forged by another account", async () => {
-  const alice = env.authenticatedContext("alice").firestore();
+  const alice = env.authenticatedContext("alice", { profileId: "owner" }).firestore();
   const bob = env.authenticatedContext("bob").firestore();
   await assertFails(setDoc(doc(alice, "users/bob/watchRooms/forged-room"), {
     roomId: "forged-room", name: "Not Alice's room"
