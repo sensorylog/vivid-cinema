@@ -14,6 +14,7 @@ test("Windows offline engine partitions state and files by account/profile owner
   const offline = fs.readFileSync(new URL("../scripts/downloads/desktop-offline.js", import.meta.url), "utf8");
   assert.match(main, /vivid-download-set-owner/);
   assert.match(main, /resolveLegacyDownloadStorage/);
+  assert.match(main, /ownerId\.endsWith\("::owner"\)/);
   assert.match(preload, /setOwner: ownerId => ipcRenderer\.invoke/);
   assert.match(engine, /createHash\("sha256"\)/);
   assert.match(engine, /ownerHash/);
