@@ -60,7 +60,7 @@ test("movie and TV playback retains seven sources while Free Anime is restricted
   assert.match(source, /const order = \["vidapi", "vidsrc", "embedwave", "vidfast", "ezvidapi", "embedapistream", "moviesapi"\]/);
   assert.match(source, /if \(source === "vidapi" \|\| source === "vidsrc" \|\| source === "vidfast" \|\| source === "embedapistream" \|\| source === "moviesapi"\) return hasFallbackId\(\)/);
   assert.match(source, /button\.hidden = isAnimePlayback\(\) \? source !== "vidapi"/);
-  assert.match(source, /<span class="vivid-server-count">7 sources<\/span>/);
+  assert.match(source, /<span class="vivid-server-count">10 sources<\/span>/);
   assert.doesNotMatch(source, /mountPlaybackServerSettings\(serverPanel/);
   for (const provider of ["embedwave", "vidfast", "ezvidapi", "embedapistream", "moviesapi", "archive", "commons", "loc"]) {
     assert.ok(source.includes(`data-player-source="${provider}"`), `${provider} should have a Player 1 button`);
