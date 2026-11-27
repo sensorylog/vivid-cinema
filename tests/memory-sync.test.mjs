@@ -22,9 +22,10 @@ test("profile-aware local stores use the shared snapshot migration policy", () =
 test("playback progress reads and writes are scoped to the active profile", () => {
   assert.ok(progress.includes('doc(db, "users", uid, "profiles", profileId, "progress", contentId)'));
   assert.ok(progress.includes('collection(db, "users", user.uid, "profiles", profileId, "progress")'));
-  assert.ok(progress.includes("getActiveProfileId(owner.uid) === owner.profileId"));
+  assert.ok(progress.includes("progressQueueKey(ownerAtQueue, contentId)"));
+  assert.ok(progress.includes("const sameAccount=previous&&uid&&previous.uid===String(uid)"));
   assert.ok(progress.includes("const ownerAtQueue = localStorage.getItem(LOCAL_OWNER_KEY) || \"guest\""));
-  assert.ok(progress.includes("activeOwner === ownerAtQueue"));
+  assert.ok(progress.includes("String(auth?.currentUser?.uid || \\"\") === owner.uid"));
   assert.ok(progress.includes("initializeProfileFoundation(user)"));
   assert.match(progress, /remoteUpdated > 0 && remoteUpdated >= localUpdated/);
   assert.match(progress, /JSON\.stringify\(merged\) !== JSON\.stringify\(local\[contentId\]\)/);
