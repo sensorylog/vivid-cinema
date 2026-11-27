@@ -249,3 +249,21 @@ test("current signed profile claims override a stale cached Kids policy", async 
   });
   expect(allowed).toBe(true);
 });
+
+
+test("account reauthentication ignores a stale Kids selection so the parent can restore the Main Profile PIN", async ({ page }) => {
+  await page.addInitScript(() => {
+    window.__profileClaims = {};
+    window.__activeProfileId = "kid-1";
+    window.__profiles = [
+      { id: "owner", name: "Main Profile", isOwner: true, isKids: false, hasPin: false, avatarId: "aurora" },
+      { id: "kid-1", name: "Kids Room", isOwner: false, isKids: true, hasPin: false, avatarId: "ember" }
+    ];
+  });
+  await mockProfileRuntime(page);
+  await page.goto("/profiles.html", { waitUntil: "domcontentloaded" });
+  await expect(page.getByRole("button", { name: "Choose Main Profile" })).toBeVisible();
+  await expect(page.locator("#profile-pin-dialog")).toBeHidden();
+  await page.getByRole("button", { name: "Choose Main Profile" }).click();
+  await expect(page).toHaveURL(/home\.html$/);
+});
