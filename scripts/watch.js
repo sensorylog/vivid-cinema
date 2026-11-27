@@ -1315,10 +1315,10 @@ function renderShell(params) {
       const button = event.target.closest("[data-player-source]");
       if (!button || button.disabled || !serverPanel.contains(button)) return;
       const source = button.getAttribute("data-player-source");
-      if ((!["vidapi", "vidsrc", "vidlink", "vidplus", "vidking", "direct", "embedwave", "vidfast", "ezvidapi", "embedapistream", "moviesapi", "archive"].includes(source) && !(source?.startsWith("custom:"))) || !sourceAvailable(source)) return;
+      if ((!["vidapi", "vidsrc", "vidlink", "vidplus", "vidking", "direct", "embedwave", "vidfast", "ezvidapi", "embedapistream", "moviesapi", "archive", "commons", "loc"].includes(source) && !(source?.startsWith("custom:"))) || !sourceAvailable(source)) return;
       sourceAttempted.clear();
       if (["archive", "commons", "loc"].includes(source)) {
-        activeSource = "archive";
+        activeSource = source;
         primaryHealthy = false;
         clearFallbackTimer();
         showArchiveFallback();
