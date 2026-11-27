@@ -299,7 +299,9 @@ test("Windows workflow builds on demand or on release tags", () => {
   assert.match(workflow, /gh release view \$tag --json isDraft,assets/);
   assert.match(workflow, /Vivid-Cinema-Setup-\$version\.exe\.blockmap/);
   assert.match(workflow, /latest\.yml/);
-  assert.match(workflow, /pull_request/);
+  assert.match(workflow, /workflow_dispatch/);
+  assert.doesNotMatch(workflow, /pull_request/);
+  assert.match(workflow, /if: github.event_name == 'workflow_dispatch'/);
   assert.match(workflow, /windows-latest/);
   assert.match(workflow, /run: npm run desktop:dist/);
   assert.match(workflow, /icons\/\*\*/);
