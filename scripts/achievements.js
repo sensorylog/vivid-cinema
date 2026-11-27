@@ -147,7 +147,7 @@ function ensureOwner(uid,requestedProfileId=null){
 }
 async function loadRemote(uid,profileId,version){
   try{
-    const [{db},fs]=await Promise.all([import("./firebase.js"),import("https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js")]);
+    const [{db,auth},fs]=await Promise.all([import("./firebase.js"),import("https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js")]);
     const user = auth?.currentUser;
     if(!user || String(user.uid)!==String(uid))return;
     await initializeProfileFoundation(user);
