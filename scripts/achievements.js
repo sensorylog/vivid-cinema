@@ -113,7 +113,7 @@ function showUnlock(a,others,library){
 function persistRemote(record){
   const uid=currentUid;if(!uid||!record?.id)return;
   void (async()=>{try{
-    const [{db},fs]=await Promise.all([import("./firebase.js"),import("https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js")]);
+    const [{db,auth},fs]=await Promise.all([import("./firebase.js"),import("https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js")]);
     if(currentUid!==uid)return;
     const user = auth?.currentUser;
     if(!user || String(user.uid)!==String(uid))return;
