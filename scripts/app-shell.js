@@ -405,14 +405,14 @@ const PROFILE_RETURN_TO_KEY = "vivid:profile-return-to:v1";
 
 function rememberProfileReturnRoute() {
   const page = location.pathname.split("/").filter(Boolean).pop() || "home.html";
-  if (["profiles.html", "auth.html", "verify-email.html", "anime-premium-return.html"].includes(page)) return;
+  if (["profiles.html", "auth.html", "login.html", "forgot-password.html", "auth-diagnostics.html", "verify-email.html", "anime-premium-return.html"].includes(page)) return;
   try { sessionStorage.setItem(PROFILE_RETURN_TO_KEY, currentRoute()); } catch {}
 }
 
 async function enforceProfileSelection(user) {
   if (!user?.uid) return;
   const page = location.pathname.split("/").filter(Boolean).pop() || "home.html";
-  if (["profiles.html", "verify-email.html", "anime-premium-return.html"].includes(page)) return;
+  if (["profiles.html", "auth.html", "login.html", "forgot-password.html", "auth-diagnostics.html", "verify-email.html", "anime-premium-return.html"].includes(page)) return;
   const redirectToProfiles = () => {
     rememberProfileReturnRoute();
     if (page !== "profiles.html") window.location.replace("profiles.html");
