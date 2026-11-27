@@ -413,9 +413,26 @@ service cloud.firestore {
         && (!request.resource.data.keys().hasAny(['updatedAt']) || request.resource.data.updatedAt is timestamp);
       }
 
+      function hasProfilePin(userId, profileId) {
+        return exists(/databases/$(database)/documents/users/$(userId)/profiles/$(profileId)/profileSecurity/pin);
+      }
+
+      function hasProfileSession(userId, profileId) {
+        return request.auth.token.keys().hasAll(['profileId','profileSessionId'])
+          && request.auth.token.profileId == profileId
+          && request.auth.token.profileSessionId is string
+          && exists(/databases/$(database)/documents/users/$(userId)/profiles/$(profileId)/profileSessions/$(request.auth.token.profileSessionId))
+          && get(/databases/$(database)/documents/users/$(userId)/profiles/$(profileId)/profileSessions/$(request.auth.token.profileSessionId)).data.uid == userId
+          && get(/databases/$(database)/documents/users/$(userId)/profiles/$(profileId)/profileSessions/$(request.auth.token.profileSessionId)).data.profileId == profileId
+          && get(/databases/$(database)/documents/users/$(userId)/profiles/$(profileId)/profileSessions/$(request.auth.token.profileSessionId)).data.revoked == false
+          && get(/databases/$(database)/documents/users/$(userId)/profiles/$(profileId)/profileSessions/$(request.auth.token.profileSessionId)).data.expiresAt is timestamp
+          && get(/databases/$(database)/documents/users/$(userId)/profiles/$(profileId)/profileSessions/$(request.auth.token.profileSessionId)).data.expiresAt > request.time;
+      }
+
       function hasViewingProfile(userId, profileId) {
         return isOwner(userId)
-          && exists(/databases/$(database)/documents/users/$(userId)/profiles/$(profileId));
+          && exists(/databases/$(database)/documents/users/$(userId)/profiles/$(profileId))
+          && (!hasProfilePin(userId, profileId) || hasProfileSession(userId, profileId));
       }
 
     match /users/{userId}/profiles/{profileId} {
@@ -427,6 +444,14 @@ service cloud.firestore {
 
         // Avatar bytes are read and written only by the authenticated profile API.
         match /avatar/{avatarId} {
+          allow read, write: if false;
+        }
+
+        match /profileSecurity/{securityId} {
+          allow read, write: if false;
+        }
+
+        match /profileSessions/{sessionId} {
           allow read, write: if false;
         }
 
