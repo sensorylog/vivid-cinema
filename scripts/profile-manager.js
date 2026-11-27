@@ -1,11 +1,12 @@
 import { auth } from "./firebase.js";
+import { getCloudflareApiUrl } from "./cloudflare-api.js";
 import { MAX_PROFILES, PROFILE_AVATARS, normalizeProfile } from "./profile-schema.js";
 
 async function profileRequest(path, method = "GET", payload = null) {
   const user = auth.currentUser;
   if (!user || user.isAnonymous) throw new Error("Sign in with your Vivid account to manage profiles.");
   const token = await user.getIdToken();
-  const response = await fetch(path, {
+  const response = await fetch(getCloudflareApiUrl(path), {
     method,
     headers: {
       Authorization: "Bearer " + token,
