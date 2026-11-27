@@ -180,6 +180,9 @@ function loadSocialBar() {
 }
 
 function loadPopunder(page) {
+  // Redirecting pop-under ads are disabled in the Windows desktop app only.
+  // Native banners and the social bar retain their existing behavior.
+  if (window.vividDownloads?.available) return;
   const config = AD_CONFIG.popunder;
   // The provider tag is loaded at most once per browser profile per 24h.
   // This is a best-effort tag-load cap; only the provider can cap its
