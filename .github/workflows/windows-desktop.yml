@@ -2,22 +2,6 @@ name: Vivid Cinema Windows Desktop
 
 on:
   workflow_dispatch:
-  pull_request:
-    paths:
-      - "package.json"
-      - "*.html"
-      - "scripts/**"
-      - "service-worker.js"
-      - "firebase.json"
-      - "init.json"
-      - "desktop/**"
-      - "icons/**"
-      - "licenses/**"
-      - "tests/**"
-      - ".github/workflows/windows-desktop.yml"
-  push:
-    branches:
-      - main
 
 permissions:
   contents: write
