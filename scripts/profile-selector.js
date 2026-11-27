@@ -1,8 +1,8 @@
 import { auth } from "./firebase.js";
-import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
-import { initializeProfileFoundation, setActiveProfileId } from "./profiles.js";
+import { onAuthStateChanged, signOut, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
+import { ensureOwnerProfile, initializeProfileFoundation, getActiveProfileId, setActiveProfileId } from "./profiles.js";
 import { normalizeAvatarUrl } from "./profile-schema.js";
-import { fetchProfiles, createProfile, updateProfile, deleteProfile, compressProfileImage, PROFILE_AVATARS, MAX_PROFILES } from "./profile-manager.js";
+import { fetchProfiles, createProfile, updateProfile, deleteProfile, compressProfileImage, verifyProfilePin, setProfilePin, removeProfilePin, resetProfilePin, PROFILE_AVATARS, MAX_PROFILES } from "./profile-manager.js";
 
 const $ = id => document.getElementById(id);
 const grid = $("profile-grid");
@@ -25,6 +25,9 @@ let selectedAvatarUrl = "";
 let selectedAvatarSource = "collection";
 let manageMode = false;
 let saving = false;
+let pendingProfile = null;
+let switchingProfile = false;
+let pinSaving = false;
 
 const avatarVisuals = {
   aurora:["bi-stars","linear-gradient(145deg,#536b9e,#18233e)"],
@@ -104,9 +107,15 @@ function renderProfiles() {
     const name = document.createElement("span");
     name.className = "profile-card-name";
     name.textContent = profile.name;
+    if (profile.hasPin) {
+      const lock = document.createElement("span");
+      lock.className = "profile-card-lock";
+      lock.innerHTML = '<i class="bi bi-lock-fill" aria-hidden="true"></i>';
+      avatar.append(lock);
+    }
     const meta = document.createElement("span");
     meta.className = "profile-card-meta";
-    meta.textContent = profile.isOwner ? "Account owner" : "Vivid profile";
+    meta.textContent = profile.isOwner ? "Account owner" : profile.hasPin ? "PIN protected" : "Vivid profile";
     card.append(avatar,name,meta);
     card.addEventListener("click", () => manageMode ? openEditor(profile) : chooseProfile(profile));
     grid.append(card);
@@ -165,6 +174,9 @@ function openEditor(profile = null) {
   nameInput.value = profile?.name || "";
   editorStatus.textContent = "";
   deleteButton.hidden = !profile || profile.isOwner;
+  $("profile-pin-status").textContent = profile?.hasPin ? "PIN enabled" : "No profile PIN";
+  $("profile-pin-manage").textContent = profile?.hasPin ? "Change PIN" : "Set PIN";
+  $("profile-pin-manage").hidden = !profile;
   photoInput.value = "";
   photoPreview.hidden = !selectedAvatarData;
   if (selectedAvatarData || (selectedAvatarSource === "google" && selectedAvatarUrl)) {
@@ -182,16 +194,42 @@ function openEditor(profile = null) {
   dialog.showModal();
   nameInput.focus();
 }
+async function finishProfileOpen(profile, customToken = "") {
+  if (customToken) {
+    switchingProfile = true;
+    try {
+      const credential = await signInWithCustomToken(auth, customToken);
+      user = credential.user;
+    } finally {
+      switchingProfile = false;
+    }
+  }
+  setActiveProfileId(user.uid, profile.id);
+  location.replace(destination());
+}
 async function chooseProfile(profile) {
+  if (profile.hasPin) {
+    pendingProfile = profile;
+    $("profile-pin-input").value = "";
+    $("profile-pin-status-message").textContent = "";
+    $("profile-pin-description").textContent = "Enter the four-digit PIN to open " + profile.name + ".";
+    $("profile-pin-dialog").showModal();
+    $("profile-pin-input").focus();
+    return;
+  }
   try {
     say("Opening " + profile.name + "…");
-    setActiveProfileId(user.uid, profile.id);
-    location.replace(destination());
+    await finishProfileOpen(profile);
   } catch (error) { say(error.message || "Could not open this profile.",true); }
 }
 async function refreshProfiles() {
-  await initializeProfileFoundation(user);
-  profiles = await fetchProfiles();
+  await ensureOwnerProfile(user);
+  let result = await fetchProfiles();
+  if (!result.migrationComplete) {
+    await initializeProfileFoundation(user);
+    result = await fetchProfiles();
+  }
+  profiles = result.profiles;
   if (!profiles.length) throw new Error("No profiles are available for this Vivid account.");
   renderProfiles();
   say("Choose a profile to continue.");
