@@ -21,6 +21,7 @@ let profiles = [];
 let editingId = null;
 let selectedAvatar = "aurora";
 let selectedAvatarData = "";
+let selectedAvatarUrl = "";
 let manageMode = false;
 let saving = false;
 
@@ -141,6 +142,7 @@ function renderGallery() {
     button.addEventListener("click",() => {
       selectedAvatar = avatar.id;
       selectedAvatarData = "";
+      selectedAvatarUrl = "";
       photoPreview.hidden = true;
       renderGallery();
     });
@@ -151,6 +153,7 @@ function openEditor(profile = null) {
   editingId = profile?.id || null;
   selectedAvatar = profile?.avatarId || "aurora";
   selectedAvatarData = profile?.avatarData || "";
+  selectedAvatarUrl = profile?.avatarUrl || "";
   nameInput.value = profile?.name || "";
   editorStatus.textContent = "";
   deleteButton.hidden = !profile || profile.isOwner;
@@ -206,6 +209,7 @@ photoInput.addEventListener("change",async() => {
   if (!file) return;
   try {
     selectedAvatarData = await compressProfileImage(file);
+    selectedAvatarUrl = "";
     photoPreview.replaceChildren();
     const img = document.createElement("img"); img.src = selectedAvatarData; img.alt = "";
     const label = document.createElement("span"); label.textContent = "Custom photo ready";
@@ -221,7 +225,7 @@ form.addEventListener("submit",async event => {
   if (!name || name.length > 48) { editorStatus.textContent = "Enter a profile name between 1 and 48 characters."; nameInput.focus(); return; }
   saving = true; saveButton.disabled = true; editorStatus.textContent = "Saving profile…";
   try {
-    const payload = { name, avatarId: selectedAvatar, avatarData: selectedAvatarData };
+    const payload = { name, avatarId: selectedAvatar, avatarData: selectedAvatarData, avatarUrl: selectedAvatarUrl };
     if (editingId) await updateProfile(editingId,payload);
     else await createProfile(payload);
     await refreshProfiles();
