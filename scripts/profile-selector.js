@@ -69,10 +69,11 @@ function say(message, error = false) {
   status.dataset.state = error ? "error" : "info";
 }
 function avatarNode(profile, large = false) {
-  const [icon, background] = avatarVisuals[profile.avatarId] || avatarVisuals.aurora;
+  const avatarIndex = Math.max(0, PROFILE_AVATARS.findIndex(avatar => avatar.id === profile.avatarId));
   const wrapper = document.createElement("span");
   wrapper.className = "profile-avatar";
-  wrapper.style.background = background;
+  wrapper.style.setProperty("--avatar-x", ((avatarIndex % 4) * 100 / 3) + "%");
+  wrapper.style.setProperty("--avatar-y", (Math.floor(avatarIndex / 4) * 100 / 3) + "%");
   if (profile.avatarData || profile.avatarUrl) {
     const image = document.createElement("img");
     image.src = profile.avatarData || profile.avatarUrl;
@@ -86,9 +87,8 @@ function avatarNode(profile, large = false) {
     }, { once:true });
     wrapper.append(image);
   } else {
-    const glyph = document.createElement("i");
-    glyph.className = "bi " + icon;
-    wrapper.append(glyph);
+    wrapper.classList.add("profile-avatar-art");
+    wrapper.setAttribute("aria-hidden", "true");
   }
   return wrapper;
 }
@@ -161,17 +161,17 @@ function renderGallery() {
   );
   const tabStopIndex = selectedIndex >= 0 ? selectedIndex : 0;
   PROFILE_AVATARS.forEach((avatar, index) => {
-    const [icon, background] = avatarVisuals[avatar.id] || avatarVisuals.aurora;
     const button = document.createElement("button");
     button.type = "button";
     button.className = "avatar-choice";
     button.dataset.avatarId = avatar.id;
     button.tabIndex = index === tabStopIndex ? 0 : -1;
-    button.style.setProperty("--avatar-bg",background);
+    button.style.setProperty("--avatar-x", ((index % 4) * 100 / 3) + "%");
+    button.style.setProperty("--avatar-y", (Math.floor(index / 4) * 100 / 3) + "%");
     button.setAttribute("role","radio");
     button.setAttribute("aria-checked",String(selectedAvatarSource === "collection" && selectedAvatar === avatar.id));
     button.setAttribute("aria-label",avatar.label);
-    button.innerHTML = '<i class="bi ' + icon + '" aria-hidden="true"></i>';
+    button.setAttribute("aria-hidden", "true");
     button.addEventListener("click",() => selectCollectionAvatar(avatar.id, true));
     button.addEventListener("keydown", event => {
       let nextIndex = index;
