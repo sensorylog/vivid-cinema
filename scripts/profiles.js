@@ -95,7 +95,7 @@ function sameData(left, right) {
 }
 
 function safeAvatarUrl(user) {
-  return normalizeAvatarUrl(String(user?.photoURL || "").trim());
+  return normalizeAvatarUrl(String(user?.photoURL || user?.providerData?.find(provider => provider.providerId === "google.com")?.photoURL || "").trim());
 }
 
 export async function ensureOwnerProfile(user = null) {
