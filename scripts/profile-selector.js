@@ -223,7 +223,16 @@ function startProfileMigration() {
   if (profileMigrationState === "pending" && profileMigrationPromise) return profileMigrationPromise;
   const migrationUser = user;
   profileMigrationState = "pending";
-  profileMigrationPromise = initializeProfileFoundation(migrationUser).then(async () => {
+  profileMigrationPromise = (async () => {
+    const migrationSession = await selectProfile(OWNER_PROFILE_ID);
+    switchingProfile = true;
+    try {
+      user = (await signInWithCustomToken(auth, migrationSession.customToken)).user;
+    } finally {
+      switchingProfile = false;
+    }
+    await initializeProfileFoundation(user);
+  })().then(async () => {
     if (user?.uid !== migrationUser?.uid) return;
     const latest = await fetchProfiles();
     if (!latest.migrationComplete) throw new Error("Your profile library setup has not been confirmed yet. Please retry.");
