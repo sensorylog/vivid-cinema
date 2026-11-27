@@ -17,6 +17,9 @@ test("browser library remains available separately from the native Electron mana
   const desktop = await readFile(new URL("../scripts/downloads/desktop-offline.js", import.meta.url), "utf8");
   assert.match(script, /createIndexedDBPersistence\(\{ownerId:owner\}\)/);
   assert.match(script, /async function offlineOwnerKey\(uid, profileId\)/);
+  assert.match(script, /async function migrateLegacyOfflineJobs\(uid, profileId, scopedOwner\)/);
+  assert.match(script, /vivid:offline-profile-migration:v1:/);
+  assert.match(script, /Existing offline downloads could not be verified/);
   assert.match(script, /crypto\.subtle\.digest\("SHA-256"/);
   assert.match(script, /getActiveProfileId\(user\.uid\)/);
   assert.match(desktop, /engine\.setOwner\(owner\)/);
