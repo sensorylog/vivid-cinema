@@ -198,7 +198,8 @@ export async function syncIntelligenceForUser(u){
   syncStage="checking signed-in account";
   const {auth}=await fb();
   if(String(auth?.currentUser?.uid || "")!==String(u.uid) ||
-     (localStorage.getItem(LOCAL_OWNER_KEY) || "guest")!==scopedOwner){
+     (localStorage.getItem(LOCAL_OWNER_KEY) || "guest")!==scopedOwner ||
+     getActiveProfileId(u.uid)!==profileId){
    throw new Error("The signed-in account changed during intelligence sync. Please retry.");
   }
   const s=read();const stateAtSync=localStorage.getItem(KEY)||"";let feedbackChanged=false;
@@ -213,7 +214,8 @@ export async function syncIntelligenceForUser(u){
   const eventDocIdsToDelete=new Set(eventDocsToDelete.map(d=>d.id));
   const retainedRemoteEventIds=new Set(e.docs.filter(d=>!eventDocIdsToDelete.has(d.id)).map(d=>d.id));
   const ownerIsCurrent=()=>String(auth?.currentUser?.uid||"")===String(u.uid)&&
-   (localStorage.getItem(LOCAL_OWNER_KEY)||"guest")===scopedOwner;
+   (localStorage.getItem(LOCAL_OWNER_KEY)||"guest")===scopedOwner&&
+   getActiveProfileId(u.uid)===profileId;
   syncStage="cleaning up invalid remote events";
   for(let i=0;i<eventDocsToDelete.length;i+=20){
    if(!ownerIsCurrent())throw new Error("The signed-in account changed during event retention cleanup. Please retry.");
