@@ -15,7 +15,8 @@ const PROFILE_DELETE_COLLECTIONS = Object.freeze([
   "profileSessions",
   "parentalControls",
   "profilePreferences",
-  "profileManagement"
+  "profileManagement",
+  "avatar"
 ]);
 const AVATAR_IDS = new Set(PROFILE_AVATARS.map(item => item.id));
 
