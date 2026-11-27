@@ -94,7 +94,7 @@ The release is marked as not-latest so it cannot replace the Windows desktop rel
 
 ### In-app update behavior
 
-The installed Android app checks the published Android release list for the highest stable `android-vMAJOR.MINOR.PATCH` release. Windows tags and Windows assets are ignored. If the Android build number is newer than the installed build, the app shows **Update Vivid Cinema** with **Download & Install** and **Later** actions. Choosing Download & Install uses Android DownloadManager, persists the download ID across app restarts, then opens Android's system package installer. Android may ask the user to allow installs from Vivid Cinema and confirm the update. Successful checks are cached for six hours; failed checks retry after fifteen minutes; dismissing a notice suppresses it only for that build.
+The installed Android app checks the published Android release list for the highest stable `android-vMAJOR.MINOR.PATCH` release. Windows tags and Windows assets are ignored. If the Android build number is newer than the installed build, the app shows **Update Vivid Cinema** with **Download & Install** and **Later** actions. Choosing Download & Install uses Android DownloadManager, persists the download ID across app restarts, then opens Android's system package installer. Android may ask the user to allow installs from Vivid Cinema and confirm the update. Successful checks are cached for fifteen minutes; failed checks retry after five minutes; dismissing a notice suppresses it only for that build.
 
 ### Android version identity and compatibility
 
