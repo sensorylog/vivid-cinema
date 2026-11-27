@@ -236,6 +236,12 @@ test("profile PIN sessions are enforced by Firestore and cannot be forged by loc
     profileId: "kid-1", profileSessionId: "session-1"
   }).firestore();
   await assertSucceeds(getDoc(doc(unlocked, "users/pin-owner/profiles/kid-1/favorites/movie:pin")));
+  await env.withSecurityRulesDisabled(async context => {
+    await setDoc(doc(context.firestore(), "users/pin-owner/profiles/kid-1/profileSecurity/pin"), {
+      pinHash: "rotated-pin-hash", pinSalt: "rotated-salt", iterations: 310000
+    });
+  });
+  await assertFails(getDoc(doc(unlocked, "users/pin-owner/profiles/kid-1/favorites/movie:pin")));
   await assertFails(getDoc(doc(unlocked, "users/pin-owner/profiles/kid-1/profileSecurity/pin")));
 
   const wrongProfile = env.authenticatedContext("pin-owner", {
