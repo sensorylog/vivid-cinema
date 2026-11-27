@@ -25,6 +25,8 @@ test("successful sign-in opens the Who's Watching profile selector by default", 
   assert.match(page, /id="profile-signout"/);
   assert.match(selector, /signOut\(auth\)/);
   assert.match(selector, /setActiveProfileId\(accountId, profile\.id\)/);
+  assert.match(selector, /vivid:profile-session:v1:/);
+  assert.match(selector, /sessionId: selectedClaims\.claims\.profileSessionId/);
   assert.match(selector, /if \(profile\.hasPin\)/);
   assert.match(selector, /verifyProfilePin\(pendingProfile\.id, pin\)/);
   assert.match(selector, /finishProfileOpen\(profile, result\.customToken\)/);
@@ -40,7 +42,8 @@ test("custom-token profile sessions are force-refreshed and verified before navi
     selector.indexOf("async function signInWithVerifiedProfileSession"),
     selector.indexOf("async function finishProfileOpen")
   );
-  assert.match(verified, /selectedUser\.getIdToken\(true\)/);
+  assert.doesNotMatch(verified, /selectedUser\.getIdToken\(true\)/);
+  assert.match(verified, /custom token already contains the server-issued profile claims/);
   assert.match(verified, /selectedUser\.getIdTokenResult\(\)/);
   assert.match(verified, /tokenResult\.claims\.profileId !== expectedProfileId/);
   assert.match(verified, /tokenResult\.claims\.profileSessionId/);
@@ -100,6 +103,9 @@ test("a server-issued Firebase profile claim restores a missing Safari storage s
   assert.match(shell, /The Firebase custom-token claim is the server-issued source of truth/);
   assert.match(shell, /setActiveProfileId\(user\.uid, claimedProfileId\)/);
   assert.match(profiles, /sessionStorage\.getItem\(key\)/);
+  assert.match(profiles, /export async function restoreProfileSession/);
+  assert.match(profiles, /action: "restore"/);
+  assert.match(shell, /restoreProfileSession\(user\)/);
   assert.match(profiles, /sessionStorage\.setItem\(key, id\)/);
 });
 
