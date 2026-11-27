@@ -185,9 +185,9 @@ async function start(){
     const [{auth},{onAuthStateChanged}]=await Promise.all([import("./firebase.js"),import("https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js")]);
     currentAuth=auth;
     if(typeof auth.authStateReady==="function")await auth.authStateReady();
-    onAuthStateChanged(auth,user=>{void switchOwner(user);});
+    onAuthStateChanged(auth,user=>{void switchOwner(user).catch(error=>setMessage(error?.message||"Could not open this profile’s offline library."));});
     window.addEventListener("vivid:profile-changed",event=>{
-      if(currentAuth?.currentUser?.uid===String(event.detail?.uid||""))void switchOwner(currentAuth.currentUser);
+      if(currentAuth?.currentUser?.uid===String(event.detail?.uid||""))void switchOwner(currentAuth.currentUser).catch(error=>setMessage(error?.message||"Could not switch the offline library."));
     });
   }catch(error){console.warn("Vivid download library is using guest storage:",error);await switchOwner(null);}
 }
