@@ -16,7 +16,7 @@ const cloudflareService = readFileSync(new URL("../cloudflare/functions/lib/anim
 test("profile PINs are stored as salted PBKDF2 hashes, never plaintext", () => {
   const first = hashProfilePin("4826");
   const second = hashProfilePin("4826");
-  assert.equal(first.iterations, 310000);
+  assert.equal(first.iterations, 600000);
   assert.notEqual(first.pinSalt, second.pinSalt);
   assert.notEqual(first.pinHash, second.pinHash);
   assert.equal("pin" in first, false);
@@ -49,18 +49,20 @@ test("server PIN endpoint verifies Firebase identity and applies brute-force pro
   assert.match(pinApi, /session\.pinHash === pinSnapshot\.data\(\)\?\.pinHash/);
 });
 
-test("normal profile-session checks do not consume the PIN-attempt rate limit", () => {
-  assert.match(pinApi, /if \(action !== "validate"\) await consumeRateLimit/);
+test("profile session validation is rate-limited and refreshes idle activity", () => {
+  assert.match(pinApi, /await consumeRateLimit\(db, claims\.uid, profileId\)/);
   assert.match(pinApi, /action === "validate"/);
+  assert.match(pinApi, /SESSION_IDLE_TIMEOUT_MS = 30 \* 60 \* 1000/);
+  assert.match(pinApi, /lastActivityAt: Timestamp\.fromMillis\(now\)/);
   assert.match(pinApi, /session\.revoked === true/);
   assert.match(pinApi, /const pinMatches = !pinSnapshot\.exists \|\| session\.pinHash === pinSnapshot\.data\(\)\?\.pinHash/);
-  assert.match(pinApi, /expiresAt <= Date\.now\(\)/);
+  assert.match(pinApi, /lastActivityAt <= now - SESSION_IDLE_TIMEOUT_MS/);
 });
 
 test("Firestore denies direct client access to PIN secrets and requires a live session for PIN-locked profile data", () => {
   assert.match(rules, /match \/profileSecurity\/{securityId} \{\s*allow read, write: if false;/);
   assert.match(rules, /match \/profileSessions\/{sessionId} \{\s*allow read, write: if false;/);
-  assert.match(rules, /function hasProfileSession\([\s\S]*?data\.revoked == false[\s\S]*?data\.expiresAt > request\.time/);
+  assert.match(rules, /function hasProfileSession\([\s\S]*?data\.revoked == false[\s\S]*?data\.expiresAt > request\.time[\s\S]*?data\.lastActivityAt > request\.time - duration\.value\(30, 'm'\)/);
   assert.match(rules, /function hasCurrentPinSession\([\s\S]*?data\.pinHash[\s\S]*?data\.pinHash/);
   assert.match(rules, /request\.auth\.token\.profileId == profileId/);
   assert.match(rules, /function hasLegacyOwnerProfileAccess/);
@@ -96,8 +98,9 @@ test("profile APIs resolve to the hosted Pages origin from Android and Electron 
 });
 
 test("profile listing exposes only a PIN-enabled flag and never returns the stored PIN hash", () => {
-  assert.match(profileService, /hasPin: pinSnapshot\.exists/);
-  assert.doesNotMatch(profileService, /pinHash/);
+  const listing = profileService.match(/export async function listAccountProfiles[\s\S]*?(?=\nexport async function|\nfunction )/)?.[0] || "";
+  assert.match(listing, /hasPin: pinSnapshot\.exists/);
+  assert.doesNotMatch(listing, /pinHash/);
 });
 
 test("profile chooser exposes PIN setup, unlock, and recovery without persisting the PIN in browser storage", () => {
