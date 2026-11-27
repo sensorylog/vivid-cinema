@@ -65,21 +65,43 @@ export async function fetchProfiles() {
 export async function requestProfilePin(action, profileId, details = {}) {
   const user = auth.currentUser;
   if (!user) throw new Error("Sign in to manage profile security.");
-  const token = await user.getIdToken();
-  const response = await fetch("https://vivid-cinema-api.vercel.app/api/profile-pin", {
-    method: "POST",
-    headers: { "Content-Type": "application/json", Authorization: "Bearer " + token },
-    body: JSON.stringify({ action, profileId, ...details }),
-    cache: "no-store"
+
+  const controller = new AbortController();
+  let timeoutId;
+  const timeoutError = new Error("Vivid profile security took too long to respond. Check your connection and retry.");
+  const timeout = new Promise((_, reject) => {
+    timeoutId = window.setTimeout(() => {
+      controller.abort();
+      reject(timeoutError);
+    }, 15_000);
   });
-  const result = await response.json().catch(() => ({}));
-  if (!response.ok || result.ok !== true) {
-    const error = new Error(result.message || "Profile security is temporarily unavailable.");
-    error.code = result.code || "profile-security-unavailable";
-    error.retryAfterMs = Number(result.retryAfterMs || 0);
+  const request = (async () => {
+    const token = await user.getIdToken();
+    const response = await fetch("https://vivid-cinema-api.vercel.app/api/profile-pin", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: "Bearer " + token },
+      body: JSON.stringify({ action, profileId, ...details }),
+      cache: "no-store",
+      signal: controller.signal
+    });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok || result.ok !== true) {
+      const error = new Error(result.message || "Profile security is temporarily unavailable.");
+      error.code = result.code || "profile-security-unavailable";
+      error.retryAfterMs = Number(result.retryAfterMs || 0);
+      throw error;
+    }
+    return result;
+  })();
+
+  try {
+    return await Promise.race([request, timeout]);
+  } catch (error) {
+    if (error === timeoutError || error?.name === "AbortError") throw timeoutError;
     throw error;
+  } finally {
+    window.clearTimeout(timeoutId);
   }
-  return result;
 }
 
 export const selectProfile = profileId => requestProfilePin("select", profileId);
