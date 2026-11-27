@@ -20,6 +20,7 @@ test("browser library remains available separately from the native Electron mana
   assert.match(script, /async function migrateLegacyOfflineJobs\(uid, profileId, scopedOwner\)/);
   assert.match(script, /vivid:offline-profile-migration:v1:/);
   assert.match(script, /Existing offline downloads could not be verified/);
+  assert.match(script, /migrateLegacyOfflineJobs\(user\.uid,profileId,owner\)/);
   assert.match(script, /crypto\.subtle\.digest\("SHA-256"/);
   assert.match(script, /getActiveProfileId\(user\.uid\)/);
   assert.match(desktop, /engine\.setOwner\(owner\)/);
