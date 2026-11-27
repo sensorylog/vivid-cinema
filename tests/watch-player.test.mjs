@@ -62,7 +62,7 @@ test("movie and TV playback retains seven sources while Free Anime is restricted
   assert.match(source, /button\.hidden = isAnimePlayback\(\) \? source !== "vidapi"/);
   assert.match(source, /<span class="vivid-server-count">7 sources<\/span>/);
   assert.doesNotMatch(source, /mountPlaybackServerSettings\(serverPanel/);
-  for (const provider of ["embedwave", "vidfast", "ezvidapi", "embedapistream", "moviesapi"]) {
+  for (const provider of ["embedwave", "vidfast", "ezvidapi", "embedapistream", "moviesapi", "archive"]) {
     assert.ok(source.includes(`data-player-source="${provider}"`), `${provider} should have a Player 1 button`);
   }
 });
@@ -70,7 +70,7 @@ test("movie and TV playback retains seven sources while Free Anime is restricted
 
 
 test("movie/TV server picker keeps all providers in a simple scrollable dropdown", async () => {
-  assert.match(source, /"embedwave", "vidfast", "ezvidapi", "embedapistream", "moviesapi"\]\.includes\(source\)/);
+  assert.match(source, /"embedwave", "vidfast", "ezvidapi", "embedapistream", "moviesapi", "archive"\]\.includes\(source\)/);
   assert.match(source, /const toggleServerMenu = \(\) =>/);
   assert.match(source, /positionServerPanel/);
   const styles = await readFile(new URL("../styles/vivid-cleanup.css", import.meta.url), "utf8");
@@ -216,4 +216,12 @@ test("Archive Cinema is integrated as a rights-filtered movie fallback in Player
   assert.match(archive, /public-domain/i);
   assert.match(archive, /hasPlayableVideo/);
   assert.doesNotMatch(archive, /openload|streamtape|vidsrc|torrent/i);
+});
+
+
+test("Internet Archive is a selectable movie source, not only an exhausted-server fallback", () => {
+  assert.match(source, /if \(source === "archive"\) return !isAnimePlayback\(\) && currentParams\?\.type === "movie"/);
+  assert.match(source, /data-player-source="archive"/);
+  assert.match(source, /if \(source === "archive"\) \{[\s\S]*?showArchiveFallback\(\);[\s\S]*?return;/);
+  assert.match(source, /button\.hidden = isAnimePlayback\(\) \? source !== "vidapi" : !\[[^\]]*"archive"\]\.includes\(source\)/);
 });
