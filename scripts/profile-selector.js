@@ -142,28 +142,46 @@ function renderProfiles() {
   }
   $("profile-count").textContent = profiles.length + " of " + MAX_PROFILES + " profiles";
 }
+function selectCollectionAvatar(avatarId, restoreFocus = false) {
+  selectedAvatar = avatarId;
+  selectedAvatarData = "";
+  selectedAvatarUrl = "";
+  selectedAvatarSource = "collection";
+  photoPreview.hidden = true;
+  renderGallery();
+  if (restoreFocus) gallery.querySelector('[data-avatar-id="' + avatarId + '"]')?.focus();
+}
 function renderGallery() {
   gallery.replaceChildren();
-  for (const avatar of PROFILE_AVATARS) {
+  const selectedIndex = PROFILE_AVATARS.findIndex(avatar =>
+    selectedAvatarSource === "collection" && selectedAvatar === avatar.id
+  );
+  const tabStopIndex = selectedIndex >= 0 ? selectedIndex : 0;
+  PROFILE_AVATARS.forEach((avatar, index) => {
     const [icon, background] = avatarVisuals[avatar.id] || avatarVisuals.aurora;
     const button = document.createElement("button");
     button.type = "button";
     button.className = "avatar-choice";
+    button.dataset.avatarId = avatar.id;
+    button.tabIndex = index === tabStopIndex ? 0 : -1;
     button.style.setProperty("--avatar-bg",background);
     button.setAttribute("role","radio");
     button.setAttribute("aria-checked",String(selectedAvatarSource === "collection" && selectedAvatar === avatar.id));
     button.setAttribute("aria-label",avatar.label);
     button.innerHTML = '<i class="bi ' + icon + '" aria-hidden="true"></i>';
-    button.addEventListener("click",() => {
-      selectedAvatar = avatar.id;
-      selectedAvatarData = "";
-      selectedAvatarUrl = "";
-      selectedAvatarSource = "collection";
-      photoPreview.hidden = true;
-      renderGallery();
+    button.addEventListener("click",() => selectCollectionAvatar(avatar.id, true));
+    button.addEventListener("keydown", event => {
+      let nextIndex = index;
+      if (event.key === "ArrowRight" || event.key === "ArrowDown") nextIndex = (index + 1) % PROFILE_AVATARS.length;
+      else if (event.key === "ArrowLeft" || event.key === "ArrowUp") nextIndex = (index - 1 + PROFILE_AVATARS.length) % PROFILE_AVATARS.length;
+      else if (event.key === "Home") nextIndex = 0;
+      else if (event.key === "End") nextIndex = PROFILE_AVATARS.length - 1;
+      else return;
+      event.preventDefault();
+      selectCollectionAvatar(PROFILE_AVATARS[nextIndex].id, true);
     });
     gallery.append(button);
-  }
+  });
 }
 function openEditor(profile = null) {
   editingId = profile?.id || null;
