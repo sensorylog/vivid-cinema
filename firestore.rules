@@ -413,7 +413,7 @@ service cloud.firestore {
         allow create: if isOwner(userId) && profileId == 'owner' && validViewingProfile(profileId);
         allow update: if isOwner(userId) && profileId == 'owner'
           && resource.data.isOwner == true && validViewingProfile(profileId);
-        allow delete: if false;
+        allow delete: if isOwner(userId);
 
         match /migrations/{migrationId} {
           allow get, list: if hasViewingProfile(userId, profileId);
@@ -430,7 +430,7 @@ service cloud.firestore {
               'favorites','watchLater','history','completed','progress',
               'libraryTombstones','feedback','events','taste','animePreferences','achievements'
             ]);
-          allow delete: if false;
+          allow delete: if hasViewingProfile(userId, profileId);
         }
 
         match /{profileCollection}/{documentId} {
