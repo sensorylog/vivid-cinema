@@ -113,7 +113,7 @@ function markStartup(stage) {
 function ensureDownloadEngine() {
   if (!downloadEngine) {
     const { DesktopDownloadEngine } = require("./download-engine.cjs");
-    downloadEngine = new DesktopDownloadEngine({ app, BrowserWindow, dialog, shell });
+    downloadEngine = new DesktopDownloadEngine({ app, BrowserWindow, dialog, shell, deferTorrentClient: true });
   }
   return downloadEngine;
 }
