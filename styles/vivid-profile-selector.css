@@ -22,6 +22,7 @@
 .profile-stage-footer{width:100%;display:flex;justify-content:space-between;align-items:center;margin-top:clamp(40px,8vh,76px);padding-top:20px;border-top:1px solid rgba(255,255,255,.08);color:#818b9e;font-size:.76rem}
 .profile-manage-toggle{border:1px solid rgba(255,255,255,.2);border-radius:999px;padding:10px 17px;background:transparent;color:#dce2f1;font-size:.76rem;font-weight:700;cursor:pointer}
 .profile-manage-toggle:hover{background:rgba(255,255,255,.08)}
+.profile-footer-actions{display:flex;align-items:center;gap:9px}.profile-signout{border:0;background:transparent;color:#8f9ab0;padding:10px 12px;font-size:.75rem;font-weight:700;cursor:pointer}.profile-signout:hover{color:#fff}
 .profile-status{min-height:24px;margin:14px 0 0;color:#ffb6a7;font-size:.82rem;text-align:center}
 .profile-loading{grid-column:1/-1;display:grid;justify-items:center;gap:12px;color:#a0a8b8}.profile-loading span{width:27px;height:27px;border:2px solid rgba(255,255,255,.15);border-top-color:#dce2ff;border-radius:50%;animation:profile-spin .8s linear infinite}.profile-loading p{margin:0;font-size:.82rem}
 @keyframes profile-spin{to{transform:rotate(360deg)}}
