@@ -81,9 +81,8 @@ function avatarNode(profile, large = false) {
     image.referrerPolicy = "no-referrer";
     image.addEventListener("error", () => {
       image.remove();
-      const glyph = document.createElement("i");
-      glyph.className = "bi " + icon;
-      wrapper.append(glyph);
+      wrapper.classList.add("profile-avatar-art");
+      wrapper.setAttribute("aria-hidden", "true");
     }, { once:true });
     wrapper.append(image);
   } else {
