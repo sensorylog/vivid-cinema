@@ -184,7 +184,7 @@ function resolveLegacyDownloadStorage(ownerId) {
   const markerPath = path.join(app.getPath("userData"), "vivid-downloads-profile-owner.json");
   let marker = null;
   try { marker = JSON.parse(fs.readFileSync(markerPath, "utf8")); } catch {}
-  if (!marker?.ownerId && ownerId !== "guest") {
+  if (!marker?.ownerId && ownerId !== "guest" && ownerId.endsWith("::owner")) {
     fs.mkdirSync(path.dirname(markerPath), { recursive: true });
     const temporary = markerPath + ".tmp";
     fs.writeFileSync(temporary, JSON.stringify({ version: 1, ownerId }), "utf8");
