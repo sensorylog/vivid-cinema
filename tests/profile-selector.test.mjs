@@ -3,19 +3,21 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
 const read = path => readFile(new URL(path, import.meta.url), "utf8");
-const [page, selector, manager, auth, worker, account, profiles] = await Promise.all([
+const [page, selector, manager, auth, worker, account, profiles, shell] = await Promise.all([
   read("../profiles.html"),
   read("../scripts/profile-selector.js"),
   read("../scripts/profile-manager.js"),
   read("../scripts/auth.js"),
   read("../service-worker.js"),
   read("../account.html"),
-  read("../scripts/profiles.js")
+  read("../scripts/profiles.js"),
+  read("../scripts/app-shell.js")
 ]);
 
 test("successful sign-in opens the Who's Watching profile selector by default", () => {
   assert.match(auth, /return "profiles\.html";/);
   assert.match(auth, /vivid:profile-return-to:v1/);
+  assert.match(shell, /"login\.html", "forgot-password\.html"/);
   assert.match(page, /Who's watching\?/);
   assert.match(page, /id="profile-grid"/);
   assert.match(selector, /setActiveProfileId\(user\.uid, profile\.id\)/);
