@@ -68,7 +68,15 @@ export async function requireUnlockedProfile(db, user, profileId) {
   if (profileId === OWNER_PROFILE_ID && profileData.isOwner !== true) {
     throw new AnimePremiumError(409, "owner-profile-required", "The main Vivid profile must be initialized before managing profiles.");
   }
-  if (!pinSnapshot.exists) return profileData;
+  if (!pinSnapshot.exists) {
+    if (profileId === OWNER_PROFILE_ID) {
+      const kidsProfiles = await profileReference.parent.where("isKids", "==", true).limit(1).get();
+      if (!kidsProfiles.empty) {
+        throw new AnimePremiumError(409, "parent-pin-required", "Restore the Main Profile PIN before managing profiles while Kids profiles exist.");
+      }
+    }
+    return profileData;
+  }
 
   const sessionId = String(user.profileSessionId || "");
   if (!PROFILE_SESSION_ID_PATTERN.test(sessionId)) {
