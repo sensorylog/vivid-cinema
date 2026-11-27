@@ -212,4 +212,7 @@ test("Turnstile script loading and verification cannot leave App Check pending f
   assert.match(loader, /script\.remove\(\)/);
   assert.ok(loader.indexOf("window.setTimeout") < loader.indexOf("document.head.append(script)"));
   assert.match(provider, /20_000/);
+  assert.match(provider, /8_000/);
+  assert.match(provider, /10_000/);
+  assert.match(provider, /controller\.abort\(\)/);
 });
