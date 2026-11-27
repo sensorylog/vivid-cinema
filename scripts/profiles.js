@@ -96,10 +96,10 @@ function safeAvatarUrl(user) {
   }
 }
 
-export async function ensureOwnerProfile(user = auth.currentUser) {
+export async function ensureOwnerProfile(user = null) {
   const firebase = await getFirebase();
   const { auth, db, ensureAppCheck, doc, getDocFromServer, serverTimestamp, setDoc } = firebase;
-  const current = requireSignedInUser(user, auth);
+  const current = requireSignedInUser(user || auth.currentUser, auth);
   await ensureAppCheck();
   const reference = doc(db, "users", current.uid, "profiles", OWNER_PROFILE_ID);
   const snapshot = await getDocFromServer(reference);
@@ -124,10 +124,10 @@ export async function ensureOwnerProfile(user = auth.currentUser) {
   return { ...profile, created: true };
 }
 
-export async function listProfiles(user = auth.currentUser) {
+export async function listProfiles(user = null) {
   const firebase = await getFirebase();
   const { auth, db, ensureAppCheck, collection, getDocsFromServer } = firebase;
-  const current = requireSignedInUser(user, auth);
+  const current = requireSignedInUser(user || auth.currentUser, auth);
   await ensureAppCheck();
   const snapshot = await getDocsFromServer(collection(db, "users", current.uid, "profiles"));
   return snapshot.docs
@@ -160,10 +160,10 @@ export function setActiveProfileId(uid, profileId) {
  * The legacy source is deliberately retained: interrupted migrations are
  * restartable and a failed verification can never destroy the user's data.
  */
-export async function migrateLegacyProfileData(user = auth.currentUser) {
+export async function migrateLegacyProfileData(user = null) {
   const firebase = await getFirebase();
   const { auth, db, ensureAppCheck, collection, doc, getDocFromServer, getDocsFromServer, serverTimestamp, setDoc, writeBatch } = firebase;
-  const current = requireSignedInUser(user, auth);
+  const current = requireSignedInUser(user || auth.currentUser, auth);
   await ensureOwnerProfile(current);
   await ensureAppCheck();
 
