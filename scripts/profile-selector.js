@@ -171,7 +171,6 @@ function renderGallery() {
     button.setAttribute("role","radio");
     button.setAttribute("aria-checked",String(selectedAvatarSource === "collection" && selectedAvatar === avatar.id));
     button.setAttribute("aria-label",avatar.label);
-    button.setAttribute("aria-hidden", "true");
     button.addEventListener("click",() => selectCollectionAvatar(avatar.id, true));
     button.addEventListener("keydown", event => {
       let nextIndex = index;
