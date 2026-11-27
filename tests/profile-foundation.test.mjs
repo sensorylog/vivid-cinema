@@ -58,10 +58,11 @@ test("active profile local-storage keys are isolated per authenticated account",
   assert.notEqual(activeProfileStorageKey("alice"), activeProfileStorageKey("bob"));
 });
 
-test("legacy migration is restartable, verifies copied document IDs and never deletes source data", () => {
+test("legacy migration is restartable, content-verified and never deletes source data", () => {
   assert.match(manager, /PROFILE_MIGRATION_ID/);
-  assert.match(manager, //status: "complete"/g/);
+  assert.ok(manager.includes('status: "complete"'));
   assert.match(manager, /getDocsFromServer\(destinationRef\)/);
+  assert.match(manager, /sameData\(item\.data, verifiedById\.get\(item\.id\)\)/);
   assert.match(manager, /Profile migration verification failed/);
   assert.doesNotMatch(manager, /deleteDoc\(|batch\.delete\(/);
   assert.match(manager, /Original data remains untouched/);
