@@ -155,6 +155,43 @@ test("analytics event collection is readable only by the configured admin", asyn
   await assertFails(getDocs(query(collection(env.unauthenticatedContext().firestore(), "analyticsEvents"), limit(10))));
 });
 
+
+test("owner profile bootstrap and profile-scoped library data are private to the account", async () => {
+  const alice = env.authenticatedContext("profile-alice").firestore();
+  const bob = env.authenticatedContext("profile-bob").firestore();
+  const ownerProfile = {
+    id: "owner", name: "Alice", avatarUrl: "https://example.com/avatar.png",
+    avatarId: "", isKids: false, maturityLevel: "adult", isOwner: true, schemaVersion: 1
+  };
+  await assertSucceeds(setDoc(doc(alice, "users/profile-alice/profiles/owner"), ownerProfile));
+  await assertSucceeds(getDoc(doc(alice, "users/profile-alice/profiles/owner")));
+  await assertFails(getDoc(doc(bob, "users/profile-alice/profiles/owner")));
+  await assertFails(setDoc(doc(alice, "users/profile-alice/profiles/owner"), {
+    ...ownerProfile, pinHash: "must-not-be-client-readable"
+  }));
+  await assertFails(setDoc(doc(alice, "users/profile-alice/profiles/another"), {
+    ...ownerProfile, id: "another", isOwner: false
+  }));
+  await assertSucceeds(setDoc(doc(alice, "users/profile-alice/profiles/owner/favorites/movie:550"), {
+    id: "550", media_type: "movie", title: "The Matrix", year: "1999",
+    poster_path: "/matrix.jpg", backdrop_path: "/matrix-bg.jpg", updatedAt: Date.now()
+  }));
+  await assertFails(getDoc(doc(bob, "users/profile-alice/profiles/owner/favorites/movie:550")));
+  await assertFails(setDoc(doc(alice, "users/profile-alice/profiles/owner/favorites/movie:550"), {
+    id: "550", media_type: "movie", title: "The Matrix", year: "1999",
+    poster_path: "/matrix.jpg", backdrop_path: "/matrix-bg.jpg", updatedAt: Date.now(),
+    accountUid: "profile-bob"
+  }));
+});
+
+test("profile data cannot be written until its parent profile exists", async () => {
+  const alice = env.authenticatedContext("profile-no-parent").firestore();
+  await assertFails(setDoc(doc(alice, "users/profile-no-parent/profiles/missing/favorites/movie:1"), {
+    id: "1", media_type: "movie", title: "Example", year: "2025",
+    poster_path: "", backdrop_path: "", updatedAt: Date.now()
+  }));
+});
+
 test.after(async () => {
   await env.cleanup();
 });
