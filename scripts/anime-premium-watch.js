@@ -1,6 +1,7 @@
 import { auth } from "./firebase.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
 import { tmdbApi } from "./tmdb.js";
+import { isTitleAllowed, renderParentalBlock } from "./parental-controls.js";
 import { getImageUrl } from "./media.js";
 import { escapeHtml } from "./utils.js";
 import { isAnimeMetadata } from "./anime-eligibility.js";
@@ -495,6 +496,7 @@ async function loadWatchPage() {
   const getDetails = mediaType === "movie" ? tmdbApi.movieDetails : tmdbApi.tvDetails;
   titleDetails = await getDetails(titleId);
   if (!titleDetails?.id) throw new Error("This anime title could not be found.");
+  if (!await isTitleAllowed({ ...titleDetails, id: titleId, media_type: mediaType })) { renderParentalBlock(document.getElementById("anime-premium-watch-content"), titleName(titleDetails)); return; }
   if (!isAnimeMetadata(titleDetails)) throw new Error("This title is not listed as Japanese animation in the Vivid Anime Premium catalogue.");
   animeIdPromise = resolveAnimeIds(titleName(titleDetails)).then(ids => {
     baseAnimeIds = ids || { aniListId: "", malId: "" };

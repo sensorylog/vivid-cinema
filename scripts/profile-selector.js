@@ -457,7 +457,9 @@ form.addEventListener("submit",async event => {
     if (isKids && !profiles.find(item => item.isOwner)?.hasPin) throw new Error("Set a PIN on the Main Profile before enabling Kids Mode.");
     const blockedTitles = $("profile-blocked-titles").value.split(",").map(value => value.trim().toLowerCase()).filter(Boolean);
     if (blockedTitles.some(value => !/^(movie|tv):[1-9][0-9]{0,11}$/.test(value))) throw new Error("Use movie:ID or tv:ID for blocked titles.");
-    const payload = { name, avatarId: selectedAvatar, avatarData: selectedAvatarData, avatarUrl: selectedAvatarUrl, avatarSource: selectedAvatarSource, isKids, movieRatingLimit: $("profile-movie-rating").value, tvRatingLimit: $("profile-tv-rating").value, blockedGenreIds: [...$("profile-blocked-genres").selectedOptions].map(option => Number(option.value)), blockedTitles };
+    const payload = { name, avatarId: selectedAvatar, avatarData: selectedAvatarData, avatarUrl: selectedAvatarUrl, avatarSource: selectedAvatarSource };
+    const editingProfile = profiles.find(item => item.id === editingId);
+    if (isKids || editingProfile?.isKids) Object.assign(payload, { isKids, movieRatingLimit: $("profile-movie-rating").value, tvRatingLimit: $("profile-tv-rating").value, blockedGenreIds: [...$("profile-blocked-genres").selectedOptions].map(option => Number(option.value)), blockedTitles });
     if (editingId) await updateProfile(editingId,payload);
     else await createProfile(payload);
     await refreshProfiles();
