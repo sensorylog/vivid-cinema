@@ -1,6 +1,6 @@
 import { auth } from "./firebase.js";
 import { onAuthStateChanged, signOut, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
-import { clearActiveProfileId, ensureOwnerProfile, initializeProfileFoundation, getActiveProfileId, setActiveProfileId, validateProfileSession, OWNER_PROFILE_ID } from "./profiles.js";
+import { clearActiveProfileId, ensureOwnerProfile, initializeProfileFoundation, getActiveProfileId, setActiveProfileId, validateProfileSession, withProfileTimeout, OWNER_PROFILE_ID } from "./profiles.js";
 import { normalizeAvatarUrl } from "./profile-schema.js";
 import { fetchProfiles, createProfile, updateProfile, deleteProfile, compressProfileImage, selectProfile, verifyProfilePin, setProfilePin, removeProfilePin, resetProfilePin, PROFILE_AVATARS, MAX_PROFILES } from "./profile-manager.js";
 
@@ -620,7 +620,11 @@ onAuthStateChanged(auth,async currentUser => {
       say("The profile PIN was reset. You can choose the profile and set a new PIN.");
     }
     await refreshProfiles();
-    const tokenResult = await user.getIdTokenResult();
+    const tokenResult = await withProfileTimeout(
+      user.getIdTokenResult(),
+      8_000,
+      "Your Vivid sign-in is taking too long to verify. Check your connection and retry."
+    );
     const active = profiles.find(item => item.id === String(tokenResult.claims.profileId || ""));
     if (active?.hasPin) {
       if (!await validateProfileSession(user, active.id)) {
