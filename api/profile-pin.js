@@ -346,6 +346,7 @@ export default async function handler(req, res) {
     }
 
     if (action === "set") {
+      if (profileId === "owner" && claims.profileId !== "owner") throw new ProfilePinError(403, "parent-authorization-required", "Open the Main Profile before setting its parent PIN.");
       const pin = validatePin(body.pin);
       const current = await pinReference.get();
       const migration = await db.collection("users").doc(claims.uid).collection("profiles").doc("owner").collection("migrations").doc("account-data-to-owner-profile-v1").get();

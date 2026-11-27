@@ -505,6 +505,6 @@ onAuthStateChanged(auth,async currentUser => {
     await refreshProfiles();
     const tokenResult = await user.getIdTokenResult();
     const active = profiles.find(item => item.id === String(tokenResult.claims.profileId || getActiveProfileId(user.uid)));
-    if (active?.isKids) { const owner = profiles.find(item => item.isOwner); if (!owner?.hasPin) { say("Kids Mode exit is locked until a parent PIN is configured.",true); return; } say("Parent verification is required to leave Kids Mode."); await chooseProfile(owner); }
+    if (active?.isKids) { const owner = profiles.find(item => item.isOwner); if (!owner?.hasPin) { say("Kids Mode exit is locked. Sign out, sign back in as the account owner, then open the Main Profile and set its PIN.",true); return; } say("Parent verification is required to leave Kids Mode."); await chooseProfile(owner); }
   } catch(error) { say(error.message || "Could not load your profiles.",true); grid.replaceChildren(); }
 });
