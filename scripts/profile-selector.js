@@ -163,7 +163,6 @@ function openEditor(profile = null) {
   selectedAvatarUrl = profile?.avatarUrl || "";
   selectedAvatarSource = profile?.avatarSource || (selectedAvatarData ? "upload" : selectedAvatarUrl ? "google" : "collection");
   nameInput.value = profile?.name || "";
-  $("profile-use-google").hidden = !profile?.isOwner || !googlePhoto;
   editorStatus.textContent = "";
   deleteButton.hidden = !profile || profile.isOwner;
   photoInput.value = "";
@@ -209,17 +208,6 @@ $("manage-toggle").addEventListener("click",() => {
   $("profile-heading").textContent = manageMode ? "Manage profiles" : "Who's watching?";
   $("profile-subheading").textContent = manageMode ? "Edit names and avatars, or remove a profile." : "Choose your space. Your cinema journey stays yours.";
   renderProfiles();
-});
-$("profile-use-google").addEventListener("click",() => {
-  if (!googlePhoto) return;
-  selectedAvatarSource = "google";
-  selectedAvatarUrl = googlePhoto;
-  selectedAvatarData = "";
-  photoPreview.replaceChildren();
-  const img = document.createElement("img"); img.src = googlePhoto; img.alt = "";
-  const label = document.createElement("span"); label.textContent = "Google photo selected";
-  photoPreview.append(img,label);
-  photoPreview.hidden = false;
 });
 $("profile-use-google").addEventListener("click",() => {
   const photo = normalizeAvatarUrl(user?.photoURL || user?.providerData?.find(item => item.providerId === "google.com")?.photoURL || "");
