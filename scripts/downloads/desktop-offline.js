@@ -452,6 +452,7 @@ async function refresh(){
 const player = byId("offline-player");
 const transcodePlayer = createTranscodePlayer(player);
 let playbackRequest=0;
+let playbackCleanupPromise=Promise.resolve();
 let nativeFallbackTimer=0;
 let nativeFallbackPromise=null;
 let nativeFallbackRequest=0;
@@ -1286,15 +1287,15 @@ async function releaseLocalMedia(){
 }
 async function playLocalFile(){
   const request=++playbackRequest;
-  const cleanup=releaseLocalMedia();
+  playbackCleanupPromise=releaseLocalMedia();
   const section=byId("offline-player-section");
   section.hidden=false;section.classList.remove("controls-hidden");
   byId("offline-player-title").textContent="Opening local video";
   setPlayerLoading(true,"Opening local video","Checking the file and preparing playback…");
+  await playbackCleanupPromise.catch(()=>{});
   const file=await engine.openLocalTranscode();
   if(!file){setPlayerLoading(false);return;}
   if(request!==playbackRequest){void engine.stopTranscode(file.sessionId);return;}
-  void cleanup.catch(()=>{});
   resetSeekPreviewSource();clearExternalSubtitle();chapterTrack=null;chapterCues=[];
   activePreferenceKey="local:"+file.fileName+":"+file.fileSize;applyPlaybackPreferences();
   player.dataset.frameRate="";byId("offline-frame-back").disabled=true;byId("offline-frame-forward").disabled=true;player.dataset.jobId="";player.dataset.fileIndex="0";
@@ -1329,6 +1330,8 @@ async function startCompatibilityPlayback(job,fileIndex,request){
   const task=(async()=>{
     let media=null;
     try{
+      // Finish retiring any previous FFmpeg session before starting another.
+      await playbackCleanupPromise.catch(()=>{});
       // Load HLS.js while FFmpeg prepares the first segment.
       const hlsReady=transcodePlayer.prepare().catch(()=>null);
       media=await engine.openDownloadTranscode(job.id,fileIndex);
@@ -1370,7 +1373,7 @@ async function play(job,fileIndex=0){
   nativeFallbackPromise=null;nativeFallbackRequest=0;
   const file=Array.isArray(job.files)?job.files[fileIndex]:null;
   const playerTitle=file&&job.files.length>1?job.title+" — "+file.name:job.title;
-  const cleanup=releaseLocalMedia();
+  playbackCleanupPromise=releaseLocalMedia();
   clearExternalSubtitle();activePreferenceKey=playbackProfileKey(job,fileIndex);applyPlaybackPreferences();resetSeekPreviewSource();
   player.dataset.frameRate="";byId("offline-frame-back").disabled=true;byId("offline-frame-forward").disabled=true;
   player.dataset.jobId=job.id;player.dataset.fileIndex=String(fileIndex);player.dataset.localMediaToken="";player.dataset.transcodeSessionId="";player.dataset.transcodeCodecs="";player.dataset.nativeAttempt="true";player.dataset.transcodePreparing="false";player.dataset.mediaFilename=file?.name||job.title||"Saved media";
@@ -1381,7 +1384,7 @@ async function play(job,fileIndex=0){
   section.scrollIntoView({behavior:"auto",block:"start"});
   setPlayerLoading(true,"Opening your movie","Opening the saved file directly. Compatibility conversion is only used if this format needs it.");
   setMessage("Opening "+playerTitle+" from your offline library…");
-  void cleanup.catch(()=>{});
+  void playbackCleanupPromise.catch(()=>{});
   lastPositionSave=0;section.dataset.subtitleSize="medium";byId("offline-subtitle-size").value="medium";
   try{
     const mediaUrl=await engine.mediaUrl(job.id,fileIndex);
