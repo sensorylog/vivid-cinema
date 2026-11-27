@@ -1541,6 +1541,7 @@ else setMessage("Your offline library is ready.");
 
 let desktopAuth = null;
 let activeDesktopOwner = null;
+document.body.inert = true;
 async function switchDesktopProfile(user) {
   if(user?.uid){
     try{await initializeProfileFoundation(user);}
@@ -1549,11 +1550,13 @@ async function switchDesktopProfile(user) {
   const profileId=user?.uid?getActiveProfileId(user.uid):"guest";
   const owner=user?.uid?String(user.uid)+"::"+String(profileId):"guest";
   if(owner===activeDesktopOwner)return;
+  document.body.inert = true;
   try{await playback?.stop();}catch{}
   if(typeof engine.setOwner!=="function")throw new Error("This Vivid desktop build cannot safely separate offline downloads by profile. Update the app and retry.");
   await engine.setOwner(owner);
   activeDesktopOwner=owner;
   await refresh();
+  document.body.inert = false;
 }
 async function bootstrapDesktopProfile() {
   const [{auth},{onAuthStateChanged}]=await Promise.all([
@@ -1576,6 +1579,7 @@ try {
   await bootstrapDesktopProfile();
 } catch(error) {
   setMessage(error?.message||"Could not initialize the profile-specific offline library.");
+  document.body.inert = true;
 }
 
 }
