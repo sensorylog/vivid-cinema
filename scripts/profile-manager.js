@@ -27,7 +27,7 @@ async function profileRequest(path, method = "GET", payload = null) {
 }
 
 export async function fetchProfiles() {
-  const result = await profileRequest("/api/profiles");
+  const result = await profileRequest("/api/profiles?includeAvatars=1");
   return Array.isArray(result.profiles) ? result.profiles.map(profile => normalizeProfile(profile.id, profile)) : [];
 }
 
