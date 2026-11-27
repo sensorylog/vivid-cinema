@@ -10,6 +10,10 @@ applyPerformanceProfile();
 
 const MOBILE_BREAKPOINT = 768;
 let initialized = false;
+let profileActivityBound = false;
+let profileActivityUid = "";
+let profileActivityProfileId = "";
+let profileActivityPingAt = 0;
 
 const NAV_STACK_KEY = "vivid:navigation-stack:v1";
 
@@ -409,6 +413,40 @@ function rememberProfileReturnRoute() {
   try { sessionStorage.setItem(PROFILE_RETURN_TO_KEY, currentRoute()); } catch {}
 }
 
+function bindProfileActivity(user, profileId) {
+  if (!user?.uid || (profileActivityBound && profileActivityUid === user.uid && profileActivityProfileId === profileId)) return;
+  profileActivityBound = true;
+  profileActivityUid = user.uid;
+  profileActivityProfileId = profileId;
+  profileActivityPingAt = Date.now();
+
+  const ping = async () => {
+    const currentUser = window.vividAuthUser;
+    if (document.visibilityState === "hidden" || !currentUser?.uid || currentUser.uid !== user.uid) return;
+    const now = Date.now();
+    if (now - profileActivityPingAt < 5 * 60 * 1000) return;
+    profileActivityPingAt = now;
+    try {
+      const tokenResult = await currentUser.getIdTokenResult();
+      if (tokenResult.claims.profileId !== profileId || typeof tokenResult.claims.profileSessionId !== "string") return;
+      if (!await validateProfileSession(currentUser, profileId)) {
+        rememberProfileReturnRoute();
+        window.location.replace("profiles.html");
+      }
+    } catch (error) {
+      console.warn("Vivid could not refresh the active profile session:", error);
+    }
+  };
+  const handler = () => { void ping(); };
+  ["pointerdown", "keydown", "touchstart", "scroll"].forEach(eventName => {
+    document.addEventListener(eventName, handler, { passive: true });
+  });
+  document.addEventListener("timeupdate", handler, true);
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState !== "hidden") handler();
+  });
+}
+
 async function enforceProfileSelection(user) {
   if (!user?.uid) return;
   const page = location.pathname.split("/").filter(Boolean).pop() || "home.html";
@@ -435,11 +473,13 @@ async function enforceProfileSelection(user) {
       redirectToProfiles();
       return;
     }
-    if (activeProfile.hasPin &&
-      (typeof tokenResult.claims.profileSessionId !== "string" ||
-        !await validateProfileSession(user, activeId))) {
-      redirectToProfiles();
-      return;
+    if (activeProfile.hasPin) {
+      if (typeof tokenResult.claims.profileSessionId !== "string" ||
+          !await validateProfileSession(user, activeId)) {
+        redirectToProfiles();
+        return;
+      }
+      bindProfileActivity(user, activeId);
     }
     if (page === "auth.html") window.location.replace("home.html");
   } catch (error) {
