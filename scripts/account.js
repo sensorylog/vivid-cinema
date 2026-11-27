@@ -471,6 +471,33 @@ async function deleteOwnedDocuments(uid, collectionName) {
   }
 }
 
+async function deleteProfileDocuments(uid) {
+  const profiles = await withTimeout(
+    getDocsFromServer(collection(db, "users", uid, "profiles")),
+    12000,
+    "Could not read your viewing profiles for deletion."
+  );
+  const profileCollections = [
+    "favorites","watchLater","history","completed","progress","libraryTombstones",
+    "feedback","events","taste","animePreferences","achievements","migrations"
+  ];
+  for (const profile of profiles.docs) {
+    for (const collectionName of profileCollections) {
+      const snapshot = await withTimeout(
+        getDocsFromServer(collection(db, "users", uid, "profiles", profile.id, collectionName)),
+        12000,
+        "Could not read profile " + collectionName + " records for deletion."
+      );
+      for (let offset = 0; offset < snapshot.docs.length; offset += 400) {
+        const batch = writeBatch(db);
+        snapshot.docs.slice(offset, offset + 400).forEach(item => batch.delete(item.ref));
+        await withTimeout(batch.commit(), 12000, "Could not delete profile " + collectionName + " records.");
+      }
+    }
+    await withTimeout(deleteDoc(profile.ref), 12000, "Could not delete a viewing profile.");
+  }
+}
+
 async function permanentlyDeleteAccount() {
   const user = auth.currentUser;
   if (!user || deleteAccountButton?.disabled) return;
@@ -494,6 +521,7 @@ async function permanentlyDeleteAccount() {
     for (const collectionName of ACCOUNT_PRIVATE_COLLECTIONS) {
       await deleteOwnedDocuments(user.uid, collectionName);
     }
+    await deleteProfileDocuments(user.uid);
     await withTimeout(deleteDoc(doc(db, "users", user.uid)), 12000, "Could not delete your profile document.");
 
     // Clear this browser's Vivid-owned data after the server-side private data is gone.
