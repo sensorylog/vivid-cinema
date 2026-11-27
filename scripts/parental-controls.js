@@ -28,6 +28,15 @@ function normalizeCertification(value, type) {
   return "";
 }
 
+function mostRestrictiveCertification(values, type) {
+  const scale = type === "tv" ? TV_AGE : MOVIE_AGE;
+  const normalized = values.map(value => normalizeCertification(value, type));
+  // An unknown listed rating is not treated as safe just because another
+  // release entry has a known rating.
+  if (normalized.some(value => !value)) return "";
+  return normalized.sort((a, b) => scale[b] - scale[a])[0] || "";
+}
+
 async function getActiveProfile() {
   if (typeof window === "undefined") return null;
   const [{ auth }, { listProfileSummaries, getActiveProfileId }] = await Promise.all([
@@ -116,20 +125,17 @@ async function getCertification(type, id) {
 
   if (type === "tv") {
     const rows = data?.results || [];
-    value = rows.find(row => row.iso_3166_1 === country && row.rating)?.rating ||
-      rows.find(row => row.iso_3166_1 === "US" && row.rating)?.rating || "";
+    const localRatings = rows.filter(row => row.iso_3166_1 === country && row.rating).map(row => row.rating);
+    const usRatings = rows.filter(row => row.iso_3166_1 === "US" && row.rating).map(row => row.rating);
+    value = mostRestrictiveCertification(localRatings, type) ||
+      (localRatings.length ? "" : mostRestrictiveCertification(usRatings, type));
   } else {
-    const groups = [
-      data?.results?.find(group => group.iso_3166_1 === country),
-      data?.results?.find(group => group.iso_3166_1 === "US")
-    ].filter(Boolean);
-    for (const group of groups) {
-      const release = (group.release_dates || []).find(item => item.certification);
-      if (release?.certification) {
-        value = release.certification;
-        break;
-      }
-    }
+    const localGroup = data?.results?.find(group => group.iso_3166_1 === country);
+    const usGroup = data?.results?.find(group => group.iso_3166_1 === "US");
+    const localRatings = (localGroup?.release_dates || []).map(item => item.certification).filter(Boolean);
+    const usRatings = (usGroup?.release_dates || []).map(item => item.certification).filter(Boolean);
+    value = mostRestrictiveCertification(localRatings, type) ||
+      (localRatings.length ? "" : mostRestrictiveCertification(usRatings, type));
   }
 
   certificationCache.set(key, value);
