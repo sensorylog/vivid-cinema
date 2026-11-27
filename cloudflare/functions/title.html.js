@@ -65,6 +65,7 @@ function renderTitleContent(details, type, canonical) {
     ...(image ? { "image": image } : {}),
     ...(date ? { "datePublished": date } : {}),
     "genre": genres,
+    "actor": cast.filter(person => person.id).map(person => ({ "@type": "Person", "name": person.name, "url": ORIGIN + "/person.html?id=" + person.id })),
     "inLanguage": details.original_language || "en",
     ...(rating > 0 && Number(details.vote_count) > 0 ? {
       "aggregateRating": { "@type": "AggregateRating", "ratingValue": rating.toFixed(1), "bestRating": "10", "worstRating": "0", "ratingCount": Number(details.vote_count) }
