@@ -25,7 +25,7 @@ test("playback progress reads and writes are scoped to the active profile", () =
   assert.ok(progress.includes("progressQueueKey(ownerAtQueue, contentId)"));
   assert.ok(progress.includes("const sameAccount=previous&&uid&&previous.uid===String(uid)"));
   assert.ok(progress.includes("const ownerAtQueue = localStorage.getItem(LOCAL_OWNER_KEY) || \"guest\""));
-  assert.ok(progress.includes("String(auth?.currentUser?.uid || \\"\") === owner.uid"));
+  assert.ok(progress.includes('String(auth?.currentUser?.uid || "") === owner.uid'));
   assert.ok(progress.includes("initializeProfileFoundation(user)"));
   assert.match(progress, /remoteUpdated > 0 && remoteUpdated >= localUpdated/);
   assert.match(progress, /JSON\.stringify\(merged\) !== JSON\.stringify\(local\[contentId\]\)/);
