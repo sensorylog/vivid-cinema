@@ -53,6 +53,7 @@ test("Retired Watch Rooms clients stay out of the shell while legacy API routes 
   assert.ok(!source.includes('"./scripts/watch-room-api.js"'));
   assert.ok(!source.includes('"./scripts/watch-room-playback.js"'));
   assert.ok(source.includes('"./scripts/cloudflare-api.js"'), "Cloudflare API origin helper remains precached");
+  assert.ok(source.includes('"./scripts/library-page.js"'), "library parental filtering remains available offline");
 });
 test("Retired Watch Rooms API adapter is not cached but cannot be served from a stale cache", () => {
   assert.ok(!source.includes('"./scripts/watch-room-api.js"'));
