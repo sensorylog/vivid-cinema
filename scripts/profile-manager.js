@@ -6,16 +6,29 @@ async function profileRequest(path, method = "GET", payload = null) {
   const user = auth.currentUser;
   if (!user || user.isAnonymous) throw new Error("Sign in with your Vivid account to manage profiles.");
   const token = await user.getIdToken();
-  const response = await fetch(getCloudflareApiUrl(path), {
-    method,
-    headers: {
-      Authorization: "Bearer " + token,
-      ...(payload ? { "Content-Type": "application/json" } : {})
-    },
-    body: payload ? JSON.stringify(payload) : undefined,
-    credentials: "same-origin",
-    cache: "no-store"
-  });
+  const controller = new AbortController();
+  const timeout = window.setTimeout(() => controller.abort(), 15_000);
+  let response;
+  try {
+    response = await fetch(getCloudflareApiUrl(path), {
+      method,
+      headers: {
+        Authorization: "Bearer " + token,
+        ...(payload ? { "Content-Type": "application/json" } : {})
+      },
+      body: payload ? JSON.stringify(payload) : undefined,
+      credentials: "same-origin",
+      cache: "no-store",
+      signal: controller.signal
+    });
+  } catch (error) {
+    if (error?.name === "AbortError") {
+      throw new Error("Vivid's profile service took too long to respond. Check your connection and retry.");
+    }
+    throw error;
+  } finally {
+    window.clearTimeout(timeout);
+  }
   let result = {};
   try { result = await response.json(); } catch {}
   if (!response.ok || result.ok === false) {
