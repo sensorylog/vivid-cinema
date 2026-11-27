@@ -44,8 +44,8 @@ test("profile controls retain visible keyboard focus and reduced-motion support"
 
 test("cloud library sync reads authoritative server data rather than cache-only snapshots", () => {
   const library = readFileSync(new URL("../scripts/library.js", import.meta.url), "utf8");
-  assert.match(library, /getDocsFromServer\(firestoreCollection\(db,\s*"users",\s*uid,\s*collection\)\)/);
-  assert.match(library, /getDocsFromServer\(firestoreCollection\(db,\s*"users",\s*uid,\s*"libraryTombstones"\)\)/);
+  assert.match(library, //getDocsFromServer\\\(firestoreCollection\\\(db,\\s\*"users",\\s\*uid,\\s\*"profiles",\\s\*profileId,\\s\*collection\\\)\\\)/g/);
+  assert.match(library, //getDocsFromServer\\\(firestoreCollection\\\(db,\\s\*"users",\\s\*uid,\\s\*"profiles",\\s\*profileId,\\s\*"libraryTombstones"\\\)\\\)/g/);
 });
 
 test("library sync propagates Firestore failures so the account UI cannot report false success", () => {
@@ -61,7 +61,7 @@ test("library sync propagates Firestore failures so the account UI cannot report
 
 test("library sync reconciles deletions and avoids rewriting every unchanged remote item", () => {
   const library = readFileSync(new URL("../scripts/library.js", import.meta.url), "utf8");
-  assert.match(library, /deleteDoc\(doc\(db,\s*"users",\s*user\.uid,\s*tombstone\.collection,\s*contentId\)\)/);
+  assert.match(library, //deleteDoc\\\(doc\\\(db,\\s\*"users",\\s\*user\\.uid,\\s\*"profiles",\\s\*profileId,\\s\*tombstone\\.collection,\\s\*contentId\\\)\\\)/g/);
   assert.match(library, /if\(!remote \|\| Number\(item\.updatedAt\|\|0\)>Number\(remote\.updatedAt\|\|0\)\)/);
   assert.match(library, /await mapLimit\(writes,8/);
 });
@@ -79,8 +79,8 @@ test("library mutations retry through one deduplicated sync path and preserve pe
 
 test("sync repeats when a library mutation arrives mid-sync and aborts safely on account changes", () => {
   const library = readFileSync(new URL("../scripts/library.js", import.meta.url), "utf8");
-  assert.match(library, /do\{\s*syncedRevision=localMutationRevision;\s*result=await performLibrarySyncForUser\(user\);\s*\}while\(syncedRevision!==localMutationRevision\)/);
-  assert.match(library, /The signed-in account changed during library sync/);
+  assert.match(library, /do\{\s*syncedRevision=localMutationRevision;\s*/result=await performLibrarySyncForUser\\\(user,profileId\\\)/g;\s*\}while\(syncedRevision!==localMutationRevision\)/);
+  assert.match(library, //The active account or profile changed during library sync/g/);
   assert.match(library, /const activeAuth=await getFirebaseAuth\(\)/);
 });
 
