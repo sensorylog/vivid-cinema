@@ -56,13 +56,13 @@ test("free anime previews are allowlisted and expose only one in-app player", ()
 
 
 
-test("movie and TV playback retains seven sources while Free Anime is restricted", () => {
+test("movie and TV playback exposes ten sources while Free Anime is restricted", () => {
   assert.match(source, /const order = \["vidapi", "vidsrc", "embedwave", "vidfast", "ezvidapi", "embedapistream", "moviesapi"\]/);
   assert.match(source, /if \(source === "vidapi" \|\| source === "vidsrc" \|\| source === "vidfast" \|\| source === "embedapistream" \|\| source === "moviesapi"\) return hasFallbackId\(\)/);
   assert.match(source, /button\.hidden = isAnimePlayback\(\) \? source !== "vidapi"/);
-  assert.match(source, /<span class="vivid-server-count">7 sources<\/span>/);
+  assert.match(source, /<span class="vivid-server-count">10 sources<\/span>/);
   assert.doesNotMatch(source, /mountPlaybackServerSettings\(serverPanel/);
-  for (const provider of ["embedwave", "vidfast", "ezvidapi", "embedapistream", "moviesapi"]) {
+  for (const provider of ["embedwave", "vidfast", "ezvidapi", "embedapistream", "moviesapi", "archive", "commons", "loc"]) {
     assert.ok(source.includes(`data-player-source="${provider}"`), `${provider} should have a Player 1 button`);
   }
 });
@@ -70,7 +70,7 @@ test("movie and TV playback retains seven sources while Free Anime is restricted
 
 
 test("movie/TV server picker keeps all providers in a simple scrollable dropdown", async () => {
-  assert.match(source, /"embedwave", "vidfast", "ezvidapi", "embedapistream", "moviesapi"\]\.includes\(source\)/);
+  assert.match(source, /\["archive", "commons", "loc"\]\.includes\(source\)/);
   assert.match(source, /const toggleServerMenu = \(\) =>/);
   assert.match(source, /positionServerPanel/);
   const styles = await readFile(new URL("../styles/vivid-cleanup.css", import.meta.url), "utf8");
@@ -209,11 +209,29 @@ test("Archive Cinema is integrated as a rights-filtered movie fallback in Player
   assert.ok(source.includes("showArchiveFallback();"));
   assert.match(source, /if \(archiveRoot\) archiveRoot\.hidden = true/);
   assert.match(source, /currentParams\?\.type !== "movie"/);
-  assert.match(source, /activeSource = "archive"/);
+  assert.match(source, /activeSource = provider/);
   assert.match(source, /https:\/\/archive\.org\/embed\//);
   const archive = await readFile(new URL("../scripts/playback/archive-film-fallback.js", import.meta.url), "utf8");
   assert.ok(archive.includes('creativecommons\\.org'));
   assert.match(archive, /public-domain/i);
   assert.match(archive, /hasPlayableVideo/);
   assert.doesNotMatch(archive, /openload|streamtape|vidsrc|torrent/i);
+});
+
+
+test("Internet Archive is a selectable movie source, not only an exhausted-server fallback", () => {
+  assert.match(source, /if \(\["archive", "commons", "loc"\]\.includes\(source\)\) return !isAnimePlayback\(\) && currentParams\?\.type === "movie"/);
+  assert.match(source, /data-player-source="archive"/);
+  assert.match(source, /if \(\["archive", "commons", "loc"\]\.includes\(source\)\) \{[\s\S]*?activeSource = source;[\s\S]*?showArchiveFallback\(\);[\s\S]*?return;/);
+  assert.match(source, /button\.hidden = isAnimePlayback\(\) \? source !== "vidapi" : !\[[^\]]*"loc"\]\.includes\(source\)/);
+});
+
+
+test("open movie catalogues are selectable sources and never appear for anime", () => {
+  assert.match(source, /data-player-source="archive"/);
+  assert.match(source, /data-player-source="commons"/);
+  assert.match(source, /data-player-source="loc"/);
+  assert.match(source, /\["archive", "commons", "loc"\]\.includes\(source\)/);
+  assert.match(source, /button\.hidden = isAnimePlayback\(\) \? source !== "vidapi"/);
+  assert.match(source, /directPlayer\.src = directUrl/);
 });

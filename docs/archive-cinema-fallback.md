@@ -1,33 +1,26 @@
-# Archive Cinema fallback
+# Open Film Sources in Vivid Cinema
 
-Archive Cinema is a last-resort discovery source in Player 1 for movie pages. It stays hidden and makes no archive requests while Vivid's normal movie servers are available. Only after every available Vivid movie server has been tried and none can play the title does the archive option appear and search Internet Archive. It searches Internet Archive movie records, checks each candidate's metadata, and offers only records that have a browser-playable video file plus an explicit public-domain or commercial Creative Commons rights declaration.
+Player 1 offers three selectable catalogues for movie pages: Internet Archive, Wikimedia Commons and the Library of Congress. They are independent of Vivid's normal third-party embed servers and are also available as a last-resort discovery option after normal movie servers fail.
 
-## Flow
+## Internet Archive
 
-1. Search the Internet Archive Advanced Search API for movie records matching the requested title.
-2. Fetch each candidate's metadata record.
-3. Reject candidates without a public-domain declaration or a supported commercial Creative Commons license.
-4. Reject non-commercial (NC), no-derivatives (ND), private, and non-video files.
-5. Open the selected item using the Internet Archive's own embedded player. Vivid does not proxy, mirror, download, or re-host the media.
+Searches the Internet Archive Advanced Search API, fetches each candidate's metadata, and offers the official archive embed only when the record declares a public-domain or supported commercial Creative Commons licence and includes a playable video file. Accepted declarations are Public Domain Mark, CC0, CC BY and CC BY-SA. Non-commercial and no-derivatives licences are rejected. Uploader-supplied rights declarations are not independently verified.
 
-Accepted declarations are Public Domain Mark, CC0, CC BY and CC BY-SA. The archive item details page is linked beside every result so viewers can inspect the source and rights statement.
+## Wikimedia Commons
 
-## Important rights limitation
+Searches the Commons API for video files and uses each file's own extended metadata. Only direct HTTPS MP4, WebM or OGV files with a public-domain, CC0, CC BY or CC BY-SA declaration are offered. The original Commons file page is linked beside every result. Browser codec support varies by format.
 
-Internet Archive says that rights information is often supplied by the uploader and that it cannot guarantee the accuracy of uploader-provided copyright information. Therefore this filter is a conservative metadata screen, not legal verification or a guarantee that a title is public domain. The UI discloses this limitation and links to the original item. Do not describe every returned title as verified public domain. Remove or disable any item if a rights holder disputes its status.
+## Library of Congress
 
-Internet Archive's own guidance:
-- https://archivesupport.zendesk.com/hc/en-us/articles/360014759692-Rights
-- https://archivesupport.zendesk.com/hc/en-us/articles/360017808151-Movies-and-Videos-A-Basic-Guide
+Searches the official loc.gov film-and-video JSON endpoint, then fetches each item's detail record and digital resources. It only offers an MP4 resource when the item has an explicit public-domain, compatible Creative Commons, or "No known restrictions on publication/use" rights advisory. The latter is shown as an advisory, not a guarantee of public-domain status. Items with undetermined rights or no playable MP4 are excluded. The original item record is linked for inspection.
 
-## Playback behavior
+The Library of Congress says the National Screening Room includes both copyrighted and public-domain works; item-level rights/access checks are therefore mandatory. The LOC API documents distinct search, item and resource endpoints, and the collection notes that most titles are available as MP4 downloads. See [LOC National Screening Room](https://www.loc.gov/collections/national-screening-room/about-this-collection/), [LOC API endpoints](https://www.loc.gov/apis/json-and-yaml/requests/endpoints/), and [LOC streaming services](https://www.loc.gov/apis/micro-services/streaming-services/).
 
-- Available only as a last resort on movie watch pages after all configured Vivid movie servers have been attempted without success. It is not shown for ordinary successful playback, TV episodes, Free Anime or Premium Anime; their source restrictions remain unchanged.\n- No Internet Archive catalogue request is made until the fallback is revealed after movie-server exhaustion.
-- Uses Player 1's existing iframe and the Archive's official embed URL.
-- Archive playback is user-selected and is not part of automatic server failover.
-- The archive player controls playback, subtitles, quality and progress. Vivid cannot inspect its cross-origin iframe internals.
-- Search is limited to 12 catalogue hits and checks metadata for up to 10 candidates per search. Searches time out after 15 seconds.
+## Playback and limitations
 
-## Next catalogue expansion
-
-After this last-resort fallback is stable, evaluate the Library of Congress National Screening Room as a separate, rights-aware historical-film catalogue. Integrate only titles whose item-level access and reuse terms permit the intended playback experience; keep it behind the same exhausted-Vivid-servers gate. Do not make it a default source for current releases or ordinary catalogue titles.
+- All three catalogues are available only for movie playback, never Free Anime or Premium Anime.
+- Internet Archive uses its official embedded player. Commons and LOC use their direct MP4/WebM/OGV files in Vivid's native HTML5 video element.
+- Catalogue requests begin when a user selects a source or when the normal movie servers are exhausted.
+- The sources are archives of public-domain/openly licensed material, not substitutes for current commercial streaming catalogues. Most new studio releases will not be available here.
+- Vivid does not proxy, mirror, download or re-host these files. Source availability, formats, playback restrictions and rights metadata can change; users can open the original item record.
+- The source picker keeps Vivid's existing commercial embed providers unchanged.
