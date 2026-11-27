@@ -60,7 +60,7 @@ test("Phase 1 does not grant membership or expose a Premium playback catalogue",
 });
 
 test("Premium route and assets are included in the offline app shell", () => {
-  assert.match(serviceWorker, /vivid-cinema-shell-v374/);
+  assert.match(serviceWorker, /vivid-cinema-shell-v375/);
   assert.match(serviceWorker, /"\.\/anime-premium\.html"/);
   assert.match(serviceWorker, /"\.\/styles\/vivid-anime-premium\.css"/);
   assert.match(serviceWorker, /"\.\/scripts\/anime-premium\.js"/);
