@@ -30,9 +30,29 @@ test("successful sign-in opens the Who's Watching profile selector by default", 
   assert.match(selector, /finishProfileOpen\(profile, result\.customToken\)/);
   assert.match(selector, /signInWithCustomToken\(auth, customToken\)/);
   const openFlow = selector.slice(selector.indexOf("async function finishProfileOpen"), selector.indexOf("function startProfileMigration"));
-  assert.ok(openFlow.indexOf("setActiveProfileId") < openFlow.indexOf("signInWithCustomToken"),
-    "the selected profile must be persisted before Firebase emits its auth-state event");
-  assert.match(openFlow, /clearActiveProfileId/);
+  assert.ok(openFlow.indexOf("signInWithVerifiedProfileSession") < openFlow.indexOf("setActiveProfileId"),
+    "the selected profile is persisted only after the server-issued claim is verified");
+  assert.match(openFlow, /sessionStorage\.removeItem/);
+});
+
+test("custom-token profile sessions are force-refreshed and verified before navigation", () => {
+  const verified = selector.slice(
+    selector.indexOf("async function signInWithVerifiedProfileSession"),
+    selector.indexOf("async function finishProfileOpen")
+  );
+  assert.match(verified, /selectedUser\.getIdToken\(true\)/);
+  assert.match(verified, /selectedUser\.getIdTokenResult\(\)/);
+  assert.match(verified, /tokenResult\.claims\.profileId !== expectedProfileId/);
+  assert.match(verified, /tokenResult\.claims\.profileSessionId/);
+  assert.match(selector, /signInWithVerifiedProfileSession\(migrationSession\.customToken, OWNER_PROFILE_ID, migrationUser\.uid\)/);
+});
+
+test("profile gate redirects only once per account session and clears after a valid claim", () => {
+  assert.match(shell, /vivid:profile-gate-redirected:v1:/);
+  assert.match(shell, /profileGateRedirectedUids/);
+  assert.match(shell, /showProfileGateNotice\(\)/);
+  assert.match(shell, /clearProfileGateRedirect\(user\.uid\)/);
+  assert.match(shell, /clearProfileGateRedirect\(previousUid\)/);
 });
 
 test("profile selector does not expose protected global navigation before a profile is chosen", () => {
