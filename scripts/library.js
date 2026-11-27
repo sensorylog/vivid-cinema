@@ -421,7 +421,9 @@ async function performLibrarySyncForUser(user=null,profileId=null){
   saveLocalTombstones(remainingTombstones);
   return merged;
   } catch (error) {
-    if (error && typeof error === "object" && !error.syncStage) error.syncStage = syncStage;
+    try {
+      if (error && typeof error === "object" && !error.syncStage) error.syncStage = syncStage;
+    } catch {}
     throw error;
   }
 }
