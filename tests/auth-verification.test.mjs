@@ -20,7 +20,7 @@ test("signup and resend use the authenticated external verification API", () => 
   assert.doesNotMatch(auth, /firebase-functions\.js|httpsCallable|getFunctions/);
   assert.doesNotMatch(auth, /sendEmailVerification/);
   assert.match(auth, /Verify My Email/);
-  assert.match(auth, /JSON\.stringify\(\["anime-premium\.html", "anime-premium-membership\.html"\]\.includes\(postAuthDestination\(\)\) \? \{ returnTo: postAuthDestination\(\) \} : \{\}\)/);
+  assert.match(auth, /JSON\.stringify\(\["anime-premium\.html", "anime-premium-membership\.html"\]\.includes\(requestedPostAuthDestination\(\)\) \? \{ returnTo: requestedPostAuthDestination\(\) \} : \{\}\)/);
 });
 
 test("Google redirect recovery only runs when a redirect was explicitly started", () => {
