@@ -24,7 +24,7 @@ test("downloads page resolves current assets from the latest GitHub release", ()
 });
 
 test("download buttons have safe latest-release fallbacks and wait for release lookup before navigating", () => {
-  assert.match(script, /RELEASE_DOWNLOAD = .*releases\/latest\/download/);
+  assert.match(script, /ANDROID_RELEASE_PAGE/);
   assert.match(script, /Vivid-Cinema-Android\.apk/);
   assert.match(script, /View the latest official Vivid Cinema Windows installer/);
   assert.match(script, /View the latest official Vivid Cinema portable build/);
@@ -59,5 +59,5 @@ test("Android offline downloads and website downloads are clearly marked in deve
 test("download page never hardcodes an obsolete Windows installer fallback", async () => {
   assert.doesNotMatch(html, /Vivid-Cinema-(?:Setup|Portable)-1\.0\.\d+\.exe/);
   assert.doesNotMatch(script, /Vivid-Cinema-(?:Setup|Portable)-1\.0\.\d+\.exe/);
-  assert.match(html, /scripts\/downloads\.js\?v=direct-download-v4/);
+  assert.match(html, /scripts\/downloads\.js\?v=direct-download-v5/);
 });
