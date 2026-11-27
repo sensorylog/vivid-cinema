@@ -21,9 +21,10 @@ test("successful sign-in opens the Who's Watching profile selector by default", 
   assert.match(shell, /"login\.html", "forgot-password\.html"/);
   assert.match(page, /Who's watching\?/);
   assert.match(page, /id="profile-grid"/);
+  assert.match(page, /profile-selector-watchdog\.js/);
   assert.match(page, /id="profile-signout"/);
   assert.match(selector, /signOut\(auth\)/);
-  assert.match(selector, /setActiveProfileId\(user\.uid, profile\.id\)/);
+  assert.match(selector, /setActiveProfileId\(accountId, profile\.id\)/);
   assert.match(selector, /if \(profile\.hasPin\)/);
   assert.match(selector, /verifyProfilePin\(pendingProfile\.id, pin\)/);
   assert.match(selector, /finishProfileOpen\(profile, result\.customToken\)/);
@@ -41,6 +42,28 @@ test("profile route validation does not turn transient service failures into sel
   assert.match(summary, /PROFILE_CHECK_UNAVAILABLE/);
   assert.match(shell, /temporarily unavailable; preserving the selected route/);
   assert.match(shell, /PROFILE_SESSION_REJECTED/);
+});
+
+test("profile startup bounds Firebase token refresh and gives users a retry instead of an endless spinner", () => {
+  assert.match(manager, /Promise\.race\(\[request, timeout\]\)/);
+  assert.match(manager, /user\.getIdToken\(\)/);
+  assert.match(manager, /Vivid's profile service took too long to respond/);
+  assert.match(selector, /showProfileLoadError/);
+  assert.match(selector, /profile-load-retry/);
+  assert.match(selector, /console\.error\("Vivid profile selector initialization failed:/);
+  assert.match(profiles, /withProfileTimeout/);
+  assert.match(profiles, /Your Vivid sign-in is taking too long to refresh/);
+  assert.match(profiles, /export function withProfileTimeout/);
+  assert.match(profiles, /Vivid security verification is taking too long/);
+  assert.match(profiles, /Vivid library setup is taking too long/);
+  assert.match(selector, /Your Vivid sign-in is taking too long to verify/);
+});
+
+test("a server-issued Firebase profile claim restores a missing Safari storage selection", () => {
+  assert.match(shell, /The Firebase custom-token claim is the server-issued source of truth/);
+  assert.match(shell, /setActiveProfileId\(user\.uid, claimedProfileId\)/);
+  assert.match(profiles, /sessionStorage\.getItem\(key\)/);
+  assert.match(profiles, /sessionStorage\.setItem\(key, id\)/);
 });
 
 test("profile selector renders existing profiles before starting owner-scoped library migration", () => {
@@ -123,8 +146,9 @@ test("profile deletion protects the owner and requires an explicit confirmation"
 });
 
 test("profile selector assets are network refreshed and accessible from the account hub", () => {
-  assert.match(worker, /vivid-cinema-shell-v377/);
+  assert.match(worker, /vivid-cinema-shell-v378/);
   assert.match(worker, /profile-selector/);
+  assert.match(worker, /profile-selector-watchdog/);
   assert.match(worker, /profiles\.html/);
   assert.match(account, /href="profiles\.html"/);
   assert.match(styles, /grid-template-columns:repeat\(auto-fit/);
@@ -156,6 +180,6 @@ test("profile identities use the original cinematic avatar artwork and mobile sy
   assert.match(selector, /profile-avatar-art/);
   assert.match(selector, /--avatar-x/);
   assert.match(styles, /background-image:url\("\.\.\/assets\/profile-avatars\.svg"\)/);
-  assert.match(page, /phase5-avatar-art-1/);
+  assert.match(page, /phase7-profile-recovery-1/);
   assert.match(accountStyles, /\.account-page \.account-sync \.vivid-button\{flex:1 1 100%;width:100%/);
 });

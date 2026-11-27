@@ -75,6 +75,19 @@ export function activeProfileStorageKey(uid) {
   return ACTIVE_PROFILE_PREFIX + userId;
 }
 
+export function withProfileTimeout(promise, milliseconds, message) {
+  let timeoutId;
+  const timeout = new Promise((_, reject) => {
+    timeoutId = window.setTimeout(() => {
+      const error = new Error(message);
+      error.code = "PROFILE_CHECK_UNAVAILABLE";
+      reject(error);
+    }, milliseconds);
+  });
+  return Promise.race([Promise.resolve().then(() => promise), timeout])
+    .finally(() => window.clearTimeout(timeoutId));
+}
+
 function requireSignedInUser(user, auth) {
   const current = auth.currentUser;
   if (!user?.uid || !current?.uid || String(user.uid) !== String(current.uid)) {
@@ -104,9 +117,17 @@ export async function ensureOwnerProfile(user = null) {
   const firebase = await getFirebase();
   const { auth, db, ensureAppCheck, doc, getDocFromServer, serverTimestamp, setDoc } = firebase;
   const current = requireSignedInUser(user || auth.currentUser, auth);
-  await ensureAppCheck();
+  await withProfileTimeout(
+    ensureAppCheck(),
+    10_000,
+    "Vivid security verification is taking too long. Retry profile loading."
+  );
   const reference = doc(db, "users", current.uid, "profiles", OWNER_PROFILE_ID);
-  const snapshot = await getDocFromServer(reference);
+  const snapshot = await withProfileTimeout(
+    getDocFromServer(reference),
+    12_000,
+    "Vivid couldn't retrieve your Main Profile in time. Check your connection and retry."
+  );
   if (snapshot.exists()) {
     const existing = snapshot.data() || {};
     if (existing.isOwner !== true || existing.schemaVersion !== PROFILE_SCHEMA_VERSION) {
@@ -122,7 +143,11 @@ export async function ensureOwnerProfile(user = null) {
     }
     if (Object.keys(updates).length) {
       updates.updatedAt = serverTimestamp();
-      await setDoc(reference, updates, { merge: true });
+      await withProfileTimeout(
+        setDoc(reference, updates, { merge: true }),
+        12_000,
+        "Vivid couldn't finish updating your Main Profile. Please retry."
+      );
     }
     return { id: OWNER_PROFILE_ID, ...existing, ...updates, created: false };
   }
@@ -134,11 +159,11 @@ export async function ensureOwnerProfile(user = null) {
   });
   const timestamp = serverTimestamp();
   const { avatarData, ...profileRecord } = profile;
-  await setDoc(reference, {
+  await withProfileTimeout(setDoc(reference, {
     ...profileRecord,
     createdAt: timestamp,
     updatedAt: timestamp
-  });
+  }), 12_000, "Vivid couldn't create your Main Profile in time. Please retry.");
   return { ...profile, created: true };
 }
 
@@ -158,14 +183,19 @@ export async function listProfileSummaries(user = null) {
   const firebase = await getFirebase();
   const { auth } = firebase;
   const current = requireSignedInUser(user || auth.currentUser, auth);
-  const token = await current.getIdToken();
   const controller = new AbortController();
   const timeout = window.setTimeout(() => controller.abort(), 8_000);
   let response;
   try {
-    // This endpoint authenticates with the Firebase ID token. Requiring
-    // browser App Check here creates a circular dependency: the route guard
-    // can redirect a selected user before the profile page can recover.
+    // Bound token refresh as well as fetch: Safari can leave getIdToken()
+    // pending while auth silently refreshes, otherwise the selector spins forever.
+    const token = await withProfileTimeout(
+      current.getIdToken(),
+      8_000,
+      "Your Vivid sign-in is taking too long to refresh. Check your connection and retry."
+    );
+    // This endpoint authenticates with the Firebase ID token; it does not
+    // require browser App Check to list an already-authenticated household.
     response = await fetch(getCloudflareApiUrl("/api/profiles"), {
       headers: { Authorization: "Bearer " + token },
       cache: "no-store",
@@ -178,6 +208,7 @@ export async function listProfileSummaries(user = null) {
       unavailable.code = "PROFILE_CHECK_UNAVAILABLE";
       throw unavailable;
     }
+    if (error?.code === "PROFILE_CHECK_UNAVAILABLE") throw error;
     const unavailable = new Error("Profile verification is temporarily unavailable.");
     unavailable.code = "PROFILE_CHECK_UNAVAILABLE";
     unavailable.cause = error;
@@ -202,11 +233,15 @@ export async function listProfileSummaries(user = null) {
 export async function validateProfileSession(user, profileId) {
   const firebase = await getFirebase();
   const current = requireSignedInUser(user || firebase.auth.currentUser, firebase.auth);
-  const token = await current.getIdToken();
   const controller = new AbortController();
   const timeout = window.setTimeout(() => controller.abort(), 8_000);
   let response;
   try {
+    const token = await withProfileTimeout(
+      current.getIdToken(),
+      8_000,
+      "Your Vivid sign-in is taking too long to refresh. Check your connection and retry."
+    );
     response = await fetch("https://vivid-cinema-api.vercel.app/api/profile-pin", {
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: "Bearer " + token },
@@ -228,25 +263,34 @@ export async function validateProfileSession(user, profileId) {
 }
 
 export function getActiveProfileId(uid) {
+  const key = activeProfileStorageKey(uid);
   try {
-    const id = localStorage.getItem(activeProfileStorageKey(uid)) || OWNER_PROFILE_ID;
+    const id = localStorage.getItem(key) || sessionStorage.getItem(key) || OWNER_PROFILE_ID;
     return normalizeProfileId(id);
   } catch {
-    return OWNER_PROFILE_ID;
+    try { return normalizeProfileId(sessionStorage.getItem(key) || OWNER_PROFILE_ID); }
+    catch { return OWNER_PROFILE_ID; }
   }
 }
 
 export function hasActiveProfileSelection(uid) {
+  const key = activeProfileStorageKey(uid);
   try {
-    const value = localStorage.getItem(activeProfileStorageKey(uid));
+    const value = localStorage.getItem(key) || sessionStorage.getItem(key);
     return Boolean(value && PROFILE_ID_PATTERN.test(value));
   } catch {
-    return false;
+    try {
+      const value = sessionStorage.getItem(key);
+      return Boolean(value && PROFILE_ID_PATTERN.test(value));
+    } catch { return false; }
   }
 }
 
 export function clearActiveProfileId(uid) {
-  try { localStorage.removeItem(activeProfileStorageKey(uid)); } catch {}
+  let key;
+  try { key = activeProfileStorageKey(uid); } catch { return; }
+  try { localStorage.removeItem(key); } catch {}
+  try { sessionStorage.removeItem(key); } catch {}
 }
 
 export function clearProfileLocalState(uid, profileId) {
@@ -293,7 +337,10 @@ export function clearProfileLocalState(uid, profileId) {
 export function setActiveProfileId(uid, profileId) {
   const key = activeProfileStorageKey(uid);
   const id = normalizeProfileId(profileId);
-  localStorage.setItem(key, id);
+  // Keep both stores in sync. Safari/private browsing or storage quota errors
+  // must not prevent the server-issued profile token from opening the app.
+  try { localStorage.setItem(key, id); } catch {}
+  try { sessionStorage.setItem(key, id); } catch {}
   window.dispatchEvent(new CustomEvent("vivid:profile-changed", {
     detail: { uid: String(uid), profileId: id }
   }));
@@ -310,17 +357,33 @@ export async function migrateLegacyProfileData(user = null) {
   const { auth, db, ensureAppCheck, collection, doc, getDocFromServer, getDocsFromServer, serverTimestamp, setDoc, writeBatch } = firebase;
   const current = requireSignedInUser(user || auth.currentUser, auth);
   await ensureOwnerProfile(current);
-  await ensureAppCheck();
+  await withProfileTimeout(
+    ensureAppCheck(),
+    10_000,
+    "Vivid security verification is taking too long to finish your library setup."
+  );
 
   const markerRef = doc(db, "users", current.uid, "profiles", OWNER_PROFILE_ID,
     "migrations", PROFILE_MIGRATION_ID);
-  const marker = await getDocFromServer(markerRef);
+  const marker = await withProfileTimeout(
+    getDocFromServer(markerRef),
+    12_000,
+    "Vivid library setup is taking too long. Your existing data is safe; retry the setup."
+  );
   const summary = {};
   let migratedAny = false;
   for (const collectionName of PROFILE_DATA_COLLECTIONS) {
-    const source = await getDocsFromServer(collection(db, "users", current.uid, collectionName));
+    const source = await withProfileTimeout(
+      getDocsFromServer(collection(db, "users", current.uid, collectionName)),
+      12_000,
+      "Vivid couldn't read your existing " + collectionName + " data in time. Your data is safe; retry the setup."
+    );
     const destinationRef = collection(db, "users", current.uid, "profiles", OWNER_PROFILE_ID, collectionName);
-    const destination = await getDocsFromServer(destinationRef);
+    const destination = await withProfileTimeout(
+      getDocsFromServer(destinationRef),
+      12_000,
+      "Vivid couldn't verify your " + collectionName + " profile data in time. Please retry."
+    );
     const destinationById = new Map(destination.docs.map(item => [item.id, item.data()]));
     const pending = [];
 
@@ -340,10 +403,18 @@ export async function migrateLegacyProfileData(user = null) {
       for (const item of pending.slice(offset, offset + 350)) {
         batch.set(doc(db, "users", current.uid, "profiles", OWNER_PROFILE_ID, collectionName, item.id), item.data);
       }
-      await batch.commit();
+      await withProfileTimeout(
+        batch.commit(),
+        12_000,
+        "Vivid couldn't finish copying your " + collectionName + " data in time. Your original data is safe; retry the setup."
+      );
     }
 
-    const verified = await getDocsFromServer(destinationRef);
+    const verified = await withProfileTimeout(
+      getDocsFromServer(destinationRef),
+      12_000,
+      "Vivid couldn't verify the copied " + collectionName + " data in time. Please retry."
+    );
     const verifiedById = new Map(verified.docs.map(item => [item.id, item.data()]));
     const missing = source.docs.filter(item => !verifiedById.has(item.id));
     const mismatched = pending.filter(item => !sameData(item.data, verifiedById.get(item.id)));
@@ -355,13 +426,13 @@ export async function migrateLegacyProfileData(user = null) {
     summary[collectionName] = { sourceCount: source.size, destinationCount: verified.size, copiedCount: pending.length };
   }
 
-  await setDoc(markerRef, {
+  await withProfileTimeout(setDoc(markerRef, {
     migrationId: PROFILE_MIGRATION_ID,
     status: "complete",
     schemaVersion: PROFILE_SCHEMA_VERSION,
     collections: summary,
     completedAt: serverTimestamp()
-  });
+  }), 12_000, "Vivid couldn't confirm your library setup in time. Please retry.");
   return { migrated: migratedAny, alreadyComplete: marker.exists() && !migratedAny, collections: summary };
 }
 

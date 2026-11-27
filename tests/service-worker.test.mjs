@@ -208,7 +208,7 @@ test("app shell includes current versioned assets without dropping existing cach
 
   // Preserve older entries until all runtime consumers have been verified;
   // pruning query-versioned assets is a separate cleanup, not required here.
-  assert.ok(source.includes(JSON.stringify("./scripts/firebase.js?v=20261127-profile-flow-1")));
+  assert.ok(source.includes(JSON.stringify("./scripts/firebase.js?v=20261127-profile-timeout-2")));
 });
 test("service worker precaches Hls.js and serves the exact CORS library offline", () => {
   assert.ok(source.includes('const HLS_LIBRARY_URL = "https://cdn.jsdelivr.net/npm/hls.js@1.7.3/dist/hls.min.js"'));

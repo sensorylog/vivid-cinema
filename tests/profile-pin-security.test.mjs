@@ -114,8 +114,10 @@ test("profile chooser exposes PIN setup, unlock, and recovery without persisting
   assert.match(manager, /cache: "no-store"/);
 });
 
-test("every protected page validates the server-issued profile session before proceeding", () => {
-  assert.match(shell, /tokenResult\.claims\.profileId !== activeId/);
+test("every protected page trusts server-issued profile claims and recovers missing browser selection", () => {
+  assert.match(shell, /const claimedProfileId = typeof tokenResult\.claims\.profileId === "string"/);
+  assert.match(shell, /claimedProfileId/);
+  assert.match(shell, /setActiveProfileId\(user\.uid, claimedProfileId\)/);
   assert.match(shell, /activeProfile/);
   assert.match(shell, /tokenResult\.claims\.profileSessionId/);
   assert.match(shell, /validateProfileSession\(user, activeId\)/);

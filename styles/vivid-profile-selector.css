@@ -69,3 +69,10 @@
 /* Clear keyboard focus without adding visual noise to pointer navigation. */
 .profile-selector-page :is(a,button,input,select,textarea):not(.profile-card):focus-visible{outline:3px solid #dce5ff;outline-offset:3px}
 .profile-selector-page .avatar-choice:focus-visible{outline:3px solid #dce5ff;outline-offset:3px}
+
+/* Recoverable profile loading states */
+
+.profile-load-error{display:grid;justify-items:center;gap:18px;width:min(100%,560px);margin:24px auto;padding:28px 22px;border:1px solid rgba(255,255,255,.12);border-radius:22px;background:rgba(255,255,255,.035);text-align:center}
+.profile-load-error p{max-width:42ch;margin:0;color:var(--text-secondary,#aeb4c0);font-size:15px;line-height:1.6}
+.profile-load-retry{min-height:48px;padding:0 22px;border:1px solid rgba(255,255,255,.2);border-radius:999px;background:#f2f3f7;color:#101116;font:inherit;font-size:15px;font-weight:700;cursor:pointer}
+.profile-load-retry:disabled{opacity:.55;cursor:wait}

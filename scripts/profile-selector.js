@@ -1,6 +1,6 @@
 import { auth } from "./firebase.js";
 import { onAuthStateChanged, signOut, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
-import { clearActiveProfileId, ensureOwnerProfile, initializeProfileFoundation, getActiveProfileId, setActiveProfileId, validateProfileSession, OWNER_PROFILE_ID } from "./profiles.js";
+import { clearActiveProfileId, ensureOwnerProfile, initializeProfileFoundation, getActiveProfileId, setActiveProfileId, validateProfileSession, withProfileTimeout, OWNER_PROFILE_ID } from "./profiles.js";
 import { normalizeAvatarUrl } from "./profile-schema.js";
 import { fetchProfiles, createProfile, updateProfile, deleteProfile, compressProfileImage, selectProfile, verifyProfilePin, setProfilePin, removeProfilePin, resetProfilePin, PROFILE_AVATARS, MAX_PROFILES } from "./profile-manager.js";
 
@@ -575,6 +575,30 @@ deleteButton.addEventListener("click",async() => {
   finally { saving = false; deleteButton.disabled = false; }
 });
 $("profile-is-kids").addEventListener("change", () => { const enabled=$("profile-is-kids").checked; $("profile-kids-settings").hidden=!enabled; if(enabled){if($("profile-movie-rating").value==="NC-17")$("profile-movie-rating").value="PG";if($("profile-tv-rating").value==="TV-MA")$("profile-tv-rating").value="TV-PG";if(!$("profile-blocked-genres").selectedOptions.length)[...$("profile-blocked-genres").options].forEach(option=>option.selected=["27","53","80","10752"].includes(option.value));} });
+function showProfileLoadError(error) {
+  grid.replaceChildren();
+  const panel = document.createElement("div");
+  panel.className = "profile-load-error";
+  const message = document.createElement("p");
+  message.textContent = error?.message || "Vivid couldn't load your profiles. Check your connection and try again.";
+  const retry = document.createElement("button");
+  retry.type = "button";
+  retry.className = "profile-load-retry";
+  retry.textContent = "Try again";
+  retry.addEventListener("click", async () => {
+    retry.disabled = true;
+    retry.textContent = "Retrying…";
+    try {
+      await refreshProfiles();
+    } catch (retryError) {
+      showProfileLoadError(retryError);
+    }
+  });
+  panel.append(message, retry);
+  grid.append(panel);
+  say("Your profiles couldn't be loaded. You can retry without signing out.", true);
+}
+
 $("manage-toggle").disabled = true;
 onAuthStateChanged(auth,async currentUser => {
   if (!currentUser || currentUser.isAnonymous) {
@@ -596,7 +620,11 @@ onAuthStateChanged(auth,async currentUser => {
       say("The profile PIN was reset. You can choose the profile and set a new PIN.");
     }
     await refreshProfiles();
-    const tokenResult = await user.getIdTokenResult();
+    const tokenResult = await withProfileTimeout(
+      user.getIdTokenResult(),
+      8_000,
+      "Your Vivid sign-in is taking too long to verify. Check your connection and retry."
+    );
     const active = profiles.find(item => item.id === String(tokenResult.claims.profileId || ""));
     if (active?.hasPin) {
       if (!await validateProfileSession(user, active.id)) {
@@ -606,5 +634,8 @@ onAuthStateChanged(auth,async currentUser => {
       bindProfileActivity(active);
     }
     if (active?.isKids) { const owner = profiles.find(item => item.isOwner); if (!owner?.hasPin) { say("Kids Mode exit is locked. Sign out, sign back in as the account owner, then open the Main Profile and set its PIN.",true); return; } say("Parent verification is required to leave Kids Mode."); await chooseProfile(owner); }
-  } catch(error) { say(error.message || "Could not load your profiles.",true); grid.replaceChildren(); }
+  } catch(error) {
+    console.error("Vivid profile selector initialization failed:", error);
+    showProfileLoadError(error);
+  }
 });

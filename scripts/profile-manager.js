@@ -5,12 +5,22 @@ import { MAX_PROFILES, PROFILE_AVATARS, normalizeProfile } from "./profile-schem
 async function profileRequest(path, method = "GET", payload = null) {
   const user = auth.currentUser;
   if (!user || user.isAnonymous) throw new Error("Sign in with your Vivid account to manage profiles.");
-  const token = await user.getIdToken();
+
   const controller = new AbortController();
-  const timeout = window.setTimeout(() => controller.abort(), 15_000);
-  let response;
-  try {
-    response = await fetch(getCloudflareApiUrl(path), {
+  let timeoutId;
+  const timeoutError = new Error("Vivid's profile service took too long to respond. Check your connection and retry.");
+  const timeout = new Promise((_, reject) => {
+    timeoutId = window.setTimeout(() => {
+      controller.abort();
+      reject(timeoutError);
+    }, 15_000);
+  });
+
+  const request = (async () => {
+    // Start the deadline before requesting the ID token. Firebase token refresh
+    // can stall independently of fetch and was leaving Who's Watching spinning.
+    const token = await user.getIdToken();
+    const response = await fetch(getCloudflareApiUrl(path), {
       method,
       headers: {
         Authorization: "Bearer " + token,
@@ -21,23 +31,25 @@ async function profileRequest(path, method = "GET", payload = null) {
       cache: "no-store",
       signal: controller.signal
     });
-  } catch (error) {
-    if (error?.name === "AbortError") {
-      throw new Error("Vivid's profile service took too long to respond. Check your connection and retry.");
+    let result = {};
+    try { result = await response.json(); } catch {}
+    if (!response.ok || result.ok === false) {
+      const error = new Error(result.message || "Vivid couldn't update profiles right now.");
+      error.code = result.code || "profile-request-failed";
+      error.status = response.status;
+      throw error;
     }
+    return result;
+  })();
+
+  try {
+    return await Promise.race([request, timeout]);
+  } catch (error) {
+    if (error === timeoutError || error?.name === "AbortError") throw timeoutError;
     throw error;
   } finally {
-    window.clearTimeout(timeout);
+    window.clearTimeout(timeoutId);
   }
-  let result = {};
-  try { result = await response.json(); } catch {}
-  if (!response.ok || result.ok === false) {
-    const error = new Error(result.message || "Vivid couldn't update profiles right now.");
-    error.code = result.code || "profile-request-failed";
-    error.status = response.status;
-    throw error;
-  }
-  return result;
 }
 
 export async function fetchProfiles() {
@@ -53,21 +65,43 @@ export async function fetchProfiles() {
 export async function requestProfilePin(action, profileId, details = {}) {
   const user = auth.currentUser;
   if (!user) throw new Error("Sign in to manage profile security.");
-  const token = await user.getIdToken();
-  const response = await fetch("https://vivid-cinema-api.vercel.app/api/profile-pin", {
-    method: "POST",
-    headers: { "Content-Type": "application/json", Authorization: "Bearer " + token },
-    body: JSON.stringify({ action, profileId, ...details }),
-    cache: "no-store"
+
+  const controller = new AbortController();
+  let timeoutId;
+  const timeoutError = new Error("Vivid profile security took too long to respond. Check your connection and retry.");
+  const timeout = new Promise((_, reject) => {
+    timeoutId = window.setTimeout(() => {
+      controller.abort();
+      reject(timeoutError);
+    }, 15_000);
   });
-  const result = await response.json().catch(() => ({}));
-  if (!response.ok || result.ok !== true) {
-    const error = new Error(result.message || "Profile security is temporarily unavailable.");
-    error.code = result.code || "profile-security-unavailable";
-    error.retryAfterMs = Number(result.retryAfterMs || 0);
+  const request = (async () => {
+    const token = await user.getIdToken();
+    const response = await fetch("https://vivid-cinema-api.vercel.app/api/profile-pin", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: "Bearer " + token },
+      body: JSON.stringify({ action, profileId, ...details }),
+      cache: "no-store",
+      signal: controller.signal
+    });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok || result.ok !== true) {
+      const error = new Error(result.message || "Profile security is temporarily unavailable.");
+      error.code = result.code || "profile-security-unavailable";
+      error.retryAfterMs = Number(result.retryAfterMs || 0);
+      throw error;
+    }
+    return result;
+  })();
+
+  try {
+    return await Promise.race([request, timeout]);
+  } catch (error) {
+    if (error === timeoutError || error?.name === "AbortError") throw timeoutError;
     throw error;
+  } finally {
+    window.clearTimeout(timeoutId);
   }
-  return result;
 }
 
 export const selectProfile = profileId => requestProfilePin("select", profileId);
