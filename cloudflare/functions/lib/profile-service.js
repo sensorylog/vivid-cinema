@@ -87,12 +87,12 @@ function cleanProfileInput(profileId, body, existing = {}) {
   const avatarSource = body.avatarSource == null
     ? (["auto","google","collection","upload"].includes(existing.avatarSource)
       ? existing.avatarSource
-      : existing.avatarData ? "upload" : existing.avatarUrl ? "google" : profileId === OWNER_PROFILE_ID ? "default" : "collection")
+      : existing.avatarData ? "upload" : existing.avatarUrl ? "google" : profileId === OWNER_PROFILE_ID ? "auto" : "collection")
     : String(body.avatarSource);
   const allowedSources = new Set(["auto","google","collection","upload"]);
   if (avatarSource && !allowedSources.has(avatarSource)) throw new AnimePremiumError(400, "invalid-avatar-source", "Choose a valid profile photo source.");
   const source = avatarSource || (profileId === OWNER_PROFILE_ID ? "auto" : "collection");
-  if (source === "default" && profileId !== OWNER_PROFILE_ID) throw new AnimePremiumError(400, "invalid-avatar-source", "Automatic Google photos are only available for the account owner.");
+  if (source === "auto" && profileId !== OWNER_PROFILE_ID) throw new AnimePremiumError(400, "invalid-avatar-source", "Automatic Google photos are only available for the account owner.");
   const requestedUrl = body.avatarUrl == null ? String(existing.avatarUrl || "") : String(body.avatarUrl);
   const requestedData = body.avatarData == null ? String(existing.avatarData || "") : String(body.avatarData);
   const avatarUrl = source === "google" || source === "auto" ? requestedUrl : "";
