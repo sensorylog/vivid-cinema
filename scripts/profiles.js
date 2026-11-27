@@ -46,7 +46,7 @@ async function getFirebase() {
           }
         });
       }
-      return { ...firebase, ...firestore };
+      return { ...firebase, ...firestore, authSdk };
     }).catch(error => {
       firebasePromise = null;
       throw error;
@@ -228,6 +228,78 @@ export async function listProfileSummaries(user = null) {
     profiles: result.profiles.map(profile => ({ ...profile, hasPin: profile.hasPin === true })),
     migrationComplete: result.migrationComplete === true
   };
+}
+
+const PROFILE_SESSION_STORAGE_PREFIX = "vivid:profile-session:v1:";
+
+export function clearStoredProfileSession(uid) {
+  if (!uid) return;
+  try { sessionStorage.removeItem(PROFILE_SESSION_STORAGE_PREFIX + String(uid)); } catch {}
+}
+
+export async function restoreProfileSession(user) {
+  if (!user?.uid) return user;
+  const firebase = await getFirebase();
+  const current = requireSignedInUser(user, firebase.auth);
+  let stored = null;
+  try {
+    stored = JSON.parse(sessionStorage.getItem(PROFILE_SESSION_STORAGE_PREFIX + current.uid) || "null");
+  } catch {}
+  if (!stored || !PROFILE_ID_PATTERN.test(String(stored.profileId || "")) ||
+      !PROFILE_ID_PATTERN.test(String(stored.sessionId || ""))) return current;
+
+  const existing = await withProfileTimeout(
+    current.getIdTokenResult(),
+    8_000,
+    "Vivid is restoring your profile. Please retry in a moment."
+  );
+  if (existing.claims.profileId === stored.profileId &&
+      existing.claims.profileSessionId === stored.sessionId) return current;
+
+  const token = await withProfileTimeout(
+    current.getIdToken(),
+    8_000,
+    "Vivid is restoring your sign-in. Check your connection and retry."
+  );
+  const controller = new AbortController();
+  const timeout = window.setTimeout(() => controller.abort(), 10_000);
+  let response;
+  try {
+    response = await fetch("https://vivid-cinema-api.vercel.app/api/profile-pin", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: "Bearer " + token },
+      body: JSON.stringify({ action: "restore", profileId: stored.profileId, sessionId: stored.sessionId }),
+      cache: "no-store",
+      signal: controller.signal
+    });
+  } finally {
+    window.clearTimeout(timeout);
+  }
+  const result = await response.json().catch(() => ({}));
+  if (!response.ok || result.ok !== true || typeof result.customToken !== "string") {
+    if (response.status === 401 || response.status === 403) clearStoredProfileSession(current.uid);
+    const error = new Error(result.message || "Your profile session could not be restored.");
+    error.code = result.code || "PROFILE_SESSION_RESTORE_FAILED";
+    error.status = response.status;
+    throw error;
+  }
+
+  const credential = await withProfileTimeout(
+    firebase.authSdk.signInWithCustomToken(firebase.auth, result.customToken),
+    10_000,
+    "Vivid could not restore your selected profile. Please retry."
+  );
+  if (credential.user?.uid !== current.uid) throw new Error("The restored profile belongs to a different Vivid account.");
+  const restoredClaims = await withProfileTimeout(
+    credential.user.getIdTokenResult(),
+    8_000,
+    "Vivid could not confirm your restored profile."
+  );
+  if (restoredClaims.claims.profileId !== stored.profileId ||
+      restoredClaims.claims.profileSessionId !== stored.sessionId) {
+    throw new Error("Vivid could not confirm your selected profile session. Please choose your profile again.");
+  }
+  return credential.user;
 }
 
 export async function validateProfileSession(user, profileId) {
