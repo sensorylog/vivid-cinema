@@ -1,6 +1,6 @@
 import { auth, db } from "./firebase.js";
-import { deleteUser, EmailAuthProvider, GoogleAuthProvider, onAuthStateChanged, reauthenticateWithCredential, reauthenticateWithPopup, sendPasswordResetEmail, signOut, updateProfile } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
-import { collection, deleteDoc, doc, getDocsFromServer, getDoc, serverTimestamp, setDoc, writeBatch } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
+import { EmailAuthProvider, GoogleAuthProvider, onAuthStateChanged, reauthenticateWithCredential, reauthenticateWithPopup, sendPasswordResetEmail, signOut, updateProfile } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
+import { doc, getDoc, serverTimestamp, setDoc } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
 import { getLocalLibrary, syncLibraryForUser } from "./library.js";
 
 const $ = (id) => document.getElementById(id);
@@ -435,11 +435,7 @@ changePasswordButton?.addEventListener("click", async () => {
 });
 
 
-const ACCOUNT_PRIVATE_COLLECTIONS = [
-  "pushSubscriptions", "releaseAlerts", "releaseStates", "cinemaReminders",
-  "favorites", "watchLater", "history", "progress", "libraryTombstones",
-  "feedback", "events", "taste", "achievements", "blockedUsers", "following", "followedTopics"
-];
+
 
 async function reauthenticateForDeletion(user) {
   const providerIds = (user.providerData || []).map((item) => item.providerId);
@@ -455,48 +451,6 @@ async function reauthenticateForDeletion(user) {
     return;
   }
   throw new Error("This sign-in method cannot be reauthenticated here. Sign out, sign in again, then retry.");
-}
-
-async function deleteOwnedDocuments(uid, collectionName) {
-  const snapshot = await withTimeout(
-    getDocsFromServer(collection(db, "users", uid, collectionName)),
-    12000,
-    "Could not read your " + collectionName + " records for deletion."
-  );
-  const documents = snapshot.docs;
-  for (let offset = 0; offset < documents.length; offset += 400) {
-    const batch = writeBatch(db);
-    documents.slice(offset, offset + 400).forEach((item) => batch.delete(item.ref));
-    await withTimeout(batch.commit(), 12000, "Could not delete your " + collectionName + " records.");
-  }
-}
-
-async function deleteProfileDocuments(uid) {
-  const profiles = await withTimeout(
-    getDocsFromServer(collection(db, "users", uid, "profiles")),
-    12000,
-    "Could not read your viewing profiles for deletion."
-  );
-  const profileCollections = [
-    "favorites","watchLater","history","completed","progress","libraryTombstones",
-    "feedback","events","taste","animePreferences","achievements","migrations","profileManagement"
-  ];
-  for (const profile of profiles.docs) {
-    for (const collectionName of profileCollections) {
-      if (collectionName === "profileManagement" && profile.id !== "owner") continue;
-      const snapshot = await withTimeout(
-        getDocsFromServer(collection(db, "users", uid, "profiles", profile.id, collectionName)),
-        12000,
-        "Could not read profile " + collectionName + " records for deletion."
-      );
-      for (let offset = 0; offset < snapshot.docs.length; offset += 400) {
-        const batch = writeBatch(db);
-        snapshot.docs.slice(offset, offset + 400).forEach(item => batch.delete(item.ref));
-        await withTimeout(batch.commit(), 12000, "Could not delete profile " + collectionName + " records.");
-      }
-    }
-    await withTimeout(deleteDoc(profile.ref), 12000, "Could not delete a viewing profile.");
-  }
 }
 
 async function permanentlyDeleteAccount() {
@@ -519,11 +473,17 @@ async function permanentlyDeleteAccount() {
     if (deleteAccountButton) deleteAccountButton.textContent = "Deleting private data…";
     setStatus("Deleting your private account data…");
 
-    for (const collectionName of ACCOUNT_PRIVATE_COLLECTIONS) {
-      await deleteOwnedDocuments(user.uid, collectionName);
+    const idToken = await user.getIdToken(true);
+    const deletionResponse = await withTimeout(fetch("https://vivid-cinema-api.vercel.app/api/delete-account", {
+      method: "POST",
+      headers: { Authorization: "Bearer " + idToken, "Content-Type": "application/json" },
+      body: JSON.stringify({ confirm: true }),
+      cache: "no-store"
+    }), 20000, "Account deletion request timed out.");
+    const deletionResult = await deletionResponse.json().catch(() => ({}));
+    if (!deletionResponse.ok || deletionResult.ok !== true) {
+      throw new Error(deletionResult.message || "Could not delete your private account data.");
     }
-    await deleteProfileDocuments(user.uid);
-    await withTimeout(deleteDoc(doc(db, "users", user.uid)), 12000, "Could not delete your profile document.");
 
     // Clear this browser's Vivid-owned data after the server-side private data is gone.
     for (const storage of [window.localStorage, window.sessionStorage]) {
@@ -538,7 +498,6 @@ async function permanentlyDeleteAccount() {
     }
 
     if (deleteAccountButton) deleteAccountButton.textContent = "Deleting account…";
-    await withTimeout(deleteUser(user), 15000, "Firebase account deletion timed out.");
     currentUser = null;
     window.location.replace("login.html?accountDeleted=1");
   } catch (error) {
