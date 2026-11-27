@@ -303,7 +303,7 @@ export default async function handler(req, res) {
     if (action === "set") {
       const pin = validatePin(body.pin);
       const current = await pinReference.get();
-      const migration = await profileReference.collection("migrations").doc("account-data-to-owner-profile-v1").get();
+      const migration = await db.collection("users").doc(claims.uid).collection("profiles").doc("owner").collection("migrations").doc("account-data-to-owner-profile-v1").get();
       if (migration.data()?.status !== "complete") {
         throw new ProfilePinError(409, "profile-setup-incomplete", "Finish setting up your profile before adding a PIN.");
       }
