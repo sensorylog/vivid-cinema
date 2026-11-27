@@ -45,7 +45,7 @@ function renderTitleContent(details, type, canonical) {
   const image = details.backdrop_path ? IMAGE_BASE + "/w1280" + details.backdrop_path :
     details.poster_path ? IMAGE_BASE + "/w780" + details.poster_path : "";
   const genres = (details.genres || []).map(item => item.name).filter(Boolean);
-  const cast = (details.credits?.cast || []).slice(0, 8).map(person => person.name).filter(Boolean);
+  const cast = (details.credits?.cast || []).filter(person => person && person.name).slice(0, 8);
   const rating = Number(details.vote_average);
   const runtime = Number(details.runtime);
   const seasons = Number(details.number_of_seasons);
@@ -72,7 +72,7 @@ function renderTitleContent(details, type, canonical) {
     ...(type === "movie" && runtime > 0 ? { "duration": "PT" + Math.floor(runtime / 60) + "H" + (runtime % 60) + "M" } : {})
   };
   const poster = image ? '<img src="' + escapeSeoHtml(image) + '" alt="' + escapeSeoHtml(title + " artwork") + '" fetchpriority="high" decoding="async">' : "";
-  const castMarkup = cast.length ? '<section><h2>Cast</h2><ul>' + cast.map(name => "<li>" + escapeSeoHtml(name) + "</li>").join("") + "</ul></section>" : "";
+  const castMarkup = cast.length ? '<section><h2>Cast</h2><ul>' + cast.map(person => "<li>" + (person.id ? '<a href="person.html?id=' + encodeURIComponent(person.id) + '">' : "") + escapeSeoHtml(person.name) + (person.id ? "</a>" : "") + "</li>").join("") + "</ul></section>" : "";
   const body = '<a class="vivid-page-back" href="discover.html">← Back to discovery</a>' +
     '<article class="vivid-seo-prerender"><header>' + poster + '<div><p>' + escapeSeoHtml(type === "tv" ? "TV SERIES" : "MOVIE") +
     '</p><h1>' + escapeSeoHtml(title) + '</h1>' + (meta ? '<p>' + escapeSeoHtml(meta) + '</p>' : "") +
