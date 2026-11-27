@@ -1,5 +1,6 @@
 import { getLocalLibrary } from "./library.js";
-import { switchLocalOwner } from "./local-owner.js";
+import { seedLegacyOwnerProfileSnapshot, switchLocalOwner } from "./local-owner.js";
+import { getActiveProfileId, initializeProfileFoundation } from "./profiles.js";
 import { ACHIEVEMENTS } from "./achievement-catalog.js";
 
 const STORAGE_KEY = "vivid:achievements:v1";
@@ -12,7 +13,7 @@ const typeOf = (item) => item?.media_type || item?.mediaType || "movie";
 
 
 
-let currentUid = null, initialized = false, remoteVersion = 0, modalOpen = false, lastFocus = null;
+let currentUid = null, currentProfileId = "owner", initialized = false, remoteVersion = 0, modalOpen = false, lastFocus = null;
 const pendingUnlocks = [];
 
 function emptyStore(){return {version:VERSION,earned:{},sparkHistory:[]}}
@@ -114,7 +115,12 @@ function persistRemote(record){
   void (async()=>{try{
     const [{db},fs]=await Promise.all([import("./firebase.js"),import("https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js")]);
     if(currentUid!==uid)return;
-    await fs.setDoc(fs.doc(db,"users",uid,"achievements",record.id),{id:record.id,unlockedAt:record.unlockedAt,schemaVersion:VERSION},{merge:true});
+    const user = auth?.currentUser;
+    if(!user || String(user.uid)!==String(uid))return;
+    await initializeProfileFoundation(user);
+    const profileId = getActiveProfileId(uid);
+    if(currentProfileId!==profileId)return;
+    await fs.setDoc(fs.doc(db,"users",uid,"profiles",profileId,"achievements",record.id),{id:record.id,unlockedAt:record.unlockedAt,schemaVersion:VERSION},{merge:true});
   }catch(error){console.warn("Vivid achievement cloud sync deferred; local unlock is safe:",error?.code||error?.message||error)}})();
 }
 function evaluate({notify=false}={}){
@@ -124,15 +130,29 @@ function evaluate({notify=false}={}){
   if(notify&&newly.length)void showUnlock(newly[0],newly.slice(1),library);
   return snapshot(library);
 }
-function ensureOwner(uid){
-  try{switchLocalOwner({storage:localStorage,ownerKey:OWNER_KEY,activeKeys:[STORAGE_KEY],uid,emptyValues:{[STORAGE_KEY]:JSON.stringify(emptyStore())}})}
-  catch(error){console.warn("Vivid could not switch achievement snapshots safely:",error)}
+function ensureOwner(uid,requestedProfileId=null){
+  try{
+    const profileId=uid?(requestedProfileId||getActiveProfileId(uid)):"guest";
+    const scopedOwner=uid?String(uid)+"::"+String(profileId):null;
+    if(uid)seedLegacyOwnerProfileSnapshot({
+      storage:localStorage,ownerKey:OWNER_KEY,activeKeys:[STORAGE_KEY],
+      previousOwner:String(uid),targetOwner:scopedOwner,
+      emptyValues:{[STORAGE_KEY]:JSON.stringify(emptyStore())}
+    });
+    switchLocalOwner({
+      storage:localStorage,ownerKey:OWNER_KEY,activeKeys:[STORAGE_KEY],
+      uid:scopedOwner,emptyValues:{[STORAGE_KEY]:JSON.stringify(emptyStore())}
+    });
+  }catch(error){console.warn("Vivid could not switch achievement snapshots safely:",error)}
 }
-async function loadRemote(uid,version){
+async function loadRemote(uid,profileId,version){
   try{
     const [{db},fs]=await Promise.all([import("./firebase.js"),import("https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js")]);
-    const remote=await fs.getDocsFromServer(fs.collection(db,"users",uid,"achievements"));
-    if(version!==remoteVersion||currentUid!==uid)return;
+    const user = auth?.currentUser;
+    if(!user || String(user.uid)!==String(uid))return;
+    await initializeProfileFoundation(user);
+    const remote=await fs.getDocsFromServer(fs.collection(db,"users",uid,"profiles",profileId,"achievements"));
+    if(version!==remoteVersion||currentUid!==uid||currentProfileId!==profileId)return;
     const store=readStore();
     remote.docs.forEach(doc=>{const data=doc.data()||{},id=String(data.id||doc.id);if(!ACHIEVEMENTS.some(a=>a.id===id))return;const at=Number(data.unlockedAt)||Date.now();if(!store.earned[id]||at<Number(store.earned[id].unlockedAt||Infinity))store.earned[id]={id,unlockedAt:at,schemaVersion:VERSION}});
     writeStore(store);evaluate({notify:false});
@@ -144,10 +164,34 @@ function init(){
   window.addEventListener("vivid:library-changed",()=>evaluate({notify:true}));
   window.addEventListener("vivid:account-switched",()=>{pendingUnlocks.length=0;if(modalOpen)closeModal();evaluate({notify:false})});
   window.addEventListener("vivid:achievements-changed",render);
+  window.addEventListener("vivid:profile-changed",event=>{
+    const uid=String(event.detail?.uid||"");
+    if(!uid||uid!==String(currentUid||""))return;
+    currentProfileId=String(event.detail?.profileId||getActiveProfileId(uid));
+    ensureOwner(uid,currentProfileId);
+    pendingUnlocks.length=0;
+    if(modalOpen)closeModal();
+    const version=++remoteVersion;
+    void loadRemote(uid,currentProfileId,version);
+  });
+
   window.addEventListener("storage",event=>{if(event.key===STORAGE_KEY||event.key==="vivid:library:v2")render()});
   void (async()=>{try{
     const [{auth},{onAuthStateChanged}]=await Promise.all([import("./firebase.js"),import("https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js")]);
-    onAuthStateChanged(auth,user=>{currentUid=user?.uid||null;ensureOwner(currentUid);if(currentUid){const version=++remoteVersion;void loadRemote(currentUid,version)}else{remoteVersion++;evaluate({notify:false})}});
+    onAuthStateChanged(auth,user=>{
+      currentUid=user?.uid||null;
+      if(!user){currentProfileId="owner";ensureOwner(null);remoteVersion++;evaluate({notify:false});return;}
+      const version=++remoteVersion;
+      void (async()=>{
+        try{
+          await initializeProfileFoundation(user);
+          if(currentUid!==user.uid||version!==remoteVersion)return;
+          currentProfileId=getActiveProfileId(user.uid);
+          ensureOwner(user.uid,currentProfileId);
+          await loadRemote(user.uid,currentProfileId,version);
+        }catch(error){console.warn("Vivid profile achievements could not sync yet:",error);evaluate({notify:false});}
+      })();
+    });
   }catch(error){console.warn("Vivid achievements are running locally until account state is available:",error?.code||error?.message||error);evaluate({notify:false})}})();
 }
 if(typeof document!=="undefined"){if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init,{once:true});else init()}
