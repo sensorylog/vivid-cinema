@@ -54,8 +54,8 @@ test("Android bundle embeds build metadata and loads the updater", () => {
 });
 
 test("updater compares remote metadata and installs the cleanly named APK", () => {
-  assert.match(updater, /Vivid-Cinema-Android-build-/);
-  assert.doesNotMatch(updater, /Vivid-Cinema-Android-Play-build-/);
+  assert.match(feed, /Vivid-Cinema-Android-build-/);
+  assert.doesNotMatch(feed, /Vivid-Cinema-Android-Play-build-/);
   assert.match(updater, /Vivid-Cinema-Android\.apk/);
   assert.match(updater, /shouldShowAndroidUpdate/);
   assert.match(updater, /isAndroidUpdateCheckFresh/);
