@@ -174,6 +174,10 @@ test("Android v1 update discovery is isolated from Windows desktop releases", ()
 test("fresh Android v1 workflow builds and publishes an independent APK release", () => {
   assert.ok(independentWorkflow.includes("name: Vivid Cinema Android Direct Release"));
   assert.ok(independentWorkflow.includes("workflow_dispatch:"));
+  assert.ok(independentWorkflow.includes("paths:"));
+  assert.ok(independentWorkflow.includes(".github/workflows/android-direct-release.yml"));
+  assert.ok(independentWorkflow.includes("release-guard:"));
+  assert.ok(independentWorkflow.includes("needs.release-guard.outputs.should_build"));
   assert.ok(independentWorkflow.includes('default: "1.0.0"'));
   assert.ok(independentWorkflow.includes('tag="android-v$ANDROID_VERSION_INPUT"'));
   assert.ok(independentWorkflow.includes("VIVID_ANDROID_VERSION_CODE"));
