@@ -2,7 +2,8 @@ import { tmdbApi } from "./tmdb.js";
 import { getLocalLibrary } from "./library.js";
 import { normalizeResults } from "./media.js";
 import { getTasteProfile, getNotForMeKeys, getFeedbackState, getTasteStrength, getRecommendationMemory, recordBehavior } from "./intelligence.js";
-import { switchLocalOwner } from "./local-owner.js";
+import { seedLegacyOwnerProfileSnapshot, switchLocalOwner } from "./local-owner.js";
+import { getActiveProfileId, initializeProfileFoundation } from "./profiles.js";
 import { buildPlotKeywordQueries, extractPlotClues, getPlotConceptPhrases, scorePlotCandidate, scorePlotCandidates } from "./plot-search.js";
 
 const PROGRESS_KEY = "vivid:progress:v1";
@@ -15,15 +16,31 @@ const LOCAL_OWNER_KEY = "vivid:progress-owner:v1";
 function currentProgressOwner() {
   try { return localStorage.getItem(LOCAL_OWNER_KEY) || "guest"; } catch { return "guest"; }
 }
+function parseProgressOwner(value) {
+  const marker = String(value || "");
+  if (!marker || marker === "guest") return null;
+  const split = marker.lastIndexOf("::");
+  return split > 0
+    ? { uid: marker.slice(0, split), profileId: marker.slice(split + 2) }
+    : { uid: marker, profileId: "owner" };
+}
 
-function ensureProgressOwner(uid){
+function ensureProgressOwner(uid, requestedProfileId = null){
+  const profileId = uid ? (requestedProfileId || getActiveProfileId(uid)) : "guest";
+  const scopedOwner = uid ? String(uid) + "::" + String(profileId) : null;
   let changed=false;
   try{
+    if(uid)seedLegacyOwnerProfileSnapshot({
+      storage:localStorage,ownerKey:LOCAL_OWNER_KEY,
+      activeKeys:[PROGRESS_KEY,FOR_YOU_CACHE_KEY],
+      previousOwner:String(uid),targetOwner:scopedOwner,
+      emptyValues:{[PROGRESS_KEY]:"{}",[FOR_YOU_CACHE_KEY]:""}
+    });
     const result=switchLocalOwner({
       storage:localStorage,
       ownerKey:LOCAL_OWNER_KEY,
       activeKeys:[PROGRESS_KEY,FOR_YOU_CACHE_KEY],
-      uid,
+      uid:scopedOwner,
       emptyValues:{[PROGRESS_KEY]:"{}",[FOR_YOU_CACHE_KEY]:""}
     });
     changed=changed||result.changed;
@@ -32,11 +49,17 @@ function ensureProgressOwner(uid){
   }
   // Tonight's rejected picks live in sessionStorage, not localStorage.
   try{
+    if(uid)seedLegacyOwnerProfileSnapshot({
+      storage:sessionStorage,ownerKey:"vivid:tonight-owner:v1",
+      activeKeys:[TONIGHT_SESSION_KEY],
+      previousOwner:String(uid),targetOwner:scopedOwner,
+      emptyValues:{[TONIGHT_SESSION_KEY]:""}
+    });
     const result=switchLocalOwner({
       storage:sessionStorage,
       ownerKey:"vivid:tonight-owner:v1",
       activeKeys:[TONIGHT_SESSION_KEY],
-      uid,
+      uid:scopedOwner,
       emptyValues:{[TONIGHT_SESSION_KEY]:""}
     });
     changed=changed||result.changed;
@@ -127,11 +150,11 @@ function progressSyncStatus(status, uid, contentId) {
   }));
 }
 
-async function setRemoteProgress(uid, contentId, item) {
+async function setRemoteProgress(uid, contentId, item, profileId=getActiveProfileId(uid)) {
   try {
     const { db, doc, setDoc } = await getFirebase();
     await setDoc(
-      doc(db, "users", uid, "progress", contentId),
+      doc(db, "users", uid, "profiles", profileId, "progress", contentId),
       progressDocData(contentId, item),
       { merge: true }
     );
@@ -142,9 +165,9 @@ async function setRemoteProgress(uid, contentId, item) {
   }
 }
 
-async function deleteRemoteProgress(uid, contentId) {
+async function deleteRemoteProgress(uid, contentId, profileId=getActiveProfileId(uid)) {
   const { db, doc, deleteDoc } = await getFirebase();
-  await deleteDoc(doc(db, "users", uid, "progress", contentId));
+  await deleteDoc(doc(db, "users", uid, "profiles", profileId, "progress", contentId));
 }
 
 function queueRemoteProgress(contentId, item) {
@@ -158,10 +181,12 @@ function queueRemoteProgress(contentId, item) {
     if (!pending) return;
     try {
       const auth = await getFirebaseAuth();
+      const owner = parseProgressOwner(ownerAtQueue);
       const activeOwner = localStorage.getItem(LOCAL_OWNER_KEY) || "guest";
-      if (ownerAtQueue !== "guest" && activeOwner === ownerAtQueue &&
-          String(auth?.currentUser?.uid || "") === ownerAtQueue) {
-        await setRemoteProgress(ownerAtQueue, contentId, pending);
+      if (owner && activeOwner === ownerAtQueue &&
+          String(auth?.currentUser?.uid || "") === owner.uid &&
+          getActiveProfileId(owner.uid) === owner.profileId) {
+        await setRemoteProgress(owner.uid, contentId, pending, owner.profileId);
       }
     } catch (error) {
       if ((localStorage.getItem(LOCAL_OWNER_KEY) || "guest") === ownerAtQueue) {
@@ -226,11 +251,12 @@ export function completePlaybackProgress(contentId, data = {}) {
   writeProgress(current);
   const completed = current[contentId];
   const ownerAtWrite = localStorage.getItem(LOCAL_OWNER_KEY) || "guest";
+  const owner = parseProgressOwner(ownerAtWrite);
   void getFirebaseAuth().then(auth => {
-    if (ownerAtWrite !== "guest" &&
-        (localStorage.getItem(LOCAL_OWNER_KEY) || "guest") === ownerAtWrite &&
-        String(auth?.currentUser?.uid || "") === ownerAtWrite) {
-      return setRemoteProgress(ownerAtWrite, contentId, completed);
+    if (owner && (localStorage.getItem(LOCAL_OWNER_KEY) || "guest") === ownerAtWrite &&
+        String(auth?.currentUser?.uid || "") === owner.uid &&
+        getActiveProfileId(owner.uid) === owner.profileId) {
+      return setRemoteProgress(owner.uid, contentId, completed, owner.profileId);
     }
   }).catch(error => console.warn("Vivid completion sync unavailable:", error));
 }
@@ -246,12 +272,13 @@ export async function flushPlaybackProgress(contentId) {
   if (!current) return;
   pendingProgress.delete(contentId);
   const ownerAtWrite = localStorage.getItem(LOCAL_OWNER_KEY) || "guest";
+  const owner = parseProgressOwner(ownerAtWrite);
   try {
     const auth = await getFirebaseAuth();
-    if (ownerAtWrite !== "guest" &&
-        (localStorage.getItem(LOCAL_OWNER_KEY) || "guest") === ownerAtWrite &&
-        String(auth?.currentUser?.uid || "") === ownerAtWrite) {
-      await setRemoteProgress(ownerAtWrite, contentId, current);
+    if (owner && (localStorage.getItem(LOCAL_OWNER_KEY) || "guest") === ownerAtWrite &&
+        String(auth?.currentUser?.uid || "") === owner.uid &&
+        getActiveProfileId(owner.uid) === owner.profileId) {
+      await setRemoteProgress(owner.uid, contentId, current, owner.profileId);
     }
   } catch (error) {
     console.warn("Vivid playback progress flush unavailable:", error);
@@ -272,11 +299,12 @@ export function removePlaybackProgress(contentId) {
   pendingProgress.delete(contentId);
 
   const ownerAtWrite = localStorage.getItem(LOCAL_OWNER_KEY) || "guest";
+  const owner = parseProgressOwner(ownerAtWrite);
   void getFirebaseAuth().then(auth => {
-    if (ownerAtWrite !== "guest" &&
-        (localStorage.getItem(LOCAL_OWNER_KEY) || "guest") === ownerAtWrite &&
-        String(auth?.currentUser?.uid || "") === ownerAtWrite) {
-      return deleteRemoteProgress(ownerAtWrite, contentId);
+    if (owner && (localStorage.getItem(LOCAL_OWNER_KEY) || "guest") === ownerAtWrite &&
+        String(auth?.currentUser?.uid || "") === owner.uid &&
+        getActiveProfileId(owner.uid) === owner.profileId) {
+      return deleteRemoteProgress(owner.uid, contentId, owner.profileId);
     }
   }).catch(error => console.warn("Vivid remote progress removal unavailable:", error));
 }
@@ -285,11 +313,15 @@ export async function syncPlaybackProgressForUser(user = null) {
   ensureProgressOwner(user?.uid || null);
   if (!user) return readProgress();
   try {
+    await initializeProfileFoundation(user);
+    const profileId = getActiveProfileId(user.uid);
+    ensureProgressOwner(user.uid, profileId);
     const { db, collection, getDocsFromServer } = await getFirebase();
-    const snapshot = await getDocsFromServer(collection(db, "users", user.uid, "progress"));
+    const snapshot = await getDocsFromServer(collection(db, "users", user.uid, "profiles", profileId, "progress"));
     const auth = await getFirebaseAuth();
     if (String(auth?.currentUser?.uid || "") !== String(user.uid) ||
-        (localStorage.getItem(LOCAL_OWNER_KEY) || "guest") !== String(user.uid)) {
+        (localStorage.getItem(LOCAL_OWNER_KEY) || "guest") !== String(user.uid) + "::" + profileId ||
+        getActiveProfileId(user.uid) !== profileId) {
       throw new Error("The signed-in account changed during playback progress sync. Please retry.");
     }
     const local = readProgress();
@@ -332,6 +364,13 @@ export async function syncPlaybackProgressForUser(user = null) {
 
 export function startPlaybackSync() {
   if (progressSyncPromise) return progressSyncPromise;
+  window.addEventListener("vivid:profile-changed", event => {
+    const uid = String(event.detail?.uid || "");
+    if (!uid) return;
+    ensureProgressOwner(uid, event.detail?.profileId || null);
+    const auth = window.vividAuthUser;
+    if (auth?.uid === uid) void syncPlaybackProgressForUser(auth);
+  });
 
   progressSyncPromise = (async () => {
     try {
