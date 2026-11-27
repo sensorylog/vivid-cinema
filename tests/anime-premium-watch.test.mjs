@@ -111,5 +111,5 @@ test("Watch page assets are cached and syntax-checked", () => {
 
 test("profile changes leave premium anime playback before loading another profile", () => {
   assert.match(script, /vivid:profile-changed/);
-  assert.match(watch, /window\.location\.replace\("home\.html"\)/);
+  assert.match(script, /window\.location\.replace\("home\.html"\)/);
 });
