@@ -250,6 +250,57 @@ test("profile PIN sessions are enforced by Firestore and cannot be forged by loc
   await assertFails(deleteDoc(pinnedProfile));
 });
 
+test("unlocked profiles remain isolated by signed profile identity and legacy data stays owner-scoped", async () => {
+  await env.withSecurityRulesDisabled(async context => {
+    const admin = context.firestore();
+    await setDoc(doc(admin, "users/profile-scope/profiles/owner"), {
+      id: "owner", name: "Owner", avatarId: "aurora", avatarUrl: "",
+      isOwner: true, isKids: false, maturityLevel: "adult", schemaVersion: 1
+    });
+    await setDoc(doc(admin, "users/profile-scope/profiles/child"), {
+      id: "child", name: "Child", avatarId: "ember", avatarUrl: "",
+      isOwner: false, isKids: true, maturityLevel: "kids", schemaVersion: 1
+    });
+    await setDoc(doc(admin, "users/profile-scope/favorites/movie:legacy"), {
+      id: "legacy", media_type: "movie", title: "Legacy owner data", year: "2025",
+      poster_path: "", backdrop_path: "", updatedAt: Date.now()
+    });
+    await setDoc(doc(admin, "users/profile-scope/profiles/owner/favorites/movie:owner"), {
+      id: "owner", media_type: "movie", title: "Owner data", year: "2025",
+      poster_path: "", backdrop_path: "", updatedAt: Date.now()
+    });
+    await setDoc(doc(admin, "users/profile-scope/profiles/child/favorites/movie:child"), {
+      id: "child", media_type: "movie", title: "Child data", year: "2025",
+      poster_path: "", backdrop_path: "", updatedAt: Date.now()
+    });
+  });
+
+  const owner = env.authenticatedContext("profile-scope", { profileId: "owner" }).firestore();
+  const child = env.authenticatedContext("profile-scope", { profileId: "child" }).firestore();
+  await assertSucceeds(getDoc(doc(owner, "users/profile-scope/favorites/movie:legacy")));
+  await assertSucceeds(getDoc(doc(owner, "users/profile-scope/profiles/owner/favorites/movie:owner")));
+  await assertFails(getDoc(doc(owner, "users/profile-scope/profiles/child/favorites/movie:child")));
+  await assertSucceeds(getDoc(doc(child, "users/profile-scope/profiles/child/favorites/movie:child")));
+  await assertFails(getDoc(doc(child, "users/profile-scope/profiles/owner/favorites/movie:owner")));
+  await assertFails(getDoc(doc(child, "users/profile-scope/favorites/movie:legacy")));
+
+  await env.withSecurityRulesDisabled(async context => {
+    const admin = context.firestore();
+    await setDoc(doc(admin, "users/profile-scope/profiles/owner/profileSecurity/pin"), {
+      pinHash: "server-only", pinSalt: "server-only", iterations: 310000
+    });
+    await setDoc(doc(admin, "users/profile-scope/profiles/owner/profileSessions/owner-session"), {
+      uid: "profile-scope", profileId: "owner", revoked: false,
+      expiresAt: Timestamp.fromMillis(Date.now() + 60 * 60 * 1000)
+    });
+  });
+  await assertFails(getDoc(doc(owner, "users/profile-scope/favorites/movie:legacy")));
+  const ownerUnlocked = env.authenticatedContext("profile-scope", {
+    profileId: "owner", profileSessionId: "owner-session"
+  }).firestore();
+  await assertSucceeds(getDoc(doc(ownerUnlocked, "users/profile-scope/favorites/movie:legacy")));
+});
+
 test("profile data cannot be written until its parent profile exists", async () => {
   const alice = env.authenticatedContext("profile-no-parent", { profileId: "missing" }).firestore();
   await assertFails(setDoc(doc(alice, "users/profile-no-parent/profiles/missing/favorites/movie:1"), {
