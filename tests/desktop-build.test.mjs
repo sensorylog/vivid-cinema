@@ -6,6 +6,22 @@ import vm from "node:vm";
 const root = process.cwd();
 const pkg = JSON.parse(fs.readFileSync(path.join(root, "package.json"), "utf8"));
 
+
+test("Windows offline engine partitions state and files by account/profile owner", () => {
+  const main = readFileSync(new URL("../desktop/main.cjs", import.meta.url), "utf8");
+  const preload = readFileSync(new URL("../desktop/preload.cjs", import.meta.url), "utf8");
+  const engine = readFileSync(new URL("../desktop/download-engine.cjs", import.meta.url), "utf8");
+  const offline = readFileSync(new URL("../scripts/downloads/desktop-offline.js", import.meta.url), "utf8");
+  assert.match(main, /vivid-download-set-owner/);
+  assert.match(main, /resolveLegacyDownloadStorage/);
+  assert.match(preload, /setOwner: ownerId => ipcRenderer\.invoke/);
+  assert.match(engine, /createHash\("sha256"\)/);
+  assert.match(engine, /ownerHash/);
+  assert.match(engine, /vivid-downloads/);
+  assert.match(offline, /engine\.setOwner\(owner\)/);
+  assert.match(offline, /vivid:profile-changed/);
+});
+
 test("desktop packaging is opt-in and preserves existing scripts", () => {
   assert.equal(pkg.scripts["desktop:start"], "electron desktop/main.cjs");
   assert.match(pkg.scripts["desktop:dist"], /make-windows-icon\.cjs/);
