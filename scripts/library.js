@@ -138,6 +138,8 @@ export function clearLibraryCollection(collection){
 }
 
 export function cleanItem(item){
+  const sourceGenres = Array.isArray(item.genre_ids) ? item.genre_ids : Array.isArray(item.genres) ? item.genres.map(genre=>genre?.id) : [];
+  const genreIds = [...new Set(sourceGenres.map(Number).filter(id=>Number.isInteger(id)&&id>0&&id<=200000))].slice(0,20);
   return {
     id:String(item.id),
     media_type:item.media_type||item.mediaType||"movie",
@@ -145,6 +147,9 @@ export function cleanItem(item){
     year:String(item.year??""),
     poster_path:item.poster_path||"",
     backdrop_path:item.backdrop_path||"",
+    ...(genreIds.length?{genre_ids:genreIds}:{}),
+    ...(typeof item.adult==="boolean"?{adult:item.adult}:{}),
+    ...(typeof item.certification==="string"?{certification:item.certification.slice(0,16)}:{}),
     updatedAt:Number(item.updatedAt)||Date.now(),
     ...(item.startedAt?{startedAt:Number(item.startedAt)}:{}),
     ...(item.lastWatchedAt?{lastWatchedAt:Number(item.lastWatchedAt)}:{}),
