@@ -1,11 +1,26 @@
 let firebasePromise = null;
+let authObserverAttached = false;
+let lastObservedAuthUid = null;
 
 async function getFirebase() {
   if (!firebasePromise) {
     firebasePromise = Promise.all([
       import("./firebase.js"),
-      import("https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js")
-    ]).then(([firebase, firestore]) => ({ ...firebase, ...firestore })).catch(error => {
+      import("https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js"),
+      import("https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js")
+    ]).then(([firebase, firestore, authSdk]) => {
+      if (!authObserverAttached) {
+        authObserverAttached = true;
+        authSdk.onAuthStateChanged(firebase.auth, user => {
+          const nextUid = user?.uid ? String(user.uid) : null;
+          if (nextUid !== lastObservedAuthUid) {
+            initializedProfileAccounts.clear();
+            lastObservedAuthUid = nextUid;
+          }
+        });
+      }
+      return { ...firebase, ...firestore };
+    }).catch(error => {
       firebasePromise = null;
       throw error;
     });
