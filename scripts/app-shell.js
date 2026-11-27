@@ -1,5 +1,5 @@
 import { VIVID_CONFIG } from "./config.js";
-import { clearActiveProfileId, getActiveProfileId, setActiveProfileId, listProfileSummaries, validateProfileSession, restoreProfileSession } from "./profiles.js";
+import { clearActiveProfileId, getActiveProfileId, setActiveProfileId, listProfileSummaries, validateProfileSession, restoreProfileSession, clearStoredProfileSession } from "./profiles.js";
 import { applyPerformanceProfile } from "./performance-profile.js";
 import { resolveAndroidBackAction } from "./android-navigation.js";
 import "./movie-quick-actions.js";
@@ -628,12 +628,13 @@ function syncAccountNavigation() {
         try { previousUid = localStorage.getItem(PROFILE_SESSION_UID_KEY) || ""; } catch {}
         if (previousUid && previousUid !== String(user?.uid || "")) {
           clearActiveProfileId(previousUid);
+          clearStoredProfileSession(previousUid);
           clearProfileGateRedirect(previousUid);
         }
         if (user?.uid) {
           try { localStorage.setItem(PROFILE_SESSION_UID_KEY, String(user.uid)); } catch {}
         } else {
-          if (previousUid) clearActiveProfileId(previousUid);
+          if (previousUid) { clearActiveProfileId(previousUid); clearStoredProfileSession(previousUid); }
           clearAllProfileGateRedirects();
           try { localStorage.removeItem(PROFILE_SESSION_UID_KEY); } catch {}
         }
