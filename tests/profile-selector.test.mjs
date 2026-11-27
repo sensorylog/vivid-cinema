@@ -64,6 +64,8 @@ test("Google account photo is adopted for the owner profile and can be replaced 
   assert.match(selector, /avatarSource: selectedAvatarSource/);
   assert.match(selector, /profile-use-google/);
   assert.match(selector, /selectedAvatarSource = "google"/);
+  assert.equal(selector.split('$("profile-use-google").addEventListener("click"').length - 1, 1);
+  assert.match(selector, /const googlePhoto = normalizeAvatarUrl/);
 });
 
 test("profile deletion protects the owner and requires an explicit confirmation", () => {
