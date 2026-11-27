@@ -1293,6 +1293,7 @@ async function playLocalFile(){
   byId("offline-player-title").textContent="Opening local video";
   setPlayerLoading(true,"Opening local video","Checking the file and preparing playback…");
   await playbackCleanupPromise.catch(()=>{});
+  if(request!==playbackRequest)return;
   const file=await engine.openLocalTranscode();
   if(!file){setPlayerLoading(false);return;}
   if(request!==playbackRequest){void engine.stopTranscode(file.sessionId);return;}
@@ -1332,6 +1333,7 @@ async function startCompatibilityPlayback(job,fileIndex,request){
     try{
       // Finish retiring any previous FFmpeg session before starting another.
       await playbackCleanupPromise.catch(()=>{});
+      if(request!==playbackRequest)return;
       // Load HLS.js while FFmpeg prepares the first segment.
       const hlsReady=transcodePlayer.prepare().catch(()=>null);
       media=await engine.openDownloadTranscode(job.id,fileIndex);
