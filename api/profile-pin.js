@@ -230,7 +230,7 @@ async function createProfileSession(auth, profileReference, uid, profileId, pinH
     profileSessionId: sessionId,
     isKids: profileSnapshot.data()?.isKids === true
   });
-  return { customToken, sessionExpiresAt: expiresAt.toMillis() };
+  return { customToken, sessionId, sessionExpiresAt: expiresAt.toMillis() };
 }
 
 async function requireProfile(db, uid, profileId) {
@@ -311,6 +311,33 @@ export default async function handler(req, res) {
       }
       const session = await createProfileSession(auth, profileReference, claims.uid, profileId);
       return res.status(200).json({ ok: true, ...session });
+    }
+
+    if (action === "restore") {
+      const sessionId = String(body.sessionId || "");
+      if (!PROFILE_ID_PATTERN.test(sessionId)) {
+        throw new ProfilePinError(401, "profile-session-invalid", "Choose your profile again to continue.");
+      }
+      const [sessionSnapshot, pinSnapshot] = await Promise.all([
+        profileReference.collection("profileSessions").doc(sessionId).get(),
+        pinReference.get()
+      ]);
+      const session = sessionSnapshot.data() || {};
+      const expiresAt = Number(session.expiresAt?.toMillis?.() || 0);
+      const lastActivityAt = Number(session.lastActivityAt?.toMillis?.() || 0);
+      const pinMatches = !pinSnapshot.exists || session.pinHash === pinSnapshot.data()?.pinHash;
+      if (!sessionSnapshot.exists || session.uid !== claims.uid || session.profileId !== profileId ||
+          session.revoked === true || expiresAt <= Date.now() ||
+          lastActivityAt <= Date.now() - SESSION_IDLE_TIMEOUT_MS || !pinMatches) {
+        throw new ProfilePinError(401, "profile-session-expired", "Your profile session has expired. Choose your profile again.");
+      }
+      const targetSnapshot = await profileReference.get();
+      const customToken = await auth.createCustomToken(claims.uid, {
+        profileId,
+        profileSessionId: sessionId,
+        isKids: targetSnapshot.data()?.isKids === true
+      });
+      return res.status(200).json({ ok: true, customToken, sessionId, sessionExpiresAt: expiresAt });
     }
 
     if (action === "validate") {
