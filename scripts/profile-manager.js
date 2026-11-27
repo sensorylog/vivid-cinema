@@ -28,7 +28,12 @@ async function profileRequest(path, method = "GET", payload = null) {
 
 export async function fetchProfiles() {
   const result = await profileRequest("/api/profiles?includeAvatars=1");
-  return Array.isArray(result.profiles) ? result.profiles.map(profile => normalizeProfile(profile.id, profile)) : [];
+  return {
+    profiles: Array.isArray(result.profiles)
+      ? result.profiles.map(profile => ({ ...normalizeProfile(profile.id, profile), hasPin: profile.hasPin === true }))
+      : [],
+    migrationComplete: result.migrationComplete === true
+  };
 }
 
 export async function createProfile(details) {
