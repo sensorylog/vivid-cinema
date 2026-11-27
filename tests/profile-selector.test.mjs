@@ -53,6 +53,10 @@ test("profile startup bounds Firebase token refresh and gives users a retry inst
   assert.match(selector, /console\.error\("Vivid profile selector initialization failed:/);
   assert.match(profiles, /withProfileTimeout/);
   assert.match(profiles, /Your Vivid sign-in is taking too long to refresh/);
+  assert.match(profiles, /export function withProfileTimeout/);
+  assert.match(profiles, /Vivid security verification is taking too long/);
+  assert.match(profiles, /Vivid library setup is taking too long/);
+  assert.match(selector, /Your Vivid sign-in is taking too long to verify/);
 });
 
 test("a server-issued Firebase profile claim restores a missing Safari storage selection", () => {
