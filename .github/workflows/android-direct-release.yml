@@ -56,7 +56,12 @@ jobs:
           fi
           echo "android_version=$ANDROID_VERSION_INPUT" >> "$GITHUB_OUTPUT"
           if [ "$GITHUB_EVENT_NAME" = "push" ] || [ "$BRIDGE_LEGACY_RELEASE" = "true" ]; then
-            echo "legacy_bridge_tag=v1.0.47" >> "$GITHUB_OUTPUT"
+            bridge_tag="$(gh api "repos/$GITHUB_REPOSITORY/releases/latest" --jq '.tag_name')"
+            if [ -z "$bridge_tag" ]; then
+              echo "::error::Could not find the current Windows release for the legacy Android migration mirror."
+              exit 1
+            fi
+            echo "legacy_bridge_tag=$bridge_tag" >> "$GITHUB_OUTPUT"
           else
             echo "legacy_bridge_tag=" >> "$GITHUB_OUTPUT"
           fi
