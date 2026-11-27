@@ -1,13 +1,17 @@
-import { auth, db, ensureAppCheck } from "./firebase.js";
-import {
-  collection,
-  doc,
-  getDocFromServer,
-  getDocsFromServer,
-  serverTimestamp,
-  setDoc,
-  writeBatch
-} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
+let firebasePromise = null;
+
+async function getFirebase() {
+  if (!firebasePromise) {
+    firebasePromise = Promise.all([
+      import("./firebase.js"),
+      import("https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js")
+    ]).then(([firebase, firestore]) => ({ ...firebase, ...firestore })).catch(error => {
+      firebasePromise = null;
+      throw error;
+    });
+  }
+  return firebasePromise;
+}
 
 export const PROFILE_SCHEMA_VERSION = 1;
 export const OWNER_PROFILE_ID = "owner";
@@ -72,7 +76,7 @@ export function activeProfileStorageKey(uid) {
   return ACTIVE_PROFILE_PREFIX + userId;
 }
 
-function requireSignedInUser(user) {
+function requireSignedInUser(user, auth) {
   const current = auth.currentUser;
   if (!user?.uid || !current?.uid || String(user.uid) !== String(current.uid)) {
     throw new Error("The signed-in account changed. Please sign in again and retry.");
@@ -93,7 +97,9 @@ function safeAvatarUrl(user) {
 }
 
 export async function ensureOwnerProfile(user = auth.currentUser) {
-  const current = requireSignedInUser(user);
+  const firebase = await getFirebase();
+  const { auth, db, ensureAppCheck, doc, getDocFromServer, serverTimestamp, setDoc } = firebase;
+  const current = requireSignedInUser(user, auth);
   await ensureAppCheck();
   const reference = doc(db, "users", current.uid, "profiles", OWNER_PROFILE_ID);
   const snapshot = await getDocFromServer(reference);
@@ -119,7 +125,9 @@ export async function ensureOwnerProfile(user = auth.currentUser) {
 }
 
 export async function listProfiles(user = auth.currentUser) {
-  const current = requireSignedInUser(user);
+  const firebase = await getFirebase();
+  const { auth, db, ensureAppCheck, collection, getDocsFromServer } = firebase;
+  const current = requireSignedInUser(user, auth);
   await ensureAppCheck();
   const snapshot = await getDocsFromServer(collection(db, "users", current.uid, "profiles"));
   return snapshot.docs
@@ -153,7 +161,9 @@ export function setActiveProfileId(uid, profileId) {
  * restartable and a failed verification can never destroy the user's data.
  */
 export async function migrateLegacyProfileData(user = auth.currentUser) {
-  const current = requireSignedInUser(user);
+  const firebase = await getFirebase();
+  const { auth, db, ensureAppCheck, collection, doc, getDocFromServer, getDocsFromServer, serverTimestamp, setDoc, writeBatch } = firebase;
+  const current = requireSignedInUser(user, auth);
   await ensureOwnerProfile(current);
   await ensureAppCheck();
 
