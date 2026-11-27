@@ -82,6 +82,33 @@ function render(jobs) {
       (job.error?'<div class="offline-job-error">'+escapeHtml(job.error)+'</div>':"")+'</div><div class="offline-job-actions">'+actions.join("")+'</div></article>';
   }).join("");
 }
+async function migrateLegacyOfflineJobs(uid, profileId, scopedOwner) {
+  if (!uid || profileId !== "owner") return;
+  const markerKey = "vivid:offline-profile-migration:v1:" + String(uid);
+  if (localStorage.getItem(markerKey) === "1") return;
+  const legacy = createIndexedDBPersistence({ ownerId: String(uid) });
+  const scoped = createIndexedDBPersistence({ ownerId: scopedOwner });
+  try {
+    const [legacyJobs, scopedJobs] = await Promise.all([legacy.load(), scoped.load()]);
+    const merged = new Map(scopedJobs.map(job => [String(job.id), job]));
+    for (const job of legacyJobs) {
+      const id = String(job?.id || "");
+      if (!id) continue;
+      const current = merged.get(id);
+      if (!current || Number(job.updatedAt || 0) > Number(current.updatedAt || 0)) merged.set(id, job);
+    }
+    const next = [...merged.values()];
+    if (next.length) await scoped.save(next);
+    const verified = await scoped.load();
+    const verifiedIds = new Set(verified.map(job => String(job.id)));
+    if (next.some(job => !verifiedIds.has(String(job.id)))) {
+      throw new Error("Existing offline downloads could not be verified in the owner profile.");
+    }
+    localStorage.setItem(markerKey, "1");
+  } finally {
+    await Promise.allSettled([legacy.close(), scoped.close()]);
+  }
+}
 async function switchOwner(user) {
   if(user?.uid){
     try{await initializeProfileFoundation(user);}
