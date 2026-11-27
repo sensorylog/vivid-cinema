@@ -72,7 +72,7 @@ async function getActiveProfile() {
     try { cached = JSON.parse(localStorage.getItem(cacheKey) || "null"); } catch {}
 
     // A Kids token always fails closed, even when policy services are offline.
-    if (token.claims.isKids === true || (cached?.id === profileId && cached.isKids === true)) {
+    if (token.claims.isKids === true) {
       // A stale or unavailable policy must never become more permissive than
       // the live policy. Use the strictest built-in limits and retain cached
       // custom blocks so an outage can only reduce access, never expand it.
@@ -91,6 +91,17 @@ async function getActiveProfile() {
       };
     } else if (token.claims.isKids === false || profileId === "owner") {
       currentProfile = { id: profileId, isKids: false };
+    } else if (cached?.id === profileId && cached.isKids === true) {
+      const cachedGenres = Array.isArray(cached.blockedGenreIds) ? cached.blockedGenreIds.map(Number).filter(Number.isInteger) : [];
+      currentProfile = {
+        id: profileId,
+        isKids: true,
+        movieRatingLimit: "G",
+        tvRatingLimit: "TV-Y",
+        blockedGenreIds: [...new Set([...cachedGenres, 27, 53, 80, 10752])],
+        blockedTitles: Array.isArray(cached.blockedTitles) ? cached.blockedTitles : [],
+        allowUnrated: false
+      };
     } else {
       throw error;
     }
