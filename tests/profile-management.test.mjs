@@ -76,7 +76,7 @@ test("profile management API protects the owner profile and exposes only explici
   assert.match(service, /A Vivid account can have up to/);
   assert.match(service, /Access-Control-Allow-Methods/);
   assert.ok(rules.includes("match /users/{userId}/profiles/{profileId}"));
-  assert.match(rules, /avatarSource.*google.*collection.*upload/s);
+  assert.match(rules, /avatarSource.*google.*collection.*upload.*default/s);
 });
 
 test("profile metadata never stores PIN material in the public profile document schema", () => {
