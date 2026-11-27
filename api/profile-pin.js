@@ -271,6 +271,15 @@ export default async function handler(req, res) {
 
     if (action !== "validate") await consumeRateLimit(db, claims.uid, profileId);
 
+    if (action === "select") {
+      const pinSnapshot = await pinReference.get();
+      if (pinSnapshot.exists) {
+        throw new ProfilePinError(423, "pin-required", "This profile is PIN protected. Enter its PIN to continue.");
+      }
+      const customToken = await auth.createCustomToken(claims.uid, { profileId });
+      return res.status(200).json({ ok: true, customToken });
+    }
+
     if (action === "validate") {
       const sessionId = String(claims.profileSessionId || "");
       if (claims.profileId !== profileId || !PROFILE_ID_PATTERN.test(sessionId)) {
