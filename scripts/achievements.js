@@ -182,12 +182,13 @@ function init(){
       currentUid=user?.uid||null;
       if(!user){currentProfileId="owner";ensureOwner(null);remoteVersion++;evaluate({notify:false});return;}
       const version=++remoteVersion;
+      currentProfileId=getActiveProfileId(user.uid);
+      ensureOwner(user.uid,currentProfileId);
       void (async()=>{
         try{
           await initializeProfileFoundation(user);
-          if(currentUid!==user.uid||version!==remoteVersion)return;
+          if(currentUid!==user.uid||version!==remoteVersion||currentProfileId!==getActiveProfileId(user.uid))return;
           currentProfileId=getActiveProfileId(user.uid);
-          ensureOwner(user.uid,currentProfileId);
           await loadRemote(user.uid,currentProfileId,version);
         }catch(error){console.warn("Vivid profile achievements could not sync yet:",error);evaluate({notify:false});}
       })();
