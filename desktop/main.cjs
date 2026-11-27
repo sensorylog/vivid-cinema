@@ -41,13 +41,64 @@ else app.on("second-instance", () => {
   win.focus();
 });
 
+const PREMIUM_API_PATHS = new Set([
+  "/api/anime-premium/pricing",
+  "/api/anime-premium/membership",
+  "/api/anime-premium/page-checkout",
+  "/api/anime-premium/exchange-rate",
+  "/api/anime-premium/cancel"
+]);
+
+async function proxyAnimePremiumRequest(req, res, parsedUrl) {
+  if (!PREMIUM_API_PATHS.has(parsedUrl.pathname)) {
+    res.writeHead(404, { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store" })
+      .end(JSON.stringify({ ok: false, code: "api-route-not-found" }));
+    return;
+  }
+  const method = req.method || "GET";
+  if (!["GET", "POST", "OPTIONS"].includes(method)) {
+    res.writeHead(405, { Allow: "GET, POST, OPTIONS" }).end();
+    return;
+  }
+  try {
+    const headers = new Headers({ Accept: "application/json", Origin: HOSTED_APP_ORIGIN });
+    if (req.headers.authorization) headers.set("Authorization", req.headers.authorization);
+    if (req.headers["content-type"]) headers.set("Content-Type", req.headers["content-type"]);
+    let body;
+    if (method === "POST") {
+      const chunks = [];
+      let size = 0;
+      for await (const chunk of req) {
+        size += chunk.length;
+        if (size > 32768) {
+          res.writeHead(413, { "Content-Type": "application/json; charset=utf-8" })
+            .end(JSON.stringify({ ok: false, code: "request-too-large" }));
+          return;
+        }
+        chunks.push(chunk);
+      }
+      body = Buffer.concat(chunks);
+    }
+    const upstreamUrl = new URL(parsedUrl.pathname + parsedUrl.search, HOSTED_APP_ORIGIN);
+    const upstream = await fetch(upstreamUrl, { method, headers, body });
+    const responseHeaders = {
+      "Content-Type": upstream.headers.get("content-type") || "application/json; charset=utf-8",
+      "Cache-Control": upstream.headers.get("cache-control") || "no-store"
+    };
+    const retryAfter = upstream.headers.get("retry-after");
+    if (retryAfter) responseHeaders["Retry-After"] = retryAfter;
+    const payload = method === "OPTIONS" ? Buffer.alloc(0) : Buffer.from(await upstream.arrayBuffer());
+    res.writeHead(upstream.status, responseHeaders).end(payload);
+  } catch (error) {
+    console.warn("Vivid Anime Premium API proxy failed:", error?.message || error);
+    res.writeHead(502, { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store" })
+      .end(JSON.stringify({ ok: false, code: "premium-service-unreachable", message: "Vivid Premium services are unreachable. Reconnect to the internet and retry." }));
+  }
+}
+
 function createLocalServer(root) {
   const absoluteRoot = path.resolve(root);
   return http.createServer((req, res) => {
-    if (!["GET", "HEAD"].includes(req.method || "GET")) {
-      res.writeHead(405, { Allow: "GET, HEAD" }).end();
-      return;
-    }
     let parsedUrl;
     let pathname;
     try {
@@ -55,6 +106,14 @@ function createLocalServer(root) {
       pathname = decodeURIComponent(parsedUrl.pathname);
     } catch {
       res.writeHead(400).end("Bad request");
+      return;
+    }
+    if (pathname.startsWith("/api/anime-premium/")) {
+      void proxyAnimePremiumRequest(req, res, parsedUrl);
+      return;
+    }
+    if (!["GET", "HEAD"].includes(req.method || "GET")) {
+      res.writeHead(405, { Allow: "GET, HEAD" }).end();
       return;
     }
     if (pathname === "/") pathname = "/home.html";

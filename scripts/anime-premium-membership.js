@@ -149,8 +149,13 @@ async function loadMembership() {
     $("vap-account-status").textContent = "Signed in as " + accountLabel + ". Verify your email to continue to Anime Premium.";
     return;
   }
-  if (!response.ok) throw new Error("Membership status could not be checked.");
-  const payload = await response.json();
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    const detail = payload.message || "Membership status could not be checked.";
+    throw new Error(response.status === 404
+      ? "The Premium membership service route is unavailable in this app build. Update Vivid Cinema and retry."
+      : detail);
+  }
   const membership = payload.membership || {};
   membershipActive = membership.active === true;
   membershipAutoRenew = membership.autoRenew === true;

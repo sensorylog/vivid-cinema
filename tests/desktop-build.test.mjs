@@ -80,6 +80,13 @@ test("desktop runtime starts from the bundled local app and keeps hosted recover
   assert.match(main, /setWindowOpenHandler/);
   assert.match(main, /isFirebaseAuthPopup/);
   assert.match(main, /startsWith\(absoluteRoot \+ path\.sep\)/);
+  assert.match(main, /PREMIUM_API_PATHS/);
+  assert.match(main, /api\/anime-premium\/membership/);
+  assert.match(main, /api\/anime-premium\/page-checkout/);
+  assert.match(main, /Origin: HOSTED_APP_ORIGIN/);
+  assert.match(main, /proxyAnimePremiumRequest/);
+  assert.match(main, /premium-service-unreachable/);
+  assert.match(main, /request-too-large/);
   assert.match(main, /vivid-icon\.ico/);
   assert.match(main, /fullscreen:\s*true/);
   assert.match(main, /win\.setFullScreen\(!win\.isFullScreen\(\)\)/);

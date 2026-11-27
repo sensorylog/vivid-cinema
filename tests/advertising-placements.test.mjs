@@ -65,11 +65,11 @@ test("Adsterra script origins are explicitly allowed by the site CSP", async () 
   assert.match(headers, /connect-src[^\n]*https:\/\/aarems\.org/);
 });
 
-test("browsing pages use the refreshed advertising assets", async () => {
+test("browsing pages use cache-busted advertising assets", async () => {
   for (const page of ["home.html", "discover.html", "collection.html", "anime.html", "for-you.html"]) {
     const html = await readFile(path.join(root, page), "utf8");
     assert.match(html, /styles\/vivid-advertising\.css\?v=2/);
-    assert.match(html, /scripts\/advertising\.js\?v=4/);
+    assert.match(html, /scripts\/advertising\.js\?v=5/);
   }
 });
 
