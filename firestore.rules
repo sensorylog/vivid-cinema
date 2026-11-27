@@ -261,6 +261,7 @@ service cloud.firestore {
           && request.auth.token.profileId == profileId
           && request.auth.token.profileSessionId is string
           && exists(/databases/$(database)/documents/users/$(userId)/profiles/$(profileId)/profileSessions/$(request.auth.token.profileSessionId))
+          && get(/databases/$(database)/documents/users/$(userId)/profiles/$(profileId)/profileSessions/$(request.auth.token.profileSessionId)).data.keys().hasAll(['uid','profileId','revoked','expiresAt','lastActivityAt','pinHash'])
           && get(/databases/$(database)/documents/users/$(userId)/profiles/$(profileId)/profileSessions/$(request.auth.token.profileSessionId)).data.uid == userId
           && get(/databases/$(database)/documents/users/$(userId)/profiles/$(profileId)/profileSessions/$(request.auth.token.profileSessionId)).data.profileId == profileId
           && get(/databases/$(database)/documents/users/$(userId)/profiles/$(profileId)/profileSessions/$(request.auth.token.profileSessionId)).data.revoked == false
