@@ -86,17 +86,34 @@ export function mountArchiveFilmSearch({ root, title = "", year = "", onPlay }) 
     }).filter(Boolean);
   }
   async function searchLoc(query, signal) {
-    const params=new URLSearchParams({fo:"json",q:query,c:"30"});
+    const params=new URLSearchParams({fo:"json",q:query,c:"20"});
     const data=await fetchJson(LOC_SEARCH+"?"+params,signal);
-    return (Array.isArray(data?.results)?data.results:[]).map(item=>{
-      const rights=cleanText([item.rights,item.rights_advisory,item.access_restricted].filter(Boolean).join(" "),500);
-      const license=acceptedLicense(rights);
-      const resources=Array.isArray(item.resources)?item.resources:[];
-      const candidates=resources.flatMap(resource=>[resource.url,...(Array.isArray(resource.files)?resource.files.map(file=>file.url):[])]).map(safeHttpUrl);
-      const videoUrl=candidates.find(url=>/\.mp4(?:$|\?)/i.test(url));
-      if(!videoUrl||!license)return null;
-      return {provider:"loc",providerLabel:"Library of Congress",title:cleanText(item.title||"National Screening Room film"),year:cleanText(item.date||""),creator:cleanText(item.contributor||""),license,pageUrl:safeHttpUrl(item.id)||"https://www.loc.gov/collections/national-screening-room/",videoUrl};
-    }).filter(Boolean);
+    const summaries=Array.isArray(data?.results)?data.results:[];
+    const found=await Promise.all(summaries.slice(0,12).map(async summary=>{
+      const itemUrl=safeHttpUrl(summary.id);
+      if(!itemUrl)return null;
+      try {
+        const detailUrl=new URL(itemUrl);
+        detailUrl.searchParams.set("fo","json");
+        detailUrl.searchParams.set("at","item,resources");
+        const detail=await fetchJson(detailUrl.href,signal);
+        const record=detail.item||summary;
+        const rightsValues=[...(Array.isArray(record.rights)?record.rights:[]),...(Array.isArray(record.rights_advisory)?record.rights_advisory:[]),...(Array.isArray(record.access_advisory)?record.access_advisory:[])];
+        const license=acceptedLicense(rightsValues.join(" "));
+        if(!license)return null;
+        const resources=Array.isArray(detail.resources)?detail.resources:[];
+        const candidates=resources.flatMap(resource=>[
+          resource.url,
+          resource.default?.url,
+          ...(Array.isArray(resource.files)?resource.files.map(file=>file.url||file.href):[]),
+          ...(Array.isArray(resource.versions)?resource.versions.map(version=>version.url):[])
+        ]).map(safeHttpUrl).filter(Boolean);
+        const videoUrl=candidates.find(url=>/\.mp4(?:$|[?#])/i.test(url));
+        if(!videoUrl)return null;
+        return {provider:"loc",providerLabel:"Library of Congress",title:cleanText(record.title||summary.title||"National Screening Room film"),year:cleanText(record.date||summary.date||""),creator:cleanText((record.contributor_names||[]).join?.(", ")||""),license,pageUrl:itemUrl,videoUrl};
+      } catch { return null; }
+    }));
+    return found.filter(Boolean);
   }
   async function search(query) {
     if(activeController)activeController.abort(); activeController=new AbortController();
