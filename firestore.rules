@@ -270,9 +270,9 @@ service cloud.firestore {
           && session.profileId == profileId
           && session.revoked == false
           && session.get('expiresAt', null) is timestamp
-          && session.get('expiresAt', timestamp.value(1970, 1, 1)) > request.time
+          && session.get('expiresAt', timestamp.date(1970, 1, 1)) > request.time
           && session.get('lastActivityAt', null) is timestamp
-          && session.get('lastActivityAt', timestamp.value(1970, 1, 1)) > request.time - duration.value(30, 'm');
+          && session.get('lastActivityAt', timestamp.date(1970, 1, 1)) > request.time - duration.value(30, 'm');
       }
 
       function hasCurrentPinSession(userId, profileId) {
