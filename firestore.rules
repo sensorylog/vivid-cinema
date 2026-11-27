@@ -405,7 +405,7 @@ service cloud.firestore {
             && request.resource.data.avatarData.size() <= 180000
             && (request.resource.data.avatarData == '' || request.resource.data.avatarData.matches('^data:image/webp;base64,[A-Za-z0-9+/]+={0,2}$'))))
         && (!request.resource.data.keys().hasAny(['avatarSource']) ||
-          request.resource.data.avatarSource in ['google','collection','upload','auto'])
+          request.resource.data.avatarSource in ['google','collection','upload','default'])
         && request.resource.data.avatarId is string
         && request.resource.data.avatarId.size() <= 80
         && request.resource.data.isKids is bool
