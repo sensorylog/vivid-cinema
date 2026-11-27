@@ -160,7 +160,7 @@ test("owner profile bootstrap and profile-scoped library data are private to the
   const alice = env.authenticatedContext("profile-alice").firestore();
   const bob = env.authenticatedContext("profile-bob").firestore();
   const ownerProfile = {
-    id: "owner", name: "Alice", avatarUrl: "",
+    id: "owner", name: "Alice", avatarUrl: "", avatarData: "",
     avatarId: "", isKids: false, maturityLevel: "adult", isOwner: true, schemaVersion: 1
   };
   await assertSucceeds(setDoc(doc(alice, "users/profile-alice/profiles/owner"), ownerProfile));
