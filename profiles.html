@@ -37,6 +37,11 @@
     <div id="avatar-gallery" class="avatar-gallery" role="radiogroup" aria-label="Vivid avatars"></div>
     <div class="profile-upload-row"><div><strong>Use a photo</strong><small>Upload a custom profile picture</small></div><label class="profile-upload-button" for="profile-photo"><i class="bi bi-camera"></i> Choose photo</label><input id="profile-photo" type="file" accept="image/jpeg,image/png,image/webp,image/avif" hidden></div>
     <div id="profile-photo-preview" class="profile-photo-preview" hidden></div>
+    <button id="profile-use-google" type="button" class="profile-google-photo" hidden>Use my Google account photo</button>
+    <label class="profile-kids-option" for="profile-is-kids">
+      <input id="profile-is-kids" type="checkbox">
+      <span><strong>Kids profile</strong><small>A child-friendly profile. Parental controls will be available in the next security phase.</small></span>
+    </label>
     <p id="editor-status" class="profile-editor-status" role="status" aria-live="polite"></p>
     <div class="profile-editor-actions"><button id="profile-delete" type="button" class="profile-delete" hidden>Delete profile</button><span></span><button id="profile-cancel" type="button" class="profile-cancel">Cancel</button><button id="profile-save" type="submit" class="profile-save">Save profile</button></div>
   </form>
