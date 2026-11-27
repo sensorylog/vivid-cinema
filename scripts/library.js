@@ -191,7 +191,7 @@ async function setRemoteItem(uid,collection,item,profileId=getActiveProfileId(ui
   const safe=cleanItem(item);
   const id=safe.media_type+":"+safe.id;
   await setDoc(doc(db,"users",uid,"profiles",profileId,collection,id),safe,{merge:true});
-  await deleteDoc(doc(db,"users",uid,"libraryTombstones",tombstoneKey(collection,safe)));
+  await deleteDoc(doc(db,"users",uid,"profiles",getActiveProfileId(uid),"libraryTombstones",tombstoneKey(collection,safe)));
 }
 
 async function setRemoteTombstone(uid,tombstone,profileId=getActiveProfileId(uid)){
@@ -303,7 +303,7 @@ async function performLibrarySyncForUser(user=null,profileId=getActiveProfileId(
   const firebase = await getFirebase();
   await firebase.ensureAppCheck();
 
-  ensureLocalOwner(user.uid);
+  ensureLocalOwner(user.uid,profileId);
   const local=readLocal();
 
   // Server-only reads are intentional: a cache-only/offline response must never
