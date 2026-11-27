@@ -1,10 +1,23 @@
 {
-  "generatedAt": "2026-11-27T21:56:14.974Z",
+  "generatedAt": "2026-11-27T22:10:22.779Z",
   "source": "Google News RSS search feeds",
   "count": 120,
   "failedQueries": 0,
   "feedCount": 21,
   "articles": [
+    {
+      "id": "1my9hwo",
+      "headline": "Jungkook of BTS leads Calvin Klein social engagement with 3.1 billion views",
+      "publisher": "Music Mundial",
+      "publisherUrl": "https://www.musicmundial.com",
+      "sourceUrl": "https://www.musicmundial.com/jungkook-of-bts-leads-calvin-klein-social-engagement-with-3-1-billion-views",
+      "publishedAt": "2026-11-27T21:55:00.000Z",
+      "region": "hollywood",
+      "category": "celebrity",
+      "summary": "A Socialpruf analysis shows the singer earned more likes than 33 other brand partners combined",
+      "imageUrl": "./data/news-thumbnails/1my9hwo.webp",
+      "imageFallbackUrl": "https://www.musicmundial.com/uploads/admin/news-cover/jungkook-of-bts-leads-calvin-klein-social-engagement-with-3-1-billion-views-1795816617061-7d1c3d67.webp"
+    },
     {
       "id": "481wf8",
       "headline": "'Hunger Games: Sunrise on the Reaping's' Best Moments from Soundtrack",
@@ -15,7 +28,7 @@
       "region": "global",
       "category": "music",
       "summary": "\"The Hunger Games: Sunrise on the Reaping\" soundtrack features 29 songs from Noah Kahan, Mckenna Grace and Jennifer Lawrence. Here's the best moments.",
-      "imageUrl": "./data/news-thumbnails/481wf8.webp",
+      "imageUrl": "./data/news-thumbnails/481wf8.jpg",
       "imageFallbackUrl": "https://variety.com/wp-content/uploads/2026/11/MCDHUGA_LG049.jpg?w=1000&h=563&crop=1"
     },
     {
@@ -62,13 +75,13 @@
       "headline": "Sakamoto Days Manga Ends At Chapter 284; Vol 31 & Anime S2 Dates",
       "publisher": "Howl.Link",
       "publisherUrl": "https://t.co",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMiO0FVX3lxTE9pa2JfdkhIQkd1R2xyckZCTXQ5TlpEQ2hNTWlpTkc1LVhTckJwQUNOMmw3SHpPWHhSMF9r?oc=5",
+      "sourceUrl": "https://vviptimes.com/sakamoto-days-manga-ends-chapter-284-final-volume-anime-season-2/",
       "publishedAt": "2026-11-27T20:55:08.000Z",
       "region": "asia",
       "category": "anime",
-      "summary": "Sakamoto Days Manga Ends At Chapter 284; Vol 31 & Anime S2 Dates",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
+      "summary": "Yuto Suzuki's Sakamoto Days manga ended with Chapter 284 after six years. Get Japanese Volume 30-31 release dates, MANGA Plus details, and Netflix Season 2 info.",
+      "imageUrl": "./data/news-thumbnails/1jgr9ri.webp",
+      "imageFallbackUrl": "https://vviptimes.com/wp-content/uploads/2026/11/webp-25.webp"
     },
     {
       "id": "12d3mc8",
@@ -106,8 +119,8 @@
       "region": "global",
       "category": "box-office",
       "summary": "Ramayana Box Office Collection Day 24: ₹8.45 Cr net on Day 23; India net total ₹1,000.55 Cr after 23 days. Day 24 live updates, shows and occupancy.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
+      "imageUrl": "./data/news-thumbnails/8dd2mh.jpg",
+      "imageFallbackUrl": "https://cdn.sacnilk.com/image/news/1000023048.jpg"
     },
     {
       "id": "8uvil6",
@@ -153,13 +166,13 @@
       "headline": "After Actress Reveals Why She Lost Out On A Major Role, Fans Realize Why Hollywood Keeps Casting These Famous Faces",
       "publisher": "AOL.com",
       "publisherUrl": "https://www.aol.com",
-      "sourceUrl": "https://www.aol.com/articles/actress-reveals-why-she-lost-185930000.html",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMifEFVX3lxTE5PNGwxM3hZS3FlUkVxWnJla213UTU0S1FUZkJublVUX3REa1NRTWRoWGhwX1NfdExfYnFDUk5qa296VTJELXdyamdHeFJoRC0xbXRfQTRYaXphdU5Zc1Y1OVFrUTdvLTJ3aTNQa01VOUNYdlBhaE93U0Q1djI?oc=5",
       "publishedAt": "2026-11-27T19:22:24.000Z",
       "region": "hollywood",
       "category": "film",
-      "summary": "After Actress Reveals Why She Lost Out On A Major Role, Fans Realize Why Hollywood Keeps Casting These Famous Faces",
-      "imageUrl": "./data/news-thumbnails/mjio6d.jpg",
-      "imageFallbackUrl": "https://hermes.media.static.aol.com/media/2026/11/27/fd6aaaba-64f1-3080-8821-d50532c8f8f7/78911f1d-67e2-4fe8-bf68-3b00f9f70682.jpg"
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
     },
     {
       "id": "4g0ynw",
@@ -240,6 +253,19 @@
       "imageFallbackUrl": ""
     },
     {
+      "id": "9i03dx",
+      "headline": "After Actress Reveals Why She Lost Out On A Major…",
+      "publisher": "inkl",
+      "publisherUrl": "https://www.inkl.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMi1wFBVV95cUxPQWh0VkhRODZpNHhLUi1xNWM2SEFyX3RuZEYtNTVSeGhzVnMwbmZ5ZEFGMllNWnJxMDhINmdWRmdOOC1Damc5TC1SbmVTU1VWUzA5dVAwYUF6endUc3JfY05HWDJSU0xUa1M5QjVKbWNleTl2OFV3Rk9aZ3VReG5Mam5BWFcxUmJEMGtESUh1RzVQUExyU3pVVUdaZENuN2h2bWNHYy1Mbm5SYmhRSHFPbTZvUUJDbjZzal9LUU5jVGRJbEpLM184aUx6NUlMWEx2RmJCWTdrbw?oc=5",
+      "publishedAt": "2026-11-27T18:49:27.000Z",
+      "region": "hollywood",
+      "category": "celebrity",
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
+    },
+    {
       "id": "1tlyoyl",
       "headline": "The Best Black Friday Deals On HBO Max, Peacock, Hulu, Disney+ And Other Streaming Services",
       "publisher": "Forbes",
@@ -266,6 +292,19 @@
       "imageFallbackUrl": ""
     },
     {
+      "id": "1nty4og",
+      "headline": "Is Johnny Depp's Ebenezer a flop? Not by the numbers: his Scrooge film has made twice its budget",
+      "publisher": "Nacionale",
+      "publisherUrl": "https://www.nacionale.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMiogFBVV95cUxPX0Y5eGNDbjgxMnRqZEpQRF9qbEZkQzlzSEduNnA0eDM5dXJMcFpPdy0wNERFVjRLQW9HcDhEdUNiZkRCNVFkZzJrMWl0dE1mZUFJVGRJc2ZORUhEbmVPNHROdGZMOTlWVVJIVVRtY2w0RkFjNENIZVNCRkRtWUwwM1liVVRRX1ZHeFRJZWFoclpiY3JuNUE4T1QzYmRmYmxYSnc?oc=5",
+      "publishedAt": "2026-11-27T18:14:32.000Z",
+      "region": "global",
+      "category": "box-office",
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
+    },
+    {
       "id": "ev2bdl",
       "headline": "'Eetha' song 'Sindoor Se' out now: Shraddha Kapoor's film shows the romantic, emotional side of its artis",
       "publisher": "The Times of India",
@@ -274,19 +313,6 @@
       "publishedAt": "2026-11-27T18:14:00.000Z",
       "region": "global",
       "category": "music",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
-      "id": "1khiwyv",
-      "headline": "AI-assisted piracy puts Grand Theft Auto's business model to test",
-      "publisher": "Business Standard",
-      "publisherUrl": "https://www.business-standard.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMi1gFBVV95cUxQRmxOcl80VFc2LVVsVmtIUXFWMTExNTU2a2tDSVZKRzVnN2VJSUFpMjdEVjlzNlVVbG9iSHJGWW1PTEg2WXRTeDhyelp2dDVTUWg3ZDlJQlQxLVJCcmRVVEFmWTF6UFlNUWpTTHI4ZWJvdVVmV1A5aFVYamF5WE5aaEJTOVhIQ0ppSE1uZzFCaElfcjdEOVFndWpRSkl0MjhFQzlFRndYVnZYcDZERU1CRjUwcGJfOEhuenM3TVk4QUFWM1RiVkREdk5MRVJLem5KbGg0UFh30gHWAUFVX3lxTFBGbE5yXzRUVzYtVWxWa0hRcVYxMTE1NTZra0NJVkpHNWc3ZUlJQWkyN0RWOXM2VVVsb2JIckZZbU9MSDZZdFN4OHJ6WnZ0NVNRaDdkOUlCVDEtUkJyZFVUQWZZMXpQWU1RalNMcjhlYm91VWZXUDloVVhqYXlYTlpoQlM5WEhDSmlITW5nMUJoSV9yN0Q5UWd1alFKSXQyOEVDOUVGd1hWdlhwNkRFTUJGNTBwYl84SG56czdNWThBQVYzVGJWRER2TkxFUkt6bkpsaDRQWHc?oc=5",
-      "publishedAt": "2026-11-27T18:07:15.000Z",
-      "region": "global",
-      "category": "gaming",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
       "imageUrl": "",
       "imageFallbackUrl": ""
@@ -305,19 +331,6 @@
       "imageFallbackUrl": ""
     },
     {
-      "id": "bne11s",
-      "headline": "Ramayana Box Office Collection Day 23",
-      "publisher": "Sacnilk",
-      "publisherUrl": "https://www.sacnilk.com",
-      "sourceUrl": "https://www.sacnilk.com/quicknews/ramayana_part_1_2026_Box_Office_Collection_Day_23",
-      "publishedAt": "2026-11-27T18:00:00.000Z",
-      "region": "global",
-      "category": "box-office",
-      "summary": "Ramayana Box Office Collection Day 23: ₹8.45 Cr net on Day 23; India net total ₹1,000.55 Cr after 23 days. Day-wise collection, shows and occupancy.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
       "id": "17ajhvn",
       "headline": "Casting Guild of Australia Awards 2026: winners",
       "publisher": "TV Tonight | Australia's Leading TV Blog",
@@ -326,6 +339,19 @@
       "publishedAt": "2026-11-27T17:58:39.000Z",
       "region": "global",
       "category": "awards",
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
+    },
+    {
+      "id": "1146y53",
+      "headline": "PS5 Pro-Enhanced Star Wars Action Game Is 80% Off on PlayStation Store",
+      "publisher": "ComingSoon.net",
+      "publisherUrl": "https://www.comingsoon.net",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMilAFBVV95cUxPS1BUbTNtaUttZnFmODZ3dktmaVFhVFNoNThaN2FlZnNXZWVFQnZuNW9qZVVMRUVtSHloQ0gxb002bmZYOVU4b3Y1Sm1reENCbUJ4ZW1aeXpvSlBYbFNfX1UxZWpQdGJ1T0tlSjNoYmFrSzdkeXNYMXo4Rk9tdVRWcFMzczhvMnBfcThQcjZPNHVtek5l0gGaAUFVX3lxTE1zYW1rdmgtWGlBUjI2QldVNmlmM3l6VmFZTG1iQzNfRjBfcHhIYXJrbnNjcUkzTks2N0NzbFQtVW93eEh3c3Vza05Fc1FrVWlUN2F6RFZtNU9oM2VnUUhXRGtSQWU4Snk3ZVVRb21aUkJKYWU2WmRGWlRNTzRFX1ZkUllNdFlaQlBVMG1rSENBS21PTmJSRDB1T1E?oc=5",
+      "publishedAt": "2026-11-27T17:52:30.000Z",
+      "region": "global",
+      "category": "gaming",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
       "imageUrl": "",
       "imageFallbackUrl": ""
@@ -435,19 +461,6 @@
       "imageFallbackUrl": ""
     },
     {
-      "id": "1t2guv7",
-      "headline": "Iconic PlayStation 2 Classic Game’s Remake Reportedly Axed After Studio Cancellations",
-      "publisher": "PlayStation LifeStyle",
-      "publisherUrl": "https://www.playstationlifestyle.net",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMisAFBVV95cUxOeHI3bHZMX0t3RUJhSm5LSHVOR09aZzBGVTlMTVhobVktRWJrekpHdm5ORjdWS0xtSzZsUFlFNjhTMXlkY1ZfbC1qcDBjeDRKbG14N1RwVTB6MGlvQ2NsNndzSW5HUVRMMGh5Qkx4TnVpVDVXTnhCLUpZbUpMbXo3cWpPZUNELU9QeVE4OVVwYWpoWUVsMnMyUERJRjM5X2JGWUVKT1JqMEhDWmdQQnNlVtIBtgFBVV95cUxQZ1FhVmIzeXhrSGo0V0JPZnRwSWxzLTlBb3hwd0J3LXQ2TG0yTWRPYTdycE9xaGhsZGZxU3Vicmk2WEtZZ2ZWZzcwb0FLOGNYbkgteGZja01TSmVQRDBIQ1JSVnFXSVdwMklSZ1lfMlNVbEtKaGhOQ2lVTzZnM0l3QTFrdkYyaUoybk40VzVIa3RTMVlJVUFVT2p4TVFmNmotTHF1SHpEc3RKNlFoX19HTTJMekhRZw?oc=5",
-      "publishedAt": "2026-11-27T17:22:28.000Z",
-      "region": "global",
-      "category": "gaming",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
       "id": "8n9101",
       "headline": "Rex Omar names Kweku Smoke as his favourite young Ghanaian artiste",
       "publisher": "3News",
@@ -469,6 +482,19 @@
       "publishedAt": "2026-11-27T17:12:27.000Z",
       "region": "hollywood",
       "category": "streaming",
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
+    },
+    {
+      "id": "a4wiz9",
+      "headline": "Piracy Threatens the Manga and Anime Industry, but Japan Is Using AI to Detect Websites Offering Free, Illegal Copies Around the World",
+      "publisher": "levelup.com",
+      "publisherUrl": "https://www.levelup.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMi-AFBVV95cUxPVUNyZG5qaVhKZW9mQ1Flc0lzWVB3b084eEp5UDFtS3NBYjZhbC1kQ0l5allReFZxN0hGd29PemQ3dl9hUUl2eXgxNnNOaUtjQVVSQlV5d09jdGVaRTdCVlN1NW02VHZXV0g4TUtPVzlhVk1BVGZCbTVBMkU1ejU4ZEgzSVlNazZWT3BaMU5ib3pEazJHUzlfeW12T044SXA3QnB0SUcwMWZ1MWNsVkgxOVAtRWJOMVJYMGQySDNOWHRjNGFvMkN4SHFRT2FIWjhCNXJ0TTItVXRZbXJiRUl2VUpLeTNCa3RYeEdsX2lzS1ZKRkJyN2l2cg?oc=5",
+      "publishedAt": "2026-11-27T17:12:19.000Z",
+      "region": "asia",
+      "category": "anime",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
       "imageUrl": "",
       "imageFallbackUrl": ""
@@ -578,19 +604,6 @@
       "imageFallbackUrl": ""
     },
     {
-      "id": "wj7yqw",
-      "headline": "O.M Operation Mole Box Office Collection Day 8",
-      "publisher": "Sacnilk",
-      "publisherUrl": "https://www.sacnilk.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMikAFBVV95cUxQV0RkaDRCVTk5TjZfeTZ2YW5QMVVnelN3RzFyblVuX3VlZ1dCcGM2eEJ4ZHlwWktKYktqS0Q5dlprd1JsSE5wYzRzOWw5bU81RXZFbTdrdWVoZThxb2YyRDhoVWswNVlSOUdMSGg2TDZRTUVqUzNONUVSbG5BUThYMzFFaTF2d0VDNmZvN2xvN04?oc=5",
-      "publishedAt": "2026-11-27T16:50:17.000Z",
-      "region": "global",
-      "category": "box-office",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
       "id": "1kcu60w",
       "headline": "S16 Film Festival 2026: Dates, Screenings and Ticket Details – Complete Guide",
       "publisher": "ShockNG",
@@ -612,6 +625,19 @@
       "publishedAt": "2026-11-27T16:44:12.000Z",
       "region": "hollywood",
       "category": "film",
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
+    },
+    {
+      "id": "mjnbsi",
+      "headline": "‘Hunting Wives’ Writer Brandon Zuck Addresses Donald Trump Jr.’s Viral Criticism of Steamy Sex Scene",
+      "publisher": "Us Weekly",
+      "publisherUrl": "https://www.usmagazine.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMiowFBVV95cUxPRFdITFEzOXpHUTlidmZiNHRIQmxMRmpfNzdNa0lkN0dtU1A4cTUtNi1xa1dmRUdDbHMwc25XcXgwdER1RWk5elVuOTh5b2tsY0Z2d29qRHYtU3hmMnh3WGFrV0hZbThobXRPSC1GWHBfUzNXWDVfLXpTNk1nOVBBVDU0cHVXNWFDWWV1SVJXSWc4LXk1TURZTzNsUXoyblJqSXBr?oc=5",
+      "publishedAt": "2026-11-27T16:43:11.000Z",
+      "region": "hollywood",
+      "category": "television",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
       "imageUrl": "",
       "imageFallbackUrl": ""
@@ -690,7 +716,7 @@
       "publishedAt": "2026-11-27T16:00:45.000Z",
       "region": "hollywood",
       "category": "celebrity",
-      "summary": "How This Actress Finds Purpose Helping Families After Hollywood",
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
       "imageUrl": "",
       "imageFallbackUrl": ""
     },
@@ -721,14 +747,27 @@
       "imageFallbackUrl": ""
     },
     {
-      "id": "qesouo",
-      "headline": "[Industry news] GTA VI CAPTURES RECORD-BREAKING 31.4% OF GLOBAL GAMING ATTENTION",
-      "publisher": "mcv/develop",
-      "publisherUrl": "https://mcvuk.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMirwFBVV95cUxNQjR0bDJDXzh5a2lwdEJ5SnNUQjhjSGZiOXMyNDVObzBBRjFqR0JOYW5JZjBCa1Q3N1FQdEJNZXBXWnl5eHVQaWtoWkJpNVdPQkhYNlF1Znk0al9xWWh1M2JFaTNFdzFrMGVHRXN0ZHZXdnlKV0JJNzhZNG52ajFOU0Y4Wnh1SGpFRnM0T3BKYXdUYmdacGU2YW5OZDRpUkRaLU40amc0SXo0OEdJYlhZ?oc=5",
-      "publishedAt": "2026-11-27T15:34:40.000Z",
-      "region": "global",
-      "category": "gaming",
+      "id": "q0a4tk",
+      "headline": "13 Celebrities Who Look Younger In 2026 Than They Did Decades Ago, And The Before-And-Afters Are Truly Uncanny",
+      "publisher": "BuzzFeed",
+      "publisherUrl": "https://www.buzzfeed.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMie0FVX3lxTE5DWXJmdEhQSk9oVDl5ajZtZFlfMFBZLWlhdHlXUlo1QzVnWGRvd2QzTjZ1SHlsMjZjckNQd3hCcXFPeWZxNll6RFdqWXl6RERpcWlLaHFhT1dyZ2NOb1VvTllpbmMtZWIxUXMtWkxrdnV6WkgzSXJrQ29Bcw?oc=5",
+      "publishedAt": "2026-11-27T15:31:02.000Z",
+      "region": "hollywood",
+      "category": "celebrity",
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
+    },
+    {
+      "id": "19e9m7c",
+      "headline": "Fans take issue with show’s new trailer",
+      "publisher": "The Mercury",
+      "publisherUrl": "https://www.themercury.com.au",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMimAJBVV95cUxQYUd1TmZ5Y0xLcnFMekg1dzI4aHZCZlZYUVFtTlcyTGY4cXU1aUVCZnVrd3lLVk9pWHNOcG9yenpubEtPeXNmcVQtNG81TGpMWkhyLTV1cGYtUGxYMFA0dG12LXdMdXA1UFJPeEZ2b2lGaGRvSHVXeFpfcE41ZVQ4WFQ1Ukh4QV9jVklKYU1XTldoWGh4aDB5SnJ6ZWRFZW1qRUpOdWFXa3RoWlhnSnpYVUFUdnoxVjQ5UFBGQWJldWZWVHEzSmdzck5ydV93T09DTThlRXM3ZEpLZEVpdm82N2RrSXJfd2MtbUJMSHpLdjRmVmUxNEJrSzh3SnBjRG9JWXA3bnl4WER4LXI0TGIwbWx3aFZocmtF?oc=5",
+      "publishedAt": "2026-11-27T15:27:43.000Z",
+      "region": "hollywood",
+      "category": "television",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
       "imageUrl": "",
       "imageFallbackUrl": ""
@@ -838,6 +877,19 @@
       "imageFallbackUrl": ""
     },
     {
+      "id": "9rmgq1",
+      "headline": "‘S.W.A.T. Exiles’ EP Reveals How Long the Spinoff Can Run After Show Changes, Past Cancellations",
+      "publisher": "Us Weekly",
+      "publisherUrl": "https://www.usmagazine.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMirgFBVV95cUxNODZndWRSaUlabDJWOUFsV0hqSEZxYzFwSHNZWDVCWndPZlE4QkhIbkdOQVJ3VF9FMkVnajZjWFZkb0VKVEI0YlJ0SHI2WVV5OXptV0hfeml5Vk96dGN1N21FWGFvZWxNVGxwUGVieXZLR1NpU0wxekYzNHhOSEVwVDB1TkM5SktMZGVSQXVnUk1RXzhucHZWZE9Hc1VjQjNFelllajdXNVRtY2YxYUE?oc=5",
+      "publishedAt": "2026-11-27T14:55:04.000Z",
+      "region": "hollywood",
+      "category": "television",
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
+    },
+    {
       "id": "1dnpv72",
       "headline": "Qatar Is Forging Ahead With Film and TV Industry Plan, Undeterred by Regional Turbulence",
       "publisher": "IMDb",
@@ -859,19 +911,6 @@
       "publishedAt": "2026-11-27T14:49:49.000Z",
       "region": "global",
       "category": "festivals",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
-      "id": "8dohcg",
-      "headline": "Faisal Malik hits back at critics calling Ramayana’s Kumbhkaran VFX ‘AI’",
-      "publisher": "The Indian Express",
-      "publisherUrl": "https://indianexpress.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMi2gFBVV95cUxNaDdpSGJlMGRtbmRnb185cGZKWFVVVC02Y2MwZGtMUzJ1aXhHRXY2cjNOYTNLYTdxbk5HM2pST0JPSDJ3enlNMEFjOGNRSnl0dlBROTRQMEkwS2F6UHM2VHlfRDZ5WEtUOHhpbW5wbGNZaUlycE54T2k2R05MVjc2aWRFNmY3ek4tVGxiM1k5WlBrUUJzTFVDU3hxMlNoaGxZREp1dzdwcHd6azdIQ1JXcFVveDNOS0lsVXhUUng2aW5tUno2V09NVnZIdHZORnJDQVctTEpKbWJfZ9IB2gFBVV95cUxNaDdpSGJlMGRtbmRnb185cGZKWFVVVC02Y2MwZGtMUzJ1aXhHRXY2cjNOYTNLYTdxbk5HM2pST0JPSDJ3enlNMEFjOGNRSnl0dlBROTRQMEkwS2F6UHM2VHlfRDZ5WEtUOHhpbW5wbGNZaUlycE54T2k2R05MVjc2aWRFNmY3ek4tVGxiM1k5WlBrUUJzTFVDU3hxMlNoaGxZREp1dzdwcHd6azdIQ1JXcFVveDNOS0lsVXhUUng2aW5tUno2V09NVnZIdHZORnJDQVctTEpKbWJfZw?oc=5",
-      "publishedAt": "2026-11-27T14:47:07.000Z",
-      "region": "india",
-      "category": "film",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
       "imageUrl": "",
       "imageFallbackUrl": ""
@@ -929,19 +968,6 @@
       "imageFallbackUrl": ""
     },
     {
-      "id": "rx808",
-      "headline": "Lee Chang-dong Overcame A Decade Of Self-Doubt To Bring 'Possible Love' To Life [Interview]",
-      "publisher": "The Playlist",
-      "publisherUrl": "https://theplaylist.net",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMifEFVX3lxTE9BaHV6M1lqeXEyZjFCUWtNaHJ1X3Ywd3ZicHBOV0poaEhUR2lmVUJGSlhxOFFoaDZYRmdQWFNLRlh4REV2RXVvWHZScGZDczJzMnBCaVRyT2JRcGt2U2pMOElWbmxLQndwVVF6bDhDaklaQ3lDUkozVXlCYjI?oc=5",
-      "publishedAt": "2026-11-27T14:30:00.000Z",
-      "region": "global",
-      "category": "awards",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
       "id": "1hon7vv",
       "headline": "From National Award win to Ramayana, Abhay Jodhpurkar hits another musical milestone",
       "publisher": "Adgully",
@@ -968,6 +994,19 @@
       "imageFallbackUrl": ""
     },
     {
+      "id": "1ph0adz",
+      "headline": "BBC Unveils New Entertainment Shows and Christmas 2026 Lineup",
+      "publisher": "cwibc.co.id",
+      "publisherUrl": "https://cwibc.co.id",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMiaEFVX3lxTE9ON04xbWM0bjBJRWRFdzB3NExaQ0RZVmJUVVRjS2NJVVVXYjhxMlpRamFPLUZkUHlfZWdRLTM4X2hoYzNoSkg2bHFEa0RIUTRpcjZtcGpfRVk3cEFybTNMLVFEQktQN3Bm?oc=5",
+      "publishedAt": "2026-11-27T14:11:06.000Z",
+      "region": "hollywood",
+      "category": "television",
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
+    },
+    {
       "id": "cbi5so",
       "headline": "Dhanush’s OM Crosses 100 Crore Milestone in First Week at Global Box Office",
       "publisher": "Zoom TV",
@@ -989,19 +1028,6 @@
       "publishedAt": "2026-11-27T14:04:04.000Z",
       "region": "global",
       "category": "box-office",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
-      "id": "19oy4wn",
-      "headline": "PS Plus Users Can Now Play Hit 2026 PS5 Action Game for Free",
-      "publisher": "PlayStation LifeStyle",
-      "publisherUrl": "https://www.playstationlifestyle.net",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMisAFBVV95cUxPQWY0Y0Z6TzdpUXFmV19CQ1llU3pOVTZSNWw5WDNsR2E1ckdVelFpY1gtdzFCY0J3bFlZVE50eFcxRExsZGhsUzBzRDQtaXFQU1JjUnJ6NGNRLWRlMnR3dGRJQVZkOG8zVE8tT0I2MjctQm41OGNYYXJjajRqaHJNOEFnOEtpQ2VibG5rS2FFbzdkaXNPVHNNNGtIREFnSFhlOGV5Q1haTnh6M19lVzBTOdIBsAFBVV95cUxPQWY0Y0Z6TzdpUXFmV19CQ1llU3pOVTZSNWw5WDNsR2E1ckdVelFpY1gtdzFCY0J3bFlZVE50eFcxRExsZGhsUzBzRDQtaXFQU1JjUnJ6NGNRLWRlMnR3dGRJQVZkOG8zVE8tT0I2MjctQm41OGNYYXJjajRqaHJNOEFnOEtpQ2VibG5rS2FFbzdkaXNPVHNNNGtIREFnSFhlOGV5Q1haTnh6M19lVzBTOQ?oc=5",
-      "publishedAt": "2026-11-27T14:00:00.000Z",
-      "region": "global",
-      "category": "gaming",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
       "imageUrl": "",
       "imageFallbackUrl": ""
@@ -1078,8 +1104,8 @@
       "publisherUrl": "https://timesofindia.indiatimes.com",
       "sourceUrl": "https://news.google.com/rss/articles/CBMi5wJBVV95cUxOS295VHY0cDUwUVZmVWk1MTJOQUg0MXJYaG96dlFoVDVpUUpLd09FUnROZnZGV0xrT013SXB5QXNBNmNWcHJVbTZ3N28tMGxzc3pPa3FUNDZHdFVBenhVN0xiX1RNckxvX0piMDlXVTRNMXY5cjhFU0R1STJqSUNVNkdETUhmMUlEY3VGMURfcUhyVy1RWHU4dWoxQS1DdUQ0S2hHNkZaaFRZc21jMUhBZTEzUjYyVjdEcG5YY3VaenFxVndHWGtKdVBXdFB3ZlhwbFIyTUJKZ0w4MS1lZjQzRGtEaWRPbjFXUThMLXdtaU1kY19MYWhIRWhadG9tNk9yUjl4Mk5fY0gtb2Z0MmRqYzcxZWRCYnVHYmdILUEyVzRHdnlTcjlZYWJDLXdKc3FOS3VaQWFTeTA2SWoxMXN4NUR2THh5djZBZXJ1bHZ6T2d6ek9lY3lYa2RfbG03WENoNjlLYW1RMNIB7AJBVV95cUxNeUh3S2pnWGRhYm9OeTl5emVJTjlMY0EwVTlLdjZWUlhqTmhielpkX1lrRk91ektSQjhtZnc0eW1ESnpHWGJyLW1RSVlreFNWVWczbUZDTmQzajNndmxYVUhRc1hnWnpfazVoZTJ5NzJUTEYyVXQ1ajFWV185OWJBR1hyUVRmdkRscThfTDlPYVJuTXpKOWVSRy0yem96YXgwS0JSY2tSOVpfQmZodUdYX3l4NmhvU3k4bTZTYVExaU9WdXNEU3lqSERpS016OVVCWUlNY2kwOEdkZlRPRE1OdkVuNnpGdldmRi1aVGdOM1dPZEdXaFY3VXh6VDRYZmdpRFduX2ZRendXVjhPWDlKTDc5dTNHNURyMURyc3Z6WURuRmZkdkZkaVItNXRTaWhIVjA5RUc1Q2d1cmh2ZUFXS05idlFPRWE0UWJhbHFjN0N6RzNtc1hkdGFRWjlsTHhsTlI4Yi1iN2Raa1BT?oc=5",
       "publishedAt": "2026-11-27T13:20:00.000Z",
-      "region": "global",
-      "category": "box-office",
+      "region": "india",
+      "category": "film",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
       "imageUrl": "",
       "imageFallbackUrl": ""
@@ -1098,24 +1124,11 @@
       "imageFallbackUrl": ""
     },
     {
-      "id": "b9pbj4",
-      "headline": "The Substitute: Cha Kang-yoon, Bae Hyun-sung clash in gritty exam K-drama",
-      "publisher": "South China Morning Post",
-      "publisherUrl": "https://amp.scmp.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMi3AFBVV95cUxNS1dsNE1fS1QtN1hfamlIYlh4SS1pN2d5M01KanZVRFBCOFZfcks1Zk1CdWtiTWxadmFwZXhjLTNabnU2bmxWZXB3SDRRZC1OOTYtY0toNi1oeThNLURsSzNvUXQ0NDVadEl5aWN3WWNsbW9Qa29QaGVnc0ZxZUpNQy02UXlTa0dldzk3dWZQenhzczJaMmZJNlpwNkRHUGhwWVU2bmxQNms3S0NMclV6dFhkSGVoZE9JRlFLS3dmN2Q4cGN5ZG5JaGVqb3lXMHQ1eDA5WmRnV3ZNejIw0gHcAUFVX3lxTE1LV2w0TV9LVC03WF9qaUhiWHhJLWk3Z3kzTUpqdlVEUEI4Vl9ySzVmTUJ1a2JNbFp2YXBleGMtM1pudTZubFZlcHdINFFkLU45Ni1jS2g2LWh5OE0tRGxLM29RdDQ0NVp0SXlpY3dZY2xtb1Brb1BoZWdzRnFlSk1DLTZReVNrR2V3OTd1ZlB6eHNzMloyZkk2WnA2REdQaHBZVTZubFA2azdLQ0xyVXp0WGRIZWhkT0lGUUtLd2Y3ZDhwY3lkbkloZWpveVcwdDV4MDlaZGdXdk16MjA?oc=5",
-      "publishedAt": "2026-11-27T13:15:05.000Z",
-      "region": "asia",
-      "category": "television",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
-      "id": "eeepiy",
+      "id": "crqojz",
       "headline": "Black Friday 2026 streaming deals for Hulu, AppleTV, Disney+, more",
-      "publisher": "GoUpstate",
-      "publisherUrl": "https://www.goupstate.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMi7gFBVV95cUxPQ2R3WllSWUNucXR3QWpSdFZlTUlLZjA4UlA3ODZXRC1LNzNPTDc5SVk1UXE1ODFuSzNXb2RhdGlaWHhrYUtiSmN0WVNqcnZtMVBTZEFKUUZkb1EwTXdJT2kxay1XbG9oZUJkaXpXVmNFajdRVWp6Z0t0N2xKQkhFblRJcVRqcEx4bGxXU1VxYmtLQ3VNNjBUbXdJT1Fpc29lVlpyYjJhand6RmJ6LVdMMVNZcmN1dWtlalVYTzFCSVhWQmFTSEpNX1RHdE5qUGRWWDFkdkxzZ3pBb29wYS1Yc2t0VnFfSDdIY2g5dUtR?oc=5",
+      "publisher": "Greenville Online",
+      "publisherUrl": "https://www.greenvilleonline.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMi9wFBVV95cUxQMmhna01tX0NCNXhkeld0RTBNWEp0QlU2LW9pV1RDNEgyV3c1Qmd3a3M1SjQyd2VJTUdKUkQ0dFl3U1VOOWZEcl9CRWswMVB5WHpObzZZUkRxbUxDWlJEQU5lRHR5NFBLSllqX2NfYjdrUXUwRUVveXBmQmJwWnU3VE9aS2N0Y1BvWGYwOU1tbVBzYnVwSDdXeExMcmhfbjFVQWxwaUdCNmhvVHhWVXJQa3prSk9UUTZrblpDSTA1MTlHekluSWxpYnU2NkswOTI5TVNCWFRlVEJmUFVNNTU0ZkZTb2g3TnVJUVdqN21OLTkySXBsZl93?oc=5",
       "publishedAt": "2026-11-27T13:15:00.000Z",
       "region": "hollywood",
       "category": "streaming",
@@ -1163,19 +1176,6 @@
       "imageFallbackUrl": ""
     },
     {
-      "id": "1fuft0f",
-      "headline": "PS Plus Members Can Play December 2026 Essential Game Early",
-      "publisher": "PlayStation LifeStyle",
-      "publisherUrl": "https://www.playstationlifestyle.net",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMilwFBVV95cUxQZlRsNDQ3UVVlRzdSaGJmb1E0SGo2VnZPbzNpRXpvQXBQQ0RhS1NyRzJMQU1nNkdwX1hSa3Q3S2V4bzdkWUNFS0E0QjRGT3ZHTEJ3dDBvb0hfN29hbTkyaF84dW4zYVRiUHZybm9vQmQyNEVCd25lMGtPUjdrbFBJSDlva05KcjJnRzVNSU84bFpVeXRlQ2xJ0gGcAUFVX3lxTE1BcUFQaFJuX2ZYTXktTUcxbHFuT3lHYUJvc1Y3S3RzZS1oajhnN3h5SlZxZzJEU0xfX3VGazlMTmRXTkhMOE9TRWNhci1xT2FLcTk2TVM0Y3N1ajc4b2lYN0JRc3NUVVJzWkEtMkxITVc0LUxOMEJMaEwyRnZWVUFvV09fX1V4cnNjT081aVplUFZTY3pGRURRRnhIVw?oc=5",
-      "publishedAt": "2026-11-27T13:00:00.000Z",
-      "region": "global",
-      "category": "gaming",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
       "id": "512mm3",
       "headline": "Shobhinaw Satyaa compares his unexpected acting break in Hanuman Ansh to Shah Rukh Khan's TV debut in Fauji | Bollywood",
       "publisher": "Hindustan Times",
@@ -1189,6 +1189,19 @@
       "imageFallbackUrl": ""
     },
     {
+      "id": "y8onra",
+      "headline": "The Simpsons Hit & Run remake may have been cancelled as developer seemingly hints they were working on it",
+      "publisher": "Video Games Chronicle",
+      "publisherUrl": "https://www.videogameschronicle.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMi2gFBVV95cUxNdkhYZDRWOTlCendPdkZsV0hmazE2TjJndnpxRlhCS1NUX3E2WElCM0kwc0dNRHlGMHFtNlk4Mk5UbGdvNVpUSjJqcVczelBCQzhTakFHRjZsQldZbUJNUGl4SG5qaFFLNlNUR1ViWDJwRUVpejI4YWhvZnJvUGZYQmRyS2FINzhFemFLVWpMcUlUUnNaNnU3d2tNN3FfVnF4eGFxV18tY2txVmZwc0l3T3B0MVlueDNUMnVJajE5Y0phUW5UWTk0d3FaMUgtMEl3NDFwTURDbFd1Zw?oc=5",
+      "publishedAt": "2026-11-27T12:53:49.000Z",
+      "region": "global",
+      "category": "gaming",
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
+    },
+    {
       "id": "tgwf8r",
       "headline": "CPTPP Members Agree to Set Up Support Office in Japan",
       "publisher": "Nippon.com",
@@ -1197,6 +1210,19 @@
       "publishedAt": "2026-11-27T12:41:01.000Z",
       "region": "asia",
       "category": "anime",
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
+    },
+    {
+      "id": "1rbufpc",
+      "headline": "Friday Night Lights Tops 2026 American Sports TV Poll",
+      "publisher": "Peradaban.id",
+      "publisherUrl": "https://peradaban.id",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMibEFVX3lxTE1JLTRKdHpuZWluTnRETTAwQjhQMmZVdmpER3dlSWdRQmRHODdScGNYUXl5Yjd1ZmE5WmVDd2pxSnVIa2xqS1NhVFFiUklsaWVpTWt3VWhzVEJBWm9OdDd2V1d1TlNHX2NOeDhTZA?oc=5",
+      "publishedAt": "2026-11-27T12:40:22.000Z",
+      "region": "hollywood",
+      "category": "television",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
       "imageUrl": "",
       "imageFallbackUrl": ""
@@ -1260,7 +1286,7 @@
       "publisherUrl": "https://timesofindia.indiatimes.com",
       "sourceUrl": "https://news.google.com/rss/articles/CBMi4wJBVV95cUxOWHBJQ3NQbEJnQmtVRlYwMXdINW4zVU04dWdLc0hYMFdUbHBZOGpxdU1vTXV3YlhHUVpBRS1GTzdzNkJ4WXIxZXhzel9MelFrZ0dLRVRwRlRyTl9IWHo3Q2k4TUdHN2ZKdVhjM0lWZE9MYVE4VzQ4NGNvekx3bVhkMmVvZC1XMmtPWC1DZDd5UW9HRU92UzAtVVJyT1ZVV3hTcEZ1WTg0QnJZY3JaRTNNOFZLWEFYSEF5V2l4blV5eVA3OGltOVk1cXVHenNTbEN1VlhGekdFbnBCaFcxYm5nNmhkY21wZ01sSDZuVUNwMGxxc0VUelhfeVVJZlhDNkhfRS0ySW5CUmhpcVNYc01id0hadjNSaGFVUlVGZi13cjF4ZGFHYUpRenlRbWtieW4zQUV4VDc2SlhMWnE5X2tvSU1ROTd3el9KS3cxNEpfdXZqRy1JZ0VzMFQ1MVh1d1FxUDlB0gHoAkFVX3lxTE95YXJFelF6a3IyVUhISngwWnNEU2RmNnpQc1FaeVZ3M05yRjlLVHNPSWFLalI3YU1LM1lnQ1VmbGphVGVwYUs5aFJ0eDNqYS1fdmtuaU9lSld6QmFCS20tZUVoR0RSbUFCQmcwTFBuR1pCVzBCdU9iQklOdERldWpOeXRaVFlZTXRXVGtwd0swVVA5MjQydXEwQmZVNmJGQnJXNnBSZmYwVEVHbTI2SWtOMXZkU2FPa2hoQkZMbmhXOVUzZkpnYXFrMTF2WFRjSWVxX2pzOXI1c0RTaFluTWt4b2x0RXNqX2F3VkZ6d3BFQW41aUEtUnJmWmN2VHRzN0RNdzZ2NDJZMWl4b0wybHNRY2FveXIxVTVNMjE3WFh3d09RREZJWWoxT2JGWUt1ZVV1dUQwaFFCMDd4WEc5YkRGVWtvSzUzTC12ck95YnZjV2NURUpIWlFEVXVBT2FqTGNURFpzdjdXWQ?oc=5",
       "publishedAt": "2026-11-27T12:14:00.000Z",
-      "region": "india",
+      "region": "global",
       "category": "music",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
       "imageUrl": "",
@@ -1280,19 +1306,6 @@
       "imageFallbackUrl": ""
     },
     {
-      "id": "14990y8",
-      "headline": "Lorraine Kelly in tears as she makes emotional job admission",
-      "publisher": "Daily Express",
-      "publisherUrl": "https://www.express.co.uk",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMingFBVV95cUxPOHR1UUdtSHE3X3RGR0o5MGRuOXgwdTFIZnZOQnNtdkw3TnNrY0lSMWQ5R1ZHT0hiOFVJdDdyWkIxbktldTNOYURqamtQajVPSXIyemoxeGFIYU90bFlMTHhmd2pDOWFjcU9yLVRTdEZNdzd4V0V4UklHWjRWTlprRzNRRHpOVGh3eHlESWN1eTRrTnB5dTMwWFR5NXd1Z9IBngFBVV95cUxPOHR1UUdtSHE3X3RGR0o5MGRuOXgwdTFIZnZOQnNtdkw3TnNrY0lSMWQ5R1ZHT0hiOFVJdDdyWkIxbktldTNOYURqamtQajVPSXIyemoxeGFIYU90bFlMTHhmd2pDOWFjcU9yLVRTdEZNdzd4V0V4UklHWjRWTlprRzNRRHpOVGh3eHlESWN1eTRrTnB5dTMwWFR5NXd1Zw?oc=5",
-      "publishedAt": "2026-11-27T12:00:00.000Z",
-      "region": "hollywood",
-      "category": "television",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
       "id": "tqc0o6",
       "headline": "Celebrities arrested on Thanksgiving from Hollywood's best to little-known child star - The Mirror US",
       "publisher": "The Mirror US - News, Sports, Celebrities and Showbiz",
@@ -1301,6 +1314,19 @@
       "publishedAt": "2026-11-27T12:00:00.000Z",
       "region": "hollywood",
       "category": "celebrity",
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
+    },
+    {
+      "id": "vgp09f",
+      "headline": "Will we ever see another game like GTA VI?",
+      "publisher": "Vox",
+      "publisherUrl": "https://www.vox.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMihAFBVV95cUxORlp0ZnFUU1NTYnl2WFBMR2p2cjJKWGFTQ2REYVZYNnMyVFJlenkxeXU1aFFWdVlGYnFzRFJOZXQtdWc4ZVZ6bFVOVjdOTS0wYjVJc2w5VE95YThLS2h4WDA2dkZ0bzR1VDVyTVJxQ1RNOHF5X2J4cnJ4d3JvWHc2VnhzUWc?oc=5",
+      "publishedAt": "2026-11-27T12:00:00.000Z",
+      "region": "global",
+      "category": "gaming",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
       "imageUrl": "",
       "imageFallbackUrl": ""
@@ -1332,45 +1358,6 @@
       "imageFallbackUrl": ""
     },
     {
-      "id": "1146iji",
-      "headline": "10 Stars You Didn’t Know Came from Entertainment Dynasties",
-      "publisher": "People.com",
-      "publisherUrl": "https://people.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMie0FVX3lxTE9jTl9mMjRWT2NiMFN6LWR1UHYwR1ExeXZzYzQwUXhYSFJDSnJkcEJHeFRWdkwzdFc2YXRWZUp4ajZMWXhscHdVaUdIWGNHQi00WWNZNzk3T2x0d2JNQ1prR3loQ2RBWGcxbkJTeFlPVlhCaUhNbk9zSmE1cw?oc=5",
-      "publishedAt": "2026-11-27T11:55:00.000Z",
-      "region": "hollywood",
-      "category": "celebrity",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
-      "id": "1ltpmil",
-      "headline": "Ramayana expands global footprint, becomes No. 1 Indian film in 27 nations",
-      "publisher": "Business Standard",
-      "publisherUrl": "https://www.business-standard.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMi2wFBVV95cUxQcDY4SVJ1Rmo2MjJXekhwRFlRbjc5NDB4MXRjNzdfRGRVYWVBUlBHREJ3bl85VFowcldPTTNZTGZqcklwV0NNSGJWeUpmMFM2YUNmUno3N3RYdTE5UnIwNnBlTEVabEJreGh5U0JKU0RTSDllUWtyUVBoUFFhWkpNZWtmaDN1ZW9jZzI0X01LTXo1a3JWV05Od2psay1reVl5b3R1aURxT2tEeUU1OE5rT0ZnRDhRVWdwMUo5VW1DdnBGMTdFWmNVeXpyVzlIN21OOWc3Rlg1azJ3ZEHSAeABQVVfeXFMT3JCSXp5MWRPZXlEMG9XNGdvVFdBTDEydlVtcWs0alAwbVJDMk1xOUtxaGhOQ1JLNnppU3hGTzBiLW1YTnp2TktrSnBvcTZMOVhnRGJQd3Zva2FpSGNVU3AzeUxmaGpjZUtXTE9XN0hIalpDLUsyWFlWMnRZQjRmdFc3eFp2THR0SlY0bklKOW9PTS1jYWlsQVZNWlhjUmlNN0dxTlV1MFZJRDVXWUlldXRKTkFKSjVCTm1hTlJtVktERHBTVDhOMTNUajdsb2Mtd1dvMzJHbzlLbndxZWZtWFY?oc=5",
-      "publishedAt": "2026-11-27T11:52:36.000Z",
-      "region": "global",
-      "category": "box-office",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
-      "id": "1mxkxms",
-      "headline": "Streaming giant Netflix mourns Nollywood icon Pete Edochie with special message",
-      "publisher": "Yen News",
-      "publisherUrl": "https://yen.com.gh",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMi1wFBVV95cUxOZVZlUllYV2JrcENWbHlBNEFwaGZhNWJvTWt0ZndlTXFHblJQb1RNRWFhVTVGV29aeHhldDJteFhnaEtHN1dWUm5HU0lKZnR1am5DZ0NSUkMwR2tyRlFXZjlMX3ZraHgtWW9kWXpRQ19qTkFmWW9mVlVCVWFDekhnOXJaWVprZlFRWTlkVVJDRVhzOXJJLXRnMmRFZUgxMDNfb0NUN0pjU0YzMWdGbVdsNFBiTVEtMGJqZHVDRUZlS1dyYUstR1pZQWIwbVVmY296dTAzNE1XMA?oc=5",
-      "publishedAt": "2026-11-27T11:49:56.000Z",
-      "region": "africa",
-      "category": "celebrity",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
       "id": "hfc3dg",
       "headline": "Beyond the Bottleneck: Why Literary IP and Transmedia Bridges Are the Future of Arab Storytelling",
       "publisher": "Publishing Perspectives",
@@ -1397,6 +1384,19 @@
       "imageFallbackUrl": ""
     },
     {
+      "id": "10ici78",
+      "headline": "Flaminia Romani: The Art of Visual Storytelling Through the Eyes of an Italian-Australian Filmmaker",
+      "publisher": "openPR.com",
+      "publisherUrl": "https://www.openpr.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMioAFBVV95cUxNOHFVRktwUDhqdV9ITHYzNHEtdXJnLV9BV0luVWFhVHhkUFlpWDVjZzB6LXl0WjN2Sm5YNW9JNzd2SnZkM1FMS0FZbVhwbmhwUFNnemxSRFZZcTdJS2tlMFJFbkJ0S3RMUnVMY2FaQXN2b2pMRV9wTkZ3UmNrUnN5U1NaRFhwTEE4NUNtaV9hSDdLZkllYU1zRlRvTy1LYlI1?oc=5",
+      "publishedAt": "2026-11-27T10:28:06.000Z",
+      "region": "europe",
+      "category": "film",
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
+    },
+    {
       "id": "1r3179",
       "headline": "Who is on The Graham Norton Show tonight?",
       "publisher": "Radio Times",
@@ -1410,25 +1410,25 @@
       "imageFallbackUrl": ""
     },
     {
+      "id": "1lgc0wf",
+      "headline": "Kumar Sanu explains how he recorded 28 songs in a single day",
+      "publisher": "The Hawk",
+      "publisherUrl": "https://www.thehawk.in",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMiqgFBVV95cUxPXy1icHZPdFZmZmstaDltNFlVclBTSTVPbDF1MzZuTVFwRU16QW80VW02SENiUlF5ODJ3SDlYOWhlSjJvUjd1OFlEbGg4c2gzWk84VGNjeXhPQ0UtY1ZqWlFMcjlfZmFEcWZwbnVQWWxtczgwT1NHZVVOM3E2aHQwdW5JQVM0dDFpMW5yMEZUbXpHRXZBWnZXWEo2Q0YwWXZLMC03MTV0QV9jZw?oc=5",
+      "publishedAt": "2026-11-27T09:53:33.000Z",
+      "region": "india",
+      "category": "music",
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
+    },
+    {
       "id": "1xhe0fz",
       "headline": "UK-Ireland film cinema release dates: latest updates for 2026",
       "publisher": "Screen Daily",
       "publisherUrl": "https://www.screendaily.com",
       "sourceUrl": "https://news.google.com/rss/articles/CBMirgFBVV95cUxPZF83aElzdzJobVMwS0IzWFFJbGNGUk5NVkR3NXl5QUVmSk5rSnZEaTdORWtITFN3ZWl0NHFaekdtNldUNjNLVEI5OWVOeGZvd01WT0ZDR2dzWXpSalczMm5lWDBuWllkV00zenlRWGFvcXhaTWlOZjd5YW4yM2J1NEx3bTV1WWE4WWk5b0psa2d2cDFjNnRWWHVmNUZDTVcxcjRBN2oyeV83amNjVVE?oc=5",
       "publishedAt": "2026-11-27T09:15:18.000Z",
-      "region": "europe",
-      "category": "film",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
-      "id": "1j79krz",
-      "headline": "European Film Festival Malaysia Opens With Palme d'Or Winner Fjord As Multiple Screenings Sell Out Within Hours",
-      "publisher": "Gempak",
-      "publisherUrl": "http://gempak.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMi2gFBVV95cUxNR3doSTZxN1ZueWl5OWd5M1FWVThfbVRHYkVUb0ZWME9YUE1GWkpvVWlQOEcxVkRxTWNqRWVOMTVDU3ZFQU9HbWw5aU1SZWdaS25YU1JhZi1TRzhKZHkycHBpMmZZVFJ3Z09RdFpDTDZFT25DMGtoZHBmaHJORjhudERmbkNZaWFzcmQ2LUJPWV96dThxaTJ0Vmk5cmJJOEZpMzNNRDVDMWpqWHlXb1ZLYVhBbktTZGFpMFVuWVFoQzJvR3dLanRkV0NYT2hKWGttaFEtMGZQNHpadw?oc=5",
-      "publishedAt": "2026-11-27T08:41:38.000Z",
       "region": "europe",
       "category": "film",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
@@ -1488,6 +1488,19 @@
       "imageFallbackUrl": ""
     },
     {
+      "id": "1nacmdr",
+      "headline": "Nollywood Has Lost One Of Its Greatest Legends, Says Tinubu As He Mourns Pete Edochie",
+      "publisher": "Gistmania",
+      "publisherUrl": "https://www.gistmania.com",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMiX0FVX3lxTE05ampfcDlZTzc5V2p5UUVFeVVZTDZrMjhwVkJKQVRNb1lkdXhmSEt6TTB6d3ZQRkE0MXJfVlNRc3ZtY2ZTMFp2Qk9nUnk5SFU0VkpudHlTMjhTZGVBcVFB?oc=5",
+      "publishedAt": "2026-11-26T20:05:32.000Z",
+      "region": "africa",
+      "category": "film",
+      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
+      "imageUrl": "",
+      "imageFallbackUrl": ""
+    },
+    {
       "id": "2o37y8",
       "headline": "Reimagining the women of The Arabian Nights",
       "publisher": "The Times of India",
@@ -1527,25 +1540,12 @@
       "imageFallbackUrl": ""
     },
     {
-      "id": "1cb23ub",
-      "headline": "Indie Filmmakers at Waves Film Bazaar Look to ‘Dangal’ China Playbook, Pop-Up Cinemas and Screening Fees to Find Audiences",
-      "publisher": "IMDb",
-      "publisherUrl": "https://www.imdb.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMiZkFVX3lxTE0yalFfUHFHTl9WdkxwOUY3STJPZEU5dDRxcG1XTF9HeWh3Q0l6Q0NzbG9pMTVuV3RZMW9LWm50WFdndHBpTEVkcnRzX0g4b3F6WWk3MjVudFhjR09BOGU5RS1PZWZtQQ?oc=5",
-      "publishedAt": "2026-11-26T12:03:21.000Z",
-      "region": "africa",
-      "category": "film",
-      "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
-      "imageUrl": "",
-      "imageFallbackUrl": ""
-    },
-    {
-      "id": "8y3awm",
-      "headline": "Nollywood stars, loved ones eulogise late Francis Duru at service of songs",
-      "publisher": "PM News Nigeria",
-      "publisherUrl": "https://pmnewsnigeria.com",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMisAFBVV95cUxQaG52ZGR6VjVmVlMtcW9yakdJcHVwR1k4RFliWURqSm1sR25kMWVlRloyXzRMeVhFTVh4VzNvN0NqdFVBZGJfZzRPUkdCY0ZFLTJoVGZwTnJ3WUZ4TXF6YmszY25qS0xrSFpWM0N3OUZoMHNrLXluYURLWEQ1R0N5a1U4UXJKUGpIUngyY0puS01MVGFLNGp5S3ZuZTMtQkVabzBFbUlRS284QmVVRXpYSA?oc=5",
-      "publishedAt": "2026-11-26T10:15:38.000Z",
+      "id": "8ckytc",
+      "headline": "Nollywood fans heartbroken after viral post falsely claims 5 actors died in 2026",
+      "publisher": "Briefly News",
+      "publisherUrl": "https://briefly.co.za",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMisAFBVV95cUxQLVZjVVBEQW1mRElKOFl1ekdhcURCY3Z0WnN3OFYyTmUtS2xHVDF1bXpzTlNfd0dhVUZlVHBtNWp5ZWZmYlViTEtvYmp2ZHU3MmZ4MEd2Z1lYN1FvYWdsMUdibU1QM0tBQmU2Nnl6RnN5M0U4VldSdTBlTUI3ZDE5YlQ5alVJN1BHSUFESDF2dGFuZ2RPOTRRc2ZROHN1cFR3ZXJ2RjZjeEM2OERzOVdoSw?oc=5",
+      "publishedAt": "2026-11-26T14:31:01.000Z",
       "region": "africa",
       "category": "film",
       "summary": "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.",
