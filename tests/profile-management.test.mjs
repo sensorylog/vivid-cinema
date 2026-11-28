@@ -18,7 +18,7 @@ const [service, listCreate, update, remove, rules, vercelProfilesApi] = await Pr
 
 
 test("household profile API uses the deployed Firebase Admin backend and validates profile sessions", () => {
-  assert.match(vercelProfilesApi, /auth\.verifyIdToken\(match\[1\], true\)/);
+  assert.match(vercelProfilesApi, /getAuth\(app\)\.verifyIdToken\(match\[1\], true\)/);
   assert.match(vercelProfilesApi, /export default async function handler/);
   assert.match(vercelProfilesApi, /async function listProfiles/);
   assert.match(vercelProfilesApi, /async function createProfile/);
