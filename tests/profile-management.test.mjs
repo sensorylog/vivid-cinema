@@ -7,27 +7,16 @@ import {
 } from "../scripts/profile-schema.js";
 
 const read = path => readFile(new URL(path, import.meta.url), "utf8");
-const [service, listCreate, update, remove, rules, vercelProfilesApi] = await Promise.all([
+const [service, listCreate, update, remove, rules] = await Promise.all([
   read("../cloudflare/functions/lib/profile-service.js"),
   read("../cloudflare/functions/api/profiles/index.js"),
   read("../cloudflare/functions/api/profiles/update.js"),
   read("../cloudflare/functions/api/profiles/delete.js"),
-  read("../firestore.rules"),
-  read("../api/profiles.js")
+  read("../firestore.rules")
 ]);
 
 
-test("household profile API uses the deployed Firebase Admin backend and validates profile sessions", () => {
-  assert.match(vercelProfilesApi, /getAuth\(app\)\.verifyIdToken\(match\[1\], true\)/);
-  assert.match(vercelProfilesApi, /export default async function handler/);
-  assert.match(vercelProfilesApi, /async function listProfiles/);
-  assert.match(vercelProfilesApi, /async function createProfile/);
-  assert.match(vercelProfilesApi, /requireUnlockedProfile\(db, user, user\.profileId\)/);
-  assert.match(vercelProfilesApi, /transaction\.create\(ref, created\)/);
-  assert.match(vercelProfilesApi, /PROFILE_AVATAR_IDS\.has\(avatarId\)/);
-  assert.match(vercelProfilesApi, /MAX_PROFILES/);
-  assert.match(vercelProfilesApi, /profileApiRateLimits/);
-});
+test("household profile API stays on the native Cloudflare Firebase service", () => {\n  assert.match(listCreate, /createAccountProfile/);\n  assert.match(listCreate, /listAccountProfiles/);\n  assert.match(listCreate, /profileErrorResponse/);\n  assert.match(listCreate, /validateProfileOrigin/);\n  assert.doesNotMatch(listCreate, /vivid-cinema-api\\.vercel\\.app/);\n  assert.match(service, /verifyFirebaseIdToken/);\n  assert.match(service, /transaction\.create\(reference, created\)/);\n});
 
 test("shared profile schema defines a five-profile limit and original Vivid avatar collection", () => {
   assert.equal(MAX_PROFILES, 5);
