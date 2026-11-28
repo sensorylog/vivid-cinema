@@ -36,7 +36,7 @@ test("profile PIN validation rejects malformed and non-numeric values", () => {
 });
 
 test("server PIN endpoint verifies Firebase identity and applies brute-force protections", () => {
-  assert.match(pinApi, /auth\.verifyIdToken\(match\[1\], true\)/);
+  assert.match(pinApi, /getAuth\(app\)\.verifyIdToken\(match\[1\], true\)/);
   assert.match(pinApi, /PIN_ATTEMPT_LIMIT = 5/);
   assert.match(pinApi, /PIN_LOCKOUT_MS = 15 \* 60 \* 1000/);
   assert.match(pinApi, /timingSafeEqual\(actual, expected\)/);
@@ -124,7 +124,7 @@ test("profile chooser exposes PIN setup, unlock, and recovery without persisting
   assert.match(profilesApiProxy, /\^Bearer\\s\+\.\+\$\/i/);
   assert.match(profilesApiProxy, /request\.headers\.get\("Origin"\) \|\| "https:\/\/vivid-cinema\.pages\.dev"/);
   assert.match(profilesApiProxy, /headers\.set\("Origin", origin\)/);
-  assert.match(vercelProfilesApi, /auth\.verifyIdToken\(match\[1\], true\)/);
+  assert.match(vercelProfilesApi, /getAuth\(app\)\.verifyIdToken\(match\[1\], true\)/);
   assert.match(vercelProfilesApi, /transaction\.create\(ref, created\)/);
   assert.match(vercelProfilesApi, /hasPin: pinSnapshot\.exists/);
   assert.match(profilePinProxy, /Authorization: authorization/);
@@ -135,7 +135,7 @@ test("profile chooser exposes PIN setup, unlock, and recovery without persisting
 test("every protected page trusts server-issued profile claims and recovers missing browser selection", () => {
   assert.match(shell, /const claimedProfileId = typeof tokenResult\.claims\.profileId === "string"/);
   assert.match(shell, /claimedProfileId/);
-  assert.match(shell, /setActiveProfileId\(user\.uid, claimedProfileId\)/);
+  assert.match(shell, /setActiveProfileId\(activeUser.uid, claimedProfileId\)/);
   assert.match(shell, /activeProfile/);
   assert.match(shell, /tokenResult\.claims\.profileSessionId/);
   assert.match(shell, /validateProfileSession\(user, activeId\)/);
