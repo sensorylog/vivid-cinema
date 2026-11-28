@@ -226,7 +226,7 @@ test("profile identities use the original cinematic avatar artwork and mobile sy
   assert.match(styles, /background-image:url\("\.\.\/assets\/profile-avatars\.svg"\)/);
   assert.match(styles, /\.avatar-choice\{[^}]*background-color:/);
   assert.doesNotMatch(styles.match(/\.avatar-choice\{aspect-ratio:[^}]+\}/)?.[0] || "", /background:/);
-  assert.match(page, /profile-api-proxy-1/);
+  assert.match(page, /profile-backend-single-source-1/);
   assert.match(accountStyles, /\.account-page \.account-sync \.vivid-button\{flex:1 1 100%;width:100%/);
 });
 
