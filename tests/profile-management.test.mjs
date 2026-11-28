@@ -71,7 +71,9 @@ test("profile APIs authenticate Firebase users, rate limit changes and enforce p
   assert.match(service, /enforceRateLimit\(db, user\.uid, "profiles-create"/);
   assert.match(service, /invalid-avatar-source/);
   assert.match(service, /avatarSource/);
-  assert.match(service, /transaction\.get\(profilesRef\)/);
+  assert.match(service, /const initialProfiles = await profilesRef\.get\(\)/);
+  assert.match(service, /initialProfileCount/);
+  assert.doesNotMatch(service, /transaction\.get\(profilesRef\)/);
   assert.match(service, /currentCount >= MAX_PROFILES/);
   assert.match(service, /owner-profile-required/);
   assert.match(service, /transaction\.create\(reference, created\)/);
