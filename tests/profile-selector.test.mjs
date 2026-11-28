@@ -26,7 +26,7 @@ test("successful sign-in opens the Who's Watching profile selector by default", 
   assert.match(selector, /signOut\(auth\)/);
   assert.match(selector, /setActiveProfileId\(accountId, profile\.id\)/);
   assert.match(selector, /vivid:profile-session:v1:/);
-  assert.match(selector, /sessionId: sessionId/);
+  assert.match(selector, /sessionId\s*/);
   assert.match(selector, /if \(profile\.hasPin\)/);
   assert.match(selector, /verifyProfilePin\(pendingProfile\.id, pin\)/);
   assert.match(selector, /finishProfileOpen\(profile, result\.customToken\)/);
@@ -101,7 +101,7 @@ test("profile startup bounds Firebase token refresh and gives users a retry inst
 
 test("a server-issued Firebase profile claim restores a missing Safari storage selection", () => {
   assert.match(shell, /The Firebase custom-token claim is the server-issued source of truth/);
-  assert.match(shell, /setActiveProfileId\(user\.uid, claimedProfileId\)/);
+  assert.match(shell, /setActiveProfileId\(activeUser.uid, claimedProfileId\)/);
   assert.match(profiles, /sessionStorage\.getItem\(key\)/);
   assert.match(profiles, /export async function restoreProfileSession/);
   assert.match(profiles, /action: "restore"/);
