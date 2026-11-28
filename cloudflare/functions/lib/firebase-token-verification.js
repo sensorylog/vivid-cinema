@@ -108,6 +108,32 @@ export async function verifyFirebaseIdToken(idToken, projectId, serviceAccount) 
   if (Number(user.validSince || 0) > Number(claims.auth_time || 0)) throw new Error("Firebase ID token has been revoked.");
   return { ...claims, uid: claims.sub };
 }
+
+export async function createFirebaseCustomToken(uid, additionalClaims, serviceAccount) {
+  if (typeof uid !== "string" || !uid || uid.length > 128 ||
+      !serviceAccount?.client_email || !serviceAccount?.private_key) {
+    throw new Error("Firebase custom-token signing credentials are incomplete.");
+  }
+  const now = Math.floor(Date.now() / 1000);
+  const header = base64Url(JSON.stringify({ alg: "RS256", typ: "JWT" }));
+  const payload = base64Url(JSON.stringify({
+    iss: serviceAccount.client_email,
+    sub: serviceAccount.client_email,
+    aud: "https://identitytoolkit.googleapis.com/google.identity.identitytoolkit.v1.IdentityToolkit",
+    iat: now,
+    exp: now + 3600,
+    uid,
+    ...(additionalClaims && Object.keys(additionalClaims).length ? { claims: additionalClaims } : {})
+  }));
+  const unsigned = header + "." + payload;
+  const key = await crypto.subtle.importKey(
+    "pkcs8", pemBytes(serviceAccount.private_key),
+    { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" }, false, ["sign"]
+  );
+  const signature = await crypto.subtle.sign("RSASSA-PKCS1-v1_5", key, encoder.encode(unsigned));
+  return unsigned + "." + base64Url(signature);
+}
+
 export async function verifyAppCheckToken(token) {
   let claims;
   try {
