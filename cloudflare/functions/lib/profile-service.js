@@ -239,7 +239,7 @@ export async function createAccountProfile(request, env) {
       throw new AnimePremiumError(409, "owner-profile-required", "The main Vivid profile must be initialized before adding profiles.");
     }
     if(body.isKids===true&&!ownerPin.exists)throw new AnimePremiumError(409,"parent-pin-required","Set a PIN on the Main Profile before creating a Kids profile.");
-    const currentCount = Number(limits.data()?.profileCount ?? initialProfileCount);
+    const currentCount = Math.max(initialProfileCount, Number(limits.data()?.profileCount || 0));
     if (currentCount >= MAX_PROFILES) {
       throw new AnimePremiumError(409, "profile-limit-reached", "A Vivid account can have up to " + MAX_PROFILES + " profiles.");
     }
