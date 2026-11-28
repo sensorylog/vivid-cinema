@@ -13,6 +13,8 @@ const profileService = readFileSync(new URL("../cloudflare/functions/lib/profile
 const cloudflareApi = readFileSync(new URL("../scripts/cloudflare-api.js", import.meta.url), "utf8");
 const cloudflareService = readFileSync(new URL("../cloudflare/functions/lib/anime-premium-service.js", import.meta.url), "utf8");
 const profilePinProxy = readFileSync(new URL("../cloudflare/functions/api/profile-pin.js", import.meta.url), "utf8");
+const profilesApiProxy = readFileSync(new URL("../cloudflare/functions/api/profiles/index.js", import.meta.url), "utf8");
+const vercelProfilesApi = readFileSync(new URL("../api/profiles.js", import.meta.url), "utf8");
 
 test("profile PINs are stored as salted PBKDF2 hashes, never plaintext", () => {
   const first = hashProfilePin("4826");
@@ -116,6 +118,13 @@ test("profile chooser exposes PIN setup, unlock, and recovery without persisting
   assert.match(manager, /cache: "no-store"/);
   assert.ok(manager.includes("getCloudflareApiUrl(\"/api/profile-pin\")"));
   assert.match(profilePinProxy, /PROFILE_PIN_SERVICE/);
+  assert.match(profilePinProxy, /\^Bearer\\s\+\.\+\$\/i/);
+  assert.doesNotMatch(profilePinProxy, /Bearer\\\\s/);
+  assert.match(profilesApiProxy, /vivid-cinema-api\.vercel\.app\/api\/profiles/);
+  assert.match(profilesApiProxy, /\^Bearer\\s\+\.\+\$\/i/);
+  assert.match(vercelProfilesApi, /auth\.verifyIdToken\(match\[1\], true\)/);
+  assert.match(vercelProfilesApi, /transaction\.create\(ref, created\)/);
+  assert.match(vercelProfilesApi, /hasPin: pinSnapshot\.exists/);
   assert.match(profilePinProxy, /Authorization: authorization/);
   assert.match(profilePinProxy, /profile-security-upstream-unavailable/);
   assert.ok(readFileSync(new URL("../scripts/profiles.js", import.meta.url), "utf8").includes("getCloudflareApiUrl(\"/api/profile-pin\")"));
