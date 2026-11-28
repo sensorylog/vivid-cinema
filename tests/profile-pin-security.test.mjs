@@ -120,7 +120,7 @@ test("profile chooser exposes PIN setup, unlock, and recovery without persisting
   assert.match(profilePinProxy, /PROFILE_PIN_SERVICE/);
   assert.match(profilePinProxy, /\^Bearer\\s\+\.\+\$\/i/);
   assert.doesNotMatch(profilePinProxy, /Bearer\\\\s/);
-  assert.match(profilesApiProxy, /vivid-cinema-api\.vercel\.app\/api\/profiles/);
+  assert.match(profilesApiProxy, /createAccountProfile/);\n  assert.match(profilesApiProxy, /listAccountProfiles/);\n  assert.doesNotMatch(profilesApiProxy, /vivid-cinema-api\\.vercel\\.app/);
   assert.match(profilesApiProxy, /\^Bearer\\s\+\.\+\$\/i/);
   assert.match(profilesApiProxy, /request\.headers\.get\("Origin"\) \|\| "https:\/\/vivid-cinema\.pages\.dev"/);
   assert.match(profilesApiProxy, /headers\.set\("Origin", origin\)/);
