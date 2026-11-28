@@ -126,11 +126,26 @@ export function getPremiumServices(env) {
   let serviceAccount;
   try { serviceAccount = JSON.parse(raw); }
   catch { throw new AnimePremiumError(503, "firebase-not-configured", "The Vivid membership service is not configured."); }
-  const projectId = String(env.FIREBASE_PROJECT_ID || serviceAccount.project_id || "");
+  const configuredProjectId = String(env.FIREBASE_PROJECT_ID || "").trim();
+  const serviceAccountProjectId = String(serviceAccount.project_id || "").trim();
+  const projectId = configuredProjectId || serviceAccountProjectId;
   if (!projectId || !serviceAccount.client_email || !serviceAccount.private_key) {
     throw new AnimePremiumError(503, "firebase-not-configured", "The Vivid membership service is not configured.");
   }
-  const app = initializeRestApp({ serviceAccountJson: raw, projectId }, "vivid-anime-premium-" + projectId);
+  // The adapter validates serviceAccountJson independently and requires its
+  // own project_id field. Older deployments may provide FIREBASE_PROJECT_ID
+  // separately, so normalize the JSON before handing it to the adapter.
+  if (serviceAccountProjectId && configuredProjectId && serviceAccountProjectId !== configuredProjectId) {
+    throw new AnimePremiumError(503, "firebase-project-mismatch", "The Firebase project configuration does not match the service account.");
+  }
+  const normalizedServiceAccountJson = JSON.stringify({
+    ...serviceAccount,
+    project_id: projectId
+  });
+  const app = initializeRestApp({
+    serviceAccountJson: normalizedServiceAccountJson,
+    projectId
+  }, "vivid-anime-premium-" + projectId);
   cachedDb = getFirestore(app);
   cachedProjectId = projectId;
   cachedServiceAccount = serviceAccount;

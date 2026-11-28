@@ -97,12 +97,23 @@ export async function requireUnlockedProfile(db, user, profileId) {
 }
 
 function safeProfileErrorMessage(error) {
-  const message = String(error?.message || "Unknown profile service error.")
-    .replace(/-----BEGIN [A-Z ]*PRIVATE KEY-----[\\s\\S]*?-----END [A-Z ]*PRIVATE KEY-----/gi, "[REDACTED_PRIVATE_KEY]")
-    .replace(/Bearer\\s+[A-Za-z0-9._~+/-]+=*/gi, "Bearer [REDACTED]")
-    .replace(/eyJ[A-Za-z0-9_-]+\\.eyJ[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]+/g, "[REDACTED_TOKEN]")
-    .replace(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,}/gi, "[REDACTED_EMAIL]");
-  return message.slice(0, 600);
+  return String(error?.message || "Unknown profile service error.")
+    .replace(/-----BEGIN [A-Z ]*PRIVATE KEY-----[\s\S]*?-----END [A-Z ]*PRIVATE KEY-----/gi, "[REDACTED_PRIVATE_KEY]")
+    .replace(/Bearer\s+[A-Za-z0-9._~+/-]+=*/gi, "Bearer [REDACTED]")
+    .replace(/eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+/g, "[REDACTED_TOKEN]")
+    .replace(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi, "[REDACTED_EMAIL]")
+    .slice(0, 1200);
+}
+
+function safeValidationIssues(error) {
+  if (!Array.isArray(error?.issues)) return undefined;
+  return error.issues.slice(0, 12).map(issue => ({
+    code: String(issue.code || "validation_error").slice(0, 80),
+    path: Array.isArray(issue.path) ? issue.path.map(part => String(part).slice(0, 80)).slice(0, 8) : [],
+    expected: issue.expected == null ? undefined : String(issue.expected).slice(0, 100),
+    received: issue.received == null ? undefined : String(issue.received).slice(0, 100),
+    message: String(issue.message || "Validation failed.").slice(0, 240)
+  }));
 }
 
 export function profileErrorResponse(error, origin, env) {
@@ -115,6 +126,7 @@ export function profileErrorResponse(error, origin, env) {
       code: String(error?.code || "profile-service-unavailable").slice(0, 100),
       errorName: String(error?.name || "Error").slice(0, 100),
       message: safeProfileErrorMessage(error),
+      validationIssues: safeValidationIssues(error),
       status,
       timestamp: new Date().toISOString()
     }));
