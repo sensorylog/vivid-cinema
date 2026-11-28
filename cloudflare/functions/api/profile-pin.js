@@ -25,7 +25,7 @@ export function onRequestOptions() {
 
 export async function onRequestPost({ request }) {
   const authorization = request.headers.get("Authorization") || "";
-  if (!/^Bearer\\s+.+$/i.test(authorization)) {
+  if (!/^Bearer\s+.+$/i.test(authorization)) {
     return json({ ok: false, code: "unauthenticated", message: "Sign in to manage profile security." }, 401);
   }
 
