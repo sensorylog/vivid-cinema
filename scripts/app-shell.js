@@ -1,5 +1,5 @@
 import { VIVID_CONFIG } from "./config.js";
-import { clearActiveProfileId, getActiveProfileId, setActiveProfileId, listProfileSummaries, validateProfileSession } from "./profiles.js";
+import { clearActiveProfileId, getActiveProfileId, setActiveProfileId, listProfileSummaries, validateProfileSession, restoreProfileSession, clearStoredProfileSession } from "./profiles.js";
 import { applyPerformanceProfile } from "./performance-profile.js";
 import { resolveAndroidBackAction } from "./android-navigation.js";
 import "./movie-quick-actions.js";
@@ -433,6 +433,14 @@ function clearAllProfileGateRedirects() {
 }
 
 function showProfileGateNotice() {
+  // The profile selector is the recovery destination itself. Never cover its
+  // profile cards with the protected-page gate, even if a rewritten route or
+  // stale auth callback makes the pathname check ambiguous.
+  if (document.body?.classList.contains("profile-selector-page") ||
+      document.body?.dataset?.vividPage === "profiles") {
+    document.getElementById("vivid-profile-gate-notice")?.remove();
+    return;
+  }
   if (document.getElementById("vivid-profile-gate-notice")) return;
   const notice = document.createElement("div");
   notice.id = "vivid-profile-gate-notice";
@@ -459,7 +467,14 @@ function showProfileGateNotice() {
 
 function rememberProfileReturnRoute() {
   const page = location.pathname.split("/").filter(Boolean).pop() || "home.html";
-  if (["profiles.html", "auth.html", "login.html", "forgot-password.html", "auth-diagnostics.html", "verify-email.html", "anime-premium-return.html"].includes(page)) return;
+  const isProfileSelector = document.body?.classList.contains("profile-selector-page") ||
+    document.body?.dataset?.vividPage === "profiles" ||
+    ["profiles", "profiles.html"].includes(page);
+  if (isProfileSelector) {
+    document.getElementById("vivid-profile-gate-notice")?.remove();
+    return;
+  }
+  if (["auth.html", "login.html", "forgot-password.html", "auth-diagnostics.html", "verify-email.html", "anime-premium-return.html"].includes(page)) return;
   try { sessionStorage.setItem(PROFILE_RETURN_TO_KEY, currentRoute()); } catch {}
 }
 
@@ -503,14 +518,14 @@ async function enforceProfileSelection(user) {
   if (["profiles.html", "auth.html", "login.html", "forgot-password.html", "auth-diagnostics.html", "verify-email.html", "anime-premium-return.html"].includes(page)) return;
   const redirectToProfiles = () => {
     rememberProfileReturnRoute();
-    const key = PROFILE_GATE_REDIRECT_PREFIX + String(user.uid);
-    let alreadyRedirected = profileGateRedirectedUids.has(String(user.uid));
+    const key = PROFILE_GATE_REDIRECT_PREFIX + String(activeUser.uid);
+    let alreadyRedirected = profileGateRedirectedUids.has(String(activeUser.uid));
     try {
       alreadyRedirected = alreadyRedirected || sessionStorage.getItem(key) === "1";
       if (!alreadyRedirected) sessionStorage.setItem(key, "1");
     } catch {}
     if (!alreadyRedirected) {
-      profileGateRedirectedUids.add(String(user.uid));
+      profileGateRedirectedUids.add(String(activeUser.uid));
       window.location.replace("profiles.html");
       return;
     }
@@ -519,9 +534,18 @@ async function enforceProfileSelection(user) {
     showProfileGateNotice();
   };
 
+  let activeUser = user;
+  try {
+    activeUser = await restoreProfileSession(user);
+  } catch (error) {
+    console.warn("Vivid could not restore the selected profile session:", error);
+    showProfileGateNotice();
+    return;
+  }
+
   let tokenResult;
   try {
-    tokenResult = await user.getIdTokenResult();
+    tokenResult = await activeUser.getIdTokenResult();
   } catch (error) {
     // A temporary token refresh failure must not send a signed-in viewer into
     // a selector loop. The next navigation/auth event can retry validation.
@@ -537,25 +561,25 @@ async function enforceProfileSelection(user) {
     ? tokenResult.claims.profileId
     : "";
   if (!/^[A-Za-z0-9_-]{1,64}$/.test(claimedProfileId)) {
-    clearActiveProfileId(user.uid);
+    clearActiveProfileId(activeUser.uid);
     redirectToProfiles();
     return;
   }
-  clearProfileGateRedirect(user.uid);
-  const storedProfileId = getActiveProfileId(user.uid);
+  clearProfileGateRedirect(activeUser.uid);
+  const storedProfileId = getActiveProfileId(activeUser.uid);
   if (storedProfileId !== claimedProfileId) {
-    try { setActiveProfileId(user.uid, claimedProfileId); }
+    try { setActiveProfileId(activeUser.uid, claimedProfileId); }
     catch (error) { console.warn("Vivid could not persist the active profile locally:", error); }
   }
   const activeId = claimedProfileId;
 
   let activeProfile;
   try {
-    const summary = await listProfileSummaries(user);
+    const summary = await listProfileSummaries(activeUser);
     activeProfile = summary.profiles.find(profile => profile.id === activeId);
   } catch (error) {
     if (error?.code === "PROFILE_SESSION_REJECTED") {
-      clearActiveProfileId(user.uid);
+      clearActiveProfileId(activeUser.uid);
       redirectToProfiles();
       return;
     }
@@ -564,11 +588,11 @@ async function enforceProfileSelection(user) {
     console.warn("Vivid profile verification is temporarily unavailable; preserving the selected route:", error);
     if (typeof tokenResult.claims.profileSessionId === "string") {
       try {
-        if (!await validateProfileSession(user, activeId)) {
+        if (!await validateProfileSession(activeUser, activeId)) {
           redirectToProfiles();
           return;
         }
-        bindProfileActivity(user, activeId);
+        bindProfileActivity(activeUser, activeId);
       } catch (validationError) {
         console.warn("Vivid could not refresh profile-session verification:", validationError);
       }
@@ -577,7 +601,7 @@ async function enforceProfileSelection(user) {
   }
 
   if (!activeProfile) {
-    clearActiveProfileId(user.uid);
+    clearActiveProfileId(activeUser.uid);
     redirectToProfiles();
     return;
   }
@@ -619,12 +643,13 @@ function syncAccountNavigation() {
         try { previousUid = localStorage.getItem(PROFILE_SESSION_UID_KEY) || ""; } catch {}
         if (previousUid && previousUid !== String(user?.uid || "")) {
           clearActiveProfileId(previousUid);
+          clearStoredProfileSession(previousUid);
           clearProfileGateRedirect(previousUid);
         }
         if (user?.uid) {
           try { localStorage.setItem(PROFILE_SESSION_UID_KEY, String(user.uid)); } catch {}
         } else {
-          if (previousUid) clearActiveProfileId(previousUid);
+          if (previousUid) { clearActiveProfileId(previousUid); clearStoredProfileSession(previousUid); }
           clearAllProfileGateRedirects();
           try { localStorage.removeItem(PROFILE_SESSION_UID_KEY); } catch {}
         }

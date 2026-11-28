@@ -44,6 +44,10 @@ test("profile PIN API enforces lockout, recent-auth recovery and server-issued s
   assert.match(api, /email_verified === true/);
   assert.match(api, /action === "reset"/);
   assert.match(api, /action === "validate"/);
+  assert.match(api, /action === "restore"/);
+  assert.match(api, /profileSessionId: sessionId/);
+  assert.match(api, /sessionId, sessionExpiresAt/);
+  assert.match(api, /session\.uid !== claims\.uid/);
   assert.match(api, /SESSION_IDLE_TIMEOUT_MS = 30 \* 60 \* 1000/);
   assert.match(api, /lastActivityAt: Timestamp\.fromMillis\(now\)/);
   assert.match(service, /lastActivityAt <= Date\.now\(\) - PROFILE_SESSION_IDLE_TIMEOUT_MS/);
