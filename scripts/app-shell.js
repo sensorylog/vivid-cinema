@@ -1,5 +1,5 @@
 import { VIVID_CONFIG } from "./config.js";
-import { clearActiveProfileId, getActiveProfileId, setActiveProfileId, listProfileSummaries, validateProfileSession, restoreProfileSession, clearStoredProfileSession } from "./profiles.js?v=profile-api-proxy-1";
+import { clearActiveProfileId, getActiveProfileId, setActiveProfileId, listProfileSummaries, validateProfileSession, restoreProfileSession, clearStoredProfileSession } from "./profiles.js";
 import { applyPerformanceProfile } from "./performance-profile.js";
 import { resolveAndroidBackAction } from "./android-navigation.js";
 import "./movie-quick-actions.js";
