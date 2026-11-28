@@ -112,7 +112,12 @@ test("profile chooser exposes PIN setup, unlock, and recovery without persisting
   assert.match(selector, /setProfilePin\(editingId, pin, currentPin, openSession\)/);
   assert.match(selector, /resetProfilePin\(resetProfileId\)/);
   assert.doesNotMatch(selector, /localStorage\.setItem\([^\n]*pin/i);
-  assert.match(manager, /cache: "no-store"/);\n  assert.match(manager, /getCloudflareApiUrl\("\\/api\\/profile-pin"\)/);\n  assert.match(profilePinProxy, /PROFILE_PIN_SERVICE/);\n  assert.match(profilePinProxy, /Authorization: authorization/);\n  assert.match(profilePinProxy, /profile-security-upstream-unavailable/);\n  assert.match(readFileSync(new URL("../scripts/profiles.js", import.meta.url), "utf8"), /getCloudflareApiUrl\("\\/api\\/profile-pin"\)/);
+  assert.match(manager, /cache: "no-store"/);
+  assert.match(manager, /getCloudflareApiUrl\("\\/api\\/profile-pin"\)/);
+  assert.match(profilePinProxy, /PROFILE_PIN_SERVICE/);
+  assert.match(profilePinProxy, /Authorization: authorization/);
+  assert.match(profilePinProxy, /profile-security-upstream-unavailable/);
+  assert.match(readFileSync(new URL("../scripts/profiles.js", import.meta.url), "utf8"), /getCloudflareApiUrl\("\\/api\\/profile-pin"\)/);
 });
 
 test("every protected page trusts server-issued profile claims and recovers missing browser selection", () => {
