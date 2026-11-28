@@ -1281,3 +1281,31 @@ body.vivid-atmosphere .vivid-unified-header .vivid-navlinks > a[href="search.htm
     pointer-events: auto !important;
   }
 }
+
+
+/* Desktop and tablet navigation: Search must remain reachable in the header.
+   The mobile-only bottom tab bar is not present in the desktop shell, and an
+   older duplicate-control rule was hiding the shared header search everywhere. */
+@media (min-width: 641px) {
+  body.vivid-atmosphere .vivid-topbar .vivid-nav-tools .vivid-search-trigger,
+  body.vivid-atmosphere .vivid-topbar .vivid-nav-tools .vivid-nav-search,
+  body.vivid-atmosphere .vivid-unified-header .vivid-nav-tools .vivid-search-trigger,
+  body.vivid-atmosphere .vivid-unified-header .vivid-nav-tools .vivid-nav-search,
+  body.vivid-atmosphere .vivid-topbar .vivid-navlinks > a[href="search.html"],
+  body.vivid-atmosphere .vivid-unified-header .vivid-navlinks > a[href="search.html"] {
+    display: inline-flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+  }
+
+  body.vivid-atmosphere .vivid-topbar .vivid-nav-tools .vivid-search-trigger,
+  body.vivid-atmosphere .vivid-unified-header .vivid-nav-tools .vivid-search-trigger {
+    align-items: center !important;
+    justify-content: center !important;
+    flex: 0 0 auto !important;
+    min-width: 42px !important;
+    min-height: 42px !important;
+    gap: 8px !important;
+  }
+}
