@@ -36,7 +36,7 @@ test("profile PIN validation rejects malformed and non-numeric values", () => {
 });
 
 test("server PIN endpoint verifies Firebase identity and applies brute-force protections", () => {
-  assert.match(pinApi, /getAuth\(app\)\.verifyIdToken\(match\[1\], true\)/);
+  assert.match(pinApi, /auth\.verifyIdToken\(match\[1\], true\)/);
   assert.match(pinApi, /PIN_ATTEMPT_LIMIT = 5/);
   assert.match(pinApi, /PIN_LOCKOUT_MS = 15 \* 60 \* 1000/);
   assert.match(pinApi, /timingSafeEqual\(actual, expected\)/);
