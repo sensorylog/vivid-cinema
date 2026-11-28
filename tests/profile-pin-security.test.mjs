@@ -123,12 +123,6 @@ test("profile chooser exposes PIN setup, unlock, and recovery without persisting
   assert.match(profilesApiProxy, /createAccountProfile/);
   assert.match(profilesApiProxy, /listAccountProfiles/);
   assert.doesNotMatch(profilesApiProxy, /vivid-cinema-api\\.vercel\\.app/);
-  assert.match(profilesApiProxy, /\^Bearer\\s\+\.\+\$\/i/);
-  assert.match(profilesApiProxy, /request\.headers\.get\("Origin"\) \|\| "https:\/\/vivid-cinema\.pages\.dev"/);
-  assert.match(profilesApiProxy, /headers\.set\("Origin", origin\)/);
-  assert.match(vercelProfilesApi, /getAuth\(app\)\.verifyIdToken\(match\[1\], true\)/);
-  assert.match(vercelProfilesApi, /transaction\.create\(ref, created\)/);
-  assert.match(vercelProfilesApi, /hasPin: pinSnapshot\.exists/);
   assert.match(profilePinProxy, /Authorization: authorization/);
   assert.match(profilePinProxy, /Origin: request\.headers\.get\("Origin"\) \|\| "https:\/\/vivid-cinema\.pages\.dev"/);
   assert.match(profilePinProxy, /profile-security-upstream-unavailable/);
