@@ -21,6 +21,8 @@ const files = [
   "scripts/profile-manager.js",
   "scripts/parental-controls.js",
   "api/profile-pin.js",
+  "api/profiles.js",
+  "cloudflare/functions/api/profile-pin.js",
   "scripts/downloads/desktop-offline.js",
   "api/watch-rooms.js",
   "cloudflare/functions/api/watch-rooms.js",

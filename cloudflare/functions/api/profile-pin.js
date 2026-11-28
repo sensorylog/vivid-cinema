@@ -25,7 +25,7 @@ export function onRequestOptions() {
 
 export async function onRequestPost({ request }) {
   const authorization = request.headers.get("Authorization") || "";
-  if (!/^Bearer\\s+.+$/i.test(authorization)) {
+  if (!/^Bearer\s+.+$/i.test(authorization)) {
     return json({ ok: false, code: "unauthenticated", message: "Sign in to manage profile security." }, 401);
   }
 
@@ -47,7 +47,7 @@ export async function onRequestPost({ request }) {
       headers: {
         "Content-Type": "application/json",
         Authorization: authorization,
-        ...(request.headers.get("Origin") ? { Origin: request.headers.get("Origin") } : {})
+        Origin: request.headers.get("Origin") || "https://vivid-cinema.pages.dev"
       },
       body: JSON.stringify(body),
       cache: "no-store",

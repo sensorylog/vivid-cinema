@@ -1,8 +1,8 @@
 import { auth } from "./firebase.js";
 import { onAuthStateChanged, signOut, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
-import { clearActiveProfileId, ensureOwnerProfile, initializeProfileFoundation, getActiveProfileId, setActiveProfileId, validateProfileSession, withProfileTimeout, OWNER_PROFILE_ID } from "./profiles.js?v=profile-api-proxy-1";
+import { clearActiveProfileId, ensureOwnerProfile, initializeProfileFoundation, getActiveProfileId, setActiveProfileId, validateProfileSession, withProfileTimeout, OWNER_PROFILE_ID } from "./profiles.js";
 import { normalizeAvatarUrl } from "./profile-schema.js";
-import { fetchProfiles, createProfile, updateProfile, deleteProfile, compressProfileImage, selectProfile, verifyProfilePin, setProfilePin, removeProfilePin, resetProfilePin, PROFILE_AVATARS, MAX_PROFILES } from "./profile-manager.js?v=profile-api-proxy-1";
+import { fetchProfiles, createProfile, updateProfile, deleteProfile, compressProfileImage, selectProfile, verifyProfilePin, setProfilePin, removeProfilePin, resetProfilePin, PROFILE_AVATARS, MAX_PROFILES } from "./profile-manager.js";
 
 const $ = id => document.getElementById(id);
 const grid = $("profile-grid");
