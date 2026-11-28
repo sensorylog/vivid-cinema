@@ -128,6 +128,7 @@ test("profile chooser exposes PIN setup, unlock, and recovery without persisting
   assert.match(vercelProfilesApi, /transaction\.create\(ref, created\)/);
   assert.match(vercelProfilesApi, /hasPin: pinSnapshot\.exists/);
   assert.match(profilePinProxy, /Authorization: authorization/);
+  assert.match(profilePinProxy, /Origin: request\.headers\.get\("Origin"\) \|\| "https:\/\/vivid-cinema\.pages\.dev"/);
   assert.match(profilePinProxy, /profile-security-upstream-unavailable/);
   assert.ok(readFileSync(new URL("../scripts/profiles.js", import.meta.url), "utf8").includes("getCloudflareApiUrl(\"/api/profile-pin\")"));
 });
