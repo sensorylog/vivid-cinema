@@ -224,7 +224,9 @@ test("profile identities use the original cinematic avatar artwork and mobile sy
   assert.match(selector, /profile-avatar-art/);
   assert.match(selector, /--avatar-x/);
   assert.match(styles, /background-image:url\("\.\.\/assets\/profile-avatars\.svg"\)/);
-  assert.match(page, /phase7-profile-recovery-1/);
+  assert.match(styles, /\.avatar-choice\{[^}]*background-color:/);
+  assert.doesNotMatch(styles.match(/\.avatar-choice\{aspect-ratio:[^}]+\}/)?.[0] || "", /background:/);
+  assert.match(page, /profile-open-avatar-art-2/);
   assert.match(accountStyles, /\.account-page \.account-sync \.vivid-button\{flex:1 1 100%;width:100%/);
 });
 
