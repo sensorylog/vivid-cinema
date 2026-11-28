@@ -16,7 +16,15 @@ const [service, listCreate, update, remove, rules] = await Promise.all([
 ]);
 
 
-test("household profile API stays on the native Cloudflare Firebase service", () => {\n  assert.match(listCreate, /createAccountProfile/);\n  assert.match(listCreate, /listAccountProfiles/);\n  assert.match(listCreate, /profileErrorResponse/);\n  assert.match(listCreate, /validateProfileOrigin/);\n  assert.doesNotMatch(listCreate, /vivid-cinema-api\\.vercel\\.app/);\n  assert.match(service, /verifyFirebaseIdToken/);\n  assert.match(service, /transaction\.create\(reference, created\)/);\n});
+test("household profile API stays on the native Cloudflare Firebase service", () => {
+  assert.match(listCreate, /createAccountProfile/);
+  assert.match(listCreate, /listAccountProfiles/);
+  assert.match(listCreate, /profileErrorResponse/);
+  assert.match(listCreate, /validateProfileOrigin/);
+  assert.doesNotMatch(listCreate, /vivid-cinema-api\\.vercel\\.app/);
+  assert.match(service, /verifyFirebaseIdToken/);
+  assert.match(service, /transaction\.create\(reference, created\)/);
+});
 
 test("shared profile schema defines a five-profile limit and original Vivid avatar collection", () => {
   assert.equal(MAX_PROFILES, 5);
