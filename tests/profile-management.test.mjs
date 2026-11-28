@@ -68,7 +68,9 @@ test("profile APIs authenticate Firebase users, rate limit changes and enforce p
   assert.match(service, /collection\("avatar"\)\.doc\("image"\)/);
   assert.match(service, /includeAvatars/);
   assert.match(service, /"avatar"/);
-  assert.match(service, /transaction\.delete\(reference\)/);\n  assert.match(service, /The household chooser is available before a viewing profile is opened/);\n  assert.match(service, /existingKids = await profilesRef\.where\("isKids", "==", true\)/);
+  assert.match(service, /transaction\.delete\(reference\)/);
+  assert.match(service, /The household chooser is available before a viewing profile is opened/);
+  assert.match(service, /existingKids = await profilesRef\.where\("isKids", "==", true\)/);
 });
 
 
