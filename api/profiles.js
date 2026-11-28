@@ -73,8 +73,11 @@ function sendError(res, error) {
 }
 
 function getBody(req) {
-  const body = req.body && typeof req.body === "object" ? req.body
-    : typeof req.body === "string" ? JSON.parse(req.body) : null;
+  let body = req.body && typeof req.body === "object" ? req.body : null;
+  if (!body && typeof req.body === "string") {
+    try { body = JSON.parse(req.body); }
+    catch { throw new ProfilesApiError(400, "invalid-request", "A valid profile request is required."); }
+  }
   if (!body || typeof body !== "object" || Array.isArray(body)) {
     throw new ProfilesApiError(400, "invalid-request", "A valid profile request is required.");
   }
@@ -159,8 +162,9 @@ async function listProfiles(req, res) {
     const avatarData = includeAvatars ? (avatarSnapshot?.data()?.data || doc.data()?.avatarData || "") : "";
     return { ...serializeProfile(doc.id, doc.data() || {}, avatarData), hasPin: pinSnapshot.exists };
   }));
-  profiles.sort((a, b) => a.id === OWNER_PROFILE_ID ? -1 : b.id === OWNER_PROFILE_ID ? 1 : String(a.createdAt || "").localeCompare(String(b.createdAt || "")));
-  return res.status(200).json({ ok: true, profiles, migrationComplete: migrationSnapshot.data()?.status === "complete" });
+  const validProfiles = profiles.filter(profile => profile.id === OWNER_PROFILE_ID || PROFILE_ID_PATTERN.test(profile.id));
+  validProfiles.sort((a, b) => a.id === OWNER_PROFILE_ID ? -1 : b.id === OWNER_PROFILE_ID ? 1 : String(a.createdAt || "").localeCompare(String(b.createdAt || "")));
+  return res.status(200).json({ ok: true, profiles: validProfiles, migrationComplete: migrationSnapshot.data()?.status === "complete" });
 }
 
 function cleanProfileInput(profileId, body, role) {
