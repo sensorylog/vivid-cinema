@@ -292,12 +292,9 @@ async function ensureProfileMigration() {
   }
 }
 async function chooseProfile(profile) {
-  try {
-    await ensureProfileMigration();
-  } catch (error) {
-    say("Vivid couldn't finish the library setup. Check your connection and tap a profile to retry. " + (error.message || ""), true);
-    return;
-  }
+  // Profile access must not depend on the legacy library migration. That migration
+  // is recoverable and can be retried independently; blocking selection here
+  // strands users on the household screen when App Check or Firestore is slow.
   if (profile.hasPin) {
     pendingProfile = profile;
     $("profile-pin-input").value = "";
@@ -328,11 +325,14 @@ async function refreshProfiles() {
   if (result.migrationComplete) {
     profileMigrationState = "ready";
     profileMigrationPromise = null;
-    say("Choose a profile to continue.");
-    return;
+  } else {
+    // Do not switch Firebase identity to the Main Profile in the background:
+    // doing so races a user's tap on another profile. Legacy migration is
+    // deferred until it can run without interrupting profile selection.
+    profileMigrationState = "deferred";
+    profileMigrationPromise = null;
   }
-  say("Your profiles are ready. Finishing your library setup…");
-  void startProfileMigration();
+  say("Choose a profile to continue.");
 }
 $("profile-signout").addEventListener("click",async() => {
   const button = $("profile-signout");
