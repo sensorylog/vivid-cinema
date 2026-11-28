@@ -109,18 +109,19 @@ test("a server-issued Firebase profile claim restores a missing Safari storage s
   assert.match(profiles, /sessionStorage\.setItem\(key, id\)/);
 });
 
-test("profile selector renders existing profiles before starting owner-scoped library migration", () => {
+test("legacy library migration never blocks profile selection or races a background owner switch", () => {
   const refreshStart = selector.indexOf("async function refreshProfiles()");
   const fetchStart = selector.indexOf("let result = await fetchProfiles();", refreshStart);
-  const ownerEnsure = selector.indexOf("await ensureOwnerProfile(user);", refreshStart);
   const render = selector.indexOf("renderProfiles();", refreshStart);
-  const migration = selector.indexOf("void startProfileMigration();", refreshStart);
+  const deferred = selector.indexOf('profileMigrationState = "deferred"', refreshStart);
+  const chooseStart = selector.indexOf("async function chooseProfile(profile)");
+  const chooseEnd = selector.indexOf("async function refreshProfiles()", chooseStart);
+  const chooseFlow = selector.slice(chooseStart, chooseEnd);
   assert.ok(refreshStart >= 0 && fetchStart > refreshStart);
-  assert.ok(ownerEnsure > fetchStart, "existing profile list must be checked before creating an owner record");
-  assert.ok(render > fetchStart && migration > render, "profiles must render before background migration begins");
-  assert.match(selector, /await selectProfile\(OWNER_PROFILE_ID\)/);
-  assert.match(selector, /initializeProfileFoundation\(user\)/);
-  assert.match(selector, /await ensureProfileMigration\(\)/);
+  assert.ok(render > fetchStart && deferred > render, "profiles render before incomplete migration is deferred");
+  assert.doesNotMatch(chooseFlow, /ensureProfileMigration/);
+  assert.match(chooseFlow, /selectProfile\(profile\.id\)/);
+  assert.match(selector, /await initializeProfileFoundation\(user\)/);
   assert.match(profiles, /await ensureOwnerProfile\(user\)/);
   assert.match(selector, /location\.replace\(destination\(\)\)/);
 });
