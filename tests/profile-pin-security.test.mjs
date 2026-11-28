@@ -117,15 +117,19 @@ test("profile chooser exposes PIN setup, unlock, and recovery without persisting
   assert.doesNotMatch(selector, /localStorage\.setItem\([^\n]*pin/i);
   assert.match(manager, /cache: "no-store"/);
   assert.ok(manager.includes("getCloudflareApiUrl(\"/api/profile-pin\")"));
-  assert.match(profilePinProxy, /PROFILE_PIN_SERVICE/);
-  assert.match(profilePinProxy, /\^Bearer\\s\+\.\+\$\/i/);
-  assert.doesNotMatch(profilePinProxy, /Bearer\\\\s/);
+  assert.match(profilePinProxy, /createFirebaseCustomToken/);
+  assert.match(profilePinProxy, /requireProfileUser/);
+  assert.match(profilePinProxy, /consumeRateLimit/);
+  assert.match(profilePinProxy, /verifyProfilePinHash/);
+  assert.match(profilePinProxy, /createProfileSession/);
+  assert.match(profilePinProxy, /action === "restore"/);
+  assert.match(profilePinProxy, /action === "validate"/);
+  assert.match(profilePinProxy, /action === "verify"/);
+  assert.match(profilePinProxy, /action === "set"/);
+  assert.doesNotMatch(profilePinProxy, /vivid-cinema-api\\.vercel\\.app/);
   assert.match(profilesApiProxy, /createAccountProfile/);
   assert.match(profilesApiProxy, /listAccountProfiles/);
   assert.doesNotMatch(profilesApiProxy, /vivid-cinema-api\\.vercel\\.app/);
-  assert.match(profilePinProxy, /Authorization: authorization/);
-  assert.match(profilePinProxy, /Origin: request\.headers\.get\("Origin"\) \|\| "https:\/\/vivid-cinema\.pages\.dev"/);
-  assert.match(profilePinProxy, /profile-security-upstream-unavailable/);
   assert.ok(readFileSync(new URL("../scripts/profiles.js", import.meta.url), "utf8").includes("getCloudflareApiUrl(\"/api/profile-pin\")"));
 });
 
