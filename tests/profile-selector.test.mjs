@@ -26,7 +26,7 @@ test("successful sign-in opens the Who's Watching profile selector by default", 
   assert.match(selector, /signOut\(auth\)/);
   assert.match(selector, /setActiveProfileId\(accountId, profile\.id\)/);
   assert.match(selector, /vivid:profile-session:v1:/);
-  assert.match(selector, /sessionId: selectedClaims\.claims\.profileSessionId/);
+  assert.match(selector, /sessionId: sessionId/);
   assert.match(selector, /if \(profile\.hasPin\)/);
   assert.match(selector, /verifyProfilePin\(pendingProfile\.id, pin\)/);
   assert.match(selector, /finishProfileOpen\(profile, result\.customToken\)/);
@@ -54,7 +54,7 @@ test("profile gate redirects only once per account session and clears after a va
   assert.match(shell, /vivid:profile-gate-redirected:v1:/);
   assert.match(shell, /profileGateRedirectedUids/);
   assert.match(shell, /showProfileGateNotice\(\)/);
-  assert.match(shell, /clearProfileGateRedirect\(user\.uid\)/);
+  assert.match(shell, /clearProfileGateRedirect\(activeUser.uid\)/);
   assert.match(shell, /clearProfileGateRedirect\(previousUid\)/);
   assert.match(shell, /clearAllProfileGateRedirects\(\)/);
 });
@@ -226,7 +226,7 @@ test("profile identities use the original cinematic avatar artwork and mobile sy
   assert.match(styles, /background-image:url\("\.\.\/assets\/profile-avatars\.svg"\)/);
   assert.match(styles, /\.avatar-choice\{[^}]*background-color:/);
   assert.doesNotMatch(styles.match(/\.avatar-choice\{aspect-ratio:[^}]+\}/)?.[0] || "", /background:/);
-  assert.match(page, /profile-open-avatar-art-2/);
+  assert.match(page, /profile-api-proxy-1/);
   assert.match(accountStyles, /\.account-page \.account-sync \.vivid-button\{flex:1 1 100%;width:100%/);
 });
 
