@@ -77,7 +77,7 @@ export async function requestProfilePin(action, profileId, details = {}) {
   });
   const request = (async () => {
     const token = await user.getIdToken();
-    const response = await fetch("https://vivid-cinema-api.vercel.app/api/profile-pin", {
+    const response = await fetch(getCloudflareApiUrl("/api/profile-pin"), {
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: "Bearer " + token },
       body: JSON.stringify({ action, profileId, ...details }),

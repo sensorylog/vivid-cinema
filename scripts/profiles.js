@@ -265,7 +265,7 @@ export async function restoreProfileSession(user) {
   const timeout = window.setTimeout(() => controller.abort(), 10_000);
   let response;
   try {
-    response = await fetch("https://vivid-cinema-api.vercel.app/api/profile-pin", {
+    response = await fetch(getCloudflareApiUrl("/api/profile-pin"), {
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: "Bearer " + token },
       body: JSON.stringify({ action: "restore", profileId: stored.profileId, sessionId: stored.sessionId }),
@@ -314,7 +314,7 @@ export async function validateProfileSession(user, profileId) {
       8_000,
       "Your Vivid sign-in is taking too long to refresh. Check your connection and retry."
     );
-    response = await fetch("https://vivid-cinema-api.vercel.app/api/profile-pin", {
+    response = await fetch(getCloudflareApiUrl("/api/profile-pin"), {
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: "Bearer " + token },
       body: JSON.stringify({ action: "validate", profileId }),
