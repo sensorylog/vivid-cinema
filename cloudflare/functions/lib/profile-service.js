@@ -201,20 +201,26 @@ export async function createAccountProfile(request, env) {
   const { db, user } = await requireProfileUser(request, env);
   await enforceRateLimit(db, user.uid, "profiles-create", 10, 60 * 60 * 1000);
   const body = await readProfileBody(request);
-  if (!user.profileId) {
-    throw new AnimePremiumError(403, "profile-authorization-required", "Open a viewing profile before creating another profile.");
-  }
-  const activeProfile = await requireUnlockedProfile(db, user, user.profileId);
-  if (activeProfile.isKids === true) {
-    throw new AnimePremiumError(403, "parent-authorization-required", "Kids profiles cannot create additional viewing profiles. Verify with an adult profile first.");
+  const profilesRef = db.collection("users").doc(user.uid).collection("profiles");
+  if (user.profileId) {
+    const activeProfile = await requireUnlockedProfile(db, user, user.profileId);
+    if (activeProfile.isKids === true) {
+      throw new AnimePremiumError(403, "parent-authorization-required", "Kids profiles cannot create additional viewing profiles. Verify with an adult profile first.");
+    }
+  } else {
+    // The household chooser is available before a viewing profile is opened.
+    // Allow ordinary profiles there, but require an unlocked parent session
+    // whenever a Kids profile already exists.
+    const existingKids = await profilesRef.where("isKids", "==", true).limit(1).get();
+    if (!existingKids.empty) {
+      throw new AnimePremiumError(403, "parent-authorization-required", "Open the Main Profile and verify its PIN before managing profiles while Kids profiles exist.");
+    }
   }
   if (body.isKids === true && user.profileId !== OWNER_PROFILE_ID) {
-    throw new AnimePremiumError(403, "parent-authorization-required", "Only the Main Profile can create a Kids profile.");
+    throw new AnimePremiumError(403, "parent-authorization-required", "Open the Main Profile before creating a Kids profile.");
   }
   const name = typeof body.name === "string" ? body.name.trim() : "";
   if (!name) throw new AnimePremiumError(400, "invalid-profile-name", "Enter a name for this profile.");
-
-  const profilesRef = db.collection("users").doc(user.uid).collection("profiles");
   const now = Timestamp.fromMillis(Date.now());
   const ownerRef = profilesRef.doc(OWNER_PROFILE_ID);
   const limitRef = ownerRef.collection("profileManagement").doc("limits");
