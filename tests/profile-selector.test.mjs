@@ -26,7 +26,7 @@ test("successful sign-in opens the Who's Watching profile selector by default", 
   assert.match(selector, /signOut\(auth\)/);
   assert.match(selector, /setActiveProfileId\(accountId, profile\.id\)/);
   assert.match(selector, /vivid:profile-session:v1:/);
-  assert.match(selector, /sessionId\s*/);
+  assert.match(selector, /const sessionId = String\(selectedClaims\.claims\.profileSessionId/);
   assert.match(selector, /if \(profile\.hasPin\)/);
   assert.match(selector, /verifyProfilePin\(pendingProfile\.id, pin\)/);
   assert.match(selector, /finishProfileOpen\(profile, result\.customToken\)/);
