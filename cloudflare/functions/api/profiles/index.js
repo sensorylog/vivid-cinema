@@ -17,8 +17,8 @@ async function proxy(request) {
   const timeout = setTimeout(() => controller.abort(), 20000);
   try {
     const headers = new Headers({ Authorization: authorization });
-    const origin = request.headers.get("Origin");
-    if (origin) headers.set("Origin", origin);
+    const origin = request.headers.get("Origin") || "https://vivid-cinema.pages.dev";
+    headers.set("Origin", origin);
     if (request.method === "POST") headers.set("Content-Type", "application/json");
     const upstream = await fetch(PROFILE_API + url.search, {
       method: request.method,
