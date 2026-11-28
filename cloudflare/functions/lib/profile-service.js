@@ -224,9 +224,14 @@ export async function createAccountProfile(request, env) {
   const now = Timestamp.fromMillis(Date.now());
   const ownerRef = profilesRef.doc(OWNER_PROFILE_ID);
   const limitRef = ownerRef.collection("profileManagement").doc("limits");
+  // This Firestore adapter supports transactional document reads. Read the
+  // collection query before entering the transaction, then use the shared
+  // limits document as the serialized counter so concurrent creates cannot
+  // overrun the profile cap.
+  const initialProfiles = await profilesRef.get();
+  const initialProfileCount = initialProfiles.size;
   let created;
   await db.runTransaction(async transaction => {
-    const profiles = await transaction.get(profilesRef);
     const owner = await transaction.get(ownerRef);
     const limits = await transaction.get(limitRef);
     const ownerPin = await transaction.get(ownerRef.collection("profileSecurity").doc("pin"));
@@ -234,7 +239,7 @@ export async function createAccountProfile(request, env) {
       throw new AnimePremiumError(409, "owner-profile-required", "The main Vivid profile must be initialized before adding profiles.");
     }
     if(body.isKids===true&&!ownerPin.exists)throw new AnimePremiumError(409,"parent-pin-required","Set a PIN on the Main Profile before creating a Kids profile.");
-    const currentCount = profiles.size;
+    const currentCount = Number(limits.data()?.profileCount ?? initialProfileCount);
     if (currentCount >= MAX_PROFILES) {
       throw new AnimePremiumError(409, "profile-limit-reached", "A Vivid account can have up to " + MAX_PROFILES + " profiles.");
     }
