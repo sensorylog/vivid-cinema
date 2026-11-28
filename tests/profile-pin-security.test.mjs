@@ -126,6 +126,8 @@ test("profile chooser exposes PIN setup, unlock, and recovery without persisting
   assert.match(profilePinProxy, /action === "validate"/);
   assert.match(profilePinProxy, /action === "verify"/);
   assert.match(profilePinProxy, /action === "set"/);
+  assert.match(profilePinProxy, /PIN security is independent of the legacy library migration/);
+  assert.doesNotMatch(profilePinProxy, /account-data-to-owner-profile-v1/);
   assert.doesNotMatch(profilePinProxy, /vivid-cinema-api\\.vercel\\.app/);
   assert.match(profilesApiProxy, /createAccountProfile/);
   assert.match(profilesApiProxy, /listAccountProfiles/);
