@@ -26,6 +26,8 @@ test("household profile API stays on the native Cloudflare Firebase service", ()
   assert.match(service, /Vivid profile service failure/);
   assert.match(service, /safeProfileErrorMessage/);
   assert.match(service, /REDACTED_TOKEN/);
+  assert.match(service, /safeValidationIssues/);
+  assert.match(service, /validationIssues: safeValidationIssues/);
   assert.match(service, /transaction\.create\(reference, created\)/);
 });
 
@@ -126,4 +128,14 @@ test("profile metadata never stores PIN material in the public profile document 
   assert.doesNotMatch(profileSchema, /pinHash|pinVerifier|pinSalt|pinCode/i);
   assert.match(service, /profileSecurity/);
   assert.match(service, /session\.pinHash/);
+});
+
+test("Firebase service-account project ID is normalized before strict adapter validation", async () => {
+  const firebaseService = await read("../cloudflare/functions/lib/anime-premium-service.js");
+  assert.match(firebaseService, /configuredProjectId = String\(env\.FIREBASE_PROJECT_ID/);
+  assert.match(firebaseService, /serviceAccountProjectId/);
+  assert.match(firebaseService, /firebase-project-mismatch/);
+  assert.match(firebaseService, /normalizedServiceAccountJson/);
+  assert.match(firebaseService, /project_id: projectId/);
+  assert.match(firebaseService, /serviceAccountJson: normalizedServiceAccountJson/);
 });
