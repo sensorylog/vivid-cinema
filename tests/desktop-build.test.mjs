@@ -505,6 +505,9 @@ test("Windows desktop navigation keeps Home Search visible and restores previous
   assert.match(searchPage, /id="search-page-input"/);
   assert.match(searchPage, /scripts\/search-page\.js/);
   assert.match(liquidGlass, /body\.vivid-windows-desktop \.vivid-topbar \.vivid-navlinks > a\[href="search\.html"\]/);
+  const desktopStyles = fs.readFileSync(path.join(root, "styles", "vivid-desktop.css"), "utf8");
+  assert.doesNotMatch(desktopStyles, /\.vivid-search-trigger[\s\S]{0,180}display\s*:\s*none\s*!important/);
+  assert.match(home, /vivid-liquid-glass\.css\?v=lg6/);
 
   // Every Windows content page gets a Back control; Home gets one only when
   // it was reached from another internal page. Direct entry remains sensible.
