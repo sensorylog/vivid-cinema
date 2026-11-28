@@ -125,7 +125,7 @@ test("account waits for Firebase auth restoration before redirecting signed-out 
 test("account page and account runtime are network-first for installed PWA freshness", () => {
   const worker = readFileSync(new URL("../service-worker.js", import.meta.url), "utf8");
   assert.match(page, /scripts\/account\.js\?v=profile-auth-ready-2/);
-  assert.match(page, /scripts\/app-shell\.js\?v=profile-gate-guard-2/);
+  assert.match(page, /scripts\/app-shell\.js\?v=durable-profile-session-1/);
   assert.match(worker, /vivid-cinema-shell-v\d+/);
   assert.match(worker, /auth-diagnostics\|account\|profiles\)\\\.html/);
   assert.match(worker, /isAuthRuntime=.*profile-selector.*profiles.*cloudflare-ai/);
