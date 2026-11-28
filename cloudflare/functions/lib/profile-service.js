@@ -96,8 +96,29 @@ export async function requireUnlockedProfile(db, user, profileId) {
   return profileData;
 }
 
+function safeProfileErrorMessage(error) {
+  const message = String(error?.message || "Unknown profile service error.")
+    .replace(/-----BEGIN [A-Z ]*PRIVATE KEY-----[\\s\\S]*?-----END [A-Z ]*PRIVATE KEY-----/gi, "[REDACTED_PRIVATE_KEY]")
+    .replace(/Bearer\\s+[A-Za-z0-9._~+/-]+=*/gi, "Bearer [REDACTED]")
+    .replace(/eyJ[A-Za-z0-9_-]+\\.eyJ[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]+/g, "[REDACTED_TOKEN]")
+    .replace(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,}/gi, "[REDACTED_EMAIL]");
+  return message.slice(0, 600);
+}
+
 export function profileErrorResponse(error, origin, env) {
   const status = error instanceof AnimePremiumError ? error.status : 500;
+  if (status >= 500) {
+    // Cloudflare's invocation outcome can be "ok" even when the application
+    // returns a handled 500. Emit a structured, secret-redacted diagnostic so
+    // production failures can be identified without exposing credentials.
+    console.error("Vivid profile service failure", JSON.stringify({
+      code: String(error?.code || "profile-service-unavailable").slice(0, 100),
+      errorName: String(error?.name || "Error").slice(0, 100),
+      message: safeProfileErrorMessage(error),
+      status,
+      timestamp: new Date().toISOString()
+    }));
+  }
   return jsonResponse({
     ok: false,
     code: error?.code || "profile-service-unavailable",

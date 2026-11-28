@@ -23,6 +23,9 @@ test("household profile API stays on the native Cloudflare Firebase service", ()
   assert.match(listCreate, /validateProfileOrigin/);
   assert.doesNotMatch(listCreate, /vivid-cinema-api\\.vercel\\.app/);
   assert.match(service, /verifyFirebaseIdToken/);
+  assert.match(service, /Vivid profile service failure/);
+  assert.match(service, /safeProfileErrorMessage/);
+  assert.match(service, /REDACTED_TOKEN/);
   assert.match(service, /transaction\.create\(reference, created\)/);
 });
 
