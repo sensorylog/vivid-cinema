@@ -11,7 +11,7 @@ const rules = readFileSync(new URL("../firestore.rules", import.meta.url), "utf8
 const page = readFileSync(new URL("../profiles.html", import.meta.url), "utf8");
 const profileService = readFileSync(new URL("../cloudflare/functions/lib/profile-service.js", import.meta.url), "utf8");
 const cloudflareApi = readFileSync(new URL("../scripts/cloudflare-api.js", import.meta.url), "utf8");
-const cloudflareService = readFileSync(new URL("../cloudflare/functions/lib/anime-premium-service.js", import.meta.url), "utf8");
+const cloudflareService = readFileSync(new URL("../cloudflare/functions/lib/anime-premium-service.js", import.meta.url), "utf8");\nconst profilePinProxy = readFileSync(new URL("../cloudflare/functions/api/profile-pin.js", import.meta.url), "utf8");
 
 test("profile PINs are stored as salted PBKDF2 hashes, never plaintext", () => {
   const first = hashProfilePin("4826");
@@ -112,7 +112,7 @@ test("profile chooser exposes PIN setup, unlock, and recovery without persisting
   assert.match(selector, /setProfilePin\(editingId, pin, currentPin, openSession\)/);
   assert.match(selector, /resetProfilePin\(resetProfileId\)/);
   assert.doesNotMatch(selector, /localStorage\.setItem\([^\n]*pin/i);
-  assert.match(manager, /cache: "no-store"/);
+  assert.match(manager, /cache: "no-store"/);\n  assert.match(manager, /getCloudflareApiUrl\("\\/api\\/profile-pin"\)/);\n  assert.match(profilePinProxy, /PROFILE_PIN_SERVICE/);\n  assert.match(profilePinProxy, /Authorization: authorization/);\n  assert.match(profilePinProxy, /profile-security-upstream-unavailable/);\n  assert.match(readFileSync(new URL("../scripts/profiles.js", import.meta.url), "utf8"), /getCloudflareApiUrl\("\\/api\\/profile-pin"\)/);
 });
 
 test("every protected page trusts server-issued profile claims and recovers missing browser selection", () => {
