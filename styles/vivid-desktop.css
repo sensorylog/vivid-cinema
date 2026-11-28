@@ -37,8 +37,7 @@
     white-space:nowrap;
   }
 
-  /* No legacy desktop search/bell/account controls. The shell is intentionally quiet. */
-  .vivid-search-trigger,
+  /* Keep Search available on desktop; only secondary legacy controls are hidden. */
   .vivid-notification-button,
   .vivid-nav-action,
   .vivid-theme-toggle{
@@ -203,7 +202,6 @@
 @media (min-width:901px) and (max-width:1180px){
   .vivid-nav{gap:8px}
   .vivid-navlinks a{padding-inline:7px;font-size:.76rem}
-  .vivid-search-trigger,
   .vivid-notification-button,
   .vivid-nav-action,
   .vivid-theme-toggle{display:none!important}
