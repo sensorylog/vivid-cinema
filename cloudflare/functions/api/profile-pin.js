@@ -266,9 +266,8 @@ export async function onRequestPost({ request, env }) {
       if (profileId === OWNER_PROFILE_ID && claims.profileId !== OWNER_PROFILE_ID) throw new ProfilePinError(403, "parent-authorization-required", "Open the Main Profile before setting its parent PIN.");
       const pin = validatePin(body.pin);
       const current = await pinReference.get();
-      const migration = await db.collection("users").doc(claims.uid).collection("profiles").doc(OWNER_PROFILE_ID)
-        .collection("migrations").doc("account-data-to-owner-profile-v1").get();
-      if (migration.data()?.status !== "complete") throw new ProfilePinError(409, "profile-setup-incomplete", "Finish setting up your profile before adding a PIN.");
+      // PIN security is independent of the legacy library migration. A missing
+      // migration marker must never prevent the owner from securing the account.
       if (current.exists) await verifyExistingPin(db, pinReference, validatePin(body.currentPin));
       const hashed = await hashProfilePin(pin);
       await pinReference.set({ ...hashed, failedAttempts: 0, lockedUntil: null, updatedAt: Timestamp.fromMillis(Date.now()) });
