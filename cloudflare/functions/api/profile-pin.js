@@ -47,7 +47,7 @@ export async function onRequestPost({ request }) {
       headers: {
         "Content-Type": "application/json",
         Authorization: authorization,
-        ...(request.headers.get("Origin") ? { Origin: request.headers.get("Origin") } : {})
+        Origin: request.headers.get("Origin") || "https://vivid-cinema.pages.dev"
       },
       body: JSON.stringify(body),
       cache: "no-store",
